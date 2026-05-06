@@ -147,6 +147,18 @@ function ChalkChip({ value }: { value: number }) {
               </div>
             </div>
 
+            <div>
+              <div className="menu-label mb-2">Bonuses</div>
+              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+                {modifiers.map(m => (
+                  <div key={m.label} className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="text-foreground/90">{m.label}</span>
+                    <span className="tabular-nums font-bold text-[hsl(var(--accent))]">+{m.amount}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <p className="text-xs text-muted-foreground">
               Equipped gear, auras, and consumables apply additional % bonuses on top of the base.
             </p>

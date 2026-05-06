@@ -52,7 +52,7 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
         <img
           src={climberMale1}
           alt={lvl.title}
-          className="relative z-10 h-[92%] w-[92%] object-contain animate-sprite-bob drop-shadow-[0_3px_0_hsl(0_0%_0%/0.35)]"
+          className="relative z-10 h-[92%] w-[92%] object-contain drop-shadow-[0_3px_0_hsl(0_0%_0%/0.35)]"
         />
       ) : (
         <PixelSprite sprite={sprite} pixel={PIXEL_SIZE[size]} aura={auraColor} className="relative z-10" />

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { STYLES, Style } from "@/game/data";
+import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
 import { computeChalk, logBoulder, useGame, levelUp, nextLevel } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

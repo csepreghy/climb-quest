@@ -268,10 +268,10 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
   const item = getItem(id);
   if (!item) return { ok: false, reason: "Unknown item" };
   if (item.levelReq && state.level < item.levelReq) return { ok: false, reason: `Requires Level ${item.levelReq}` };
-  if (item.rarity !== "consumable" && state.owned.includes(id)) return { ok: false, reason: "Already owned" };
+  if (!item.consumableBonus && state.owned.includes(id)) return { ok: false, reason: "Already owned" };
   if (state.chalk < item.price) return { ok: false, reason: "Not enough Chalk" };
   set(s => {
-    const owned = item.rarity === "consumable" ? s.owned : [...s.owned, id];
+    const owned = item.consumableBonus ? s.owned : [...s.owned, id];
     const badges = new Set(s.badges);
     if (id === "crocs") badges.add("crocs_equipped");
     if (id === "golden_crocs") badges.add("golden_crocs");
@@ -283,7 +283,7 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
 
 export function equipItem(id: string) {
   const item = getItem(id); if (!item) return;
-  if (item.rarity === "consumable") {
+  if (item.consumableBonus) {
     set(s => ({ ...s, pendingConsumable: id }));
     return;
   }

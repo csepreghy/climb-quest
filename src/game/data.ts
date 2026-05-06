@@ -1,6 +1,6 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
-export type Rarity = "common" | "rare" | "epic" | "legendary" | "consumable";
+export type Rarity = "common" | "rare" | "epic" | "legendary";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "aura" | "title";
 export type ItemGroup = "outfit" | "gear" | "power";
 export type Gender = "male" | "female";
@@ -109,8 +109,8 @@ export const SHOP: ShopItem[] = [
   { id: "title_chalk_monster", name: "Title: Chalk Monster",group: "power", category: "Titles", slot: "title", rarity: "rare",      price: 700,  emoji: "👹", desc: "Coats every hold." },
   { id: "title_demigod",       name: "Title: Crimp Demigod",group: "power", category: "Titles", slot: "title", rarity: "legendary", price: 1800, emoji: "👑", desc: "Endgame energy.", levelReq: 10 },
 
-  { id: "energy_gummies", name: "Send Gummies",        group: "power",  category: "Consumables", slot: "accessory", rarity: "consumable", price: 120, emoji: "🍬", desc: "+15% Chalk on your NEXT logged activity.", consumableBonus: 0.15 },
-  { id: "espresso",       name: "Pre-Send Espresso",   group: "power",  category: "Consumables", slot: "accessory", rarity: "consumable", price: 200, emoji: "☕", desc: "+25% Chalk on your NEXT logged activity.", consumableBonus: 0.25 },
+  { id: "energy_gummies", name: "Send Gummies",        group: "power",  category: "Consumables", slot: "accessory", rarity: "common", price: 120, emoji: "🍬", desc: "+15% Chalk on your NEXT logged activity.", consumableBonus: 0.15 },
+  { id: "espresso",       name: "Pre-Send Espresso",   group: "power",  category: "Consumables", slot: "accessory", rarity: "common", price: 200, emoji: "☕", desc: "+25% Chalk on your NEXT logged activity.", consumableBonus: 0.25 },
 ];
 
 export const ITEM_BY_ID: Record<string, ShopItem> = Object.fromEntries(SHOP.map(i => [i.id, i]));
@@ -178,7 +178,7 @@ export const RARITY_COLOR: Record<Rarity, string> = {
   rare: "text-rare border-rare/50",
   epic: "text-epic border-epic/60",
   legendary: "text-legendary border-legendary/60",
-  consumable: "text-chalk-glow border-chalk-glow/40",
+  
 };
 
 // Border ring color around an item's image, by rarity.
@@ -187,5 +187,5 @@ export const RARITY_BORDER: Record<Rarity, string> = {
   rare: "ring-2 ring-rare",
   epic: "ring-2 ring-epic",
   legendary: "ring-2 ring-legendary",
-  consumable: "ring-2 ring-chalk-glow",
+  
 };

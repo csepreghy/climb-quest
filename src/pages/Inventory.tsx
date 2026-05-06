@@ -41,7 +41,7 @@ export default function Inventory() {
   const s = useGame();
   useCustomItems(); // subscribe so admin updates re-render
   const items = s.owned.map(id => getItem(id)).filter(Boolean) as ReturnType<typeof getItem>[] as NonNullable<ReturnType<typeof getItem>>[];
-  const consumables = items.filter(i => i.rarity === "consumable");
+  const consumables = items.filter(i => !!i.consumableBonus);
   const totalBonusByActivity = gearBonusSummary(s.equipped);
 
   return (
@@ -76,7 +76,7 @@ export default function Inventory() {
       <div className="space-y-6">
         {(["outfit", "gear", "power"] as ItemGroup[]).map(group => {
           const slots = GROUP_SLOTS[group];
-          const ownedInGroup = items.filter(it => it.rarity !== "consumable" && it.group === group);
+          const ownedInGroup = items.filter(it => !it.consumableBonus && it.group === group);
           return (
             <section key={group} className="space-y-3">
               <div className="menu-label">{GROUP_LABEL[group]}</div>

@@ -12,36 +12,21 @@ export function LevelUpBanner() {
   useEffect(() => {
     trigger = (title, unlocks) => {
       setData({ title, unlocks });
-      window.setTimeout(() => setData(null), 2800);
+      window.setTimeout(() => setData(null), 2400);
     };
     return () => { trigger = () => {}; };
   }, []);
 
   if (!data) return null;
 
-  // 24 confetti pieces
-  const confetti = Array.from({ length: 28 });
-
   return (
     <div className="fixed inset-0 z-[100] grid place-items-center pointer-events-none">
-      <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px] animate-fade-overlay" />
-      {confetti.map((_, i) => (
-        <span
-          key={i}
-          className="absolute top-1/2 left-1/2 w-2 h-2 animate-confetti-burst"
-          style={{
-            background: ["#ffd83a","#7adfff","#ff7aa8","#7aff7a","#fff"][i % 5],
-            ["--cx" as string]: `${(Math.cos((i / 28) * Math.PI * 2) * (180 + Math.random()*120)).toFixed(0)}px`,
-            ["--cy" as string]: `${(Math.sin((i / 28) * Math.PI * 2) * (180 + Math.random()*120)).toFixed(0)}px`,
-            animationDelay: `${(i % 6) * 30}ms`,
-          }}
-        />
-      ))}
-      <div className="relative animate-banner-pop text-center">
-        <div className="font-pixel text-3xl sm:text-5xl gradient-chalk-text drop-shadow-[0_4px_0_hsl(280_80%_20%)]">LEVEL UP!</div>
-        <div className="mt-3 font-pixel text-base sm:text-xl text-legendary">{data.title}</div>
+      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm animate-fade-overlay" />
+      <div className="relative animate-banner-pop text-center px-8 py-6 rounded-xl border border-legendary/40 bg-card/95 shadow-[0_20px_60px_-20px_hsl(35_95%_60%/0.4)]">
+        <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Level Up</div>
+        <div className="font-display font-semibold text-2xl sm:text-3xl mt-2 gradient-chalk-text">{data.title}</div>
         {data.unlocks.length > 0 && (
-          <div className="mt-2 text-xs sm:text-sm text-muted-foreground max-w-md mx-auto px-4">
+          <div className="mt-2 text-xs text-muted-foreground max-w-md mx-auto">
             Unlocked: {data.unlocks.join(" · ")}
           </div>
         )}

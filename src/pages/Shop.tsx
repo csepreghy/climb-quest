@@ -17,15 +17,15 @@ export default function Shop() {
   return (
     <div className="space-y-5 animate-float-up">
       <div>
-        <h1 className="font-display text-2xl font-bold">Chalk Shop</h1>
-        <p className="text-sm text-muted-foreground">Spend Chalk on silly gear. Bonuses apply to future logged sessions.</p>
+        <h1 className="font-display text-2xl font-semibold">Chalk Shop</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Spend Chalk on silly gear. Bonuses apply to future logged sessions.</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {CATEGORIES.map(c => (
           <button key={c} onClick={() => setCat(c)}
-            className={cn("text-xs px-3 py-1.5 rounded-full border transition",
-              cat === c ? "bg-accent text-accent-foreground border-accent shadow-glow" : "border-border bg-secondary/40 text-muted-foreground hover:text-foreground")}>
+            className={cn("text-xs px-3 py-1.5 rounded-md border transition-colors",
+              cat === c ? "bg-secondary text-foreground border-border" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>
             {c}
           </button>
         ))}
@@ -47,7 +47,7 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
   function buy() {
     const r = buyItem(item.id);
     if (!r.ok) { toast.error(r.reason ?? "Cannot buy"); return; }
-    toast.success(`Looted ${item.name}!`, { description: isConsumable ? "Equip it to use on your next log." : "Equip it from your Inventory." });
+    toast.success(`Looted ${item.name}`, { description: isConsumable ? "Equip it to use on your next log." : "Equip it from your Inventory." });
   }
 
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
@@ -55,18 +55,18 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
   return (
     <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3">
       <div className="flex items-start gap-3">
-        <div className="text-4xl drop-shadow-[2px_2px_0_hsl(240_10%_2%)]">{item.emoji}</div>
+        <div className="text-3xl">{item.emoji}</div>
         <div className="min-w-0 flex-1">
-          <div className="font-pixel text-xs leading-snug truncate">{item.name}</div>
-          <div className={cn("text-[9px] font-pixel uppercase tracking-wider inline-block px-1.5 py-0.5 rounded border-2 mt-1", RARITY_COLOR[item.rarity])}>
+          <div className="text-sm font-medium leading-snug truncate">{item.name}</div>
+          <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
             {item.rarity}
           </div>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground flex-1">{item.desc}</p>
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-dashed border-border/40">
-        <div className="font-pixel text-xs">
-          {item.price === 0 ? <span className="text-muted-foreground">STARTER</span> : <span className="gradient-chalk-text">🧂 {item.price}</span>}
+      <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
+        <div className="text-sm">
+          {item.price === 0 ? <span className="text-muted-foreground text-xs">Starter</span> : <span className="font-medium tabular-nums">{item.price} <span className="text-muted-foreground text-xs">Chalk</span></span>}
         </div>
         {ownAlready ? (
           <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Owned</GameButton>

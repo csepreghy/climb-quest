@@ -95,6 +95,9 @@
     background-clip: text;
     color: transparent;
   }
+  .menu-label {
+    @apply text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium;
+  }
 }
 
 @layer utilities {

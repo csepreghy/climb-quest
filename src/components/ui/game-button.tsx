@@ -10,17 +10,17 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<Variant, string> = {
-  primary:   "bg-accent text-accent-foreground border-accent-foreground/30 [--gb-shadow:hsl(280_80%_18%)]",
-  secondary: "bg-secondary text-foreground border-border [--gb-shadow:hsl(240_10%_2%)]",
-  danger:    "bg-boss text-foreground border-foreground/30 [--gb-shadow:hsl(350_60%_18%)]",
-  legendary: "bg-gradient-to-r from-legendary to-accent text-primary-foreground border-foreground/30 [--gb-shadow:hsl(35_60%_18%)]",
-  ghost:     "bg-transparent text-foreground border-border [--gb-shadow:hsl(240_10%_2%)]",
+  primary:   "bg-accent/90 text-accent-foreground border-accent hover:bg-accent",
+  secondary: "bg-secondary text-foreground border-border hover:bg-secondary/70",
+  danger:    "bg-boss/90 text-foreground border-boss hover:bg-boss",
+  legendary: "bg-gradient-to-r from-legendary/90 to-accent/90 text-primary-foreground border-legendary/60 hover:brightness-110",
+  ghost:     "bg-transparent text-muted-foreground border-transparent hover:text-foreground hover:bg-secondary/60",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-3 text-xs",
-  md: "h-11 px-5 text-sm",
-  lg: "h-14 px-6 text-base",
+  sm: "h-8 px-3 text-xs",
+  md: "h-10 px-4 text-sm",
+  lg: "h-11 px-5 text-sm",
 };
 
 export const GameButton = React.forwardRef<HTMLButtonElement, Props>(
@@ -30,12 +30,11 @@ export const GameButton = React.forwardRef<HTMLButtonElement, Props>(
         ref={ref}
         {...rest}
         className={cn(
-          "relative inline-flex items-center justify-center gap-2 font-pixel uppercase tracking-wider",
-          "border-[3px] rounded-md select-none whitespace-nowrap",
-          "shadow-[0_5px_0_0_var(--gb-shadow),0_0_0_3px_hsl(0_0%_0%/0.3)]",
-          "translate-y-0 transition-[transform,box-shadow] duration-100",
-          "hover:brightness-110",
-          "active:translate-y-[5px] active:shadow-[0_0_0_0_var(--gb-shadow),0_0_0_3px_hsl(0_0%_0%/0.3)]",
+          "relative inline-flex items-center justify-center gap-2 font-medium rounded-md border",
+          "select-none whitespace-nowrap",
+          "transition-all duration-150",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "active:translate-y-[1px]",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0",
           variants[variant],
           sizes[size],

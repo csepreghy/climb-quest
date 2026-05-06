@@ -7,16 +7,24 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   tone?: Tone;
   /** Subtle hover lift */
   interactive?: boolean;
-  /** Holographic shimmer overlay (for legendary loot) */
+  /** Soft glow overlay (for legendary loot) */
   shimmer?: boolean;
 }
 
 const toneClasses: Record<Tone, string> = {
-  default:   "border-border [--gc-shadow:hsl(240_10%_2%)] [--gc-glow:transparent]",
-  accent:    "border-accent/70 [--gc-shadow:hsl(280_80%_10%)] [--gc-glow:hsl(280_80%_60%/0.35)]",
-  legendary: "border-legendary/70 [--gc-shadow:hsl(35_60%_10%)] [--gc-glow:hsl(35_95%_60%/0.35)]",
-  boss:      "border-boss/70 [--gc-shadow:hsl(350_60%_10%)] [--gc-glow:hsl(350_80%_60%/0.35)]",
-  rare:      "border-rare/70 [--gc-shadow:hsl(260_60%_10%)] [--gc-glow:hsl(260_85%_70%/0.35)]",
+  default:   "border-border",
+  accent:    "border-accent/40",
+  legendary: "border-legendary/40",
+  boss:      "border-boss/40",
+  rare:      "border-rare/40",
+};
+
+const toneAccentBar: Record<Tone, string> = {
+  default:   "bg-border/60",
+  accent:    "bg-accent/70",
+  legendary: "bg-legendary/70",
+  boss:      "bg-boss/70",
+  rare:      "bg-rare/70",
 };
 
 export const GameCard = React.forwardRef<HTMLDivElement, Props>(
@@ -26,21 +34,23 @@ export const GameCard = React.forwardRef<HTMLDivElement, Props>(
         ref={ref}
         {...rest}
         className={cn(
-          "relative rounded-xl border-[3px] bg-card/95 gradient-card",
-          "shadow-[6px_6px_0_0_var(--gc-shadow),0_0_30px_0_var(--gc-glow)]",
-          "transition-transform duration-150",
-          interactive && "hover:-translate-y-1 hover:rotate-[-0.4deg] cursor-pointer",
+          "relative rounded-xl border bg-card/80 backdrop-blur-sm",
+          "shadow-[0_1px_0_0_hsl(0_0%_100%/0.04)_inset,0_8px_24px_-12px_hsl(0_0%_0%/0.6)]",
+          "transition-transform duration-200",
+          interactive && "hover:-translate-y-0.5 cursor-pointer",
           toneClasses[tone],
           className,
         )}
       >
-        {/* Inner pixel-frame highlight */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[9px] ring-1 ring-inset ring-foreground/5" />
+        {/* Left accent rail for tone */}
+        {tone !== "default" && (
+          <div aria-hidden className={cn("absolute left-0 top-3 bottom-3 w-[2px] rounded-r", toneAccentBar[tone])} />
+        )}
         {shimmer && (
-          <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[9px] overflow-hidden">
+          <div aria-hidden className="pointer-events-none absolute inset-0 rounded-xl overflow-hidden opacity-60">
             <div className="absolute inset-0 animate-shimmer-band" style={{
               background:
-                "linear-gradient(115deg, transparent 30%, hsl(40 100% 80% / 0.18) 45%, hsl(280 100% 80% / 0.22) 50%, hsl(160 100% 70% / 0.18) 55%, transparent 70%)",
+                "linear-gradient(115deg, transparent 40%, hsl(40 80% 80% / 0.08) 50%, transparent 60%)",
               backgroundSize: "200% 100%",
             }} />
           </div>
@@ -52,13 +62,12 @@ export const GameCard = React.forwardRef<HTMLDivElement, Props>(
 );
 GameCard.displayName = "GameCard";
 
-/** Segmented RPG-style XP / health bar */
+/** Slim RPG-style XP / health bar */
 export function PixelBar({
   value,
   max = 100,
   color = "hsl(var(--xp))",
   className,
-  segments = 20,
 }: {
   value: number;
   max?: number;
@@ -68,19 +77,8 @@ export function PixelBar({
 }) {
   const pct = Math.max(0, Math.min(1, value / max));
   return (
-    <div className={cn("relative h-3 w-full rounded-sm border-2 border-foreground/20 bg-secondary overflow-hidden", className)}>
-      <div className="absolute inset-y-0 left-0 transition-all duration-500" style={{ width: `${pct * 100}%`, background: color }} />
-      {/* Segment ticks */}
-      <div className="absolute inset-0 flex">
-        {Array.from({ length: segments - 1 }).map((_, i) => (
-          <div key={i} className="flex-1 border-r border-background/40" />
-        ))}
-        <div className="flex-1" />
-      </div>
-      {/* Scanline gloss */}
-      <div className="absolute inset-0 opacity-30 mix-blend-overlay pointer-events-none" style={{
-        backgroundImage: "repeating-linear-gradient(0deg, rgba(255,255,255,0.6) 0 1px, transparent 1px 3px)",
-      }} />
+    <div className={cn("relative h-2 w-full rounded-full border border-border/60 bg-secondary/60 overflow-hidden", className)}>
+      <div className="absolute inset-y-0 left-0 transition-all duration-500 rounded-full" style={{ width: `${pct * 100}%`, background: color }} />
     </div>
   );
 }

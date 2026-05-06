@@ -5,74 +5,75 @@
 /* ClimbQuest design system — pastel RPG menu (flat fills, gradients only in shadows) */
 @layer base {
   :root {
-    /* Stone-purple base from reference */
-    --background: 260 14% 18%;
-    --foreground: 40 30% 92%;
+    /* Warm stone base */
+    --background: 20 14% 18%;
+    --foreground: 40 30% 94%;
 
-    --card: 258 14% 24%;
-    --card-foreground: 40 30% 92%;
+    --card: 22 14% 24%;
+    --card-foreground: 40 30% 94%;
 
-    --popover: 258 14% 22%;
-    --popover-foreground: 40 30% 92%;
+    --popover: 22 14% 22%;
+    --popover-foreground: 40 30% 94%;
 
     /* Orange primary action */
     --primary: 28 95% 58%;
     --primary-foreground: 24 50% 12%;
 
-    --secondary: 258 12% 28%;
-    --secondary-foreground: 40 30% 92%;
+    --secondary: 22 12% 28%;
+    --secondary-foreground: 40 30% 94%;
 
-    --muted: 258 12% 26%;
-    --muted-foreground: 258 8% 70%;
+    --muted: 22 12% 26%;
+    --muted-foreground: 30 10% 72%;
 
-    /* Purple accent (matches potion/lightning tile) */
-    --accent: 268 60% 55%;
+    /* Brand-red accent (replaces purple) */
+    --accent: 353 45% 42%;
     --accent-foreground: 40 30% 96%;
 
-    --destructive: 0 75% 58%;
+    --destructive: 0 75% 52%;
     --destructive-foreground: 40 30% 96%;
 
-    --border: 258 18% 14%;
-    --input: 258 14% 22%;
+    --border: 22 22% 12%;
+    --input: 22 14% 22%;
     --ring: 28 95% 58%;
 
-    --radius: 0.9rem;
+    /* Sharp edges */
+    --radius: 0rem;
 
     /* Saturated game tokens */
-    --chalk: 42 95% 60%;             /* gold star */
+    --chalk: 42 95% 60%;
     --chalk-glow: 42 100% 65%;
     --chalk-shadow: 32 80% 32%;
-    --xp: 150 60% 45%;               /* play green */
+    --xp: 150 60% 45%;
     --xp-shadow: 152 70% 22%;
     --boss: 354 75% 55%;
     --boss-shadow: 354 70% 28%;
     --legendary: 42 95% 60%;
     --legendary-shadow: 32 80% 32%;
-    --rare: 268 60% 60%;             /* purple gem */
-    --rare-shadow: 268 55% 28%;
-    --sky: 195 75% 55%;              /* teal/cyan */
+    --rare: 353 55% 50%;             /* now warm red instead of purple */
+    --rare-shadow: 353 60% 26%;
+    --sky: 195 75% 55%;
     --sky-shadow: 198 70% 26%;
 
-    /* Frame & bevel — very dark stone outline */
-    --panel-frame: 260 30% 8%;
-    --panel-edge: 258 12% 38%;
-    --panel-fill: 258 14% 24%;
+    /* Frame & bevel — very dark warm stone outline */
+    --panel-frame: 22 30% 8%;
+    --panel-edge: 22 12% 38%;
+    --panel-fill: 22 14% 24%;
     --panel-inset-light: 40 30% 92% / 0.08;
-    --panel-inset-dark: 260 40% 4% / 0.7;
+    --panel-inset-dark: 22 40% 4% / 0.7;
 
-    /* Solid button fills (no gradient) */
+    /* Solid button fills */
     --btn-orange: 28 95% 58%;
     --btn-orange-shadow: 18 80% 30%;
     --btn-green: 150 60% 45%;
     --btn-green-shadow: 152 70% 20%;
-    --btn-purple: 268 60% 55%;
-    --btn-purple-shadow: 268 55% 26%;
+    --btn-purple: 353 55% 50%;        /* alias kept, now red */
+    --btn-purple-shadow: 353 60% 26%;
     --btn-red: 354 75% 55%;
     --btn-red-shadow: 354 70% 26%;
     --btn-gold: 42 95% 60%;
     --btn-gold-shadow: 32 80% 30%;
-    --btn-stone: 258 12% 32%;
-    --btn-stone-shadow: 260 25% 10%;
+    --btn-stone: 22 12% 32%;
+    --btn-stone-shadow: 22 25% 10%;
 
     /* Brand gradient stops (red → orange) */
     --grad-red: 353 35% 42%;     /* #8f454e */

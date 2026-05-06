@@ -207,50 +207,67 @@ function InventoryAdmin() {
         </GameButton>
       </div>
 
-      {/* Existing items list */}
-      <div className="space-y-3 pt-2 border-t border-border">
+      {/* Existing items list, grouped */}
+      <div className="space-y-4 pt-2 border-t border-border">
         <div className="menu-label">All items ({all.length})</div>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {all.map(item => {
-            const isCustom = custom.some(c => c.id === item.id);
-            return (
-              <div key={item.id} className={cn("flex items-center gap-3 p-2 rounded-lg border bg-secondary/30", isCustom ? "border-[hsl(var(--btn-orange))]/50" : "border-border")}>
-                <div className="h-10 w-10 grid place-items-center text-xl shrink-0">
-                  {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className="h-10 w-10 object-contain rounded" /> : item.emoji}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate flex items-center gap-2">
-                    {item.name}
-                    {isCustom
-                      ? <span className="text-[9px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">custom</span>
-                      : <span className="text-[9px] uppercase tracking-wider text-muted-foreground">built-in</span>}
+        {GROUP_OPTIONS.map(group => {
+          const inGroup = all.filter(i => i.group === group.value);
+          if (inGroup.length === 0) return null;
+          const byCategory = CATEGORIES_BY_GROUP[group.value]
+            .map(cat => ({ cat, items: inGroup.filter(i => i.category === cat) }))
+            .filter(b => b.items.length > 0);
+          return (
+            <div key={group.value} className="space-y-2">
+              <div className="text-xs uppercase tracking-wider font-bold text-foreground">{group.label} ({inGroup.length})</div>
+              {byCategory.map(({ cat, items }) => (
+                <div key={cat} className="space-y-1.5">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground pl-1">{cat}</div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {items.map(item => {
+                      const isCustom = custom.some(c => c.id === item.id);
+                      return (
+                        <div key={item.id} className={cn("flex items-center gap-3 p-2 rounded-lg border bg-secondary/30", isCustom ? "border-[hsl(var(--btn-orange))]/50" : "border-border")}>
+                          <div className="h-10 w-10 grid place-items-center text-xl shrink-0">
+                            {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className="h-10 w-10 object-contain rounded" /> : item.emoji}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold truncate flex items-center gap-2">
+                              {item.name}
+                              {isCustom
+                                ? <span className="text-[9px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">custom</span>
+                                : <span className="text-[9px] uppercase tracking-wider text-muted-foreground">built-in</span>}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground capitalize">
+                              {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}
+                            </div>
+                          </div>
+                          {isCustom ? (
+                            <>
+                              <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>
+                              <button className="text-destructive" onClick={async () => { if (confirm(`Delete ${item.name}?`)) { try { await deleteCustomItem(item.id); toast.success("Deleted"); } catch (e: any) { toast.error(e?.message ?? "Delete failed"); } } }} title="Delete"><Trash2 className="h-4 w-4" /></button>
+                            </>
+                          ) : (
+                            <button
+                              className="text-destructive"
+                              title="Remove from shop (all users)"
+                              onClick={async () => {
+                                if (!confirm(`Remove ${item.name} from every player's shop?`)) return;
+                                try { await hideBuiltinItem(item.id); toast.success("Removed from shop"); }
+                                catch (e: any) { toast.error(e?.message ?? "Remove failed"); }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="text-[10px] text-muted-foreground capitalize">
-                    {item.rarity} · {item.category} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}
-                  </div>
                 </div>
-                {isCustom ? (
-                  <>
-                    <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>
-                    <button className="text-destructive" onClick={async () => { if (confirm(`Delete ${item.name}?`)) { try { await deleteCustomItem(item.id); toast.success("Deleted"); } catch (e: any) { toast.error(e?.message ?? "Delete failed"); } } }} title="Delete"><Trash2 className="h-4 w-4" /></button>
-                  </>
-                ) : (
-                  <button
-                    className="text-destructive"
-                    title="Remove from shop (all users)"
-                    onClick={async () => {
-                      if (!confirm(`Remove ${item.name} from every player's shop?`)) return;
-                      try { await hideBuiltinItem(item.id); toast.success("Removed from shop"); }
-                      catch (e: any) { toast.error(e?.message ?? "Remove failed"); }
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              ))}
+            </div>
+          );
+        })}
 
         {hidden.size > 0 && (
           <div className="space-y-2 pt-3 border-t border-border">

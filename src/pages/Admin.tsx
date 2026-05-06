@@ -83,8 +83,10 @@ const empty: CustomItemInput = {
 function InventoryAdmin() {
   const all = useAllItems();
   const custom = useCustomItems();
+  const hidden = useHiddenBuiltins();
   const [draft, setDraft] = useState<CustomItemInput>(empty);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   function reset() { setDraft(empty); setEditingId(null); }
 
@@ -95,17 +97,22 @@ function InventoryAdmin() {
     reader.readAsDataURL(file);
   }
 
-  function save() {
+  async function save() {
     if (!draft.name.trim()) { toast.error("Name required"); return; }
     if (draft.price < 0) { toast.error("Price can't be negative"); return; }
-    if (editingId) {
-      updateCustomItem(editingId, draft);
-      toast.success("Item updated");
-    } else {
-      addCustomItem(draft);
-      toast.success("Item created");
-    }
-    reset();
+    setBusy(true);
+    try {
+      if (editingId) {
+        await updateCustomItem(editingId, draft);
+        toast.success("Item updated");
+      } else {
+        await addCustomItem(draft);
+        toast.success("Item created");
+      }
+      reset();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Save failed");
+    } finally { setBusy(false); }
   }
 
   function startEdit(item: ShopItem) {

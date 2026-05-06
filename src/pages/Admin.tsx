@@ -4,7 +4,6 @@ export default function Admin() {
   return (
     <div className="space-y-6 animate-float-up max-w-4xl">
       <div>
-        <h1 className="font-display text-2xl font-bold">Admin · Theme Studio</h1>
         <p className="text-sm text-muted-foreground">
           Mix and match background, header, boxes, and character. Saved automatically.
         </p>

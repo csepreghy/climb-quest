@@ -34,7 +34,7 @@
     --input: 20 18% 12%;
     --ring: 28 95% 58%;
 
-    --radius: 0rem;
+    --radius: 0.75rem;
 
     /* Saturated game tokens */
     --chalk: 42 95% 60%;
@@ -81,7 +81,7 @@
     --shadow-panel:
       0 0 0 3px hsl(var(--panel-frame)),
       0 0 0 4px hsl(var(--panel-edge) / 0.55),
-      inset 0 1px 0 hsl(var(--panel-inset-light)),
+      inset 0 2px 0 hsl(var(--panel-inset-light) / 0.9),
       inset 0 -3px 0 hsl(var(--panel-inset-dark)),
       inset 0 0 0 1px hsl(258 14% 36% / 0.35),
       0 6px 0 -1px hsl(var(--panel-frame)),

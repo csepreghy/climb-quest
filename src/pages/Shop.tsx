@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { SHOP, ShopItem, RARITY_COLOR, ItemGroup } from "@/game/data";
+import { ShopItem, RARITY_COLOR, ItemGroup } from "@/game/data";
+import { useAllItems, isImageEmoji } from "@/game/customItems";
 import { buyItem, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

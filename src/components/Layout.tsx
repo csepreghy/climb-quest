@@ -22,9 +22,10 @@ export default function Layout() {
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
         <div className="container flex items-center justify-between gap-4 py-3">
           <NavLink to="/" className="flex items-center gap-2.5 group">
-            <div className="h-10 w-10 rounded-lg grid place-items-center transition-transform group-hover:rotate-[-4deg] bg-accent"
+            <div className="h-10 w-10 rounded-lg grid place-items-center transition-transform group-hover:rotate-[-4deg]"
               style={{
-                boxShadow: "0 0 0 2px hsl(var(--panel-frame)), inset 0 1px 0 hsl(0 0% 100% / 0.35), inset 0 -2px 0 hsl(16 70% 32% / 0.55), 0 2px 0 hsl(16 70% 32%)",
+                background: "var(--gradient-brand)",
+                boxShadow: "0 0 0 2px hsl(var(--panel-frame)), inset 0 1px 0 hsl(0 0% 100% / 0.35), inset 0 -2px 0 hsl(0 0% 0% / 0.35), 0 2px 0 hsl(var(--panel-frame))",
               }}>
               <span className="text-lg">🧗</span>
             </div>

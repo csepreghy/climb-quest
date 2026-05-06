@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { STYLES, Style } from "@/game/data";
+import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
 import { computeChalk, logBoulder, useGame, levelUp, nextLevel } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -19,13 +19,15 @@ export default function LogBoulder() {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [location, setLocation] = useState("Indoor gym");
   const [grade, setGrade] = useState("V3");
+  const [type, setType] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder">>("boulder");
+  const [sent, setSent] = useState(true);
   const [styles, setStyles] = useState<Style[]>([]);
   const [notes, setNotes] = useState("");
   const [reward, setReward] = useState<{ total: number; base: number; bonuses: { source: string; amount: number }[]; newBadges: string[] } | null>(null);
 
   const preview = useMemo(
-    () => computeChalk("boulder", styles),
-    [styles, s.equipped, s.pendingConsumable],
+    () => computeChalk(type, styles, sent),
+    [type, sent, styles, s.equipped, s.pendingConsumable],
   );
 
   function toggleStyle(st: Style) {
@@ -34,11 +36,12 @@ export default function LogBoulder() {
 
   function submit() {
     const res = logBoulder({
-      activity: "boulder",
+      activity: type,
       date: new Date(date).toISOString(),
       location,
       grade,
       styles,
+      sent,
       notes,
     });
     setReward({ total: res.log.chalkTotal, base: res.log.chalkBase, bonuses: res.breakdown.bonuses, newBadges: res.newBadges });
@@ -71,7 +74,29 @@ export default function LogBoulder() {
           <Field label="Grade (e.g. V4, 6B+)">
             <Input value={grade} onChange={e => setGrade(e.target.value)} placeholder="V4" />
           </Field>
+          <Field label="Boulder type">
+            <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="warmup_boulder">Warm-up · +{BASE_CHALK.warmup_boulder}</SelectItem>
+                <SelectItem value="boulder">Regular · +{BASE_CHALK.boulder}</SelectItem>
+                <SelectItem value="hard_boulder">Hard · +{BASE_CHALK.hard_boulder}</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
         </div>
+
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={sent}
+            onChange={e => setSent(e.target.checked)}
+            className="h-4 w-4 accent-[hsl(var(--chalk))]"
+          />
+          <span className="text-sm">
+            Sent it <span className="text-muted-foreground text-xs">(+{BASE_CHALK.boulder_send} Chalk)</span>
+          </span>
+        </label>
 
         <div>
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>

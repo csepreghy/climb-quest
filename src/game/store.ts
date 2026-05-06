@@ -131,10 +131,13 @@ export interface ChalkBreakdown {
   bonuses: { source: string; amount: number }[];
   total: number;
 }
-export function computeChalk(activity: ActivityType, styles: Style[]): ChalkBreakdown {
+export function computeChalk(activity: ActivityType, styles: Style[], sent = false): ChalkBreakdown {
   const base = BASE_CHALK[activity] ?? 50;
 
   const bonuses: { source: string; amount: number }[] = [];
+  if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
+    bonuses.push({ source: "Send", amount: BASE_CHALK.boulder_send });
+  }
   // Equipped items
   const eq = state.equipped;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
@@ -166,6 +169,7 @@ export interface LogInput {
   location?: string;
   grade?: string;
   styles: Style[];
+  sent?: boolean;
   problemsTried?: number;
   sends?: number;
   hardestSend?: string;
@@ -173,7 +177,7 @@ export interface LogInput {
 }
 
 export function logBoulder(input: LogInput) {
-  const breakdown = computeChalk(input.activity, input.styles);
+  const breakdown = computeChalk(input.activity, input.styles, input.sent);
   const log: BoulderLog = {
     id: crypto.randomUUID(),
     date: input.date ?? new Date().toISOString(),

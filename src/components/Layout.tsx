@@ -96,10 +96,15 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   const [open, setOpen] = useState(false);
 
-  // Activity rows
+  // Activity rows (exclude the "send" modifier — shown separately)
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
+    .filter(a => a !== "boulder_send")
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
     .sort((a, b) => b.chalk - a.chalk);
+
+  const modifiers = [
+    { label: "Send a boulder", amount: BASE_CHALK.boulder_send },
+  ];
 
   return (
     <>
@@ -136,7 +141,19 @@ function ChalkChip({ value }: { value: number }) {
                 {activities.map(a => (
                   <div key={a.label} className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-foreground/90">{a.label}</span>
-                    <span className="tabular-nums font-bold text-[hsl(var(--accent))]">+{a.chalk}</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+{a.chalk}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="menu-label mb-2">Bonuses</div>
+              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+                {modifiers.map(m => (
+                  <div key={m.label} className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="text-foreground/90">{m.label}</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+{m.amount}</span>
                   </div>
                 ))}
               </div>

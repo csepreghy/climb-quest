@@ -4,7 +4,13 @@ export type Rarity = "common" | "rare" | "legendary" | "consumable";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "accessory" | "aura" | "title";
 export type Gender = "male" | "female" | "neutral";
 
-export type ActivityType = "boulder" | "boss_attempt" | "boss_send";
+export type ActivityType =
+  | "warmup_boulder"
+  | "boulder"
+  | "hard_boulder"
+  | "boulder_send"
+  | "boss_attempt"
+  | "boss_send";
 
 export type Style =
   | "slab" | "vertical" | "overhang" | "cave" | "compression"
@@ -110,8 +116,8 @@ export const BADGES: BadgeDef[] = [
   { id: "slab_survivor",     name: "Slab Survivor",     emoji: "🧗", desc: "Logged a slab problem." },
   { id: "overhang_enjoyer",  name: "Overhang Enjoyer",  emoji: "🙃", desc: "Logged an overhang problem." },
   { id: "board_goblin_cert", name: "Board Goblin Certified", emoji: "👺", desc: "Logged 3 board sessions." },
-  { id: "crux_breaker",      name: "Crux Breaker",      emoji: "🔓", desc: "Sent a boss problem." },
-  { id: "project_slayer",    name: "Project Slayer",    emoji: "⚔️", desc: "Sent 3 boss problems." },
+  { id: "crux_breaker",      name: "Crux Breaker",      emoji: "🔓", desc: "Sent a boss project." },
+  { id: "project_slayer",    name: "Project Slayer",    emoji: "⚔️", desc: "Sent 3 boss projects." },
   { id: "crocs_equipped",    name: "Crocs Equipped",    emoji: "🩴", desc: "Equipped Crocs." },
   { id: "golden_crocs",      name: "Golden Crocs Owner",emoji: "👑", desc: "Owned the Golden Crocs." },
   { id: "shirtless_form",    name: "Shirtless Final Form", emoji: "🦾", desc: "Equipped Minimal Send Kit." },
@@ -119,7 +125,7 @@ export const BADGES: BadgeDef[] = [
   { id: "dyno_unlocked",     name: "Dyno Devourer Unlocked", emoji: "🦘", desc: "Reached level 6." },
   { id: "demigod_unlocked",  name: "Crimp Demigod Unlocked", emoji: "👑", desc: "Reached level 10." },
   { id: "got_humbled",       name: "Got Humbled",       emoji: "🥲", desc: "Logged a 'got humbled' result." },
-  { id: "zone_reached",      name: "Zone Reached",      emoji: "🎯", desc: "Reached the zone on a boss problem." },
+  { id: "zone_reached",      name: "Zone Reached",      emoji: "🎯", desc: "Reached the zone on a boss project." },
   { id: "tiny_crimp",        name: "Tiny Crimp Survivor", emoji: "🤏", desc: "Logged 5 crimp problems." },
 ];
 
@@ -139,15 +145,21 @@ export const BOSS_TEMPLATES: BossTemplate[] = [
 
 // Base Chalk per activity (before bonuses)
 export const BASE_CHALK: Record<ActivityType, number> = {
+  warmup_boulder: 30,
   boulder: 80,
+  hard_boulder: 160,
+  boulder_send: 60,
   boss_attempt: 50,
   boss_send: 250,
 };
 
 export const ACTIVITY_LABELS: Record<ActivityType, string> = {
-  boulder: "Boulder",
-  boss_attempt: "Boss Problem Attempt",
-  boss_send: "Boss Problem Send",
+  warmup_boulder: "Warm-up Boulder",
+  boulder: "Regular Boulder",
+  hard_boulder: "Hard Boulder",
+  boulder_send: "Boulder Send",
+  boss_attempt: "Boss Project Attempt",
+  boss_send: "Boss Project Send",
 };
 
 export const STYLES: Style[] = ["slab","vertical","overhang","cave","compression","coordination","dyno","mantle","crimp","sloper"];

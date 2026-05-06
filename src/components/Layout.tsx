@@ -96,10 +96,15 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   const [open, setOpen] = useState(false);
 
-  // Activity rows
+  // Activity rows (exclude the "send" modifier — shown separately)
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
+    .filter(a => a !== "boulder_send")
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
     .sort((a, b) => b.chalk - a.chalk);
+
+  const modifiers = [
+    { label: "Send a boulder", amount: BASE_CHALK.boulder_send },
+  ];
 
   return (
     <>

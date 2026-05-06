@@ -101,8 +101,8 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
         ) : locked ? (
           <GameButton size="sm" variant="ghost" disabled><Lock className="h-3 w-3" /> Lv {item.levelReq}</GameButton>
         ) : (
-          <GameButton size="sm" variant={item.rarity === "legendary" ? "legendary" : "primary"} disabled={!canAfford || item.price === 0} onClick={buy}>
-            {item.price === 0 ? "Free" : canAfford ? "Buy" : "No Chalk"}
+          <GameButton size="sm" variant={!canAfford || item.price === 0 ? "secondary" : "primary"} disabled={!canAfford || item.price === 0} onClick={buy}>
+            {item.price === 0 ? "Free" : canAfford ? "Buy" : "Not enough Chalk"}
           </GameButton>
         )}
       </div>

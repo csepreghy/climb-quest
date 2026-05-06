@@ -34,6 +34,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <GameSync />
+          <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route element={<RequireAuth />}>
               <Route element={<Layout />}>

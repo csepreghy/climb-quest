@@ -1,72 +1,61 @@
 ## Goal
 
-Make ClimbQuest feel like a real bouldering RPG by adding pixel-art and cartoon visuals built from pure SVG + CSS — no external image assets required. Keep the polished dark UI, but layer in chunky game-feel elements.
+Move ClimbQuest off the warm brown/stone palette into a soft **pastel RPG-menu** look. All surfaces use **flat solid colors** (no gradient fills). Gradients are reserved for **shadows / bevels only** — i.e. the soft inner highlight + dark inner bottom shade that gives buttons and panels their dimensional, "cartoony game UI" feel.
 
-## Visual Direction
+## Palette direction
 
-Pick **"Chunky Pixel RPG"** as the dominant style:
+Dark, cool base with sugary pastel accents — think a candy-colored quest menu over a deep slate room.
 
-- 8/16-bit pixel-art sprites for climbers, bosses, and items, drawn as SVG with hard edges (`shape-rendering: crispEdges`)
-- Cartoon sticker-style cards: thick borders, drop shadows, slight tilt on hover, little "pop" wobble on click
-- Animated background: parallax pixel-art climbing wall (rocks, holds, chalk dust particles) behind the dashboard
-- Dithered gradients (CSS) instead of smooth ones — gives a retro game-screen feel
-- Pixel-style display font for headings (e.g. "Press Start 2P" or "VT323" via Google Fonts) paired with current Inter for body
-- Chunky game-style buttons with offset bottom shadow that "presses" down on click
+- Background: deep slate-indigo (flat, very dark) — `hsl(230 22% 10%)`
+- Card / panel fill: slightly lifted slate — `hsl(230 18% 14%)` (flat)
+- Panel frame: near-black slate `hsl(230 30% 6%)`
+- Panel inner edge: cool gray `hsl(230 12% 28%)`
+- Text: soft off-white `hsl(220 25% 95%)`
+- Muted text: `hsl(225 12% 65%)`
 
-## What I'll Build
+Pastel accent set (each one a single flat color, no gradient):
+- Mint (primary action / XP): `hsl(155 55% 65%)`
+- Peach (secondary highlight): `hsl(18 85% 72%)`
+- Lavender (rare): `hsl(265 70% 78%)`
+- Sky (info / level chip): `hsl(205 75% 70%)`
+- Lemon (Chalk / legendary): `hsl(48 90% 70%)`
+- Rose (boss / danger): `hsl(350 75% 72%)`
 
-1. **Pixel-art sprite system (SVG)**
-   - `PixelSprite` component renders a sprite from a small grid string (e.g. `". . X X . . / . X 1 1 X ."`) with a color palette per sprite
-   - Sprite library: 10 climber avatars (one per level), 6 bosses, key items (chalk bag, shoes, brush, crocs, magdust)
-   - Each sprite has an idle bobbing animation and optional aura layer
-   - Climber sprites adapt clothing color by gender variant
+Each accent has a paired darker "shadow" tone used **only** in the chunky drop-shadow under buttons/panels (e.g. mint button → mint-700 hard shadow). That's where gradients live — as soft top-highlight + bottom-shade insets.
 
-2. **Animated game background**
-   - Fixed-position pixel-art climbing wall with bouldering holds scattered across it
-   - Slow drifting chalk dust particles (CSS keyframes)
-   - Subtle parallax on scroll
+## What changes
 
-3. **Cartoon card system**
-   - New `GameCard` variant: thick 3px border, hard offset shadow (`box-shadow: 6px 6px 0 hsl(...)`), slight rotate on hover
-   - Loot cards get a rarity-colored holographic shimmer for legendary items
-   - Boss cards get a "health bar" styled like a classic RPG (segmented, glowing)
+### 1. `src/index.css`
+- Replace all brown/stone HSL tokens (`--background`, `--card`, `--secondary`, `--border`, `--panel-*`, `--btn-*-top/bot`, `--chalk`, `--xp`, `--boss`, `--legendary`, `--rare`, `--accent`) with the pastel palette above.
+- Remove the warm radial-gradient body wash. Body becomes a **flat** dark slate. Optional: a single very subtle vignette via `radial-gradient(... transparent ... darker)` — that's a shadow effect, not a color fill, so it stays.
+- `--shadow-panel`: keep the multi-layer bevel (outer dark frame, inner light highlight, inner dark shade, ground shadow) but recolor stops to the cool slate family.
+- `gradient-chalk-text`: switch to a flat lemon color (`color: hsl(var(--chalk))`) — drop the gradient text since rule is "no gradients except for shadows".
 
-4. **Chunky game buttons**
-   - Pressed-button effect: offset shadow that collapses on `:active`
-   - Sparkle/pop animation when clicked (CSS-only, small SVG burst)
-   - Primary CTAs ("Log Boulder", "Attempt Boss", "Level Up") get the full treatment
+### 2. `src/components/ui/game-button.tsx`
+- `bevel()` helper currently builds a `linear-gradient(180deg, top, bot)` background. Change to a **flat solid background** per variant (e.g. mint, peach, rose, lemon, slate).
+- Keep the bevel shadow stack: top inset highlight + bottom inset shade + chunky `0 3px 0 hsl(shadow)` hard drop + soft ground shadow. Those stay (they're shadows).
+- Adjust per-variant text color for AA contrast on each pastel.
 
-5. **HUD / status flourishes**
-   - Chalk counter becomes a pixel chalk-bag icon with a bouncing number
-   - Level chip becomes a pixel badge with a sparkle ring
-   - Progress bars get segmented "XP bar" styling with scanlines
-   - Toasts get a pixel-art frame
+### 3. `src/components/ui/game-card.tsx`
+- `rpg-panel` fill becomes a **flat** `hsl(var(--card))` instead of the `linear-gradient(...)` it currently uses. Bevel comes entirely from `--shadow-panel`.
+- Tone accent rail (top hairline + ring) recolored to pastel tones.
 
-6. **Floating reward animation**
-   - When chalk is earned, "+126 CHALK" floats up from the button in pixel font with a small particle burst
-   - Level-up triggers a fullscreen pixel banner ("LEVEL UP!") with confetti
+### 4. `src/components/Layout.tsx`
+- Header logo tile, `Lv` chip, and active-nav pill: replace inline `linear-gradient` backgrounds with flat pastel fills (`hsl(var(--accent))` mint for active nav, slate for chips). Keep the inset-highlight + inset-shade box-shadows for the bevel.
+- `ChalkChip`: coin badge currently uses a radial-gradient fill — recolor to a flat lemon disk with an inset bottom shadow ring for depth (shadow, not gradient fill).
 
-7. **Boss & item art**
-   - Each boss gets a unique pixel sprite (slab menace = stoic stone face, board goblin = green crouching gremlin, etc.)
-   - Shop items get pixel icons replacing emoji (still keep emoji as fallback)
+### 5. `src/components/pixel/GameBackground.tsx`
+- Strip the warm radial gradients. Either render nothing (flat body color is enough) or keep one ultra-subtle dark vignette overlay for framing. No colored fill gradients.
 
-## Technical Details
+### 6. `src/components/pixel/LevelUpBanner.tsx`
+- Banner border/glow recolored to lemon/peach pastel. Title uses flat `text-accent`.
 
-- New file `src/components/pixel/PixelSprite.tsx`: SVG sprite renderer from string grid + palette
-- New file `src/components/pixel/sprites.ts`: sprite definitions (climbers, bosses, items)
-- New file `src/components/pixel/GameBackground.tsx`: fixed pixel wall + chalk dust
-- New file `src/components/pixel/RewardPop.tsx`: floating "+chalk" animation
-- New file `src/components/ui/game-card.tsx` and `game-button.tsx`: cartoon variants
-- Extend `src/index.css` with: pixel-perfect rendering helpers, dither gradient utilities, chunky shadow tokens, scanline overlay, sparkle keyframes, level-up banner keyframes
-- Extend `tailwind.config.ts` with `font-pixel` family + new shadows
-- Add Google Fonts link in `index.html` for "Press Start 2P" (titles only) and "VT323" (numbers/HUD)
-- Update `Layout`, `Dashboard`, `Bosses`, `Shop`, `Inventory`, `Character`, `LogBoulder` to use new sprite + card + button components
-- `ClimberAvatar` swaps emoji for `PixelSprite` (keeps same API)
+## What does NOT change
 
-No asset files, no backend, no new dependencies — everything is SVG + CSS + Google Fonts.
+- Layout, spacing, typography, animations.
+- Game logic, routes, store, sprites, copy.
+- Component APIs (`GameCard tone="boss"` etc. still work; only the colors behind those tones change).
 
-## What Stays The Same
+## Verification
 
-- Dark near-black palette, chalk-white text, semantic color tokens
-- All game logic, localStorage persistence, routing, RPG mechanics
-- Responsive layout for desktop + mobile
+After approval I'll spot-check Dashboard, Shop, and Bosses to ensure: no brown remains, button/panel depth still reads as chunky-RPG, contrast on pastel buttons is legible, and no element uses a gradient as a color fill (only as bevel/shadow).

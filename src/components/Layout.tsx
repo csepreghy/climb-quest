@@ -16,13 +16,12 @@ export default function Layout() {
   const s = useGame();
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.4),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/85 border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]">
         <div className="container flex items-center justify-between gap-4 py-3">
           <NavLink to="/" className="flex items-center gap-2.5 group">
-            <div className="h-10 w-10 rounded-lg grid place-items-center transition-transform group-hover:rotate-[-4deg]"
+            <div className="h-10 w-10 rounded-lg grid place-items-center transition-transform group-hover:rotate-[-4deg] bg-accent"
               style={{
-                background: "linear-gradient(180deg, hsl(28 30% 28%), hsl(26 25% 16%))",
-                boxShadow: "0 0 0 2px hsl(var(--panel-frame)), inset 0 1px 0 hsl(38 30% 92% / 0.15), inset 0 -2px 0 hsl(0 0% 0% / 0.4)",
+                boxShadow: "0 0 0 2px hsl(var(--panel-frame)), inset 0 1px 0 hsl(0 0% 100% / 0.35), inset 0 -2px 0 hsl(16 70% 32% / 0.55), 0 2px 0 hsl(16 70% 32%)",
               }}>
               <span className="text-lg">🧗</span>
             </div>
@@ -33,9 +32,9 @@ export default function Layout() {
           </NavLink>
           <div className="flex items-center gap-2">
             <ChalkChip value={s.chalk} />
-            <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border border-[hsl(var(--panel-frame))] bg-[hsl(26_22%_14%)] text-sm shadow-[inset_0_1px_0_hsl(38_30%_92%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.4)]">
+            <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)]">
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>
-              <span className="font-bold tabular-nums text-accent">{s.level}</span>
+              <span className="font-bold tabular-nums text-[hsl(var(--sky))]">{s.level}</span>
             </div>
           </div>
         </div>

@@ -122,6 +122,7 @@ function InventoryAdmin() {
       bonusPct: item.bonus ? Math.round(item.bonus.mult * 100) : 0,
       imageDataUrl: isImageEmoji(item.emoji) ? item.emoji : undefined,
       appliesTo: item.bonus?.appliesTo,
+      levelReq: item.levelReq,
     });
   }
 

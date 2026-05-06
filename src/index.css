@@ -37,9 +37,9 @@
     --radius: 0.75rem;
 
     /* Saturated game tokens */
-    --chalk: 42 95% 60%;
-    --chalk-glow: 42 100% 65%;
-    --chalk-shadow: 32 80% 32%;
+   --chalk: 142 70% 50%;
+   --chalk-glow: 142 80% 60%;
+   --chalk-shadow: 150 70% 22%;
     --xp: 150 60% 45%;
     --xp-shadow: 152 70% 22%;
     --boss: 354 75% 55%;

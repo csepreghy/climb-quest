@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, ScrollText, Swords, User, Store, Backpack, Settings, LogOut } from "lucide-react";
+import { Home, ScrollText, Swords, User, Store, Backpack, Settings, LogOut, Building2 } from "lucide-react";
 import { useGame } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ const NAV_BASE = [
   { to: "/log", label: "Log Boulder", icon: ScrollText },
   { to: "/bosses", label: "Boss Projects", icon: Swords },
   { to: "/character", label: "Character", icon: User },
+  { to: "/gym", label: "My Gym", icon: Building2 },
   { to: "/shop", label: "Shop", icon: Store },
 ];
 const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };

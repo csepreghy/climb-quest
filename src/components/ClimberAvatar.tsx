@@ -24,26 +24,27 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
   const shoes = equipped?.shoes ? ITEM_BY_ID[equipped.shoes] : null;
   const sprite = getClimberSprite(level, gender);
 
-  const auraColor = aura
-    ? "hsl(var(--legendary))"
-    : glow
-    ? "hsl(var(--accent))"
-    : undefined;
+  // Use themed glow var; aura item forces legendary gold; otherwise honor user's chosen glow.
+  const showGlow = !!aura || !!glow;
+  const auraColor = aura ? "hsl(var(--legendary))" : "hsl(var(--avatar-glow-color, 42 100% 65%))";
+  const auraOpacity = aura ? 0.85 : "var(--avatar-glow-opacity, 0)";
 
   const useIllustration = level === 1 && gender === "male";
 
   return (
     <div className={cn("relative inline-flex items-center justify-center", FRAME_SIZE[size])}>
-      {/* Soft framed stage — light fill so character has contrast */}
       <div
         className="absolute inset-0 rounded-xl border border-[hsl(var(--panel-frame))] overflow-hidden"
         style={{ background: "var(--avatar-stage, transparent)" }}
       />
 
-      {auraColor && (
+      {showGlow && (
         <div
-          className="absolute inset-2 rounded-full blur-2xl opacity-70 animate-aura-pulse z-0"
-          style={{ background: `radial-gradient(circle, ${auraColor} 0%, transparent 65%)` }}
+          className="absolute -inset-1 rounded-full blur-2xl animate-aura-pulse z-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(circle, ${auraColor} 0%, transparent 65%)`,
+            opacity: auraOpacity as string,
+          }}
         />
       )}
 

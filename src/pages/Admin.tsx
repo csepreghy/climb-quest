@@ -202,7 +202,7 @@ function InventoryAdmin() {
 
       <div className="flex justify-end gap-2">
         {editingId && <Button variant="ghost" onClick={reset}><X className="h-4 w-4" /> Cancel</Button>}
-        <GameButton variant="primary" onClick={save}>
+        <GameButton variant="primary" onClick={save} disabled={busy}>
           {editingId ? "Update item" : <><Plus className="h-4 w-4" /> Create item</>}
         </GameButton>
       </div>
@@ -221,7 +221,9 @@ function InventoryAdmin() {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold truncate flex items-center gap-2">
                     {item.name}
-                    {isCustom && <span className="text-[9px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">custom</span>}
+                    {isCustom
+                      ? <span className="text-[9px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">custom</span>
+                      : <span className="text-[9px] uppercase tracking-wider text-muted-foreground">built-in</span>}
                   </div>
                   <div className="text-[10px] text-muted-foreground capitalize">
                     {item.rarity} · {item.category} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}
@@ -230,15 +232,53 @@ function InventoryAdmin() {
                 {isCustom ? (
                   <>
                     <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>
-                    <button className="text-destructive" onClick={() => { if (confirm(`Delete ${item.name}?`)) deleteCustomItem(item.id); }} title="Delete"><Trash2 className="h-4 w-4" /></button>
+                    <button className="text-destructive" onClick={async () => { if (confirm(`Delete ${item.name}?`)) { try { await deleteCustomItem(item.id); toast.success("Deleted"); } catch (e: any) { toast.error(e?.message ?? "Delete failed"); } } }} title="Delete"><Trash2 className="h-4 w-4" /></button>
                   </>
                 ) : (
-                  <span className="text-[10px] text-muted-foreground italic px-1">built-in</span>
+                  <button
+                    className="text-destructive"
+                    title="Remove from shop (all users)"
+                    onClick={async () => {
+                      if (!confirm(`Remove ${item.name} from every player's shop?`)) return;
+                      try { await hideBuiltinItem(item.id); toast.success("Removed from shop"); }
+                      catch (e: any) { toast.error(e?.message ?? "Remove failed"); }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 )}
               </div>
             );
           })}
         </div>
+
+        {hidden.size > 0 && (
+          <div className="space-y-2 pt-3 border-t border-border">
+            <div className="menu-label">Removed built-ins ({hidden.size})</div>
+            <p className="text-[10px] text-muted-foreground">These items are hidden from every player's shop. Restore to make them available again.</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {Array.from(hidden).map(id => {
+                const item = ITEM_BY_ID[id];
+                if (!item) return null;
+                return (
+                  <div key={id} className="flex items-center gap-3 p-2 rounded-lg border border-dashed border-border bg-secondary/10 opacity-70">
+                    <div className="h-10 w-10 grid place-items-center text-xl shrink-0">
+                      {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className="h-10 w-10 object-contain rounded" /> : item.emoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold truncate line-through">{item.name}</div>
+                      <div className="text-[10px] text-muted-foreground capitalize">{item.rarity} · {item.category}</div>
+                    </div>
+                    <Button size="sm" variant="secondary" onClick={async () => {
+                      try { await restoreBuiltinItem(id); toast.success("Restored"); }
+                      catch (e: any) { toast.error(e?.message ?? "Restore failed"); }
+                    }}>Restore</Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </GameCard>
   );

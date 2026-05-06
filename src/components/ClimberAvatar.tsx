@@ -21,8 +21,6 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
   const lvl = LEVELS.find(l => l.level === level) ?? LEVELS[0];
   const auraId = equipped?.aura;
   const aura = auraId ? getItem(auraId) : null;
-  const outfit = equipped?.outfit ? getItem(equipped.outfit) : null;
-  const shoes = equipped?.shoes ? getItem(equipped.shoes) : null;
   const sprite = getClimberSprite(level, gender);
 
   // Use themed glow var; aura item forces legendary gold; otherwise honor user's chosen glow.
@@ -59,15 +57,6 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
         <PixelSprite sprite={sprite} pixel={PIXEL_SIZE[size]} aura={auraColor} className="relative z-10" />
       )}
 
-      {/* Item indicator chips */}
-      <div className="absolute bottom-1.5 right-1.5 flex gap-1 z-20">
-        {shoes && shoes.id !== "rental_shoes" && (
-          <span className="text-xs bg-background/90 border border-border rounded px-1.5 py-0.5">{shoes.emoji}</span>
-        )}
-        {outfit && (
-          <span className="text-xs bg-background/90 border border-border rounded px-1.5 py-0.5">{outfit.emoji}</span>
-        )}
-      </div>
       {/* Level chip */}
       <div className="absolute top-1.5 left-1.5 z-20 text-[11px] font-medium bg-background/85 border border-border rounded px-1.5 py-0.5 text-muted-foreground">
         Lv <span className="text-foreground">{level}</span>

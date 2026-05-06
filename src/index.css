@@ -2,104 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* ClimbQuest design system — dark bouldering RPG */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Near-black RPG dashboard */
+    --background: 240 10% 4%;
+    --foreground: 40 30% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 240 10% 7%;
+    --card-foreground: 40 30% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 240 10% 6%;
+    --popover-foreground: 40 30% 96%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Chalk white as primary */
+    --primary: 40 50% 92%;
+    --primary-foreground: 240 10% 6%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 8% 12%;
+    --secondary-foreground: 40 30% 96%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 8% 12%;
+    --muted-foreground: 240 5% 60%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 280 80% 60%;
+    --accent-foreground: 40 30% 96%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 40 30% 96%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 240 8% 16%;
+    --input: 240 8% 14%;
+    --ring: 280 80% 60%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Game-specific tokens */
+    --chalk: 40 60% 95%;
+    --chalk-glow: 40 90% 75%;
+    --xp: 145 70% 50%;
+    --boss: 350 80% 60%;
+    --legendary: 35 95% 60%;
+    --rare: 260 85% 70%;
+    --common: 200 30% 65%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --gradient-hero: linear-gradient(135deg, hsl(280 80% 30% / 0.6), hsl(220 70% 25% / 0.6));
+    --gradient-chalk: linear-gradient(135deg, hsl(40 90% 75%), hsl(40 50% 92%));
+    --gradient-boss: linear-gradient(135deg, hsl(350 80% 50%), hsl(15 85% 55%));
+    --gradient-card: linear-gradient(160deg, hsl(240 10% 9%), hsl(240 10% 6%));
+    --gradient-legendary: linear-gradient(135deg, hsl(35 95% 60%), hsl(280 80% 60%));
 
-    --sidebar-primary: 240 5.9% 10%;
+    --shadow-glow: 0 0 40px hsl(280 80% 60% / 0.25);
+    --shadow-chalk: 0 0 30px hsl(40 90% 75% / 0.35);
+    --shadow-card: 0 10px 30px -10px hsl(0 0% 0% / 0.6);
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --transition-pop: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
+  /* Force dark theme always */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    color-scheme: dark;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  * { @apply border-border; }
+  html { color-scheme: dark; }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, hsl(280 80% 30% / 0.18), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, hsl(220 70% 30% / 0.12), transparent);
+    background-attachment: fixed;
   }
+}
+
+@layer components {
+  .glow-chalk { box-shadow: var(--shadow-chalk); }
+  .glow-accent { box-shadow: var(--shadow-glow); }
+  .gradient-card { background: var(--gradient-card); }
+  .gradient-hero { background: var(--gradient-hero); }
+  .gradient-chalk-text {
+    background: var(--gradient-chalk);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gradient-legendary-text {
+    background: var(--gradient-legendary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@layer utilities {
+  @keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes float-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes chalk-pulse {
+    0%, 100% { box-shadow: 0 0 20px hsl(40 90% 75% / 0.3); }
+    50% { box-shadow: 0 0 40px hsl(40 90% 75% / 0.6); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .animate-pop-in { animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .animate-float-up { animation: float-up 0.5s ease-out; }
+  .animate-chalk-pulse { animation: chalk-pulse 2.5s ease-in-out infinite; }
 }

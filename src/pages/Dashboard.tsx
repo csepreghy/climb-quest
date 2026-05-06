@@ -16,8 +16,7 @@ export default function Dashboard() {
   const next = nextLevel(s);
   const boss = activeBoss(s);
   const nav = useNavigate();
-  const titleId = s.equipped.title;
-  const titleName = titleId ? ITEM_BY_ID[titleId]?.name.replace(/^Title:\s*/, "") : cur.title;
+  const progress0 = 0; void progress0;
   const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;
 
   const onLevelUp = () => {

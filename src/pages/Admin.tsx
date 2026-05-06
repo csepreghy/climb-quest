@@ -21,7 +21,7 @@ import {
   isImageEmoji,
   CustomItemInput,
 } from "@/game/customItems";
-import { ItemGroup, Rarity, Slot, ShopItem } from "@/game/data";
+import { ItemGroup, Rarity, Slot, ShopItem, ITEM_BY_ID } from "@/game/data";
 import { cn } from "@/lib/utils";
 
 const RARITIES: Rarity[] = ["common", "rare", "legendary", "consumable"];

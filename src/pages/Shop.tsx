@@ -16,14 +16,15 @@ const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
 
 export default function Shop() {
   const s = useGame();
+  const all = useAllItems();
   const [group, setGroup] = useState<ItemGroup>("outfit");
   const [cat, setCat] = useState<string>("All");
 
   const activeGroup = GROUPS.find(g => g.key === group)!;
   const items = useMemo(() => {
-    const inGroup = SHOP.filter(i => i.group === group);
+    const inGroup = all.filter(i => i.group === group);
     return cat === "All" ? inGroup : inGroup.filter(i => i.category === cat);
-  }, [group, cat]);
+  }, [group, cat, all]);
 
   return (
     <div className="space-y-5 animate-float-up">

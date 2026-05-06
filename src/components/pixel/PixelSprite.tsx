@@ -27,7 +27,7 @@ export function PixelSprite({ sprite, pixel = 6, className, idle = true, aura, o
   const h = rows * pixel;
 
   return (
-    <div className={cn("relative inline-block", idle && "animate-sprite-bob", className)} style={{ width: w, height: h }}>
+    <div className={cn("relative inline-block", className)} style={{ width: w, height: h }}>
       {aura && (
         <div
           className="absolute inset-0 rounded-full blur-2xl opacity-70 animate-aura-pulse"

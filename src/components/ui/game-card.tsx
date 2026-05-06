@@ -11,49 +11,21 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   rivets?: boolean;
 }
 
-const toneRing: Record<Tone, string> = {
-  default:   "",
-  accent:    "ring-1 ring-accent/30",
-  legendary: "ring-1 ring-legendary/35",
-  boss:      "ring-1 ring-boss/35",
-  rare:      "ring-1 ring-rare/35",
-};
-
-const toneAccentBar: Record<Tone, string> = {
-  default:   "",
-  accent:    "bg-accent",
-  legendary: "bg-legendary",
-  boss:      "bg-boss",
-  rare:      "bg-rare",
-};
-
 export const GameCard = React.forwardRef<HTMLDivElement, Props>(
-  ({ tone = "default", interactive, shimmer, rivets = true, className, children, ...rest }, ref) => {
+  ({ tone = "default", interactive, shimmer, rivets: _rivets, className, children, ...rest }, ref) => {
+    void tone;
+    void _rivets;
     return (
       <div
         ref={ref}
         {...rest}
         className={cn(
           "rpg-panel",
-          rivets && "rpg-rivets",
           "transition-transform duration-200",
           interactive && "hover:-translate-y-0.5 cursor-pointer",
-          toneRing[tone],
           className,
         )}
       >
-        {rivets && (
-          <>
-            <span className="rivet-tr" aria-hidden />
-            <span className="rivet-br" aria-hidden />
-          </>
-        )}
-        {tone !== "default" && (
-          <div
-            aria-hidden
-            className={cn("absolute left-3 right-3 top-0 h-px", toneAccentBar[tone])}
-          />
-        )}
         {shimmer && (
           <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden opacity-70">
             <div

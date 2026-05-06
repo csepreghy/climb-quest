@@ -68,7 +68,7 @@ export const GameButton = React.forwardRef<HTMLButtonElement, Props>(
           className,
         )}
       >
-        <span className="relative drop-shadow-[0_2px_0_hsl(0_0%_0%/0.4)]">{children}</span>
+        <span className="relative inline-flex items-center gap-2 whitespace-nowrap drop-shadow-[0_2px_0_hsl(0_0%_0%/0.4)]">{children}</span>
       </button>
     );
   },

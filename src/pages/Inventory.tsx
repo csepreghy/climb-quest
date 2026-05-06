@@ -14,7 +14,7 @@ import { ArrowRight } from "lucide-react";
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",
-  bottoms: "Bottom",
+  bottoms: "Pants",
   shoes: "Shoes",
   hat: "Hat",
   hand: "Hand",

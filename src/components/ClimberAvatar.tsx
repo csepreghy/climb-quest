@@ -21,8 +21,6 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
   const lvl = LEVELS.find(l => l.level === level) ?? LEVELS[0];
   const auraId = equipped?.aura;
   const aura = auraId ? getItem(auraId) : null;
-  const outfit = equipped?.outfit ? getItem(equipped.outfit) : null;
-  const shoes = equipped?.shoes ? getItem(equipped.shoes) : null;
   const sprite = getClimberSprite(level, gender);
 
   // Use themed glow var; aura item forces legendary gold; otherwise honor user's chosen glow.
@@ -31,10 +29,6 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
   const auraOpacity = aura ? 0.85 : "var(--avatar-glow-opacity, 0)";
 
   const useIllustration = level === 1 && gender === "male";
-  const itemChips = [
-    shoes && shoes.id !== "rental_shoes" ? shoes.emoji : null,
-    outfit ? outfit.emoji : null,
-  ].filter(Boolean);
 
   return (
     <div className={cn("relative inline-flex items-center justify-center", FRAME_SIZE[size])}>
@@ -63,16 +57,6 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
         <PixelSprite sprite={sprite} pixel={PIXEL_SIZE[size]} aura={auraColor} className="relative z-10" />
       )}
 
-      {/* Item indicator chips */}
-      {itemChips.length > 0 && (
-        <div className="absolute bottom-1.5 right-1.5 z-20 flex gap-1 pointer-events-none isolate [backface-visibility:hidden]">
-          {itemChips.map((emoji, index) => (
-            <span key={`${emoji}-${index}`} className="text-xs leading-none bg-background border border-border rounded px-1.5 py-1 shadow-sm">
-              {emoji}
-            </span>
-          ))}
-        </div>
-      )}
       {/* Level chip */}
       <div className="absolute top-1.5 left-1.5 z-20 text-[11px] font-medium bg-background/85 border border-border rounded px-1.5 py-0.5 text-muted-foreground">
         Lv <span className="text-foreground">{level}</span>

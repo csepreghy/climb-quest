@@ -101,6 +101,7 @@ export interface CustomItemInput {
   imageDataUrl?: string;
   bonusPct: number;
   appliesTo?: ActivityType[] | "all";
+  levelReq?: number;
 }
 
 function inputToRow(id: string, input: CustomItemInput) {
@@ -115,6 +116,7 @@ function inputToRow(id: string, input: CustomItemInput) {
     image: input.imageDataUrl ?? null,
     bonus_pct: input.bonusPct,
     applies_to: (input.appliesTo ?? "all") as any,
+    level_req: input.levelReq ?? null,
   };
 }
 

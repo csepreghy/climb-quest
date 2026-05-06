@@ -19,13 +19,15 @@ export default function LogBoulder() {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [location, setLocation] = useState("Indoor gym");
   const [grade, setGrade] = useState("V3");
+  const [type, setType] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder">>("boulder");
+  const [sent, setSent] = useState(true);
   const [styles, setStyles] = useState<Style[]>([]);
   const [notes, setNotes] = useState("");
   const [reward, setReward] = useState<{ total: number; base: number; bonuses: { source: string; amount: number }[]; newBadges: string[] } | null>(null);
 
   const preview = useMemo(
-    () => computeChalk("boulder", styles),
-    [styles, s.equipped, s.pendingConsumable],
+    () => computeChalk(type, styles, sent),
+    [type, sent, styles, s.equipped, s.pendingConsumable],
   );
 
   function toggleStyle(st: Style) {
@@ -34,11 +36,12 @@ export default function LogBoulder() {
 
   function submit() {
     const res = logBoulder({
-      activity: "boulder",
+      activity: type,
       date: new Date(date).toISOString(),
       location,
       grade,
       styles,
+      sent,
       notes,
     });
     setReward({ total: res.log.chalkTotal, base: res.log.chalkBase, bonuses: res.breakdown.bonuses, newBadges: res.newBadges });

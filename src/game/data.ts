@@ -4,16 +4,11 @@ export type Rarity = "common" | "rare" | "legendary" | "consumable";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "accessory" | "aura" | "title";
 export type Gender = "male" | "female" | "neutral";
 
-export type ActivityType =
-  | "indoor" | "outdoor" | "board" | "spray" | "project_attempt"
-  | "completed" | "flashed" | "boss_attempt" | "boss_send"
-  | "competition" | "hangboard" | "strength" | "mobility";
+export type ActivityType = "boulder" | "boss_attempt" | "boss_send";
 
 export type Style =
   | "slab" | "vertical" | "overhang" | "cave" | "compression"
   | "coordination" | "dyno" | "mantle" | "crimp" | "sloper";
-
-export type Result = "session" | "project_attempt" | "send" | "flash" | "competition" | "humbled";
 
 export interface ClimberLevel {
   level: number;

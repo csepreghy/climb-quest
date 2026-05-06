@@ -16,9 +16,7 @@ const bevel = (fill: string, shadow: string, frame = "var(--panel-frame)") => ({
     `0 0 0 2px hsl(${frame})`,
     `inset 0 2px 0 hsl(0 0% 100% / 0.32)`,
     `inset 0 -3px 0 hsl(${shadow})`,
-    `0 4px 0 0 hsl(${shadow})`,
-    `0 5px 0 0 hsl(${frame})`,
-    `0 10px 16px -6px hsl(0 0% 0% / 0.6)`,
+    `0 8px 16px -8px hsl(0 0% 0% / 0.55)`,
   ].join(", "),
 });
 
@@ -60,7 +58,7 @@ export const GameButton = React.forwardRef<HTMLButtonElement, Props>(
           "transition-[transform,filter] duration-100 will-change-transform",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           "hover:brightness-[1.06] active:brightness-95",
-          !isGhost && "active:translate-y-[3px] active:[box-shadow:0_0_0_2px_hsl(var(--panel-frame)),inset_0_1px_0_hsl(0_0%_100%/0.18),inset_0_-1px_0_hsl(0_0%_0%/0.3),0_1px_0_0_hsl(var(--panel-frame)),0_4px_8px_-4px_hsl(0_0%_0%/0.5)]",
+          !isGhost && "active:translate-y-[2px] active:[box-shadow:0_0_0_2px_hsl(var(--panel-frame)),inset_0_1px_0_hsl(0_0%_100%/0.18),inset_0_-1px_0_hsl(0_0%_0%/0.3),0_2px_6px_-2px_hsl(0_0%_0%/0.45)]",
           isGhost && "rounded-md hover:bg-secondary/60 normal-case",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0",
           variantText[variant],

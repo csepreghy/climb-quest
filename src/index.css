@@ -129,7 +129,11 @@
   .rpg-rivets > .rivet-br { bottom: 7px; right: 7px; }
 
   .menu-label {
-    @apply text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold;
+    @apply text-sm uppercase tracking-[0.2em] text-foreground font-bold mb-2 block;
+  }
+  .menu-label + p,
+  .menu-label + .menu-sub {
+    @apply mt-2;
   }
   .gradient-chalk-text {
     color: hsl(var(--chalk));

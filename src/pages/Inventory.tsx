@@ -163,11 +163,16 @@ export default function Inventory() {
                   {slots.map(slot => {
                     const id = s.equipped[slot];
                     const it = id ? getItem(id) : null;
-                    if (!it) return <EmptySlotCard key={slot} slot={slot} />;
+                    if (!it) return (
+                      <div key={slot} className="flex flex-col">
+                        <div className="flex-1"><EmptySlotCard slot={slot} /></div>
+                        <div className="h-7 mt-1.5" aria-hidden />
+                      </div>
+                    );
                     return (
-                      <div key={slot} className="space-y-1.5">
-                        <ItemCard item={it} />
-                        <div className="flex justify-end">
+                      <div key={slot} className="flex flex-col">
+                        <div className="flex-1"><ItemCard item={it} /></div>
+                        <div className="flex justify-end mt-1.5">
                           <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot(slot)}>Unequip</Button>
                         </div>
                       </div>

@@ -141,7 +141,7 @@ export default function LogBoulder() {
             <span className="font-bold gradient-chalk-text">+{preview.total} Chalk</span>
             {preview.bonuses.length > 0 && <span className="text-xs"> (base {preview.base} + bonuses {preview.total - preview.base})</span>}
           </div>
-          <Button size="lg" onClick={submit} className="shadow-glow">Send it 🪨</Button>
+          <GameButton variant="primary" size="lg" onClick={submit}>Send it 🪨</GameButton>
         </div>
       </Card>
 
@@ -173,12 +173,13 @@ export default function LogBoulder() {
               )}
               {canLevel && (
                 <div className="pt-3">
-                  <Button className="w-full bg-gradient-to-r from-legendary to-accent animate-chalk-pulse" onClick={() => {
+                  <GameButton variant="legendary" className="w-full animate-chalk-pulse" onClick={() => {
+                    const target = next?.title ?? "";
                     const r = levelUp();
-                    if (r.ok) { toast.success("Level up!", { description: r.unlocks?.join(", ") }); nav("/character"); }
+                    if (r.ok) { showLevelUpBanner(target, r.unlocks ?? []); toast.success("Level up!"); }
                   }}>
-                    Spend {next?.cost} Chalk → {next?.title}
-                  </Button>
+                    Spend {next?.cost} → {next?.title}
+                  </GameButton>
                 </div>
               )}
             </div>

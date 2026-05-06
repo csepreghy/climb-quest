@@ -19,7 +19,7 @@ const SLOT_LABEL: Record<Slot, string> = {
   hat: "Hat",
   hand: "Hand",
   chalk: "Chalk",
-  accessory: "Brush / Accessory",
+  accessory: "Brush",
   aura: "Aura",
   title: "Title",
 };
@@ -96,7 +96,7 @@ function ItemCard({
 
 function EmptySlotCard({ slot }: { slot: Slot }) {
   return (
-    <GameCard className="p-4 flex flex-col gap-3 relative opacity-70">
+    <GameCard className="p-4 flex flex-col gap-3 relative opacity-60 h-full">
       <div className="flex items-start gap-3">
         <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border text-2xl">∅</div>
         <div className="min-w-0 flex-1">
@@ -104,7 +104,6 @@ function EmptySlotCard({ slot }: { slot: Slot }) {
           <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">{SLOT_LABEL[slot]}</div>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground italic">Nothing equipped in this slot.</p>
     </GameCard>
   );
 }

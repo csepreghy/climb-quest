@@ -283,11 +283,18 @@ function BonusDiff({ current, next }: { current: ShopItem | null; next: ShopItem
   const delta = nxt - cur;
   if (delta === 0 && cur === 0) return null;
   const sign = delta > 0 ? "+" : "";
-  const color = delta > 0 ? "text-chalk-glow" : delta < 0 ? "text-destructive" : "text-muted-foreground";
+  const tone = delta > 0
+    ? "border-chalk-glow/50 bg-chalk-glow/10 text-chalk-glow"
+    : delta < 0
+      ? "border-destructive/50 bg-destructive/10 text-destructive"
+      : "border-border bg-secondary text-muted-foreground";
   return (
-    <div className="text-xs text-center text-muted-foreground border-t border-border/50 pt-3 tabular-nums">
-      Bonus: {Math.round(cur)}% → {Math.round(nxt)}%
-      {delta !== 0 && <span className={cn("ml-2 font-bold", color)}>({sign}{Math.round(delta)}%)</span>}
+    <div className={cn("rounded-lg border-2 px-4 py-3 flex items-center justify-between gap-4 tabular-nums", tone)}>
+      <span className="text-xs uppercase tracking-wider opacity-80">Bonus change</span>
+      <div className="flex items-baseline gap-3">
+        <span className="text-sm opacity-70">{Math.round(cur)}% → {Math.round(nxt)}%</span>
+        {delta !== 0 && <span className="text-2xl font-extrabold">{sign}{Math.round(delta)}%</span>}
+      </div>
     </div>
   );
 }

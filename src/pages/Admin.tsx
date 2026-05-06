@@ -27,12 +27,12 @@ const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [
   { value: "power", label: "Power-ups" },
 ];
 const CATEGORIES_BY_GROUP: Record<ItemGroup, ShopItem["category"][]> = {
-  outfit: ["Top", "Bottom", "Shoes", "Hat", "Hand"],
+  outfit: ["Top", "Pants", "Shoes", "Hat", "Hand"],
   gear: ["Brushes", "Chalk"],
   power: ["Accessories", "Auras", "Titles", "Consumables"],
 };
 const CATEGORY_TO_SLOT: Record<string, Slot> = {
-  Top: "outfit", Bottom: "bottoms", Shoes: "shoes", Hat: "hat", Hand: "hand",
+  Top: "outfit", Pants: "bottoms", Shoes: "shoes", Hat: "hat", Hand: "hand",
   Brushes: "accessory", Chalk: "chalk",
   Accessories: "accessory", Auras: "aura", Titles: "title", Consumables: "accessory",
 };

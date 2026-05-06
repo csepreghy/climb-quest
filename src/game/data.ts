@@ -43,7 +43,7 @@ export interface ShopItem {
   id: string;
   name: string;
   group: ItemGroup;          // outfit | gear | power
-  category: "Top" | "Bottom" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Accessories" | "Auras" | "Titles" | "Consumables";
+  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Accessories" | "Auras" | "Titles" | "Consumables";
   slot: Slot;
   rarity: Rarity;
   price: number;

@@ -1,29 +1,30 @@
 import { useMemo, useState } from "react";
-import { ShopItem, RARITY_COLOR, RARITY_BORDER, ItemGroup } from "@/game/data";
+import { ShopItem, RARITY_BORDER, ItemGroup } from "@/game/data";
 import { useAllItems, isImageEmoji } from "@/game/customItems";
 import { buyItem, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Lock, Check } from "lucide-react";
-import { GameCard } from "@/components/ui/game-card";
-import { GameButton } from "@/components/ui/game-button";
+import { Card } from "@/components/ui/card";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
-const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
-  { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Bottom", "Shoes", "Hat", "Hand"] },
-  { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk"] },
-  { key: "power",  label: "Power-ups", categories: ["All", "Accessories", "Auras", "Titles", "Consumables"] },
+type GroupKey = ItemGroup | "all";
+
+const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [
+  { key: "all",    label: "All",        categories: ["All"] },
+  { key: "outfit", label: "Outfit",     categories: ["All", "Top", "Bottom", "Shoes", "Hat", "Hand"] },
+  { key: "gear",   label: "Gear",       categories: ["All", "Brushes", "Chalk"] },
+  { key: "power",  label: "Power-ups",  categories: ["All", "Accessories", "Auras", "Titles", "Consumables"] },
 ];
 
 export default function Shop() {
   const s = useGame();
   const all = useAllItems();
-  const [group, setGroup] = useState<ItemGroup>("outfit");
+  const [group, setGroup] = useState<GroupKey>("all");
   const [cat, setCat] = useState<string>("All");
 
   const activeGroup = GROUPS.find(g => g.key === group)!;
   const items = useMemo(() => {
-    const inGroup = all.filter(i => i.group === group);
+    const inGroup = group === "all" ? all : all.filter(i => i.group === group);
     return cat === "All" ? inGroup : inGroup.filter(i => i.category === cat);
   }, [group, cat, all]);
 
@@ -41,72 +42,83 @@ export default function Shop() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        {activeGroup.categories.map(c => (
-          <button key={c} onClick={() => setCat(c)}
-            className={cn("text-xs px-3 py-1.5 rounded-md border transition-colors",
-              cat === c ? "bg-secondary text-foreground border-border" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>
-            {c}
-          </button>
-        ))}
-      </div>
+      {activeGroup.categories.length > 1 && (
+        <div className="flex flex-wrap gap-1.5">
+          {activeGroup.categories.map(c => (
+            <button key={c} onClick={() => setCat(c)}
+              className={cn("text-xs px-3 py-1.5 rounded-md border transition-colors",
+                cat === c ? "bg-secondary text-foreground border-border" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} />)}
-      </div>
+      <Card className="gradient-card p-4">
+        <div className="grid gap-3 grid-cols-3 sm:grid-cols-4 lg:grid-cols-6">
+          {items.map(item => (
+            <ShopTile
+              key={item.id}
+              item={item}
+              owned={s.owned.includes(item.id)}
+              chalk={s.chalk}
+              level={s.level}
+            />
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }
 
-function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolean; chalk: number; level: number }) {
+function ShopTile({ item, owned, chalk, level }: { item: ShopItem; owned: boolean; chalk: number; level: number }) {
   const locked = !!(item.levelReq && level < item.levelReq);
-  const canAfford = chalk >= item.price;
   const isConsumable = !!item.consumableBonus;
   const ownAlready = owned && !isConsumable;
+  const canAfford = chalk >= item.price;
+  const disabled = ownAlready || locked || !canAfford;
 
   function buy() {
+    if (ownAlready) { toast.info("Already owned"); return; }
+    if (locked) { toast.error(`Requires Level ${item.levelReq}`); return; }
     const r = buyItem(item.id);
     if (!r.ok) { toast.error(r.reason ?? "Cannot buy"); return; }
-    toast.success(`Looted ${item.name}`, { description: isConsumable ? "Equip it to use on your next log." : "Equip it from your Inventory." });
+    toast.success(`Looted ${item.name}`, { description: isConsumable ? "Equip it on your next log." : "Equip it from your Inventory." });
   }
 
-  const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
-
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
+  const titleParts = [
+    item.name,
+    item.desc,
+    bonusPct > 0 ? `+${bonusPct}% bonus` : "",
+    item.levelReq ? `Requires Lv ${item.levelReq}` : "",
+    item.price > 0 ? `${item.price} Chalk` : "Free",
+    ownAlready ? "Owned" : "",
+  ].filter(Boolean);
 
   return (
-    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3 relative">
+    <button
+      title={titleParts.join(" · ")}
+      onClick={buy}
+      className={cn(
+        "relative aspect-square p-2 rounded-lg border flex items-center justify-center transition-colors group",
+        ownAlready
+          ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/5"
+          : "border-border bg-secondary/20 hover:bg-secondary/40",
+        disabled && !ownAlready && "opacity-60",
+      )}
+    >
       {bonusPct > 0 && (
-        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
+        <div className="absolute top-1 right-1 z-10 text-[9px] font-bold tabular-nums px-1.5 py-0.5 rounded bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
           +{bonusPct}%
         </div>
       )}
-      <div className="flex items-start gap-3">
-        {isImageEmoji(item.emoji)
-          ? <img src={item.emoji} alt={item.name} className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
-          : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
-        <div className="min-w-0 flex-1 pr-12">
-          <div className="text-sm font-medium leading-snug">{item.name}</div>
-          <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
-            {item.rarity}
-          </div>
-        </div>
+      {isImageEmoji(item.emoji)
+        ? <img src={item.emoji} alt={item.name} className={cn("h-full w-full object-contain rounded bg-background/40 p-1", RARITY_BORDER[item.rarity])} />
+        : <span className={cn("inline-flex items-center justify-center rounded leading-none text-5xl h-full w-full bg-background/40", RARITY_BORDER[item.rarity])}>{item.emoji}</span>}
+      <div className="absolute bottom-1 left-1 right-1 flex items-center justify-center gap-1 text-[10px] font-bold tabular-nums bg-background/80 rounded px-1 py-0.5">
+        {item.price === 0 ? "Free" : <>{item.price}<img src={chalkBagImg} alt="" className="h-3 w-3 object-contain" /></>}
       </div>
-      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
-        <div className="text-sm">
-          {item.price === 0 ? <span className="text-muted-foreground text-xs">Starter</span> : <span className="font-medium tabular-nums inline-flex items-center gap-1">{item.price} <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" /></span>}
-        </div>
-        {ownAlready ? (
-          <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Owned</GameButton>
-        ) : locked ? (
-          <GameButton size="sm" variant="ghost" disabled><Lock className="h-3 w-3" /> Lv {item.levelReq}</GameButton>
-        ) : (
-          <GameButton size="sm" variant={!canAfford || item.price === 0 ? "secondary" : "primary"} disabled={!canAfford || item.price === 0} onClick={buy}>
-            {item.price === 0 ? "Free" : canAfford ? "Buy" : "Not enough Chalk"}
-          </GameButton>
-        )}
-      </div>
-    </GameCard>
+    </button>
   );
 }

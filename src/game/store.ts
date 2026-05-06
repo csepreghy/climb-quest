@@ -131,11 +131,8 @@ export interface ChalkBreakdown {
   bonuses: { source: string; amount: number }[];
   total: number;
 }
-export function computeChalk(activity: ActivityType, styles: Style[], result: Result): ChalkBreakdown {
-  let base = BASE_CHALK[activity] ?? 50;
-  if (result === "send" && activity !== "boss_send") base += 30;
-  if (result === "flash") base += 60;
-  if (result === "humbled") base = Math.max(20, Math.floor(base * 0.5));
+export function computeChalk(activity: ActivityType, styles: Style[]): ChalkBreakdown {
+  const base = BASE_CHALK[activity] ?? 50;
 
   const bonuses: { source: string; amount: number }[] = [];
   // Equipped items
@@ -169,7 +166,6 @@ export interface LogInput {
   location?: string;
   grade?: string;
   styles: Style[];
-  result: Result;
   problemsTried?: number;
   sends?: number;
   hardestSend?: string;
@@ -177,7 +173,7 @@ export interface LogInput {
 }
 
 export function logBoulder(input: LogInput) {
-  const breakdown = computeChalk(input.activity, input.styles, input.result);
+  const breakdown = computeChalk(input.activity, input.styles);
   const log: BoulderLog = {
     id: crypto.randomUUID(),
     date: input.date ?? new Date().toISOString(),
@@ -186,7 +182,6 @@ export function logBoulder(input: LogInput) {
     location: input.location,
     grade: input.grade,
     styles: input.styles,
-    result: input.result,
     problemsTried: input.problemsTried,
     sends: input.sends,
     hardestSend: input.hardestSend,
@@ -208,8 +203,8 @@ export function logBoulder(input: LogInput) {
       stats: {
         ...s.stats,
         totalLogs: s.stats.totalLogs + 1,
-        totalSends: s.stats.totalSends + (log.result === "send" ? 1 : 0) + (log.sends ?? 0),
-        totalFlashes: s.stats.totalFlashes + (log.result === "flash" ? 1 : 0),
+        totalSends: s.stats.totalSends + (log.sends ?? 1),
+        totalFlashes: s.stats.totalFlashes,
         bossesSent: s.stats.bossesSent,
       },
     };
@@ -222,16 +217,11 @@ function computeNewBadges(s: State, log: BoulderLog): string[] {
   const have = new Set(s.badges);
   const add: string[] = [];
   const stylesIn = new Set(log.styles);
-  if (log.result === "send" && !have.has("first_send")) add.push("first_send");
-  if (log.result === "flash" && !have.has("first_flash")) add.push("first_flash");
-  if (log.result === "humbled" && !have.has("got_humbled")) add.push("got_humbled");
+  if (!have.has("first_send")) add.push("first_send");
   if (stylesIn.has("slab") && !have.has("slab_survivor")) add.push("slab_survivor");
   if (stylesIn.has("overhang") && !have.has("overhang_enjoyer")) add.push("overhang_enjoyer");
   const total = s.totalChalkEarned + log.chalkTotal;
   if (total >= 1000 && !have.has("chalk_monster")) add.push("chalk_monster");
-  // board sessions
-  const boardCount = s.logs.filter(l => l.activity === "board").length + (log.activity === "board" ? 1 : 0);
-  if (boardCount >= 3 && !have.has("board_goblin_cert")) add.push("board_goblin_cert");
   // crimp count
   const crimpCount = s.logs.filter(l => l.styles.includes("crimp")).length + (log.styles.includes("crimp") ? 1 : 0);
   if (crimpCount >= 5 && !have.has("tiny_crimp")) add.push("tiny_crimp");

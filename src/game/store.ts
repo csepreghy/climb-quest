@@ -68,7 +68,7 @@ const initialState = (): State => ({
   level: 1,
   chalk: 0,
   totalChalkEarned: 0,
-  gender: "neutral",
+  gender: "male",
   owned: ["rental_shoes", "plain_chalk"],
   equipped: { shoes: "rental_shoes", chalk: "plain_chalk" },
   pendingConsumable: null,

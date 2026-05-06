@@ -42,7 +42,8 @@ export const LEVELS: ClimberLevel[] = [
 export interface ShopItem {
   id: string;
   name: string;
-  category: "Shoes" | "Chalk" | "Outfits" | "Brushes" | "Accessories" | "Auras" | "Titles" | "Consumables";
+  group: ItemGroup;          // outfit | gear | power
+  category: "Top" | "Bottom" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Accessories" | "Auras" | "Titles" | "Consumables";
   slot: Slot;
   rarity: Rarity;
   price: number;

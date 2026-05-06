@@ -25,7 +25,7 @@ export interface BoulderLog {
 export interface BossAttempt {
   id: string;
   date: string;
-  outcome: "send" | "flash" | "high_point" | "zone" | "fell_crux" | "fell_low" | "humbled" | "retreat";
+  outcome: "send" | "flash" | "attempt";
   chalk: number;
   notes?: string;
 }

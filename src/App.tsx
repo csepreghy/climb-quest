@@ -19,6 +19,8 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <GameBackground />
+      <LevelUpBanner />
       <Toaster />
       <Sonner />
       <BrowserRouter>

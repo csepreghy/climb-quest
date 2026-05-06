@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,19 +6,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
 import { computeChalk, logBoulder, useGame, levelUp, nextLevel } from "@/game/store";
+import { useGyms, setLastUsedGym, gradeLabels } from "@/game/gyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BADGE_BY_ID } from "@/game/data";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { GameButton } from "@/components/ui/game-button";
-
-const LOCATIONS = ["Indoor gym", "Outdoor boulders", "Board", "Spray wall", "Moonboard", "Kilter board"];
+import { Link } from "react-router-dom";
 
 export default function LogBoulder() {
   const s = useGame();
+  const gymState = useGyms();
+  const initialGymId = gymState.lastUsedGymId
+    ?? gymState.gyms.find(g => g.primary)?.id
+    ?? gymState.gyms[0]?.id
+    ?? "";
+  const [gymId, setGymId] = useState(initialGymId);
+  const gym = gymState.gyms.find(g => g.id === gymId) ?? null;
+  const gymGradingSystems = (gym?.gradingSystemIds ?? []).map(id => gymState.gradingSystems.find(g => g.id === id)).filter(Boolean);
+  const defaultGsId = gymGradingSystems[0]?.id ?? "v_grades";
+  const [gsId, setGsId] = useState(defaultGsId);
+  useEffect(() => { setGsId(defaultGsId); }, [defaultGsId]);
+  const gs = gymState.gradingSystems.find(g => g.id === gsId);
+  const grades = gs ? gradeLabels(gs) : [];
+
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [location, setLocation] = useState("Indoor gym");
-  const [grade, setGrade] = useState("V3");
+  const [holdColorId, setHoldColorId] = useState<string>("");
+  const [grade, setGrade] = useState(grades[0] ?? "V3");
+  useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
   const [type, setType] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder">>("boulder");
   const [sent, setSent] = useState(true);
   const [styles, setStyles] = useState<Style[]>([]);
@@ -35,10 +50,13 @@ export default function LogBoulder() {
   }
 
   function submit() {
+    if (gymId) setLastUsedGym(gymId);
+    const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
+    const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
     const res = logBoulder({
       activity: type,
       date: new Date(date).toISOString(),
-      location,
+      location: locationStr || undefined,
       grade,
       styles,
       sent,
@@ -60,18 +78,37 @@ export default function LogBoulder() {
           <p className="text-sm text-muted-foreground">Real-life climbing only. One boulder per log.</p>
         </div>
 
+        {gymState.gyms.length === 0 && (
+          <div className="text-xs px-3 py-2 rounded-md border border-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/10">
+            No gyms yet. <Link to="/gym" className="underline font-semibold">Set up your gym →</Link>
+          </div>
+        )}
+
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Date">
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
           </Field>
-          <Field label="Location">
-            <Select value={location} onValueChange={setLocation}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{LOCATIONS.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+          <Field label="Gym">
+            <Select value={gymId} onValueChange={setGymId} disabled={gymState.gyms.length === 0}>
+              <SelectTrigger><SelectValue placeholder="Pick a gym" /></SelectTrigger>
+              <SelectContent>{gymState.gyms.map(g => <SelectItem key={g.id} value={g.id}>{g.name}{g.primary ? " ★" : ""}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
-          <Field label="Grade (e.g. V4, 6B+)">
-            <Input value={grade} onChange={e => setGrade(e.target.value)} placeholder="V4" />
+          <Field label="Grading system">
+            <Select value={gsId} onValueChange={setGsId} disabled={!gym}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(gymGradingSystems.length ? gymGradingSystems : gymState.gradingSystems).map(g => g && (
+                  <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Grade">
+            <Select value={grade} onValueChange={setGrade}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+            </Select>
           </Field>
           <Field label="Boulder type">
             <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
@@ -82,6 +119,21 @@ export default function LogBoulder() {
                 <SelectItem value="hard_boulder">Hard · +{BASE_CHALK.hard_boulder}</SelectItem>
               </SelectContent>
             </Select>
+          </Field>
+          <Field label="Hold color">
+            {gym && gym.holdColors.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {gym.holdColors.map(c => (
+                  <button key={c.id} type="button" onClick={() => setHoldColorId(c.id === holdColorId ? "" : c.id)}
+                    title={c.name}
+                    className={cn("h-8 w-8 rounded-md border-2 transition",
+                      holdColorId === c.id ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40" : "border-[hsl(var(--panel-frame))] hover:border-[hsl(var(--btn-orange))]")}
+                    style={{ background: c.hex }} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground italic">Add hold colors in My Gym.</div>
+            )}
           </Field>
         </div>
 

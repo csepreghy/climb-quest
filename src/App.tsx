@@ -10,6 +10,7 @@ import Bosses from "./pages/Bosses";
 import Character from "./pages/Character";
 import Shop from "./pages/Shop";
 import Inventory from "./pages/Inventory";
+import MyGym from "./pages/MyGym";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/character" element={<Character />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/inventory" element={<Inventory />} />
+                <Route path="/gym" element={<MyGym />} />
                 <Route element={<RequireAdmin />}>
                   <Route path="/admin" element={<Admin />} />
                 </Route>

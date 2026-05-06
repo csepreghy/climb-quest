@@ -1,6 +1,5 @@
-import { LEVELS } from "@/game/data";
-import { Equipped, Gender } from "@/game/store";
-import { ITEM_BY_ID } from "@/game/data";
+import { LEVELS, ITEM_BY_ID, Gender } from "@/game/data";
+import type { Equipped } from "@/game/store";
 import { cn } from "@/lib/utils";
 
 interface Props {

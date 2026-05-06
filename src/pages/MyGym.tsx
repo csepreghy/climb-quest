@@ -175,6 +175,8 @@ function CreateCustomGradingSystem() {
 function GradingSystemCard({ gs }: { gs: GradingSystem }) {
   const labels = gradeLabels(gs);
   const [showEq, setShowEq] = useState(true);
+  const [scale, setScale] = useState<"v" | "french">("v");
+  const options = (scale === "v" ? V_SCALE : FRENCH_SCALE) as readonly string[];
   return (
     <GameCard className="p-4 space-y-3">
       <div className="flex items-center justify-between">
@@ -209,29 +211,33 @@ function GradingSystemCard({ gs }: { gs: GradingSystem }) {
 
       {showEq && (
         <div className="space-y-1.5">
-          <div className="text-[10px] uppercase text-muted-foreground">
-            Map each grade to a V or French range. Pick start; leave end blank for a single grade. The last entry can be open-ended.
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[10px] uppercase text-muted-foreground">
+              Map each grade to a {scale === "v" ? "V" : "French"} range. Last entry can be open.
+            </div>
+            <div className="flex items-center gap-1 text-xs">
+              <button onClick={() => setScale("v")}
+                className={cn("px-2 py-1 rounded-md border-2", scale === "v" ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15" : "border-border bg-secondary/40 text-muted-foreground")}>V</button>
+              <button onClick={() => setScale("french")}
+                className={cn("px-2 py-1 rounded-md border-2", scale === "french" ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15" : "border-border bg-secondary/40 text-muted-foreground")}>French</button>
+            </div>
           </div>
-          <div className="grid grid-cols-[80px,1fr,1fr] gap-2 items-center text-[10px] uppercase text-muted-foreground px-1">
-            <span>Grade</span><span>V scale (start → end)</span><span>French (start → end)</span>
+          <div className="grid grid-cols-[80px,1fr] gap-2 items-center text-[10px] uppercase text-muted-foreground px-1">
+            <span>Grade</span><span>{scale === "v" ? "V scale" : "French"} (start → end)</span>
           </div>
           {labels.map((lab, i) => {
             const isLast = i === labels.length - 1;
             const eq = gs.equivalents?.[lab] ?? {};
+            const start = scale === "v" ? eq.vStart : eq.frenchStart;
+            const end = scale === "v" ? eq.vEnd : eq.frenchEnd;
             return (
-              <div key={lab} className="grid grid-cols-[80px,1fr,1fr] gap-2 items-center">
+              <div key={lab} className="grid grid-cols-[80px,1fr] gap-2 items-center">
                 <span className="text-xs font-semibold">{lab}</span>
                 <RangePicker
-                  options={V_SCALE as readonly string[]}
-                  start={eq.vStart} end={eq.vEnd}
+                  options={options}
+                  start={start} end={end}
                   allowOpenEnd={isLast}
-                  onChange={(start, end) => setEquivalent(gs.id, lab, { ...eq, vStart: start, vEnd: end })}
-                />
-                <RangePicker
-                  options={FRENCH_SCALE as readonly string[]}
-                  start={eq.frenchStart} end={eq.frenchEnd}
-                  allowOpenEnd={isLast}
-                  onChange={(start, end) => setEquivalent(gs.id, lab, { ...eq, frenchStart: start, frenchEnd: end })}
+                  onChange={(s, e) => setEquivalent(gs.id, lab, scale === "v" ? { ...eq, vStart: s, vEnd: e } : { ...eq, frenchStart: s, frenchEnd: e })}
                 />
               </div>
             );

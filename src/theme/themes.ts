@@ -91,6 +91,17 @@ export const BG_THEMES: ThemeOption[] = [
   bgSolid("d-teal",     "Dark Teal",      "#0f1f23", "188 35% 10%"),
   bgSolid("d-plum",     "Dark Plum",      "#181321", "265 25% 10%"),
   bgSolid("d-charcoal", "Dark Charcoal",  "#1c1c1c", "0 0% 11%"),
+  // 10 medium / muted backgrounds
+  bgSolid("m-grey",     "Medium Grey",    "#7a7d82", "215 4% 50%"),
+  bgSolid("m-stone",    "Stone",          "#8a8378", "30 8% 51%"),
+  bgSolid("m-slate",    "Slate Blue",     "#6e7c8c", "212 12% 49%"),
+  bgSolid("m-sage",     "Muted Sage",     "#8aa088", "115 13% 58%"),
+  bgSolid("m-rose",     "Muted Rose",     "#b08a90", "350 18% 62%"),
+  bgSolid("m-mauve",    "Muted Mauve",    "#9a8aa6", "275 14% 60%"),
+  bgSolid("m-clay",     "Clay",           "#b08868", "22 32% 55%"),
+  bgSolid("m-olive",    "Muted Olive",    "#90926a", "62 16% 49%"),
+  bgSolid("m-teal",     "Muted Teal",     "#6e9a96", "175 18% 52%"),
+  bgSolid("m-mocha",    "Mocha",          "#7a6258", "18 16% 42%"),
   // 10 gradients
   bgGrad("g-sunset", "Sunset Crag", "#8e3c4b", "#ecc979", "351 38% 41%", "40 75% 69%"),
   bgGrad("g-dawn",   "Alpine Dawn", "#7aa6d6", "#f0c4d6", "210 60% 70%", "330 55% 82%"),
@@ -183,33 +194,68 @@ export const GLOW_THEMES: ThemeOption[] = [
                                                        "var(--accent)", "0"),
 ];
 
-/* -------- BOX BACKDROP / TEXTURE (flat-stone vibes) -------- */
-const backdrop = (id: string, name: string, swatch: string, value: string): ThemeOption => ({
-  id, name, swatch, vars: { "--panel-backdrop": value },
+/* -------- BOX ELEVATION (chunky bevel like buttons / chalk chip) -------- */
+const elev = (id: string, name: string, swatch: string, value: string): ThemeOption => ({
+  id, name, swatch, vars: { "--shadow-panel": value },
 });
 
-export const BACKDROP_THEMES: ThemeOption[] = [
-  backdrop("none",        "None",        "transparent", "none"),
-  backdrop("slate-stone", "Slate Stone", "#3a3f47",
-    "radial-gradient(ellipse at 30% 20%, hsl(220 8% 28%) 0%, hsl(220 12% 18%) 60%, hsl(220 14% 12%) 100%)"),
-  backdrop("river-rock",  "River Rock",  "#5a6168",
-    "radial-gradient(circle at 40% 30%, hsl(210 6% 38%) 0%, hsl(210 8% 24%) 70%)"),
-  backdrop("granite",     "Granite",     "#6b6e72",
-    "linear-gradient(160deg, hsl(220 4% 42%) 0%, hsl(220 6% 26%) 100%)"),
-  backdrop("sandstone",   "Sandstone",   "#a8895f",
-    "radial-gradient(ellipse at 35% 25%, hsl(32 35% 55%) 0%, hsl(28 40% 32%) 75%)"),
-  backdrop("basalt",      "Basalt",      "#1f2024",
-    "radial-gradient(ellipse at 50% 30%, hsl(230 6% 18%) 0%, hsl(230 10% 8%) 80%)"),
-  backdrop("moss-stone",  "Moss Stone",  "#4a5a44",
-    "radial-gradient(ellipse at 35% 25%, hsl(110 18% 32%) 0%, hsl(120 22% 16%) 80%)"),
-  backdrop("limestone",   "Limestone",   "#cdc4ad",
-    "radial-gradient(ellipse at 40% 25%, hsl(45 25% 82%) 0%, hsl(38 22% 60%) 85%)"),
-  backdrop("obsidian-st", "Obsidian",    "#0a0b0f",
-    "radial-gradient(circle at 45% 30%, hsl(230 18% 14%) 0%, hsl(230 25% 4%) 80%)"),
-  backdrop("rust-stone",  "Rust Stone",  "#7a3a2a",
-    "radial-gradient(ellipse at 35% 25%, hsl(14 50% 38%) 0%, hsl(10 55% 20%) 80%)"),
-  backdrop("paper",       "Paper",       "#f5efe2",
-    "linear-gradient(160deg, hsl(40 50% 95%), hsl(38 30% 84%))"),
+const FRAME = "hsl(var(--panel-frame))";
+const SHADOW = "hsl(var(--panel-inset-dark))";
+
+export const ELEVATION_THEMES: ThemeOption[] = [
+  // Flat-ish (default-like)
+  elev("flat", "Flat", "#666",
+    [
+      `0 0 0 2px ${FRAME}`,
+      `inset 0 1px 0 hsl(0 0% 100% / 0.06)`,
+      `inset 0 -1px 0 hsl(0 0% 0% / 0.4)`,
+      `0 6px 16px -10px hsl(0 0% 0% / 0.6)`,
+    ].join(", ")),
+  // Like the chalk chip — thin border, soft inset bevel
+  elev("chip", "Chip", "#888",
+    [
+      `0 0 0 2px ${FRAME}`,
+      `inset 0 1px 0 hsl(0 0% 100% / 0.10)`,
+      `inset 0 -2px 0 hsl(0 0% 0% / 0.55)`,
+      `0 2px 0 0 ${FRAME}`,
+      `0 8px 16px -8px hsl(0 0% 0% / 0.55)`,
+    ].join(", ")),
+  // Like the orange Log Boulder button — chunky, deep drop
+  elev("button", "Button Stone", "#aaa",
+    [
+      `0 0 0 2px ${FRAME}`,
+      `inset 0 2px 0 hsl(0 0% 100% / 0.18)`,
+      `inset 0 -3px 0 hsl(0 0% 0% / 0.55)`,
+      `0 4px 0 0 ${FRAME}`,
+      `0 5px 0 0 hsl(0 0% 0% / 0.4)`,
+      `0 14px 22px -10px hsl(0 0% 0% / 0.7)`,
+    ].join(", ")),
+  // Tall pedestal — really lifted off the ground
+  elev("pedestal", "Pedestal", "#bbb",
+    [
+      `0 0 0 2px ${FRAME}`,
+      `inset 0 2px 0 hsl(0 0% 100% / 0.18)`,
+      `inset 0 -3px 0 hsl(0 0% 0% / 0.55)`,
+      `0 6px 0 0 ${FRAME}`,
+      `0 7px 0 0 hsl(0 0% 0% / 0.45)`,
+      `0 22px 30px -12px hsl(0 0% 0% / 0.75)`,
+    ].join(", ")),
+  // Soft floating — no chunky drop, just a halo shadow
+  elev("floating", "Floating", "#ccc",
+    [
+      `0 0 0 1px ${FRAME}`,
+      `inset 0 1px 0 hsl(0 0% 100% / 0.12)`,
+      `inset 0 -1px 0 hsl(0 0% 0% / 0.3)`,
+      `0 12px 30px -8px hsl(0 0% 0% / 0.6)`,
+      `0 4px 8px -4px hsl(0 0% 0% / 0.45)`,
+    ].join(", ")),
+  // Hard cartoon — solid offset like a sticker
+  elev("cartoon", "Cartoon", "#999",
+    [
+      `0 0 0 3px ${FRAME}`,
+      `inset 0 2px 0 hsl(0 0% 100% / 0.15)`,
+      `5px 5px 0 0 ${FRAME}`,
+    ].join(", ")),
 ];
 
 /* -------- DEFAULTS -------- */
@@ -219,6 +265,6 @@ export const DEFAULTS = {
   header: "h-ink",
   stage: "soft-cream",
   glow: "gold",
-  backdrop: "none",
+  elevation: "button",
 };
 

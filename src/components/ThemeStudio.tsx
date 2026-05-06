@@ -4,12 +4,12 @@ import { Check } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const SECTIONS: { axis: ThemeAxis; label: string; description: string }[] = [
-  { axis: "box",      label: "Boxes",           description: "Card / panel base color" },
-  { axis: "backdrop", label: "Box backdrop",    description: "Flat-stone texture overlay on each panel" },
-  { axis: "bg",       label: "Background",      description: "Page background — pastel, dark, and gradients" },
-  { axis: "header",   label: "Header color",    description: "Top bar fill (use the slider for opacity)" },
-  { axis: "stage",    label: "Character stage", description: "Background panel behind the avatar" },
-  { axis: "glow",     label: "Character glow",  description: "Aura around the character" },
+  { axis: "box",       label: "Boxes",           description: "Card / panel base color" },
+  { axis: "elevation", label: "Box elevation",   description: "How chunky the panels look — flat to pedestal" },
+  { axis: "bg",        label: "Background",      description: "Page background — pastel, medium, dark, gradients" },
+  { axis: "header",    label: "Header color",    description: "Top bar fill (use the slider for opacity)" },
+  { axis: "stage",     label: "Character stage", description: "Background panel behind the avatar" },
+  { axis: "glow",      label: "Character glow",  description: "Aura around the character" },
 ];
 
 export function ThemeStudio({ compact = false }: { compact?: boolean }) {

@@ -1,22 +1,25 @@
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { Home, ScrollText, Swords, User, Store, Backpack, Settings } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Home, ScrollText, Swords, User, Store, Backpack, Settings, LogOut } from "lucide-react";
 import { useGame } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { LevelsModal } from "@/components/LevelsModal";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
-const NAV = [
+const NAV_BASE = [
   { to: "/", label: "Home", icon: Home },
   { to: "/inventory", label: "Inventory", icon: Backpack },
   { to: "/log", label: "Log Boulder", icon: ScrollText },
   { to: "/bosses", label: "Boss Projects", icon: Swords },
   { to: "/character", label: "Character", icon: User },
   { to: "/shop", label: "Shop", icon: Store },
-  { to: "/admin", label: "Admin", icon: Settings },
 ];
+const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
 
 export default function Layout() {
   const s = useGame();

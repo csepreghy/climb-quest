@@ -91,7 +91,7 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
           </div>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>
+      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
         <div className="text-sm">
           {item.price === 0 ? <span className="text-muted-foreground text-xs">Starter</span> : <span className="font-medium tabular-nums">{item.price} <span className="text-muted-foreground text-xs">Chalk</span></span>}

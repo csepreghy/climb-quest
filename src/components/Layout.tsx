@@ -16,22 +16,22 @@ export default function Layout() {
   const s = useGame();
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b-[3px] border-border">
         <div className="container flex items-center justify-between gap-4 py-3">
           <NavLink to="/" className="flex items-center gap-2 group">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-accent to-legendary grid place-items-center shadow-glow">
+            <div className="h-10 w-10 rounded-md bg-accent border-[3px] border-foreground/20 grid place-items-center shadow-[3px_3px_0_0_hsl(240_10%_2%)] group-hover:rotate-[-4deg] transition-transform">
               <span className="text-lg">🧗</span>
             </div>
             <div className="leading-tight">
-              <div className="font-display font-bold tracking-tight text-base sm:text-lg">ClimbQuest</div>
-              <div className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">Log boulders. Earn Chalk. Send bosses.</div>
+              <div className="font-pixel tracking-tight text-sm sm:text-base text-shadow-pixel">ClimbQuest</div>
+              <div className="text-[10px] text-muted-foreground hidden sm:block">Log boulders. Earn Chalk. Send bosses.</div>
             </div>
           </NavLink>
           <div className="flex items-center gap-2 sm:gap-3">
             <ChalkChip value={s.chalk} />
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/60 text-sm">
-              <span className="text-muted-foreground">Lv</span>
-              <span className="font-bold">{s.level}</span>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border-[3px] border-border bg-card font-pixel text-xs shadow-[3px_3px_0_0_hsl(240_10%_2%)]">
+              <span className="text-muted-foreground">LV</span>
+              <span>{s.level}</span>
             </div>
           </div>
         </div>

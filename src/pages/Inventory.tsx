@@ -167,29 +167,20 @@ export default function Inventory() {
         {consumables.length > 0 && (
           <section className="space-y-3">
             <div className="menu-label">Consumables ({consumables.length})</div>
-            <Card className="gradient-card p-4">
-              <div className="grid gap-3 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
-                {consumables.map((it, i) => {
-                  const primed = s.pendingConsumable === it.id;
-                  return (
-                    <button
-                      key={it.id + i}
-                      title={`${it.name} · +${Math.round((it.consumableBonus ?? 0) * 100)}% next log`}
-                      disabled={!!s.pendingConsumable && !primed}
-                      onClick={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}
-                      className={cn(
-                        "aspect-square p-2 rounded-lg border flex items-center justify-center transition-colors",
-                        primed
-                          ? "border-chalk-glow ring-2 ring-chalk-glow/40 bg-chalk-glow/10"
-                          : "border-chalk-glow/30 bg-chalk-glow/5 hover:bg-chalk-glow/10 disabled:opacity-50"
-                      )}
-                    >
-                      <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-5xl h-full w-full" />
-                    </button>
-                  );
-                })}
-              </div>
-            </Card>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {consumables.map((it, i) => {
+                const primed = s.pendingConsumable === it.id;
+                return (
+                  <InventoryCard
+                    key={it.id + i}
+                    item={it}
+                    primed={primed}
+                    disabled={!!s.pendingConsumable && !primed}
+                    onEquip={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}
+                  />
+                );
+              })}
+            </div>
           </section>
         )}
       </div>

@@ -20,7 +20,7 @@ import {
 import { ItemGroup, Rarity, Slot, ShopItem } from "@/game/data";
 import { cn } from "@/lib/utils";
 
-const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary", "consumable"];
+const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
 const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [
   { value: "outfit", label: "Outfit" },
   { value: "gear", label: "Gear" },

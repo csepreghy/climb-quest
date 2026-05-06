@@ -11,6 +11,7 @@ import Character from "./pages/Character";
 import Shop from "./pages/Shop";
 import Inventory from "./pages/Inventory";
 import NotFound from "./pages/NotFound.tsx";
+import Admin from "./pages/Admin";
 import { GameBackground } from "./components/pixel/GameBackground";
 import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 import { ThemeProvider } from "./theme/ThemeProvider";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/character" element={<Character />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/inventory" element={<Inventory />} />
+            <Route path="/admin" element={<Admin />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

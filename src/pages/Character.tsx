@@ -83,7 +83,7 @@ export default function Character() {
       </Card>
 
       <Card className="gradient-card p-5">
-        <h2 className="font-display font-bold mb-4">Badges ({s.badges.length}/{BADGES.length})</h2>
+        <div className="menu-label mb-3">Badges ({s.badges.length}/{BADGES.length})</div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {BADGES.map(b => {
             const have = earnedBadges.has(b.id);

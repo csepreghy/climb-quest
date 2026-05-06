@@ -11,17 +11,13 @@ import { toast } from "sonner";
 import { Plus, Minus, Upload, Trash2, Pencil, X } from "lucide-react";
 import {
   useAllItems,
-  useCustomItems,
-  useHiddenBuiltins,
   addCustomItem,
   updateCustomItem,
   deleteCustomItem,
-  hideBuiltinItem,
-  restoreBuiltinItem,
   isImageEmoji,
   CustomItemInput,
 } from "@/game/customItems";
-import { ItemGroup, Rarity, Slot, ShopItem, ITEM_BY_ID } from "@/game/data";
+import { ItemGroup, Rarity, Slot, ShopItem } from "@/game/data";
 import { cn } from "@/lib/utils";
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary", "consumable"];
@@ -82,8 +78,6 @@ const empty: CustomItemInput = {
 
 function InventoryAdmin() {
   const all = useAllItems();
-  const custom = useCustomItems();
-  const hidden = useHiddenBuiltins();
   const [draft, setDraft] = useState<CustomItemInput>(empty);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -223,79 +217,27 @@ function InventoryAdmin() {
                 <div key={cat} className="space-y-1.5">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground pl-1">{cat}</div>
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {items.map(item => {
-                      const isCustom = custom.some(c => c.id === item.id);
-                      return (
-                        <div key={item.id} className={cn("flex items-center gap-3 p-2 rounded-lg border bg-secondary/30", isCustom ? "border-[hsl(var(--btn-orange))]/50" : "border-border")}>
-                          <div className="h-10 w-10 grid place-items-center text-xl shrink-0">
-                            {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className="h-10 w-10 object-contain rounded" /> : item.emoji}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold truncate flex items-center gap-2">
-                              {item.name}
-                              {isCustom
-                                ? <span className="text-[9px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">custom</span>
-                                : <span className="text-[9px] uppercase tracking-wider text-muted-foreground">built-in</span>}
-                            </div>
-                            <div className="text-[10px] text-muted-foreground capitalize">
-                              {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}
-                            </div>
-                          </div>
-                          {isCustom ? (
-                            <>
-                              <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>
-                              <button className="text-destructive" onClick={async () => { if (confirm(`Delete ${item.name}?`)) { try { await deleteCustomItem(item.id); toast.success("Deleted"); } catch (e: any) { toast.error(e?.message ?? "Delete failed"); } } }} title="Delete"><Trash2 className="h-4 w-4" /></button>
-                            </>
-                          ) : (
-                            <button
-                              className="text-destructive"
-                              title="Remove from shop (all users)"
-                              onClick={async () => {
-                                if (!confirm(`Remove ${item.name} from every player's shop?`)) return;
-                                try { await hideBuiltinItem(item.id); toast.success("Removed from shop"); }
-                                catch (e: any) { toast.error(e?.message ?? "Remove failed"); }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          )}
+                    {items.map(item => (
+                      <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg border border-border bg-secondary/30">
+                        <div className="h-10 w-10 grid place-items-center text-xl shrink-0">
+                          {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className="h-10 w-10 object-contain rounded" /> : item.emoji}
                         </div>
-                      );
-                    })}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold truncate">{item.name}</div>
+                          <div className="text-[10px] text-muted-foreground capitalize">
+                            {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}
+                          </div>
+                        </div>
+                        <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>
+                        <button className="text-destructive" onClick={async () => { if (confirm(`Delete ${item.name}?`)) { try { await deleteCustomItem(item.id); toast.success("Deleted"); } catch (e: any) { toast.error(e?.message ?? "Delete failed"); } } }} title="Delete"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
           );
         })}
-
-        {hidden.size > 0 && (
-          <div className="space-y-2 pt-3 border-t border-border">
-            <div className="menu-label">Removed built-ins ({hidden.size})</div>
-            <p className="text-[10px] text-muted-foreground">These items are hidden from every player's shop. Restore to make them available again.</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {Array.from(hidden).map(id => {
-                const item = ITEM_BY_ID[id];
-                if (!item) return null;
-                return (
-                  <div key={id} className="flex items-center gap-3 p-2 rounded-lg border border-dashed border-border bg-secondary/10 opacity-70">
-                    <div className="h-10 w-10 grid place-items-center text-xl shrink-0">
-                      {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className="h-10 w-10 object-contain rounded" /> : item.emoji}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold truncate line-through">{item.name}</div>
-                      <div className="text-[10px] text-muted-foreground capitalize">{item.rarity} · {item.category}</div>
-                    </div>
-                    <Button size="sm" variant="secondary" onClick={async () => {
-                      try { await restoreBuiltinItem(id); toast.success("Restored"); }
-                      catch (e: any) { toast.error(e?.message ?? "Restore failed"); }
-                    }}>Restore</Button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
     </GameCard>
   );

@@ -77,9 +77,9 @@ export function getItem(id: string): ShopItem | undefined {
   return ITEM_BY_ID[id] ?? state.custom.find(i => i.id === id);
 }
 
-/** Full merged catalog, with hidden built-ins removed */
+/** Full catalog: only admin-managed items. Built-ins are no longer surfaced. */
 export function getAllItems(): ShopItem[] {
-  return [...SHOP.filter(i => !state.hidden.has(i.id)), ...state.custom];
+  return [...state.custom];
 }
 
 export function useAllItems(): ShopItem[] {

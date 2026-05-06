@@ -9,8 +9,8 @@ import { toast } from "sonner";
 
 function ItemIcon({ emoji, alt, className, rarity }: { emoji: string; alt?: string; className?: string; rarity?: Rarity }) {
   const ring = rarity ? RARITY_BORDER[rarity] : "";
-  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("h-8 w-8 object-contain rounded bg-background/40 p-0.5", ring, className)} />;
-  return <span className={cn(rarity && "inline-flex items-center justify-center rounded bg-background/40", ring, className)}>{emoji}</span>;
+  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("object-contain rounded bg-background/40 p-0.5", ring, className)} />;
+  return <span className={cn("inline-flex items-center justify-center rounded leading-none", rarity && "bg-background/40", ring, className)}>{emoji}</span>;
 }
 
 const SLOT_LABEL: Record<Slot, string> = {

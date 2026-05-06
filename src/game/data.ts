@@ -109,8 +109,8 @@ export const SHOP: ShopItem[] = [
   { id: "title_chalk_monster", name: "Title: Chalk Monster",group: "power", category: "Titles", slot: "title", rarity: "rare",      price: 700,  emoji: "👹", desc: "Coats every hold." },
   { id: "title_demigod",       name: "Title: Crimp Demigod",group: "power", category: "Titles", slot: "title", rarity: "legendary", price: 1800, emoji: "👑", desc: "Endgame energy.", levelReq: 10 },
 
-  { id: "energy_gummies", name: "Send Gummies",        group: "power",  category: "Consumables", slot: "accessory", rarity: "consumable", price: 120, emoji: "🍬", desc: "+15% Chalk on your NEXT logged activity.", consumableBonus: 0.15 },
-  { id: "espresso",       name: "Pre-Send Espresso",   group: "power",  category: "Consumables", slot: "accessory", rarity: "consumable", price: 200, emoji: "☕", desc: "+25% Chalk on your NEXT logged activity.", consumableBonus: 0.25 },
+  { id: "energy_gummies", name: "Send Gummies",        group: "power",  category: "Consumables", slot: "accessory", rarity: "common", price: 120, emoji: "🍬", desc: "+15% Chalk on your NEXT logged activity.", consumableBonus: 0.15 },
+  { id: "espresso",       name: "Pre-Send Espresso",   group: "power",  category: "Consumables", slot: "accessory", rarity: "common", price: 200, emoji: "☕", desc: "+25% Chalk on your NEXT logged activity.", consumableBonus: 0.25 },
 ];
 
 export const ITEM_BY_ID: Record<string, ShopItem> = Object.fromEntries(SHOP.map(i => [i.id, i]));

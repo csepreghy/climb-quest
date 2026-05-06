@@ -50,7 +50,7 @@ export default function Layout() {
                   cn(
                     "px-3.5 py-2 rounded-full text-sm font-semibold flex items-center gap-2 transition-all border whitespace-nowrap",
                     isActive
-                      ? "text-white border-[hsl(var(--panel-frame))] shadow-[inset_0_2px_0_hsl(0_0%_100%/0.32),inset_0_-3px_0_hsl(var(--btn-orange-shadow)),0_3px_0_hsl(var(--btn-orange-shadow))] [background:var(--gradient-brand)]"
+                      ? "text-white border-[hsl(var(--panel-frame))] bg-[hsl(var(--btn-orange))] shadow-[inset_0_2px_0_hsl(0_0%_100%/0.32),inset_0_-3px_0_hsl(var(--btn-orange-shadow)),0_3px_0_hsl(var(--btn-orange-shadow))]"
                       : "text-muted-foreground hover:text-foreground border-transparent hover:bg-secondary/50",
                   )
                 }

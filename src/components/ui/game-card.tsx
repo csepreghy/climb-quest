@@ -5,54 +5,68 @@ type Tone = "default" | "accent" | "legendary" | "boss" | "rare";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   tone?: Tone;
-  /** Subtle hover lift */
   interactive?: boolean;
-  /** Soft glow overlay (for legendary loot) */
   shimmer?: boolean;
+  /** Show small corner rivets like a metal-trimmed game panel */
+  rivets?: boolean;
 }
 
-const toneClasses: Record<Tone, string> = {
-  default:   "border-border",
-  accent:    "border-accent/40",
-  legendary: "border-legendary/40",
-  boss:      "border-boss/40",
-  rare:      "border-rare/40",
+const toneRing: Record<Tone, string> = {
+  default:   "",
+  accent:    "ring-1 ring-accent/30",
+  legendary: "ring-1 ring-legendary/35",
+  boss:      "ring-1 ring-boss/35",
+  rare:      "ring-1 ring-rare/35",
 };
 
 const toneAccentBar: Record<Tone, string> = {
-  default:   "bg-border/60",
-  accent:    "bg-accent/70",
-  legendary: "bg-legendary/70",
-  boss:      "bg-boss/70",
-  rare:      "bg-rare/70",
+  default:   "",
+  accent:    "from-accent/0 via-accent/70 to-accent/0",
+  legendary: "from-legendary/0 via-legendary/80 to-legendary/0",
+  boss:      "from-boss/0 via-boss/80 to-boss/0",
+  rare:      "from-rare/0 via-rare/80 to-rare/0",
 };
 
 export const GameCard = React.forwardRef<HTMLDivElement, Props>(
-  ({ tone = "default", interactive, shimmer, className, children, ...rest }, ref) => {
+  ({ tone = "default", interactive, shimmer, rivets = true, className, children, ...rest }, ref) => {
     return (
       <div
         ref={ref}
         {...rest}
         className={cn(
-          "relative rounded-xl border bg-card/80 backdrop-blur-sm",
-          "shadow-[0_1px_0_0_hsl(0_0%_100%/0.04)_inset,0_8px_24px_-12px_hsl(0_0%_0%/0.6)]",
+          "rpg-panel",
+          rivets && "rpg-rivets",
           "transition-transform duration-200",
           interactive && "hover:-translate-y-0.5 cursor-pointer",
-          toneClasses[tone],
+          toneRing[tone],
           className,
         )}
       >
-        {/* Left accent rail for tone */}
+        {rivets && (
+          <>
+            <span className="rivet-tr" aria-hidden />
+            <span className="rivet-br" aria-hidden />
+          </>
+        )}
         {tone !== "default" && (
-          <div aria-hidden className={cn("absolute left-0 top-3 bottom-3 w-[2px] rounded-r", toneAccentBar[tone])} />
+          <div
+            aria-hidden
+            className={cn(
+              "absolute left-3 right-3 top-0 h-px bg-gradient-to-r",
+              toneAccentBar[tone],
+            )}
+          />
         )}
         {shimmer && (
-          <div aria-hidden className="pointer-events-none absolute inset-0 rounded-xl overflow-hidden opacity-60">
-            <div className="absolute inset-0 animate-shimmer-band" style={{
-              background:
-                "linear-gradient(115deg, transparent 40%, hsl(40 80% 80% / 0.08) 50%, transparent 60%)",
-              backgroundSize: "200% 100%",
-            }} />
+          <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden opacity-70">
+            <div
+              className="absolute inset-0 animate-shimmer-band"
+              style={{
+                background:
+                  "linear-gradient(115deg, transparent 42%, hsl(46 90% 75% / 0.10) 50%, transparent 58%)",
+                backgroundSize: "200% 100%",
+              }}
+            />
           </div>
         )}
         <div className="relative">{children}</div>
@@ -62,7 +76,7 @@ export const GameCard = React.forwardRef<HTMLDivElement, Props>(
 );
 GameCard.displayName = "GameCard";
 
-/** Slim RPG-style XP / health bar */
+/** Slim RPG XP / health bar with inset bevel. */
 export function PixelBar({
   value,
   max = 100,
@@ -77,8 +91,23 @@ export function PixelBar({
 }) {
   const pct = Math.max(0, Math.min(1, value / max));
   return (
-    <div className={cn("relative h-2 w-full rounded-full border border-border/60 bg-secondary/60 overflow-hidden", className)}>
-      <div className="absolute inset-y-0 left-0 transition-all duration-500 rounded-full" style={{ width: `${pct * 100}%`, background: color }} />
+    <div
+      className={cn(
+        "relative h-2.5 w-full rounded-full overflow-hidden",
+        "bg-[hsl(26_18%_10%)]",
+        "shadow-[inset_0_1px_2px_hsl(0_0%_0%/0.6),0_1px_0_hsl(38_30%_92%/0.06)]",
+        "ring-1 ring-[hsl(28_28%_22%)]",
+        className,
+      )}
+    >
+      <div
+        className="absolute inset-y-0 left-0 transition-all duration-500 rounded-full"
+        style={{
+          width: `${pct * 100}%`,
+          background: `linear-gradient(180deg, color-mix(in hsl, ${color} 80%, white 20%), ${color})`,
+          boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.25), inset 0 -1px 0 hsl(0 0% 0% / 0.3)",
+        }}
+      />
     </div>
   );
 }

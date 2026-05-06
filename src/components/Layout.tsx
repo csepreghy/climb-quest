@@ -16,22 +16,26 @@ export default function Layout() {
   const s = useGame();
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/75 border-b border-border">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.4),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]">
         <div className="container flex items-center justify-between gap-4 py-3">
           <NavLink to="/" className="flex items-center gap-2.5 group">
-            <div className="h-9 w-9 rounded-md bg-secondary border border-border grid place-items-center group-hover:border-accent/60 transition-colors">
-              <span className="text-base">🧗</span>
+            <div className="h-10 w-10 rounded-lg grid place-items-center transition-transform group-hover:rotate-[-4deg]"
+              style={{
+                background: "linear-gradient(180deg, hsl(28 30% 28%), hsl(26 25% 16%))",
+                boxShadow: "0 0 0 2px hsl(var(--panel-frame)), inset 0 1px 0 hsl(38 30% 92% / 0.15), inset 0 -2px 0 hsl(0 0% 0% / 0.4)",
+              }}>
+              <span className="text-lg">🧗</span>
             </div>
             <div className="leading-tight">
-              <div className="font-display font-semibold tracking-tight text-base">ClimbQuest</div>
+              <div className="font-display font-bold tracking-tight text-base">ClimbQuest</div>
               <div className="text-[11px] text-muted-foreground hidden sm:block">Log boulders. Earn Chalk. Send bosses.</div>
             </div>
           </NavLink>
           <div className="flex items-center gap-2">
             <ChalkChip value={s.chalk} />
-            <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-md border border-border bg-secondary/60 text-sm">
-              <span className="text-muted-foreground text-xs">Lv</span>
-              <span className="font-medium tabular-nums">{s.level}</span>
+            <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border border-[hsl(var(--panel-frame))] bg-[hsl(26_22%_14%)] text-sm shadow-[inset_0_1px_0_hsl(38_30%_92%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.4)]">
+              <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>
+              <span className="font-bold tabular-nums text-accent">{s.level}</span>
             </div>
           </div>
         </div>
@@ -80,10 +84,24 @@ export default function Layout() {
 
 function ChalkChip({ value }: { value: number }) {
   return (
-    <div className="flex items-center gap-1.5 px-3 h-9 rounded-md bg-secondary/60 border border-border">
-      <span className="h-2 w-2 rounded-full bg-chalk-glow shadow-[0_0_8px_hsl(var(--chalk-glow))]" />
-      <span className="text-sm font-medium tabular-nums">{value.toLocaleString()}</span>
-      <span className="text-xs text-muted-foreground">Chalk</span>
+    <div
+      className="flex items-center gap-2 pl-2 pr-3 h-9 rounded-full border border-[hsl(var(--panel-frame))]"
+      style={{
+        background: "linear-gradient(180deg, hsl(26 22% 18%), hsl(26 22% 11%))",
+        boxShadow: "inset 0 1px 0 hsl(38 30% 92% / 0.08), inset 0 -1px 0 hsl(0 0% 0% / 0.5)",
+      }}
+    >
+      <span
+        className="h-5 w-5 rounded-full grid place-items-center animate-coin-shine"
+        style={{
+          background: "radial-gradient(circle at 35% 30%, hsl(50 100% 80%), hsl(38 95% 50%) 70%, hsl(28 80% 30%))",
+          boxShadow: "0 0 0 1px hsl(28 60% 18%), inset 0 -1px 0 hsl(0 0% 0% / 0.3)",
+        }}
+      >
+        <span className="text-[9px] font-black text-[hsl(28_60%_22%)]">C</span>
+      </span>
+      <span className="text-sm font-bold tabular-nums gradient-chalk-text">{value.toLocaleString()}</span>
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
     </div>
   );
 }

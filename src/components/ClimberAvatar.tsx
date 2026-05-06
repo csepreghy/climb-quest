@@ -62,10 +62,10 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
       {/* Item indicator chips */}
       <div className="absolute bottom-1.5 right-1.5 flex gap-1 z-20">
         {shoes && shoes.id !== "rental_shoes" && (
-          <span className="text-xs bg-background/80 border border-border rounded px-1.5 py-0.5 backdrop-blur">{shoes.emoji}</span>
+          <span className="text-xs bg-background/90 border border-border rounded px-1.5 py-0.5">{shoes.emoji}</span>
         )}
         {outfit && (
-          <span className="text-xs bg-background/80 border border-border rounded px-1.5 py-0.5 backdrop-blur">{outfit.emoji}</span>
+          <span className="text-xs bg-background/90 border border-border rounded px-1.5 py-0.5">{outfit.emoji}</span>
         )}
       </div>
       {/* Level chip */}

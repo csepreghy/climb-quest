@@ -89,7 +89,7 @@ export default function Inventory() {
                       <div key={slot} className="flex items-center justify-between gap-2 p-3 rounded-lg border border-border bg-secondary/30">
                         <div className="min-w-0">
                           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{SLOT_LABEL[slot]}</div>
-                          <div className="font-medium truncate">{it ? `${it.emoji} ${it.name}` : <span className="italic text-muted-foreground">empty</span>}</div>
+                          <div className="font-medium truncate flex items-center gap-2">{it ? <><ItemIcon emoji={it.emoji} alt={it.name} className="h-5 w-5" /> {it.name}</> : <span className="italic text-muted-foreground">empty</span>}</div>
                         </div>
                         {it && it.id !== "rental_shoes" && it.id !== "plain_chalk" && (
                           <Button size="sm" variant="ghost" onClick={() => unequipSlot(slot)}>Remove</Button>

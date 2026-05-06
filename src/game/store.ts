@@ -3,6 +3,7 @@ import {
   ACTIVITY_LABELS, ActivityType, BADGES, BASE_CHALK, BOSS_TEMPLATES,
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
 } from "./data";
+import { getItem } from "./customItems";
 
 // ----- Types -----
 export interface BoulderLog {

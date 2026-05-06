@@ -15,7 +15,7 @@ const REGISTRY: Record<ThemeAxis, ThemeOption[]> = {
   elevation: ELEVATION_THEMES,
 };
 
-const STORAGE_KEY = "cq.theme.v3";
+const STORAGE_KEY = "cq.theme.v4";
 
 type State = {
   selections: Record<ThemeAxis, string>;

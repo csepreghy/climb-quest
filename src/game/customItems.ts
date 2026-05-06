@@ -27,7 +27,7 @@ function rowToItem(r: any): ShopItem {
     rarity: r.rarity as Rarity,
     price: r.price ?? 0,
     emoji: r.image ?? "🎁",
-    desc: bonusPct > 0 ? `+${bonusPct}% Chalk.` : "Custom item.",
+    desc: bonusPct > 0 ? `+${bonusPct}% Chalk.` : "",
     bonus: bonusPct > 0
       ? { mult: bonusPct / 100, appliesTo: (r.applies_to ?? "all") as ActivityType[] | "all" }
       : undefined,

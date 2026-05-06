@@ -96,13 +96,6 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   const [open, setOpen] = useState(false);
 
-  // Bonus reference rows derived from store result modifiers
-  const bonusRows: { label: string; amount: string }[] = [
-    { label: "Send a boulder", amount: "+30" },
-    { label: "Flash a boulder", amount: "+60" },
-    { label: "Got humbled", amount: "−50%" },
-  ];
-
   // Activity rows
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
@@ -132,7 +125,7 @@ function ChalkChip({ value }: { value: number }) {
               How you earn Chalk
             </DialogTitle>
             <DialogDescription>
-              Base points per activity, plus result modifiers and equipped item bonuses.
+              Base points per activity, plus equipped item bonuses.
             </DialogDescription>
           </DialogHeader>
 
@@ -144,18 +137,6 @@ function ChalkChip({ value }: { value: number }) {
                   <div key={a.label} className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-foreground/90">{a.label}</span>
                     <span className="tabular-nums font-bold text-[hsl(var(--accent))]">+{a.chalk}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="menu-label mb-2">Result modifiers</div>
-              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
-                {bonusRows.map(r => (
-                  <div key={r.label} className="flex items-center justify-between px-3 py-2 text-sm">
-                    <span className="text-foreground/90">{r.label}</span>
-                    <span className="tabular-nums font-bold text-[hsl(var(--accent))]">{r.amount}</span>
                   </div>
                 ))}
               </div>

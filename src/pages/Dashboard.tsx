@@ -146,7 +146,7 @@ export default function Dashboard() {
             {s.logs.slice(0, 6).map(l => (
               <div key={l.id} className="py-2.5 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-sm font-medium truncate">{ACTIVITY_LABELS[l.activity]}</div>
+                  <div className="text-sm font-medium truncate">{ACTIVITY_LABELS[l.activity] ?? "Boulder"}</div>
                   <div className="text-xs text-muted-foreground">
                     {new Date(l.date).toLocaleDateString()} · {l.styles.slice(0,2).join(", ") || "—"}{l.grade ? ` · ${l.grade}` : ""}
                   </div>

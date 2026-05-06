@@ -6,7 +6,7 @@ import { ThemeButton } from "@/components/ThemeSwitcher";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 const NAV = [
-  { to: "/", label: "Dashboard", icon: Home },
+  { to: "/", label: "Home", icon: Home },
   { to: "/log", label: "Log Boulder", icon: ScrollText },
   { to: "/bosses", label: "Boss Projects", icon: Swords },
   { to: "/character", label: "Character", icon: User },

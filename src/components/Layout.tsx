@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Home, ScrollText, Swords, User, Store, Backpack, Settings } from "lucide-react";
 import { useGame } from "@/game/store";
+import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 const NAV = [
-  { to: "/", label: "Dashboard", icon: Home },
+  { to: "/", label: "Home", icon: Home },
   { to: "/log", label: "Log Boulder", icon: ScrollText },
   { to: "/bosses", label: "Boss Projects", icon: Swords },
   { to: "/character", label: "Character", icon: User },
@@ -91,16 +94,80 @@ export default function Layout() {
 }
 
 function ChalkChip({ value }: { value: number }) {
+  const [open, setOpen] = useState(false);
+
+  // Bonus reference rows derived from store result modifiers
+  const bonusRows: { label: string; amount: string }[] = [
+    { label: "Send a boulder", amount: "+30" },
+    { label: "Flash a boulder", amount: "+60" },
+    { label: "Got humbled", amount: "−50%" },
+  ];
+
+  // Activity rows
+  const activities = (Object.keys(BASE_CHALK) as ActivityType[])
+    .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
+    .sort((a, b) => b.chalk - a.chalk);
+
   return (
-    <div
-      className="flex items-center gap-2.5 pl-3 pr-4 h-10 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary"
-      style={{
-        boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.06), inset 0 -1px 0 hsl(0 0% 0% / 0.55)",
-      }}
-    >
-      <img src={chalkBagImg} alt="" className="h-6 w-6 object-contain drop-shadow-[0_1px_0_hsl(0_0%_0%/0.5)]" />
-      <span className="text-sm font-bold tabular-nums gradient-chalk-text">{value.toLocaleString()}</span>
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="View chalk earning guide"
+        className="flex items-center gap-2.5 pl-3 pr-4 h-10 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary transition-transform hover:brightness-110 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+        style={{
+          boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.06), inset 0 -1px 0 hsl(0 0% 0% / 0.55)",
+        }}
+      >
+        <img src={chalkBagImg} alt="" className="h-6 w-6 object-contain drop-shadow-[0_1px_0_hsl(0_0%_0%/0.5)]" />
+        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{value.toLocaleString()}</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
+      </button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <img src={chalkBagImg} alt="" className="h-6 w-6 object-contain" />
+              How you earn Chalk
+            </DialogTitle>
+            <DialogDescription>
+              Base points per activity, plus result modifiers and equipped item bonuses.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <div className="menu-label mb-2">Per activity (base)</div>
+              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+                {activities.map(a => (
+                  <div key={a.label} className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="text-foreground/90">{a.label}</span>
+                    <span className="tabular-nums font-bold text-[hsl(var(--accent))]">+{a.chalk}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="menu-label mb-2">Result modifiers</div>
+              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+                {bonusRows.map(r => (
+                  <div key={r.label} className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="text-foreground/90">{r.label}</span>
+                    <span className="tabular-nums font-bold text-[hsl(var(--accent))]">{r.amount}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Equipped gear, auras, and consumables apply additional % bonuses on top of the base.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
+

@@ -14,8 +14,7 @@ import {
 import { Plus, X, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
-const SELECT_CLS = "h-8 rounded-md border-2 border-[hsl(var(--panel-frame))] bg-background/80 px-2 text-xs shadow-[inset_0_2px_0_hsl(0_0%_0%/0.45)] hover:border-[hsl(var(--btn-orange))] focus:outline-none focus:border-[hsl(var(--btn-orange))]";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MyGym() {
   const s = useGyms();

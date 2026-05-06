@@ -139,26 +139,15 @@ export const BOSS_TEMPLATES: BossTemplate[] = [
 
 // Base Chalk per activity (before bonuses)
 export const BASE_CHALK: Record<ActivityType, number> = {
-  indoor: 80, outdoor: 110, board: 90, spray: 85,
-  project_attempt: 30, completed: 60, flashed: 100,
-  boss_attempt: 50, boss_send: 250,
-  competition: 200, hangboard: 60, strength: 50, mobility: 30,
+  boulder: 80,
+  boss_attempt: 50,
+  boss_send: 250,
 };
 
 export const ACTIVITY_LABELS: Record<ActivityType, string> = {
-  indoor: "Indoor Bouldering Session",
-  outdoor: "Outdoor Bouldering Session",
-  board: "Board Session",
-  spray: "Spray Wall Session",
-  project_attempt: "Project Attempt",
-  completed: "Completed Boulder",
-  flashed: "Flashed Boulder",
+  boulder: "Boulder",
   boss_attempt: "Boss Problem Attempt",
   boss_send: "Boss Problem Send",
-  competition: "Bouldering Competition",
-  hangboard: "Hangboard Session",
-  strength: "Strength Session",
-  mobility: "Mobility Session",
 };
 
 export const STYLES: Style[] = ["slab","vertical","overhang","cave","compression","coordination","dyno","mantle","crimp","sloper"];

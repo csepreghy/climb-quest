@@ -169,6 +169,7 @@ export interface LogInput {
   location?: string;
   grade?: string;
   styles: Style[];
+  sent?: boolean;
   problemsTried?: number;
   sends?: number;
   hardestSend?: string;
@@ -176,7 +177,7 @@ export interface LogInput {
 }
 
 export function logBoulder(input: LogInput) {
-  const breakdown = computeChalk(input.activity, input.styles);
+  const breakdown = computeChalk(input.activity, input.styles, input.sent);
   const log: BoulderLog = {
     id: crypto.randomUUID(),
     date: input.date ?? new Date().toISOString(),

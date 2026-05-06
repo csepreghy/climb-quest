@@ -176,6 +176,16 @@ export const STYLES: Style[] = ["slab","vertical","overhang","cave","compression
 export const RARITY_COLOR: Record<Rarity, string> = {
   common: "text-common border-common/40",
   rare: "text-rare border-rare/50",
+  epic: "text-epic border-epic/60",
   legendary: "text-legendary border-legendary/60",
   consumable: "text-chalk-glow border-chalk-glow/40",
+};
+
+// Border ring color around an item's image, by rarity.
+export const RARITY_BORDER: Record<Rarity, string> = {
+  common: "ring-2 ring-white/80",
+  rare: "ring-2 ring-rare",
+  epic: "ring-2 ring-epic",
+  legendary: "ring-2 ring-legendary",
+  consumable: "ring-2 ring-chalk-glow",
 };

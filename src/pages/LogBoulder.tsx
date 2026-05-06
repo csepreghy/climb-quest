@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,13 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
 import { computeChalk, logBoulder, useGame, levelUp, nextLevel } from "@/game/store";
+import { useGyms, setLastUsedGym, gradeLabels } from "@/game/gyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BADGE_BY_ID } from "@/game/data";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { GameButton } from "@/components/ui/game-button";
-
-const LOCATIONS = ["Indoor gym", "Outdoor boulders", "Board", "Spray wall", "Moonboard", "Kilter board"];
+import { Link } from "react-router-dom";
 
 export default function LogBoulder() {
   const s = useGame();

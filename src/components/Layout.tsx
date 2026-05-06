@@ -89,7 +89,7 @@ export default function Layout() {
 
       {/* Bottom nav (mobile) */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border">
-        <div className="grid grid-cols-6">
+        <div className="grid" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           {NAV.map(n => (
             <NavLink key={n.to} to={n.to} end={n.to === "/"}
               className={({ isActive }) =>

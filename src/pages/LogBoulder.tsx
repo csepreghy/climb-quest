@@ -74,7 +74,29 @@ export default function LogBoulder() {
           <Field label="Grade (e.g. V4, 6B+)">
             <Input value={grade} onChange={e => setGrade(e.target.value)} placeholder="V4" />
           </Field>
+          <Field label="Boulder type">
+            <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="warmup_boulder">Warm-up · +{BASE_CHALK.warmup_boulder}</SelectItem>
+                <SelectItem value="boulder">Regular · +{BASE_CHALK.boulder}</SelectItem>
+                <SelectItem value="hard_boulder">Hard · +{BASE_CHALK.hard_boulder}</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
         </div>
+
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={sent}
+            onChange={e => setSent(e.target.checked)}
+            className="h-4 w-4 accent-[hsl(var(--chalk))]"
+          />
+          <span className="text-sm">
+            Sent it <span className="text-muted-foreground text-xs">(+{BASE_CHALK.boulder_send} Chalk)</span>
+          </span>
+        </label>
 
         <div>
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>

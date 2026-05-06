@@ -58,7 +58,6 @@ export default function Character() {
       </div>
 
       <Card className="gradient-card p-5">
-        <h2 className="font-display font-bold mb-4">Climber Levels</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {LEVELS.map(l => {
             const unlocked = s.level >= l.level;

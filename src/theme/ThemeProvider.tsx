@@ -1,10 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
-  BOX_THEMES, BG_THEMES, HEADER_THEMES, STAGE_THEMES, GLOW_THEMES,
+  BOX_THEMES, BG_THEMES, HEADER_THEMES, STAGE_THEMES, GLOW_THEMES, BACKDROP_THEMES,
   DEFAULTS, type ThemeOption,
 } from "./themes";
 
-export type ThemeAxis = "box" | "bg" | "header" | "stage" | "glow";
+export type ThemeAxis = "box" | "bg" | "header" | "stage" | "glow" | "backdrop";
 
 const REGISTRY: Record<ThemeAxis, ThemeOption[]> = {
   box: BOX_THEMES,
@@ -12,6 +12,7 @@ const REGISTRY: Record<ThemeAxis, ThemeOption[]> = {
   header: HEADER_THEMES,
   stage: STAGE_THEMES,
   glow: GLOW_THEMES,
+  backdrop: BACKDROP_THEMES,
 };
 
 const STORAGE_KEY = "cq.theme.v3";
@@ -61,11 +62,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<State>(load);
 
   const current = useMemo(() => ({
-    box:    REGISTRY.box.find(t => t.id === state.selections.box) ?? REGISTRY.box[0],
-    bg:     REGISTRY.bg.find(t => t.id === state.selections.bg) ?? REGISTRY.bg[0],
-    header: REGISTRY.header.find(t => t.id === state.selections.header) ?? REGISTRY.header[0],
-    stage:  REGISTRY.stage.find(t => t.id === state.selections.stage) ?? REGISTRY.stage[0],
-    glow:   REGISTRY.glow.find(t => t.id === state.selections.glow) ?? REGISTRY.glow[0],
+    box:      REGISTRY.box.find(t => t.id === state.selections.box) ?? REGISTRY.box[0],
+    bg:       REGISTRY.bg.find(t => t.id === state.selections.bg) ?? REGISTRY.bg[0],
+    header:   REGISTRY.header.find(t => t.id === state.selections.header) ?? REGISTRY.header[0],
+    stage:    REGISTRY.stage.find(t => t.id === state.selections.stage) ?? REGISTRY.stage[0],
+    glow:     REGISTRY.glow.find(t => t.id === state.selections.glow) ?? REGISTRY.glow[0],
+    backdrop: REGISTRY.backdrop.find(t => t.id === state.selections.backdrop) ?? REGISTRY.backdrop[0],
   }), [state.selections]);
 
   useEffect(() => {
@@ -74,6 +76,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyVars(current.header);
     applyVars(current.stage);
     applyVars(current.glow);
+    applyVars(current.backdrop);
     document.documentElement.style.setProperty("--topbar-opacity", String(state.headerOpacity));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [current, state]);

@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { BADGE_BY_ID } from "@/game/data";
+import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
+import { GameButton } from "@/components/ui/game-button";
 
 const LOCATIONS = ["Indoor gym","Outdoor boulders","Board","Spray wall","Moonboard","Kilter board"];
 const RESULTS: { value: Result; label: string }[] = [

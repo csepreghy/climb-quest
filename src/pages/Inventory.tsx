@@ -38,7 +38,8 @@ const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
 
 export default function Inventory() {
   const s = useGame();
-  const items = s.owned.map(id => ITEM_BY_ID[id]).filter(Boolean);
+  useCustomItems(); // subscribe so admin updates re-render
+  const items = s.owned.map(id => getItem(id)).filter(Boolean) as ReturnType<typeof getItem>[] as NonNullable<ReturnType<typeof getItem>>[];
   const consumables = items.filter(i => i.rarity === "consumable");
   const totalBonusByActivity = gearBonusSummary(s.equipped);
 

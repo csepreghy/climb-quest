@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { SHOP, ShopItem, RARITY_COLOR } from "@/game/data";
 import { buyItem, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Lock, Check } from "lucide-react";
+import { GameCard } from "@/components/ui/game-card";
+import { GameButton } from "@/components/ui/game-button";
 
 const CATEGORIES = ["All","Shoes","Chalk","Outfits","Brushes","Accessories","Auras","Titles","Consumables"] as const;
 

@@ -93,68 +93,83 @@ export const BG_THEMES: ThemeOption[] = [
   bgGrad("g-plum",   "Royal Plum",  "#e9b13a", "#7a3f8c", "42 80% 60%",  "285 45% 35%"),
 ];
 
-/* -------- HEADER / TOP BAR (20) -------- */
+/* -------- HEADER / TOP BAR (20) — color only; opacity is separate -------- */
 const header = (id: string, name: string, hex: string, value: string): ThemeOption => ({
-  id, name, swatch: hex, vars: { "--topbar-bg": value },
+  id, name, swatch: hex, vars: { "--topbar-color": value },
 });
 
 export const HEADER_THEMES: ThemeOption[] = [
-  // Dark
-  header("h-ink",       "Ink",         "#0d1218", "210 25% 8% / 0.88"),
-  header("h-midnight",  "Midnight",    "#0e1422", "222 30% 9% / 0.88"),
-  header("h-graphite",  "Graphite",    "#16181a", "210 6% 9% / 0.88"),
-  header("h-espresso",  "Espresso",    "#2a1a12", "20 40% 10% / 0.9"),
-  header("h-oxblood",   "Oxblood",     "#3a1820", "350 40% 14% / 0.9"),
-  header("h-pine",      "Pine",        "#0f1a16", "158 25% 9% / 0.9"),
-  header("h-deep-teal", "Deep Teal",   "#0f1f23", "188 35% 10% / 0.9"),
-  header("h-plum",      "Plum",        "#181321", "265 25% 10% / 0.9"),
-  // Mid
-  header("h-stone",     "Stone",       "#5a554f", "30 6% 32% / 0.9"),
-  header("h-clay",      "Clay",        "#8a4a3a", "12 40% 38% / 0.9"),
-  header("h-olive",     "Olive",       "#5a6a3a", "75 30% 32% / 0.9"),
-  header("h-navy",      "Navy",        "#1f3658", "215 50% 24% / 0.9"),
-  // Bright / accent
-  header("h-orange",    "Orange",      "#e8843a", "22 80% 56% / 0.95"),
-  header("h-crimson",   "Crimson",     "#b83048", "350 60% 45% / 0.95"),
-  header("h-emerald",   "Emerald",     "#2c8a5a", "150 50% 36% / 0.95"),
-  // Pastel
-  header("h-paper",     "Paper",       "#f5efe2", "40 40% 92% / 0.92"),
-  header("h-cream",     "Cream",       "#fbf3df", "44 60% 92% / 0.92"),
-  header("h-blush",     "Blush",       "#f5dde2", "350 50% 91% / 0.92"),
-  header("h-sky",       "Pale Sky",    "#dceaf5", "205 50% 91% / 0.92"),
-  header("h-mint",      "Mint",        "#dff3e6", "140 40% 91% / 0.92"),
+  header("h-ink",       "Ink",         "#0d1218", "210 25% 8%"),
+  header("h-midnight",  "Midnight",    "#0e1422", "222 30% 9%"),
+  header("h-graphite",  "Graphite",    "#16181a", "210 6% 9%"),
+  header("h-espresso",  "Espresso",    "#2a1a12", "20 40% 10%"),
+  header("h-oxblood",   "Oxblood",     "#3a1820", "350 40% 14%"),
+  header("h-pine",      "Pine",        "#0f1a16", "158 25% 9%"),
+  header("h-deep-teal", "Deep Teal",   "#0f1f23", "188 35% 10%"),
+  header("h-plum",      "Plum",        "#181321", "265 25% 10%"),
+  header("h-stone",     "Stone",       "#5a554f", "30 6% 32%"),
+  header("h-clay",      "Clay",        "#8a4a3a", "12 40% 38%"),
+  header("h-olive",     "Olive",       "#5a6a3a", "75 30% 32%"),
+  header("h-navy",      "Navy",        "#1f3658", "215 50% 24%"),
+  header("h-orange",    "Orange",      "#e8843a", "22 80% 56%"),
+  header("h-crimson",   "Crimson",     "#b83048", "350 60% 45%"),
+  header("h-emerald",   "Emerald",     "#2c8a5a", "150 50% 36%"),
+  header("h-paper",     "Paper",       "#f5efe2", "40 40% 92%"),
+  header("h-cream",     "Cream",       "#fbf3df", "44 60% 92%"),
+  header("h-blush",     "Blush",       "#f5dde2", "350 50% 91%"),
+  header("h-sky",       "Pale Sky",    "#dceaf5", "205 50% 91%"),
+  header("h-mint",      "Mint",        "#dff3e6", "140 40% 91%"),
 ];
 
-/* -------- AVATAR STAGE (background behind character) -------- */
+/* -------- AVATAR STAGE -------- */
 const stage = (id: string, name: string, swatch: string, value: string): ThemeOption => ({
   id, name, swatch, vars: { "--avatar-stage": value },
 });
 
 export const STAGE_THEMES: ThemeOption[] = [
-  stage("none",        "None / Transparent", "transparent",
+  stage("none",       "None",        "transparent",
         "transparent"),
-  stage("soft-cream",  "Soft Cream",         "#fbf3df",
+  stage("soft-cream", "Soft Cream",  "#fbf3df",
         "linear-gradient(180deg, hsl(44 70% 95%), hsl(40 50% 86%))"),
-  stage("paper",       "Paper",              "#f5efe2",
-        "hsl(40 40% 92%)"),
-  stage("sky-fade",    "Sky Fade",           "#cfe4f4",
+  stage("paper",      "Paper",       "#f5efe2", "hsl(40 40% 92%)"),
+  stage("sky-fade",   "Sky Fade",    "#cfe4f4",
         "linear-gradient(180deg, hsl(200 70% 92%), hsl(210 50% 78%))"),
-  stage("sunrise",     "Sunrise",            "#fbd6b8",
+  stage("sunrise",    "Sunrise",     "#fbd6b8",
         "linear-gradient(180deg, hsl(40 95% 88%), hsl(20 80% 78%))"),
-  stage("meadow",      "Meadow",             "#cfe9c2",
+  stage("meadow",     "Meadow",      "#cfe9c2",
         "linear-gradient(180deg, hsl(110 55% 88%), hsl(140 40% 72%))"),
-  stage("dusk",        "Dusk",               "#a89bd6",
+  stage("dusk",       "Dusk",        "#a89bd6",
         "linear-gradient(180deg, hsl(260 50% 78%), hsl(290 40% 60%))"),
-  stage("chalkboard",  "Chalkboard",         "#1a2230",
+  stage("chalkboard", "Chalkboard",  "#1a2230",
         "linear-gradient(180deg, hsl(220 25% 18%), hsl(220 30% 10%))"),
-  stage("cave",        "Cave",               "#2a221c",
+  stage("cave",       "Cave",        "#2a221c",
         "radial-gradient(circle at 50% 35%, hsl(30 25% 22%), hsl(20 30% 8%))"),
-  stage("spotlight",   "Spotlight",          "#caa040",
+  stage("spotlight",  "Spotlight",   "#caa040",
         "radial-gradient(circle at 50% 40%, hsl(42 90% 70%), hsl(28 60% 35%))"),
-  stage("rock",        "Rock Wall",          "#7a6a58",
+  stage("rock",       "Rock Wall",   "#7a6a58",
         "linear-gradient(180deg, hsl(28 18% 55%), hsl(22 22% 32%))"),
-  stage("sunset",      "Sunset",             "#e08858",
+  stage("sunset",     "Sunset",      "#e08858",
         "linear-gradient(180deg, hsl(28 90% 72%), hsl(350 60% 50%))"),
+];
+
+/* -------- CHARACTER GLOW -------- */
+const glow = (id: string, name: string, swatch: string, color: string, intensity = "0.7"): ThemeOption => ({
+  id, name, swatch,
+  vars: { "--avatar-glow-color": color, "--avatar-glow-opacity": intensity },
+});
+
+export const GLOW_THEMES: ThemeOption[] = [
+  glow("none",      "None",       "transparent",      "transparent",   "0"),
+  glow("gold",      "Gold",       "#ffd76a",          "42 100% 65%",   "0.75"),
+  glow("amber",     "Amber",      "#ff9a3a",          "28 100% 60%",   "0.75"),
+  glow("crimson",   "Crimson",    "#ff5a6a",          "354 90% 62%",   "0.7"),
+  glow("emerald",   "Emerald",    "#4ade80",          "142 70% 55%",   "0.7"),
+  glow("aqua",      "Aqua",       "#5fd6ff",          "195 95% 65%",   "0.7"),
+  glow("violet",    "Violet",     "#a87aff",          "260 90% 70%",   "0.7"),
+  glow("magenta",   "Magenta",    "#ff5ad8",          "315 95% 65%",   "0.7"),
+  glow("white",     "Holy White", "#ffffff",          "0 0% 100%",     "0.7"),
+  glow("rainbow",   "Rainbow",    "linear-gradient(135deg,#ff5a6a,#ffd76a,#4ade80,#5fd6ff,#a87aff)",
+                                                       "var(--accent)", "0"),
 ];
 
 /* -------- DEFAULTS -------- */
@@ -163,4 +178,6 @@ export const DEFAULTS = {
   bg: "g-sunset",
   header: "h-ink",
   stage: "soft-cream",
+  glow: "gold",
 };
+

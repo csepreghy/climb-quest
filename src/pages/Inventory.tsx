@@ -137,7 +137,7 @@ export default function Inventory() {
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {consumables.map((it, i) => (
                   <div key={it.id + i} className="p-3 rounded-lg border border-chalk-glow/30 bg-chalk-glow/5 flex items-start gap-3">
-                    <ItemIcon emoji={it.emoji} alt={it.name} className="text-2xl h-10 w-10" />
+                    <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-2xl h-10 w-10" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold truncate">{it.name}</div>
                       <div className="text-[10px] text-muted-foreground">+{Math.round((it.consumableBonus ?? 0) * 100)}% next log</div>

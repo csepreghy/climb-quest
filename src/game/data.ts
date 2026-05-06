@@ -178,7 +178,7 @@ export const RARITY_COLOR: Record<Rarity, string> = {
   rare: "text-rare border-rare/50",
   epic: "text-epic border-epic/60",
   legendary: "text-legendary border-legendary/60",
-  consumable: "text-chalk-glow border-chalk-glow/40",
+  
 };
 
 // Border ring color around an item's image, by rarity.

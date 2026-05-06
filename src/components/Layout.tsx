@@ -125,7 +125,7 @@ function ChalkChip({ value }: { value: number }) {
               How you earn Chalk
             </DialogTitle>
             <DialogDescription>
-              Base points per activity, plus result modifiers and equipped item bonuses.
+              Base points per activity, plus equipped item bonuses.
             </DialogDescription>
           </DialogHeader>
 
@@ -137,18 +137,6 @@ function ChalkChip({ value }: { value: number }) {
                   <div key={a.label} className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-foreground/90">{a.label}</span>
                     <span className="tabular-nums font-bold text-[hsl(var(--accent))]">+{a.chalk}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="menu-label mb-2">Result modifiers</div>
-              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
-                {bonusRows.map(r => (
-                  <div key={r.label} className="flex items-center justify-between px-3 py-2 text-sm">
-                    <span className="text-foreground/90">{r.label}</span>
-                    <span className="tabular-nums font-bold text-[hsl(var(--accent))]">{r.amount}</span>
                   </div>
                 ))}
               </div>

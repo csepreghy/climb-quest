@@ -98,6 +98,7 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
           </GameButton>
         )}
       </div>
+      </div>
     </GameCard>
   );
 }

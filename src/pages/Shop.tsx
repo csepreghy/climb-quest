@@ -74,7 +74,9 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
   return (
     <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3">
       <div className="flex items-start gap-3">
-        <div className="text-3xl">{item.emoji}</div>
+        {isImageEmoji(item.emoji)
+          ? <img src={item.emoji} alt={item.name} className="h-12 w-12 object-contain rounded" />
+          : <div className="text-3xl">{item.emoji}</div>}
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium leading-snug truncate">{item.name}</div>
           <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>

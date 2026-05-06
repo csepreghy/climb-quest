@@ -52,14 +52,14 @@ export default function Shop() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} />)}
+        {items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} ignoreLevelReq={!!s.ignoreLevelReq} />)}
       </div>
     </div>
   );
 }
 
-function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolean; chalk: number; level: number }) {
-  const locked = !!(item.levelReq && level < item.levelReq);
+function ShopCard({ item, owned, chalk, level, ignoreLevelReq }: { item: ShopItem; owned: boolean; chalk: number; level: number; ignoreLevelReq: boolean }) {
+  const locked = !ignoreLevelReq && !!(item.levelReq && level < item.levelReq);
   const canAfford = chalk >= item.price;
   const isConsumable = !!item.consumableBonus;
   const ownAlready = owned && !isConsumable;

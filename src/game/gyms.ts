@@ -3,16 +3,43 @@ import { useSyncExternalStore } from "react";
 
 export type GradingKind = "v" | "french" | "number" | "color";
 
+/** Canonical V grades for dropdowns elsewhere in the app */
+export const V_SCALE = [
+  "VB","V0","V1","V2","V3","V4","V5","V6","V7","V8",
+  "V9","V10","V11","V12","V13","V14","V15","V16",
+] as const;
+
+/** Canonical French (Font) grades for dropdowns elsewhere in the app */
+export const FRENCH_SCALE = [
+  "4C","5A","5B","5C",
+  "6A","6A+","6B","6B+","6C","6C+",
+  "7A","7A+","7B","7B+","7C","7C+",
+  "8A","8A+","8B","8B+","8C","8C+",
+  "9A",
+] as const;
+
+export interface GradeEquivalent {
+  /** V scale start/end (inclusive). End optional — single grade OR open-ended last entry. */
+  vStart?: string;
+  vEnd?: string;
+  /** French scale start/end */
+  frenchStart?: string;
+  frenchEnd?: string;
+}
+
 export interface GradingSystem {
   id: string;
   name: string;
   kind: GradingKind;
-  /** for number: min/max; for color: list of color stops */
+  /** For number kind */
   numberMin?: number;
   numberMax?: number;
+  /** For color kind */
   colors?: { name: string; hex: string }[];
-  /** Map a grade label (e.g. "5", "5+", "Red") to V/French equivalent ranges */
-  equivalents?: Record<string, { v?: string; french?: string }>;
+  /** Whether the last grade in the list is open-ended (e.g. 5 → 5+). */
+  lastOpenEnded?: boolean;
+  /** Map a grade label (e.g. "5", "Red") to V/French equivalent ranges */
+  equivalents?: Record<string, GradeEquivalent>;
 }
 
 export interface HoldColor {
@@ -27,7 +54,7 @@ export interface Gym {
   location: string;
   primary: boolean;
   holdColors: HoldColor[];
-  gradingSystemIds: string[]; // references to gradingSystems
+  gradingSystemIds: string[];
 }
 
 export interface GymState {
@@ -38,16 +65,8 @@ export interface GymState {
 
 const KEY = "climbquest:gym:v1";
 
-const V_GRADES: GradingSystem = {
-  id: "v_grades",
-  name: "V Scale",
-  kind: "v",
-};
-const FRENCH_GRADES: GradingSystem = {
-  id: "french_grades",
-  name: "French (Font)",
-  kind: "french",
-};
+const V_GRADES: GradingSystem = { id: "v_grades", name: "V Scale", kind: "v" };
+const FRENCH_GRADES: GradingSystem = { id: "french_grades", name: "French (Font)", kind: "french" };
 
 const DEFAULT_HOLD_COLORS: HoldColor[] = [
   { id: "white", name: "White", hex: "#f5f5f5" },
@@ -61,11 +80,7 @@ const DEFAULT_HOLD_COLORS: HoldColor[] = [
 ];
 
 function initial(): GymState {
-  return {
-    gyms: [],
-    gradingSystems: [V_GRADES, FRENCH_GRADES],
-    lastUsedGymId: null,
-  };
+  return { gyms: [], gradingSystems: [V_GRADES, FRENCH_GRADES], lastUsedGymId: null };
 }
 
 let state: GymState = load();
@@ -78,7 +93,6 @@ function load(): GymState {
     if (!raw) return initial();
     const parsed = JSON.parse(raw);
     const merged: GymState = { ...initial(), ...parsed };
-    // ensure built-ins
     const ids = new Set(merged.gradingSystems.map(g => g.id));
     if (!ids.has("v_grades")) merged.gradingSystems.unshift(V_GRADES);
     if (!ids.has("french_grades")) merged.gradingSystems.push(FRENCH_GRADES);
@@ -154,7 +168,7 @@ export function toggleGymGradingSystem(gymId: string, gsId: string) {
     }),
   }));
 }
-export function setEquivalent(gsId: string, gradeLabel: string, eq: { v?: string; french?: string }) {
+export function setEquivalent(gsId: string, gradeLabel: string, eq: GradeEquivalent) {
   set(s => ({
     ...s,
     gradingSystems: s.gradingSystems.map(g => {
@@ -165,19 +179,15 @@ export function setEquivalent(gsId: string, gradeLabel: string, eq: { v?: string
   }));
 }
 
-// Helper: enumerate grade labels for a system
+/** Enumerate grade labels for a system */
 export function gradeLabels(g: GradingSystem): string[] {
-  if (g.kind === "v") return Array.from({ length: 18 }, (_, i) => `V${i}`);
-  if (g.kind === "french") {
-    const tiers = ["4","5","5+","6A","6A+","6B","6B+","6C","6C+","7A","7A+","7B","7B+","7C","7C+","8A","8A+","8B","8B+"];
-    return tiers;
-  }
+  if (g.kind === "v") return [...V_SCALE];
+  if (g.kind === "french") return [...FRENCH_SCALE];
   if (g.kind === "number") {
     const min = g.numberMin ?? 1, max = g.numberMax ?? 10;
     const out: string[] = [];
     for (let n = min; n <= max; n++) out.push(String(n));
-    // largest number gets a "+" appended (per spec)
-    out.push(`${max}+`);
+    if (g.lastOpenEnded) out.push(`${max}+`);
     return out;
   }
   if (g.kind === "color") return (g.colors ?? []).map(c => c.name);

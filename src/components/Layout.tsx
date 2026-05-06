@@ -17,7 +17,7 @@ export default function Layout() {
   const s = useGame();
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/85 border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]">
+      <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-bg, 20 40% 8% / 0.85))" }}>
         <div className="container flex items-center justify-between gap-4 py-3">
           <NavLink to="/" className="flex items-center gap-2.5 group">
             <div className="h-10 w-10 rounded-lg grid place-items-center transition-transform group-hover:rotate-[-4deg] bg-accent"

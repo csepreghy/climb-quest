@@ -97,12 +97,9 @@
   * { @apply border-border; }
   html { color-scheme: dark; }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-feature-settings: "ss01", "cv11";
-    background:
-      radial-gradient(ellipse at top left, hsl(var(--grad-red) / 0.45), transparent 55%),
-      radial-gradient(ellipse at bottom right, hsl(var(--grad-orange) / 0.35), transparent 55%),
-      hsl(var(--background));
+    background: linear-gradient(135deg, #8e3c4b 0%, #ecc979 100%);
     background-attachment: fixed;
   }
 }

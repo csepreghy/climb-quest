@@ -1,4 +1,5 @@
-import { LEVELS, ITEM_BY_ID, Gender } from "@/game/data";
+import { LEVELS, Gender } from "@/game/data";
+import { getItem } from "@/game/customItems";
 import type { Equipped } from "@/game/store";
 import { cn } from "@/lib/utils";
 import { PixelSprite } from "./pixel/PixelSprite";

@@ -31,6 +31,8 @@ export default {
         xp: "hsl(var(--xp))",
         boss: "hsl(var(--boss))",
         legendary: "hsl(var(--legendary))",
+        epic: "hsl(var(--epic))",
+        uncommon: "hsl(var(--uncommon))",
         rare: "hsl(var(--rare))",
         common: "hsl(var(--common))",
       },

@@ -99,7 +99,7 @@ export default function Inventory() {
                     {ownedInGroup.map(it => {
                       const equipped = s.equipped[it.slot] === it.id;
                       return (
-                        <div key={it.id} className={cn("p-3 rounded-lg border flex items-start gap-3", equipped ? "border-accent/60 bg-accent/5" : "border-border bg-secondary/20")}>
+                        <div key={it.id} className={cn("p-3 rounded-lg border flex items-start gap-3", equipped ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/5" : "border-border bg-secondary/20")}>
                           <div className="text-2xl">{it.emoji}</div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-semibold truncate">{it.name}</div>

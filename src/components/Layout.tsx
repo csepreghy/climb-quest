@@ -1,27 +1,35 @@
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { Home, ScrollText, Swords, User, Store, Backpack, Settings } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Home, ScrollText, Swords, User, Store, Backpack, Settings, LogOut } from "lucide-react";
 import { useGame } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { LevelsModal } from "@/components/LevelsModal";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
-const NAV = [
+const NAV_BASE = [
   { to: "/", label: "Home", icon: Home },
   { to: "/inventory", label: "Inventory", icon: Backpack },
   { to: "/log", label: "Log Boulder", icon: ScrollText },
   { to: "/bosses", label: "Boss Projects", icon: Swords },
   { to: "/character", label: "Character", icon: User },
   { to: "/shop", label: "Shop", icon: Store },
-  { to: "/admin", label: "Admin", icon: Settings },
 ];
+const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
 
 export default function Layout() {
   const s = useGame();
+  const { isAdmin, signOut } = useAuth();
+  const nav = useNavigate();
+  const NAV = isAdmin ? [...NAV_BASE, NAV_ADMIN] : NAV_BASE;
+  const [levelsOpen, setLevelsOpen] = useState(false);
   return (
     <div className="min-h-screen flex flex-col">
+      <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} />
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
         <div className="container flex items-center justify-between gap-4 py-3">
           <NavLink to="/" className="flex items-center gap-2.5 group">
@@ -40,10 +48,14 @@ export default function Layout() {
           <div className="flex items-center gap-3">
             <ThemeButton />
             <ChalkChip value={s.chalk} />
-            <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)]">
+            <button type="button" onClick={() => setLevelsOpen(true)}
+              className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110">
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>
               <span className="font-bold tabular-nums text-[hsl(var(--sky))]">{s.level}</span>
-            </div>
+            </button>
+            <Button size="icon" variant="ghost" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out">
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
         {/* Top nav (desktop) */}
@@ -96,15 +108,11 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   const [open, setOpen] = useState(false);
 
-  // Activity rows (exclude the "send" modifier — shown separately)
+  // Activity rows sorted ascending by points
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
     .filter(a => a !== "boulder_send")
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
-    .sort((a, b) => b.chalk - a.chalk);
-
-  const modifiers = [
-    { label: "Send a boulder", amount: BASE_CHALK.boulder_send },
-  ];
+    .sort((a, b) => a.chalk - b.chalk);
 
   return (
     <>
@@ -142,18 +150,6 @@ function ChalkChip({ value }: { value: number }) {
                   <div key={a.label} className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-foreground/90">{a.label}</span>
                     <span className="tabular-nums font-bold gradient-chalk-text">+{a.chalk}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="menu-label mb-2">Bonuses</div>
-              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
-                {modifiers.map(m => (
-                  <div key={m.label} className="flex items-center justify-between px-3 py-2 text-sm">
-                    <span className="text-foreground/90">{m.label}</span>
-                    <span className="tabular-nums font-bold gradient-chalk-text">+{m.amount}</span>
                   </div>
                 ))}
               </div>

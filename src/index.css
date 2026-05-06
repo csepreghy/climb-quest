@@ -69,10 +69,12 @@
 
     --shadow-panel:
       0 0 0 2px hsl(var(--panel-frame)),
-      0 0 0 3px hsl(var(--panel-edge) / 0.7),
+      0 0 0 4px hsl(28 35% 4%),
+      0 0 0 5px hsl(var(--panel-edge) / 0.9),
       inset 0 1px 0 hsl(var(--panel-inset-light)),
-      inset 0 -2px 0 hsl(var(--panel-inset-dark)),
-      0 14px 28px -16px hsl(0 0% 0% / 0.7);
+      inset 0 -3px 0 hsl(var(--panel-inset-dark)),
+      inset 0 0 0 1px hsl(28 30% 22% / 0.5),
+      0 16px 32px -18px hsl(0 0% 0% / 0.85);
   }
 
   .dark { color-scheme: dark; }

@@ -187,5 +187,5 @@ export const RARITY_BORDER: Record<Rarity, string> = {
   rare: "ring-2 ring-rare",
   epic: "ring-2 ring-epic",
   legendary: "ring-2 ring-legendary",
-  consumable: "ring-2 ring-chalk-glow",
+  
 };

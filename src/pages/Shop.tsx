@@ -10,7 +10,7 @@ import { GameButton } from "@/components/ui/game-button";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
-  { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Bottom", "Shoes", "Hat", "Hand"] },
+  { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
   { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk"] },
   { key: "power",  label: "Power-ups", categories: ["All", "Accessories", "Auras", "Titles", "Consumables"] },
 ];

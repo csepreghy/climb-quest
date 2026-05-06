@@ -56,6 +56,19 @@ export default function Admin() {
         </div>
       </GameCard>
 
+      <GameCard tone="accent" className="p-5">
+        <div className="menu-label mb-3">Admin · Level Controls</div>
+        <div className="text-sm text-muted-foreground mb-3">Current level: <span className="font-bold tabular-nums">{s.level}</span></div>
+        <div className="flex gap-2">
+          <Button variant="default" onClick={() => { adminSetLevel(1); toast.success("Level +1"); }}>
+            <Plus className="h-4 w-4" /> Level Up
+          </Button>
+          <Button variant="secondary" onClick={() => { adminSetLevel(-1); toast.info("Level -1"); }}>
+            <Minus className="h-4 w-4" /> Level Down
+          </Button>
+        </div>
+      </GameCard>
+
       <InventoryAdmin />
 
       <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>

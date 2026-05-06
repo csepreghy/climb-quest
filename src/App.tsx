@@ -33,7 +33,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
+          <GameSync />
             <Route path="/auth" element={<Auth />} />
             <Route element={<RequireAuth />}>
               <Route element={<Layout />}>

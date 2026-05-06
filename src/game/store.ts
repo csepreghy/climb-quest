@@ -331,6 +331,10 @@ export function createBoss(name: string, grade: string, style: Style, difficulty
   }));
 }
 
+export function adminAdjustChalk(delta: number) {
+  set(s => ({ ...s, chalk: Math.max(0, s.chalk + delta), totalChalkEarned: delta > 0 ? s.totalChalkEarned + delta : s.totalChalkEarned }));
+}
+
 export function resetGame() {
   state = initialState();
   persist();

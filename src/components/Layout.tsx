@@ -48,14 +48,14 @@ export default function Layout() {
                 end={n.to === "/"}
                 className={({ isActive }) =>
                   cn(
-                    "px-3.5 py-2 rounded-full text-sm font-semibold flex items-center gap-2 transition-all border",
+                    "px-3.5 py-2 rounded-full text-sm font-semibold flex items-center gap-2 transition-all border whitespace-nowrap",
                     isActive
-                      ? "text-white border-[hsl(var(--panel-frame))] bg-[hsl(var(--btn-orange))] shadow-[inset_0_2px_0_hsl(0_0%_100%/0.32),inset_0_-3px_0_hsl(var(--btn-orange-shadow)),0_3px_0_hsl(var(--btn-orange-shadow))]"
+                      ? "text-white border-[hsl(var(--panel-frame))] shadow-[inset_0_2px_0_hsl(0_0%_100%/0.32),inset_0_-3px_0_hsl(var(--btn-orange-shadow)),0_3px_0_hsl(var(--btn-orange-shadow))] [background:var(--gradient-brand)]"
                       : "text-muted-foreground hover:text-foreground border-transparent hover:bg-secondary/50",
                   )
                 }
               >
-                <n.icon className="h-4 w-4" /> {n.label}
+                <n.icon className="h-4 w-4 shrink-0" /> <span className="whitespace-nowrap">{n.label}</span>
               </NavLink>
             ))}
           </div>

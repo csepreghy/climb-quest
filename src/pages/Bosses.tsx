@@ -135,7 +135,7 @@ function CreateBoss() {
         <Button variant="secondary" className="gap-2"><Plus className="h-4 w-4" /> New Boss</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Create a Boss Problem</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Create a Boss Project</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div>
             <Label className="text-xs">Quick templates</Label>

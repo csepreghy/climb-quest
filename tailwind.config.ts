@@ -10,6 +10,8 @@ export default {
       fontFamily: {
         display: ['"Space Grotesk"', "system-ui", "sans-serif"],
         sans: ['"Inter"', "system-ui", "sans-serif"],
+        pixel: ['"Press Start 2P"', "system-ui", "monospace"],
+        hud: ['"VT323"', "ui-monospace", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",

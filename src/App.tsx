@@ -11,12 +11,16 @@ import Character from "./pages/Character";
 import Shop from "./pages/Shop";
 import Inventory from "./pages/Inventory";
 import NotFound from "./pages/NotFound.tsx";
+import { GameBackground } from "./components/pixel/GameBackground";
+import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <GameBackground />
+      <LevelUpBanner />
       <Toaster />
       <Sonner />
       <BrowserRouter>

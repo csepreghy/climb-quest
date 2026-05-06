@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Lock, ArrowUp } from "lucide-react";
+import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 
 export default function Character() {
   const s = useGame();
@@ -34,7 +35,7 @@ export default function Character() {
             <div className="text-3xl font-bold gradient-chalk-text">{s.chalk.toLocaleString()}</div>
             {next && (
               <Button className="mt-3 gap-2 bg-gradient-to-r from-legendary to-accent" disabled={s.chalk < next.cost}
-                onClick={() => { const r = levelUp(); if (r.ok) toast.success("Level up!", { description: r.unlocks?.join(", ") }); else toast.error(r.reason ?? ""); }}>
+                onClick={() => { const target = next?.title ?? ""; const r = levelUp(); if (r.ok) { showLevelUpBanner(target, r.unlocks ?? []); toast.success("Level up!"); } else toast.error(r.reason ?? ""); }}>
                 <ArrowUp className="h-4 w-4" /> Level Up ({next.cost})
               </Button>
             )}

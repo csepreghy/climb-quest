@@ -80,6 +80,17 @@ export const BG_THEMES: ThemeOption[] = [
   bgSolid("p-coral",   "Pastel Coral",    "#f6c2b1", "12 80% 84%"),
   bgSolid("p-turquoise","Pastel Turquoise","#b5e6e0", "175 50% 81%"),
   bgSolid("p-sand",    "Pastel Sand",     "#ecdcb8", "40 60% 83%"),
+  // 10 dark solid backgrounds
+  bgSolid("d-ink",      "Dark Ink",       "#0d1218", "210 25% 8%"),
+  bgSolid("d-midnight", "Dark Midnight",  "#0e1422", "222 30% 9%"),
+  bgSolid("d-graphite", "Dark Graphite",  "#16181a", "210 6% 9%"),
+  bgSolid("d-obsidian", "Dark Obsidian",  "#0a0b0f", "230 20% 5%"),
+  bgSolid("d-espresso", "Dark Espresso",  "#241712", "20 35% 11%"),
+  bgSolid("d-oxblood",  "Dark Oxblood",   "#2a1018", "350 45% 12%"),
+  bgSolid("d-pine",     "Dark Pine",      "#0f1a16", "158 25% 8%"),
+  bgSolid("d-teal",     "Dark Teal",      "#0f1f23", "188 35% 10%"),
+  bgSolid("d-plum",     "Dark Plum",      "#181321", "265 25% 10%"),
+  bgSolid("d-charcoal", "Dark Charcoal",  "#1c1c1c", "0 0% 11%"),
   // 10 gradients
   bgGrad("g-sunset", "Sunset Crag", "#8e3c4b", "#ecc979", "351 38% 41%", "40 75% 69%"),
   bgGrad("g-dawn",   "Alpine Dawn", "#7aa6d6", "#f0c4d6", "210 60% 70%", "330 55% 82%"),

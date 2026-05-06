@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { Home, ScrollText, Swords, User, Store, Backpack, Settings } from "lucide-react";
 import { useGame } from "@/game/store";
 import { cn } from "@/lib/utils";
+import { ThemeButton } from "@/components/ThemeSwitcher";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 const NAV = [

@@ -82,8 +82,6 @@ const empty: CustomItemInput = {
 
 function InventoryAdmin() {
   const all = useAllItems();
-  const custom = useCustomItems();
-  const hidden = useHiddenBuiltins();
   const [draft, setDraft] = useState<CustomItemInput>(empty);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

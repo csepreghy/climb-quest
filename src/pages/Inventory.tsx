@@ -247,8 +247,7 @@ export default function Inventory() {
               <BonusDiff current={equippedItem} next={compareItem} />
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="ghost" onClick={() => setCompareItem(null)}>Close</Button>
-                {(() => {
+                <Button variant="ghost" onClick={() => setCompareItem(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Close</Button>
                   const alreadyOn = compareItem.consumableBonus
                     ? s.pendingConsumable === compareItem.id
                     : s.equipped[compareItem.slot] === compareItem.id;

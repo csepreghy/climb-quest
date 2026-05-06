@@ -1,7 +1,8 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
 export type Rarity = "common" | "rare" | "legendary" | "consumable";
-export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "accessory" | "aura" | "title";
+export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "aura" | "title";
+export type ItemGroup = "outfit" | "gear" | "power";
 export type Gender = "male" | "female" | "neutral";
 
 export type ActivityType =

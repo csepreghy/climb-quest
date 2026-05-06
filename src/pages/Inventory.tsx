@@ -1,16 +1,60 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ITEM_BY_ID, RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity } from "@/game/data";
+import { GameCard } from "@/components/ui/game-card";
+import { GameButton } from "@/components/ui/game-button";
+import { ITEM_BY_ID, RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity, ShopItem } from "@/game/data";
 import { equipItem, unequipSlot, useGame } from "@/game/store";
 import { getItem, useCustomItems, isImageEmoji } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Check } from "lucide-react";
 
 function ItemIcon({ emoji, alt, className, rarity }: { emoji: string; alt?: string; className?: string; rarity?: Rarity }) {
   const ring = rarity ? RARITY_BORDER[rarity] : "";
   if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("object-contain rounded bg-background/40 p-0.5", ring, className)} />;
   return <span className={cn("inline-flex items-center justify-center rounded leading-none", rarity && "bg-background/40", ring, className)}>{emoji}</span>;
+}
+
+function InventoryCard({ item, equipped, onEquip, primed, disabled }: { item: ShopItem; equipped?: boolean; onEquip: () => void; primed?: boolean; disabled?: boolean }) {
+  const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
+  const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
+  const isConsumable = !!item.consumableBonus;
+  return (
+    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3 relative">
+      {bonusPct > 0 && (
+        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
+          +{bonusPct}%
+        </div>
+      )}
+      {isConsumable && (
+        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
+          +{Math.round((item.consumableBonus ?? 0) * 100)}%
+        </div>
+      )}
+      <div className="flex items-start gap-3">
+        {isImageEmoji(item.emoji)
+          ? <img src={item.emoji} alt={item.name} className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
+          : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
+        <div className="min-w-0 flex-1 pr-12">
+          <div className="text-sm font-medium leading-snug">{item.name}</div>
+          <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
+            {item.rarity}
+          </div>
+        </div>
+      </div>
+      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
+      <div className="flex items-center justify-end pt-2 border-t border-border/50">
+        {equipped || primed ? (
+          <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> {primed ? "Primed" : "Equipped"}</GameButton>
+        ) : (
+          <GameButton size="sm" variant="primary" disabled={disabled} onClick={onEquip}>
+            {isConsumable ? "Prime" : "Equip"}
+          </GameButton>
+        )}
+      </div>
+    </GameCard>
+  );
 }
 
 const SLOT_LABEL: Record<Slot, string> = {

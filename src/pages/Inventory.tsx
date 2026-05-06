@@ -1,15 +1,16 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ITEM_BY_ID, RARITY_COLOR, Slot, ItemGroup } from "@/game/data";
+import { ITEM_BY_ID, RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity } from "@/game/data";
 import { equipItem, unequipSlot, useGame } from "@/game/store";
 import { getItem, useCustomItems, isImageEmoji } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-function ItemIcon({ emoji, alt, className }: { emoji: string; alt?: string; className?: string }) {
-  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("h-8 w-8 object-contain rounded", className)} />;
-  return <span className={className}>{emoji}</span>;
+function ItemIcon({ emoji, alt, className, rarity }: { emoji: string; alt?: string; className?: string; rarity?: Rarity }) {
+  const ring = rarity ? RARITY_BORDER[rarity] : "";
+  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("h-8 w-8 object-contain rounded bg-background/40 p-0.5", ring, className)} />;
+  return <span className={cn(rarity && "inline-flex items-center justify-center rounded bg-background/40", ring, className)}>{emoji}</span>;
 }
 
 const SLOT_LABEL: Record<Slot, string> = {
@@ -107,7 +108,7 @@ export default function Inventory() {
                       const equipped = s.equipped[it.slot] === it.id;
                       return (
                         <div key={it.id} className={cn("p-3 rounded-lg border flex items-start gap-3", equipped ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/5" : "border-border bg-secondary/20")}>
-                          <ItemIcon emoji={it.emoji} alt={it.name} className="text-2xl h-10 w-10" />
+                          <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-2xl h-10 w-10" />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-semibold truncate">{it.name}</div>
                             <div className={cn("text-[10px] uppercase font-bold inline-block px-1 rounded border", RARITY_COLOR[it.rarity])}>{it.rarity}</div>
@@ -136,7 +137,7 @@ export default function Inventory() {
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {consumables.map((it, i) => (
                   <div key={it.id + i} className="p-3 rounded-lg border border-chalk-glow/30 bg-chalk-glow/5 flex items-start gap-3">
-                    <ItemIcon emoji={it.emoji} alt={it.name} className="text-2xl h-10 w-10" />
+                    <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-2xl h-10 w-10" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold truncate">{it.name}</div>
                       <div className="text-[10px] text-muted-foreground">+{Math.round((it.consumableBonus ?? 0) * 100)}% next log</div>

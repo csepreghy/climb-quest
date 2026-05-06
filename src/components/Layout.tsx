@@ -3,6 +3,7 @@ import { Home, ScrollText, Swords, User, Store, Backpack } from "lucide-react";
 import { useGame } from "@/game/store";
 import { cn } from "@/lib/utils";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: Home },
@@ -90,16 +91,12 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   return (
     <div
-      className="flex items-center gap-2 pl-2 pr-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary"
+      className="flex items-center gap-2 pl-1.5 pr-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary"
       style={{
         boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.06), inset 0 -1px 0 hsl(0 0% 0% / 0.55)",
       }}
     >
-      <span
-        className="h-5 w-5 rounded-full grid place-items-center animate-coin-shine bg-[hsl(var(--chalk))]"
-      >
-        <span className="text-[9px] font-black text-[hsl(38_60%_22%)]">C</span>
-      </span>
+      <img src={chalkBagImg} alt="" className="h-7 w-7 object-contain drop-shadow-[0_1px_0_hsl(0_0%_0%/0.5)]" />
       <span className="text-sm font-bold tabular-nums gradient-chalk-text">{value.toLocaleString()}</span>
       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
     </div>

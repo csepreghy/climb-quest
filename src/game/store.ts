@@ -358,6 +358,14 @@ export function adminAdjustChalk(delta: number) {
   set(s => ({ ...s, chalk: Math.max(0, s.chalk + delta), totalChalkEarned: delta > 0 ? s.totalChalkEarned + delta : s.totalChalkEarned }));
 }
 
+export function adminSetLevel(delta: number) {
+  set(s => {
+    const max = LEVELS[LEVELS.length - 1].level;
+    const next = Math.max(1, Math.min(max, s.level + delta));
+    return { ...s, level: next };
+  });
+}
+
 export function resetGame() {
   state = initialState();
   persist();

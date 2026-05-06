@@ -104,7 +104,9 @@
 
 @layer components {
   .rpg-panel {
-    background: hsl(var(--panel-fill));
+    background:
+      var(--panel-backdrop, none),
+      hsl(var(--panel-fill));
     box-shadow: var(--shadow-panel);
     border-radius: var(--radius);
     position: relative;

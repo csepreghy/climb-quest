@@ -21,10 +21,10 @@ const toneRing: Record<Tone, string> = {
 
 const toneAccentBar: Record<Tone, string> = {
   default:   "",
-  accent:    "from-accent/0 via-accent/70 to-accent/0",
-  legendary: "from-legendary/0 via-legendary/80 to-legendary/0",
-  boss:      "from-boss/0 via-boss/80 to-boss/0",
-  rare:      "from-rare/0 via-rare/80 to-rare/0",
+  accent:    "bg-accent",
+  legendary: "bg-legendary",
+  boss:      "bg-boss",
+  rare:      "bg-rare",
 };
 
 export const GameCard = React.forwardRef<HTMLDivElement, Props>(
@@ -51,10 +51,7 @@ export const GameCard = React.forwardRef<HTMLDivElement, Props>(
         {tone !== "default" && (
           <div
             aria-hidden
-            className={cn(
-              "absolute left-3 right-3 top-0 h-px bg-gradient-to-r",
-              toneAccentBar[tone],
-            )}
+            className={cn("absolute left-3 right-3 top-0 h-px", toneAccentBar[tone])}
           />
         )}
         {shimmer && (

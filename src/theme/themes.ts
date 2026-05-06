@@ -183,6 +183,35 @@ export const GLOW_THEMES: ThemeOption[] = [
                                                        "var(--accent)", "0"),
 ];
 
+/* -------- BOX BACKDROP / TEXTURE (flat-stone vibes) -------- */
+const backdrop = (id: string, name: string, swatch: string, value: string): ThemeOption => ({
+  id, name, swatch, vars: { "--panel-backdrop": value },
+});
+
+export const BACKDROP_THEMES: ThemeOption[] = [
+  backdrop("none",        "None",        "transparent", "none"),
+  backdrop("slate-stone", "Slate Stone", "#3a3f47",
+    "radial-gradient(ellipse at 30% 20%, hsl(220 8% 28%) 0%, hsl(220 12% 18%) 60%, hsl(220 14% 12%) 100%)"),
+  backdrop("river-rock",  "River Rock",  "#5a6168",
+    "radial-gradient(circle at 40% 30%, hsl(210 6% 38%) 0%, hsl(210 8% 24%) 70%)"),
+  backdrop("granite",     "Granite",     "#6b6e72",
+    "linear-gradient(160deg, hsl(220 4% 42%) 0%, hsl(220 6% 26%) 100%)"),
+  backdrop("sandstone",   "Sandstone",   "#a8895f",
+    "radial-gradient(ellipse at 35% 25%, hsl(32 35% 55%) 0%, hsl(28 40% 32%) 75%)"),
+  backdrop("basalt",      "Basalt",      "#1f2024",
+    "radial-gradient(ellipse at 50% 30%, hsl(230 6% 18%) 0%, hsl(230 10% 8%) 80%)"),
+  backdrop("moss-stone",  "Moss Stone",  "#4a5a44",
+    "radial-gradient(ellipse at 35% 25%, hsl(110 18% 32%) 0%, hsl(120 22% 16%) 80%)"),
+  backdrop("limestone",   "Limestone",   "#cdc4ad",
+    "radial-gradient(ellipse at 40% 25%, hsl(45 25% 82%) 0%, hsl(38 22% 60%) 85%)"),
+  backdrop("obsidian-st", "Obsidian",    "#0a0b0f",
+    "radial-gradient(circle at 45% 30%, hsl(230 18% 14%) 0%, hsl(230 25% 4%) 80%)"),
+  backdrop("rust-stone",  "Rust Stone",  "#7a3a2a",
+    "radial-gradient(ellipse at 35% 25%, hsl(14 50% 38%) 0%, hsl(10 55% 20%) 80%)"),
+  backdrop("paper",       "Paper",       "#f5efe2",
+    "linear-gradient(160deg, hsl(40 50% 95%), hsl(38 30% 84%))"),
+];
+
 /* -------- DEFAULTS -------- */
 export const DEFAULTS = {
   box: "midnight",
@@ -190,5 +219,6 @@ export const DEFAULTS = {
   header: "h-ink",
   stage: "soft-cream",
   glow: "gold",
+  backdrop: "none",
 };
 

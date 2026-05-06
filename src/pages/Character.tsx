@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { GameButton } from "@/components/ui/game-button";
 import { Button } from "@/components/ui/button";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useGame, currentLevel, nextLevel, levelUp, setGender, resetGame } from "@/game/store";

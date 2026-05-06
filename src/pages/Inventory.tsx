@@ -163,11 +163,16 @@ export default function Inventory() {
                   {slots.map(slot => {
                     const id = s.equipped[slot];
                     const it = id ? getItem(id) : null;
-                    if (!it) return <EmptySlotCard key={slot} slot={slot} />;
+                    if (!it) return (
+                      <div key={slot} className="flex flex-col">
+                        <div className="flex-1"><EmptySlotCard slot={slot} /></div>
+                        <div className="h-7 mt-1.5" aria-hidden />
+                      </div>
+                    );
                     return (
-                      <div key={slot} className="space-y-1.5">
-                        <ItemCard item={it} />
-                        <div className="flex justify-end">
+                      <div key={slot} className="flex flex-col">
+                        <div className="flex-1"><ItemCard item={it} /></div>
+                        <div className="flex justify-end mt-1.5">
                           <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot(slot)}>Unequip</Button>
                         </div>
                       </div>
@@ -242,7 +247,7 @@ export default function Inventory() {
               <BonusDiff current={equippedItem} next={compareItem} />
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="ghost" onClick={() => setCompareItem(null)}>Close</Button>
+                <Button variant="ghost" onClick={() => setCompareItem(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Close</Button>
                 {(() => {
                   const alreadyOn = compareItem.consumableBonus
                     ? s.pendingConsumable === compareItem.id
@@ -278,11 +283,18 @@ function BonusDiff({ current, next }: { current: ShopItem | null; next: ShopItem
   const delta = nxt - cur;
   if (delta === 0 && cur === 0) return null;
   const sign = delta > 0 ? "+" : "";
-  const color = delta > 0 ? "text-chalk-glow" : delta < 0 ? "text-destructive" : "text-muted-foreground";
+  const tone = delta > 0
+    ? "border-chalk-glow/50 bg-chalk-glow/10 text-chalk-glow"
+    : delta < 0
+      ? "border-destructive/50 bg-destructive/10 text-destructive"
+      : "border-border bg-secondary text-muted-foreground";
   return (
-    <div className="text-xs text-center text-muted-foreground border-t border-border/50 pt-3 tabular-nums">
-      Bonus: {Math.round(cur)}% → {Math.round(nxt)}%
-      {delta !== 0 && <span className={cn("ml-2 font-bold", color)}>({sign}{Math.round(delta)}%)</span>}
+    <div className={cn("rounded-lg border-2 px-4 py-3 flex items-center justify-between gap-4 tabular-nums", tone)}>
+      <span className="text-xs uppercase tracking-wider opacity-80">Bonus change</span>
+      <div className="flex items-baseline gap-3">
+        <span className="text-sm opacity-70">{Math.round(cur)}% → {Math.round(nxt)}%</span>
+        {delta !== 0 && <span className="text-2xl font-extrabold">{sign}{Math.round(delta)}%</span>}
+      </div>
     </div>
   );
 }

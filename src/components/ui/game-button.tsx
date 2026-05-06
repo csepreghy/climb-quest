@@ -31,15 +31,6 @@ const variantStyles: Record<Variant, React.CSSProperties> = {
   ghost:     {} as React.CSSProperties,
 };
 
-const variantStyles: Record<Variant, React.CSSProperties> = {
-  primary:   bevel("var(--btn-orange)", "var(--btn-orange-shadow)"),
-  success:   bevel("var(--btn-green)",  "var(--btn-green-shadow)"),
-  secondary: bevel("var(--btn-stone)",  "var(--btn-stone-shadow)"),
-  danger:    bevel("var(--btn-red)",    "var(--btn-red-shadow)"),
-  legendary: bevel("var(--btn-gold)",   "var(--btn-gold-shadow)"),
-  ghost:     {} as React.CSSProperties,
-};
-
 const variantText: Record<Variant, string> = {
   primary:   "text-white",
   success:   "text-white",

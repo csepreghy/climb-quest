@@ -21,8 +21,8 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
   const lvl = LEVELS.find(l => l.level === level) ?? LEVELS[0];
   const auraId = equipped?.aura;
   const aura = auraId ? getItem(auraId) : null;
-  const outfit = equipped?.outfit ? ITEM_BY_ID[equipped.outfit] : null;
-  const shoes = equipped?.shoes ? ITEM_BY_ID[equipped.shoes] : null;
+  const outfit = equipped?.outfit ? getItem(equipped.outfit) : null;
+  const shoes = equipped?.shoes ? getItem(equipped.shoes) : null;
   const sprite = getClimberSprite(level, gender);
 
   // Use themed glow var; aura item forces legendary gold; otherwise honor user's chosen glow.

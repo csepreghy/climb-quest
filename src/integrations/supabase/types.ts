@@ -62,6 +62,7 @@ export type Database = {
           group: string
           id: string
           image: string | null
+          level_req: number | null
           name: string
           price: number
           rarity: string
@@ -76,6 +77,7 @@ export type Database = {
           group: string
           id: string
           image?: string | null
+          level_req?: number | null
           name: string
           price?: number
           rarity: string
@@ -90,6 +92,7 @@ export type Database = {
           group?: string
           id?: string
           image?: string | null
+          level_req?: number | null
           name?: string
           price?: number
           rarity?: string

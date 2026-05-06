@@ -183,7 +183,7 @@ function GradingSystemCard({ gs }: { gs: GradingSystem }) {
   // Local draft of equivalents — only commit on Save/Update
   const [draft, setDraft] = useState<Record<string, GradeEquivalent>>(gs.equivalents ?? {});
   // Reset draft when system changes (kind, labels, etc.) or saved equivalents change externally
-  React.useEffect(() => { setDraft(gs.equivalents ?? {}); }, [gs.id, gs.equivalents, gs.numberMin, gs.numberMax, gs.lastOpenEnded]);
+  useEffect(() => { setDraft(gs.equivalents ?? {}); }, [gs.id, gs.equivalents, gs.numberMin, gs.numberMax, gs.lastOpenEnded]);
 
   const hasSaved = !!gs.equivalents && Object.values(gs.equivalents).some(e =>
     e.vStart || e.vEnd || e.frenchStart || e.frenchEnd

@@ -80,10 +80,15 @@ export default function Layout() {
 
 function ChalkChip({ value }: { value: number }) {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-chalk/20 to-chalk-glow/20 border border-chalk-glow/40 shadow-chalk">
-      <span className="text-base">🧂</span>
-      <span className="font-bold gradient-chalk-text tabular-nums">{value.toLocaleString()}</span>
-      <span className="text-xs text-muted-foreground hidden sm:inline">Chalk</span>
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gradient-to-r from-chalk/20 to-chalk-glow/25 border-[3px] border-chalk-glow/60 shadow-[3px_3px_0_0_hsl(240_10%_2%)]">
+      <svg width="18" height="18" viewBox="0 0 8 8" shapeRendering="crispEdges">
+        <rect x="1" y="0" width="6" height="1" fill="#3a2a1a" />
+        <rect x="0" y="1" width="8" height="6" fill="#f5efe0" />
+        <rect x="0" y="7" width="8" height="1" fill="#3a2a1a" />
+        <rect x="2" y="3" width="2" height="1" fill="#cfc8b0" />
+        <rect x="4" y="4" width="2" height="1" fill="#cfc8b0" />
+      </svg>
+      <span className="font-pixel text-xs gradient-chalk-text tabular-nums">{value.toLocaleString()}</span>
     </div>
   );
 }

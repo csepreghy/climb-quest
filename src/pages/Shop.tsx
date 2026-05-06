@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Lock, Check } from "lucide-react";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Bottom", "Shoes", "Hat", "Hand"] },

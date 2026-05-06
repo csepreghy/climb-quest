@@ -4,7 +4,13 @@ export type Rarity = "common" | "rare" | "legendary" | "consumable";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "accessory" | "aura" | "title";
 export type Gender = "male" | "female" | "neutral";
 
-export type ActivityType = "boulder" | "boss_attempt" | "boss_send";
+export type ActivityType =
+  | "warmup_boulder"
+  | "boulder"
+  | "hard_boulder"
+  | "boulder_send"
+  | "boss_attempt"
+  | "boss_send";
 
 export type Style =
   | "slab" | "vertical" | "overhang" | "cave" | "compression"

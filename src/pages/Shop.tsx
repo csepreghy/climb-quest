@@ -71,14 +71,21 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
 
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
 
+  const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
+
   return (
-    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3">
+    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3 relative">
+      {bonusPct > 0 && (
+        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
+          +{bonusPct}%
+        </div>
+      )}
       <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji)
-          ? <img src={item.emoji} alt={item.name} className={cn("h-12 w-12 object-contain rounded bg-background/40 p-0.5", RARITY_BORDER[item.rarity])} />
-          : <div className={cn("text-3xl h-12 w-12 flex items-center justify-center rounded bg-background/40", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium leading-snug truncate">{item.name}</div>
+          ? <img src={item.emoji} alt={item.name} className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
+          : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
+        <div className="min-w-0 flex-1 pr-12">
+          <div className="text-sm font-medium leading-snug">{item.name}</div>
           <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
             {item.rarity}
           </div>

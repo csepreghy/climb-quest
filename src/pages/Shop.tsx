@@ -5,7 +5,7 @@ import { buyItem, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import chalkBagImg from "@/assets/chalk-bag.png";
+
 
 type GroupKey = ItemGroup | "all";
 

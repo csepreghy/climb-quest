@@ -11,8 +11,6 @@ import { Plus, Swords, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
-import { PixelSprite } from "@/components/pixel/PixelSprite";
-import { getBossSprite } from "@/components/pixel/sprites";
 
 const BOSS_EMOJIS = ["👹","👺","👻","😈","🗿","🐻","🦍","🐲","🦑","👽","🌀"];
 
@@ -33,8 +31,8 @@ export default function Bosses() {
     <div className="space-y-5 animate-float-up">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold">Boss Projects</h1>
-          <p className="text-sm text-muted-foreground">Long-term nemeses. Defeat them. Earn glory.</p>
+          <h1 className="font-display text-2xl font-semibold">Boss Projects</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Long-term nemeses. Defeat them. Earn glory.</p>
         </div>
         <CreateBoss />
       </div>
@@ -61,26 +59,24 @@ function BossCard({ boss, active, onActivate }: { boss: Boss; active: boolean; o
   }
 
   return (
-    <GameCard tone={boss.sent ? "legendary" : active ? "boss" : "default"} className={cn("p-5 relative overflow-hidden")}>
-      {boss.sent && <div className="absolute top-3 right-3 font-pixel text-[9px] px-2 py-1 rounded-md bg-legendary/20 text-legendary border-2 border-legendary/60 flex items-center gap-1"><Crown className="h-3 w-3" /> SENT</div>}
-      {active && !boss.sent && <div className="absolute top-3 right-3 font-pixel text-[9px] px-2 py-0.5 rounded-md bg-boss/20 text-boss border-2 border-boss/60">ACTIVE</div>}
+    <GameCard tone={boss.sent ? "legendary" : active ? "boss" : "default"} className={cn("p-5 relative")}>
+      {boss.sent && <div className="absolute top-3 right-3 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-legendary/15 text-legendary border border-legendary/40 flex items-center gap-1"><Crown className="h-3 w-3" /> Sent</div>}
+      {active && !boss.sent && <div className="absolute top-3 right-3 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-boss/15 text-boss border border-boss/40">Active</div>}
 
-      <div className="flex items-start gap-4">
-        <div className="bg-background/60 rounded-md border-2 border-border p-1 shrink-0">
-          <PixelSprite sprite={getBossSprite(boss.id)} pixel={5} aura={boss.sent ? "hsl(var(--legendary))" : "hsl(var(--boss))"} />
-        </div>
+      <div className="flex items-start gap-3">
+        <div className="text-3xl shrink-0">{boss.emoji}</div>
         <div className="min-w-0 flex-1">
-          <div className="font-pixel text-sm leading-snug truncate">{boss.name}</div>
-          <div className="text-[10px] font-pixel text-muted-foreground mt-1">{boss.grade} · {boss.style} · DIFF {boss.difficulty}/10</div>
+          <div className="font-medium leading-snug truncate pr-16">{boss.name}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">{boss.grade} · {boss.style} · Difficulty {boss.difficulty}/10</div>
           <div className="text-xs italic text-muted-foreground mt-1">"{boss.flavor}"</div>
         </div>
       </div>
 
       <div className="mt-4">
-        <div className="flex justify-between text-[10px] font-pixel text-muted-foreground mb-1">
-          <span>HIGH POINT</span><span>{boss.highPoint}%</span>
+        <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
+          <span>High point</span><span className="tabular-nums">{boss.highPoint}%</span>
         </div>
-        <PixelBar value={boss.highPoint} color="linear-gradient(90deg, hsl(var(--boss)), hsl(15 85% 60%))" />
+        <PixelBar value={boss.highPoint} color="hsl(var(--boss))" />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">

@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      hidden_builtin_items: {
+        Row: {
+          hidden_at: string
+          hidden_by: string | null
+          item_id: string
+        }
+        Insert: {
+          hidden_at?: string
+          hidden_by?: string | null
+          item_id: string
+        }
+        Update: {
+          hidden_at?: string
+          hidden_by?: string | null
+          item_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -32,6 +50,51 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+        }
+        Relationships: []
+      }
+      shop_items: {
+        Row: {
+          applies_to: Json
+          bonus_pct: number
+          category: string
+          created_at: string
+          group: string
+          id: string
+          image: string | null
+          name: string
+          price: number
+          rarity: string
+          slot: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: Json
+          bonus_pct?: number
+          category: string
+          created_at?: string
+          group: string
+          id: string
+          image?: string | null
+          name: string
+          price?: number
+          rarity: string
+          slot: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: Json
+          bonus_pct?: number
+          category?: string
+          created_at?: string
+          group?: string
+          id?: string
+          image?: string | null
+          name?: string
+          price?: number
+          rarity?: string
+          slot?: string
+          updated_at?: string
         }
         Relationships: []
       }

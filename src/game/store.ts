@@ -110,10 +110,22 @@ function load(): State {
 }
 function persist() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  remoteSave?.(state);
 }
 function set(updater: (s: State) => State) {
   state = updater(state);
   persist();
+  listeners.forEach(l => l());
+}
+
+let remoteSave: ((s: State) => void) | null = null;
+export function bindGameRemoteSync(saver: ((s: State) => void) | null) {
+  remoteSave = saver;
+}
+export function getGameStateSnapshot(): State { return state; }
+export function replaceGameState(next: State) {
+  state = { ...initialState(), ...next };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
   listeners.forEach(l => l());
 }
 

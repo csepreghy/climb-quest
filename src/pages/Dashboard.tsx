@@ -73,7 +73,7 @@ export default function Dashboard() {
           <div className="space-y-1 text-sm">
             {(["shoes","chalk","outfit","bottoms","accessory","aura","title"] as const).map(slot => {
               const id = s.equipped[slot];
-              const it = id ? ITEM_BY_ID[id] : null;
+              const it = id ? getItem(id) : null;
               return (
                 <div key={slot} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
                   <span className="text-muted-foreground capitalize text-xs">{slot}</span>
@@ -86,7 +86,7 @@ export default function Dashboard() {
           </div>
           {s.pendingConsumable && (
             <div className="mt-3 text-xs px-2.5 py-1.5 rounded-md bg-chalk-glow/10 border border-chalk-glow/30 text-chalk-glow">
-              Next log boosted: {ITEM_BY_ID[s.pendingConsumable]?.name}
+              Next log boosted: {getItem(s.pendingConsumable)?.name}
             </div>
           )}
         </GameCard>

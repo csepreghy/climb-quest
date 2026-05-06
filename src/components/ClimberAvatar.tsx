@@ -19,7 +19,7 @@ const FRAME_SIZE = { sm: "h-20 w-20", md: "h-28 w-28", lg: "h-40 w-40", xl: "h-4
 export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Props) {
   const lvl = LEVELS.find(l => l.level === level) ?? LEVELS[0];
   const auraId = equipped?.aura;
-  const aura = auraId ? ITEM_BY_ID[auraId] : null;
+  const aura = auraId ? getItem(auraId) : null;
   const outfit = equipped?.outfit ? ITEM_BY_ID[equipped.outfit] : null;
   const shoes = equipped?.shoes ? ITEM_BY_ID[equipped.shoes] : null;
   const sprite = getClimberSprite(level, gender);

@@ -14,8 +14,7 @@ import {
 import { Plus, X, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
-const SELECT_CLS = "h-8 rounded-md border-2 border-[hsl(var(--panel-frame))] bg-background/80 px-2 text-xs shadow-[inset_0_2px_0_hsl(0_0%_0%/0.45)] hover:border-[hsl(var(--btn-orange))] focus:outline-none focus:border-[hsl(var(--btn-orange))]";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MyGym() {
   const s = useGyms();
@@ -140,10 +139,13 @@ function CreateCustomGradingSystem() {
 
       <div className="grid sm:grid-cols-[1fr,140px,auto] gap-2">
         <Input placeholder="System name (e.g. 'House numbers')" value={name} onChange={e => setName(e.target.value)} />
-        <select value={kind} onChange={e => setKind(e.target.value as GradingKind)} className={cn(SELECT_CLS, "h-10 text-sm")}>
-          <option value="number">Number range</option>
-          <option value="color">Colors</option>
-        </select>
+        <Select value={kind} onValueChange={v => setKind(v as GradingKind)}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="number">Number range</SelectItem>
+            <SelectItem value="color">Colors</SelectItem>
+          </SelectContent>
+        </Select>
         <GameButton variant="primary" onClick={() => {
           if (!name.trim()) { toast.error("Name required"); return; }
           if (kind === "number") {
@@ -256,17 +258,24 @@ function RangePicker({
   allowOpenEnd: boolean;
   onChange: (start?: string, end?: string) => void;
 }) {
+  const NONE = "__none__";
   return (
     <div className="flex items-center gap-1">
-      <select value={start ?? ""} onChange={e => onChange(e.target.value || undefined, end)} className={cn(SELECT_CLS, "flex-1 min-w-0")}>
-        <option value="">—</option>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
-      </select>
+      <Select value={start ?? NONE} onValueChange={v => onChange(v === NONE ? undefined : v, end)}>
+        <SelectTrigger className="h-8 text-xs flex-1 min-w-0"><SelectValue placeholder="—" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NONE}>—</SelectItem>
+          {options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+        </SelectContent>
+      </Select>
       <span className="text-muted-foreground text-xs">→</span>
-      <select value={end ?? ""} onChange={e => onChange(start, e.target.value || undefined)} className={cn(SELECT_CLS, "flex-1 min-w-0")} disabled={!start}>
-        <option value="">{allowOpenEnd ? "open" : "—"}</option>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
-      </select>
+      <Select value={end ?? NONE} onValueChange={v => onChange(start, v === NONE ? undefined : v)} disabled={!start}>
+        <SelectTrigger className="h-8 text-xs flex-1 min-w-0"><SelectValue placeholder={allowOpenEnd ? "open" : "—"} /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NONE}>{allowOpenEnd ? "open" : "—"}</SelectItem>
+          {options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

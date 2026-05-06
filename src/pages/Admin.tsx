@@ -74,6 +74,7 @@ const empty: CustomItemInput = {
   price: 100,
   bonusPct: 0,
   imageDataUrl: undefined,
+  levelReq: undefined,
 };
 
 function InventoryAdmin() {
@@ -121,6 +122,7 @@ function InventoryAdmin() {
       bonusPct: item.bonus ? Math.round(item.bonus.mult * 100) : 0,
       imageDataUrl: isImageEmoji(item.emoji) ? item.emoji : undefined,
       appliesTo: item.bonus?.appliesTo,
+      levelReq: item.levelReq,
     });
   }
 
@@ -191,6 +193,20 @@ function InventoryAdmin() {
             <Label className="text-xs">Chalk bonus %</Label>
             <Input type="number" min={0} value={draft.bonusPct} onChange={e => setDraft(d => ({ ...d, bonusPct: parseInt(e.target.value) || 0 }))} />
           </div>
+          <div>
+            <Label className="text-xs">Level requirement</Label>
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              placeholder="None"
+              value={draft.levelReq ?? ""}
+              onChange={e => {
+                const v = e.target.value;
+                setDraft(d => ({ ...d, levelReq: v === "" ? undefined : Math.max(1, parseInt(v) || 1) }));
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -225,7 +241,7 @@ function InventoryAdmin() {
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-semibold truncate">{item.name}</div>
                           <div className="text-[10px] text-muted-foreground capitalize">
-                            {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}
+                            {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}{item.levelReq ? ` · Lv ${item.levelReq}+` : ""}
                           </div>
                         </div>
                         <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>

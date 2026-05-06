@@ -1,0 +1,1 @@
+ALTER TABLE public.shop_items ADD COLUMN level_req integer;

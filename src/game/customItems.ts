@@ -28,6 +28,7 @@ function rowToItem(r: any): ShopItem {
     price: r.price ?? 0,
     emoji: r.image ?? "🎁",
     desc: "",
+    levelReq: r.level_req ?? undefined,
     bonus: bonusPct > 0
       ? { mult: bonusPct / 100, appliesTo: (r.applies_to ?? "all") as ActivityType[] | "all" }
       : undefined,
@@ -100,6 +101,7 @@ export interface CustomItemInput {
   imageDataUrl?: string;
   bonusPct: number;
   appliesTo?: ActivityType[] | "all";
+  levelReq?: number;
 }
 
 function inputToRow(id: string, input: CustomItemInput) {
@@ -114,6 +116,7 @@ function inputToRow(id: string, input: CustomItemInput) {
     image: input.imageDataUrl ?? null,
     bonus_pct: input.bonusPct,
     applies_to: (input.appliesTo ?? "all") as any,
+    level_req: input.levelReq ?? null,
   };
 }
 
@@ -135,6 +138,7 @@ export async function updateCustomItem(itemId: string, patch: Partial<CustomItem
   if (patch.imageDataUrl !== undefined) row.image = patch.imageDataUrl ?? null;
   if (patch.bonusPct !== undefined) row.bonus_pct = patch.bonusPct;
   if (patch.appliesTo !== undefined) row.applies_to = patch.appliesTo as any;
+  if (patch.levelReq !== undefined) row.level_req = patch.levelReq ?? null;
   const { error } = await (supabase.from("shop_items") as any).update(row).eq("id", itemId);
   if (error) throw error;
   await refresh();

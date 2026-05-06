@@ -21,9 +21,8 @@ export default function Character() {
         <div className="flex flex-col md:flex-row gap-6 items-center">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
           <div className="flex-1 text-center md:text-left">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">Lv {s.level}</div>
-            <h1 className="font-display text-3xl font-bold gradient-chalk-text">{cur.title}</h1>
-            <p className="text-muted-foreground italic">"{cur.desc}"</p>
+            <div className="text-xs uppercase tracking-widest text-muted-foreground">Lv {s.level} · {cur.title}</div>
+            <p className="text-muted-foreground italic mt-2">"{cur.desc}"</p>
             <div className="mt-3 flex flex-wrap gap-2 justify-center md:justify-start">
               {(["male","female","neutral"] as const).map(g => (
                 <Button key={g} size="sm" variant={s.gender === g ? "default" : "secondary"} onClick={() => setGender(g)} className="capitalize">{g}</Button>

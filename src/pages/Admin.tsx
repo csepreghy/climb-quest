@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { adminAdjustChalk, useGame } from "@/game/store";
+import { adminAdjustChalk, adminSetLevel, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { Plus, Minus, Upload, Trash2, Pencil, X } from "lucide-react";
 import {
@@ -52,6 +52,19 @@ export default function Admin() {
           </Button>
           <Button variant="secondary" onClick={() => { adminAdjustChalk(-amount); toast.info(`-${amount} Chalk`); }}>
             <Minus className="h-4 w-4" /> Subtract
+          </Button>
+        </div>
+      </GameCard>
+
+      <GameCard tone="accent" className="p-5">
+        <div className="menu-label mb-3">Admin · Level Controls</div>
+        <div className="text-sm text-muted-foreground mb-3">Current level: <span className="font-bold tabular-nums">{s.level}</span></div>
+        <div className="flex gap-2">
+          <Button variant="default" onClick={() => { adminSetLevel(1); toast.success("Level +1"); }}>
+            <Plus className="h-4 w-4" /> Level Up
+          </Button>
+          <Button variant="secondary" onClick={() => { adminSetLevel(-1); toast.info("Level -1"); }}>
+            <Minus className="h-4 w-4" /> Level Down
           </Button>
         </div>
       </GameCard>

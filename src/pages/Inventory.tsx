@@ -1,61 +1,16 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
-import { ITEM_BY_ID, RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity, ShopItem } from "@/game/data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity, ShopItem } from "@/game/data";
 import { equipItem, unequipSlot, useGame } from "@/game/store";
 import { getItem, useCustomItems, isImageEmoji } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
-
-function ItemIcon({ emoji, alt, className, rarity }: { emoji: string; alt?: string; className?: string; rarity?: Rarity }) {
-  const ring = rarity ? RARITY_BORDER[rarity] : "";
-  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("object-contain rounded bg-background/40 p-0.5", ring, className)} />;
-  return <span className={cn("inline-flex items-center justify-center rounded leading-none", rarity && "bg-background/40", ring, className)}>{emoji}</span>;
-}
-
-function InventoryCard({ item, equipped, onEquip, primed, disabled }: { item: ShopItem; equipped?: boolean; onEquip: () => void; primed?: boolean; disabled?: boolean }) {
-  const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
-  const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
-  const isConsumable = !!item.consumableBonus;
-  return (
-    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3 relative">
-      {bonusPct > 0 && (
-        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
-          +{bonusPct}%
-        </div>
-      )}
-      {isConsumable && (
-        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
-          +{Math.round((item.consumableBonus ?? 0) * 100)}%
-        </div>
-      )}
-      <div className="flex items-start gap-3">
-        {isImageEmoji(item.emoji)
-          ? <img src={item.emoji} alt={item.name} className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
-          : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
-        <div className="min-w-0 flex-1 pr-12">
-          <div className="text-sm font-medium leading-snug">{item.name}</div>
-          <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
-            {item.rarity}
-          </div>
-        </div>
-      </div>
-      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
-      <div className="flex items-center justify-end pt-2 border-t border-border/50">
-        {equipped || primed ? (
-          <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> {primed ? "Primed" : "Equipped"}</GameButton>
-        ) : (
-          <GameButton size="sm" variant="primary" disabled={disabled} onClick={onEquip}>
-            {isConsumable ? "Prime" : "Equip"}
-          </GameButton>
-        )}
-      </div>
-    </GameCard>
-  );
-}
+import { ArrowRight } from "lucide-react";
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",
@@ -81,12 +36,91 @@ const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
   power: ["aura", "title"],
 };
 
+function ItemCard({
+  item,
+  showAction,
+  actionLabel,
+  onAction,
+  onClick,
+  primed,
+  highlight,
+}: {
+  item: ShopItem;
+  showAction?: boolean;
+  actionLabel?: string;
+  onAction?: () => void;
+  onClick?: () => void;
+  primed?: boolean;
+  highlight?: boolean;
+}) {
+  const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
+  const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
+  const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
+  const showPct = bonusPct || consumablePct;
+  return (
+    <GameCard
+      tone={tone as "default"}
+      shimmer={item.rarity === "legendary"}
+      interactive={!!onClick}
+      className={cn("p-4 flex flex-col gap-3 relative", onClick && "cursor-pointer", highlight && "ring-2 ring-[hsl(var(--btn-orange))]/60")}
+      onClick={onClick}
+    >
+      {showPct > 0 && (
+        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
+          +{showPct}%
+        </div>
+      )}
+      <div className="flex items-start gap-3">
+        {isImageEmoji(item.emoji)
+          ? <img src={item.emoji} alt={item.name} className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
+          : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
+        <div className="min-w-0 flex-1 pr-12">
+          <div className="text-sm font-medium leading-snug">{item.name}</div>
+          <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
+            {item.rarity}
+          </div>
+          {primed && <div className="mt-1 text-[10px] uppercase tracking-wider text-chalk-glow">Primed</div>}
+        </div>
+      </div>
+      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
+      {showAction && (
+        <div className="flex items-center justify-end pt-2 border-t border-border/50">
+          <GameButton size="sm" variant="primary" onClick={(e) => { e.stopPropagation(); onAction?.(); }}>
+            {actionLabel ?? "Equip"}
+          </GameButton>
+        </div>
+      )}
+    </GameCard>
+  );
+}
+
+function EmptySlotCard({ slot }: { slot: Slot }) {
+  return (
+    <GameCard className="p-4 flex flex-col gap-3 relative opacity-70">
+      <div className="flex items-start gap-3">
+        <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border text-2xl">∅</div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-medium leading-snug text-muted-foreground">Empty</div>
+          <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">{SLOT_LABEL[slot]}</div>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground italic">Nothing equipped in this slot.</p>
+    </GameCard>
+  );
+}
+
 export default function Inventory() {
   const s = useGame();
-  useCustomItems(); // subscribe so admin updates re-render
-  const items = s.owned.map(id => getItem(id)).filter(Boolean) as ReturnType<typeof getItem>[] as NonNullable<ReturnType<typeof getItem>>[];
-  const consumables = items.filter(i => !!i.consumableBonus);
+  useCustomItems();
+  const owned = s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[];
   const totalBonusByActivity = gearBonusSummary(s.equipped);
+
+  const [compareItem, setCompareItem] = useState<ShopItem | null>(null);
+  const equippedItem = compareItem
+    ? (compareItem.consumableBonus
+        ? (s.pendingConsumable ? getItem(s.pendingConsumable) ?? null : null)
+        : (s.equipped[compareItem.slot] ? getItem(s.equipped[compareItem.slot]!) ?? null : null))
+    : null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px,1fr] animate-float-up">
@@ -117,73 +151,139 @@ export default function Inventory() {
         </Card>
       </div>
 
-      <div className="space-y-6">
-        {(["outfit", "gear", "power"] as ItemGroup[]).map(group => {
-          const slots = GROUP_SLOTS[group];
-          const ownedInGroup = items.filter(it => !it.consumableBonus && it.group === group);
-          return (
-            <section key={group} className="space-y-3">
-              <div className="menu-label">{GROUP_LABEL[group]}</div>
-
-              <Card className="gradient-card p-4">
-                <div className="grid gap-2 sm:grid-cols-2">
+      <div className="space-y-8">
+        {/* EQUIPPED */}
+        <section className="space-y-4">
+          <div className="menu-label">Equipped</div>
+          {(["outfit", "gear", "power"] as ItemGroup[]).map(group => {
+            const slots = GROUP_SLOTS[group];
+            return (
+              <div key={group} className="space-y-2">
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">{GROUP_LABEL[group]}</div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {slots.map(slot => {
                     const id = s.equipped[slot];
                     const it = id ? getItem(id) : null;
+                    if (!it) return <EmptySlotCard key={slot} slot={slot} />;
                     return (
-                      <div key={slot} className="flex items-center justify-between gap-2 p-3 rounded-lg border border-border bg-secondary/30">
-                        <div className="min-w-0">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{SLOT_LABEL[slot]}</div>
-                          <div className="font-medium truncate flex items-center gap-2">{it ? <><ItemIcon emoji={it.emoji} alt={it.name} className="h-5 w-5" /> {it.name}</> : <span className="italic text-muted-foreground">empty</span>}</div>
+                      <div key={slot} className="space-y-1.5">
+                        <ItemCard item={it} />
+                        <div className="flex justify-end">
+                          <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot(slot)}>Unequip</Button>
                         </div>
-                        {it && it.id !== "rental_shoes" && it.id !== "plain_chalk" && (
-                          <Button size="sm" variant="ghost" onClick={() => unequipSlot(slot)}>Remove</Button>
-                        )}
                       </div>
                     );
                   })}
                 </div>
-              </Card>
+              </div>
+            );
+          })}
+        </section>
 
-              {ownedInGroup.length > 0 && (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {ownedInGroup.map(it => {
-                    const equipped = s.equipped[it.slot] === it.id;
-                    return (
-                      <InventoryCard
-                        key={it.id}
-                        item={it}
-                        equipped={equipped}
-                        onEquip={() => { equipItem(it.id); toast.success(`Equipped ${it.name}`); }}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          );
-        })}
-
-        {consumables.length > 0 && (
-          <section className="space-y-3">
-            <div className="menu-label">Consumables ({consumables.length})</div>
+        {/* OWNED */}
+        <section className="space-y-3">
+          <div className="menu-label">Owned ({owned.length})</div>
+          {owned.length === 0 ? (
+            <Card className="gradient-card p-4">
+              <p className="text-sm text-muted-foreground italic">No items yet. Visit the shop to gear up.</p>
+            </Card>
+          ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {consumables.map((it, i) => {
-                const primed = s.pendingConsumable === it.id;
+              {owned.map(it => {
+                const isEquipped = !it.consumableBonus && s.equipped[it.slot] === it.id;
+                const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
                 return (
-                  <InventoryCard
-                    key={it.id + i}
+                  <ItemCard
+                    key={it.id}
                     item={it}
-                    primed={primed}
-                    disabled={!!s.pendingConsumable && !primed}
-                    onEquip={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}
+                    primed={isPrimed}
+                    highlight={isEquipped}
+                    onClick={() => setCompareItem(it)}
                   />
                 );
               })}
             </div>
-          </section>
-        )}
+          )}
+        </section>
       </div>
+
+      {/* COMPARE MODAL */}
+      <Dialog open={!!compareItem} onOpenChange={(o) => { if (!o) setCompareItem(null); }}>
+        <DialogContent className="max-w-3xl">
+          {compareItem && (
+            <>
+              <DialogHeader>
+                <DialogTitle>
+                  {compareItem.consumableBonus
+                    ? `Prime ${compareItem.name}?`
+                    : `Equip ${compareItem.name}?`}
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-center">
+                <div className="space-y-2">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {compareItem.consumableBonus ? "Currently primed" : `Equipped · ${SLOT_LABEL[compareItem.slot]}`}
+                  </div>
+                  {equippedItem
+                    ? <ItemCard item={equippedItem} />
+                    : <EmptySlotCard slot={compareItem.slot} />}
+                </div>
+
+                <div className="hidden md:flex justify-center">
+                  <ArrowRight className="h-6 w-6 text-muted-foreground" />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">New</div>
+                  <ItemCard item={compareItem} />
+                </div>
+              </div>
+
+              <BonusDiff current={equippedItem} next={compareItem} />
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="ghost" onClick={() => setCompareItem(null)}>Close</Button>
+                {(() => {
+                  const alreadyOn = compareItem.consumableBonus
+                    ? s.pendingConsumable === compareItem.id
+                    : s.equipped[compareItem.slot] === compareItem.id;
+                  return (
+                    <GameButton
+                      variant="primary"
+                      disabled={alreadyOn}
+                      onClick={() => {
+                        equipItem(compareItem.id);
+                        toast.success(compareItem.consumableBonus ? `Primed ${compareItem.name}` : `Equipped ${compareItem.name}`);
+                        setCompareItem(null);
+                      }}
+                    >
+                      {alreadyOn
+                        ? (compareItem.consumableBonus ? "Already primed" : "Already equipped")
+                        : (compareItem.consumableBonus ? "Prime" : "Equip")}
+                    </GameButton>
+                  );
+                })()}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function BonusDiff({ current, next }: { current: ShopItem | null; next: ShopItem }) {
+  const cur = (current?.bonus?.mult ?? current?.consumableBonus ?? 0) * 100;
+  const nxt = (next.bonus?.mult ?? next.consumableBonus ?? 0) * 100;
+  const delta = nxt - cur;
+  if (delta === 0 && cur === 0) return null;
+  const sign = delta > 0 ? "+" : "";
+  const color = delta > 0 ? "text-chalk-glow" : delta < 0 ? "text-destructive" : "text-muted-foreground";
+  return (
+    <div className="text-xs text-center text-muted-foreground border-t border-border/50 pt-3 tabular-nums">
+      Bonus: {Math.round(cur)}% → {Math.round(nxt)}%
+      {delta !== 0 && <span className={cn("ml-2 font-bold", color)}>({sign}{Math.round(delta)}%)</span>}
     </div>
   );
 }

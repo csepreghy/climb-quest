@@ -35,7 +35,10 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
   return (
     <div className={cn("relative inline-flex items-center justify-center", FRAME_SIZE[size])}>
       {/* Soft framed stage — light fill so character has contrast */}
-      <div className="absolute inset-0 rounded-xl border border-border bg-gradient-to-b from-[hsl(40_60%_92%)] to-[hsl(40_50%_82%)] overflow-hidden" />
+      <div
+        className="absolute inset-0 rounded-xl border border-[hsl(var(--panel-frame))] overflow-hidden"
+        style={{ background: "var(--avatar-stage, transparent)" }}
+      />
 
       {auraColor && (
         <div

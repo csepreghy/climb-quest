@@ -91,12 +91,12 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   return (
     <div
-      className="flex items-center gap-2 pl-1.5 pr-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary"
+      className="flex items-center gap-3 pl-3 pr-4 h-11 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary"
       style={{
         boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.06), inset 0 -1px 0 hsl(0 0% 0% / 0.55)",
       }}
     >
-      <img src={chalkBagImg} alt="" className="h-7 w-7 object-contain drop-shadow-[0_1px_0_hsl(0_0%_0%/0.5)]" />
+      <img src={chalkBagImg} alt="" className="h-8 w-8 object-contain drop-shadow-[0_1px_0_hsl(0_0%_0%/0.5)]" />
       <span className="text-sm font-bold tabular-nums gradient-chalk-text">{value.toLocaleString()}</span>
       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
     </div>

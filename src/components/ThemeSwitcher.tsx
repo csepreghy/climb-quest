@@ -1,26 +1,53 @@
-import { useState } from "react";
-import { Settings } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { Settings, X } from "lucide-react";
 import { ThemeStudio } from "@/components/ThemeStudio";
+import { cn } from "@/lib/utils";
 
 export function ThemeButton() {
   const [open, setOpen] = useState(false);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
+    <>
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-label="Theme studio"
+        className={cn(
+          "h-9 w-9 grid place-items-center rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-foreground hover:brightness-110",
+          "shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)]",
+          open && "ring-2 ring-foreground/40",
+        )}
+      >
+        <Settings className="h-4 w-4" />
+      </button>
+
+      {open && (
+        <div
+          className="fixed top-20 right-4 z-50 w-[380px] max-h-[80vh] overflow-y-auto rpg-panel p-4 animate-pop-in"
+          style={{ background: "hsl(var(--panel-fill))" }}
+          role="dialog"
           aria-label="Theme studio"
-          className="h-9 w-9 grid place-items-center rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-foreground hover:brightness-110 shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)]"
         >
-          <Settings className="h-4 w-4" />
-        </button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-display">Theme Studio</DialogTitle>
-        </DialogHeader>
-        <ThemeStudio compact />
-      </DialogContent>
-    </Dialog>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display font-bold text-base">Theme Studio</h2>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close"
+              className="h-7 w-7 grid place-items-center rounded-md hover:bg-secondary"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <ThemeStudio compact />
+        </div>
+      )}
+    </>
   );
 }

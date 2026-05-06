@@ -89,13 +89,22 @@ function spawnBoss(t: BossTemplate): Boss {
 let state: State = load();
 const listeners = new Set<() => void>();
 
+const INVENTORY_RESET_KEY = "climbquest:inventoryReset:v1";
 function load(): State {
   if (typeof window === "undefined") return initialState();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return initialState();
     const parsed = JSON.parse(raw);
-    return { ...initialState(), ...parsed };
+    const merged: State = { ...initialState(), ...parsed };
+    // One-time inventory wipe: reset owned items + equipped to starter pack.
+    if (!localStorage.getItem(INVENTORY_RESET_KEY)) {
+      merged.owned = ["rental_shoes", "plain_chalk"];
+      merged.equipped = { shoes: "rental_shoes", chalk: "plain_chalk" };
+      merged.pendingConsumable = null;
+      localStorage.setItem(INVENTORY_RESET_KEY, "1");
+    }
+    return merged;
   } catch { return initialState(); }
 }
 function persist() {

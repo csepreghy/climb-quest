@@ -95,7 +95,7 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
       {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
         <div className="text-sm">
-          {item.price === 0 ? <span className="text-muted-foreground text-xs">Starter</span> : <span className="font-medium tabular-nums">{item.price} <span className="text-muted-foreground text-xs">Chalk</span></span>}
+          {item.price === 0 ? <span className="text-muted-foreground text-xs">Starter</span> : <span className="font-medium tabular-nums inline-flex items-center gap-1">{item.price} <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" /></span>}
         </div>
         {ownAlready ? (
           <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Owned</GameButton>

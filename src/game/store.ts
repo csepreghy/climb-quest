@@ -45,7 +45,7 @@ export interface Boss {
   active?: boolean;
 }
 
-export type Equipped = Partial<Record<"shoes"|"chalk"|"outfit"|"bottoms"|"accessory"|"aura"|"title", string>>;
+export type Equipped = Partial<Record<"shoes"|"chalk"|"outfit"|"bottoms"|"hat"|"hand"|"accessory"|"aura"|"title", string>>;
 
 export interface State {
   level: number;

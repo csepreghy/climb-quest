@@ -16,8 +16,7 @@ export default function Dashboard() {
   const next = nextLevel(s);
   const boss = activeBoss(s);
   const nav = useNavigate();
-  const titleId = s.equipped.title;
-  const titleName = titleId ? ITEM_BY_ID[titleId]?.name.replace(/^Title:\s*/, "") : cur.title;
+  
   const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;
 
   const onLevelUp = () => {
@@ -34,7 +33,6 @@ export default function Dashboard() {
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
           <div className="flex-1 min-w-0 text-center sm:text-left">
             <div className="menu-label">Level {s.level} · {cur.title}</div>
-            <h1 className="font-display font-semibold text-2xl sm:text-3xl mt-1.5 leading-tight">{titleName}</h1>
             <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
             <div className="mt-5 space-y-1.5">

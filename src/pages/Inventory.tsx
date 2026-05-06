@@ -1,22 +1,39 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ITEM_BY_ID, RARITY_COLOR, Slot } from "@/game/data";
+import { ITEM_BY_ID, RARITY_COLOR, Slot, ItemGroup } from "@/game/data";
 import { equipItem, unequipSlot, useGame } from "@/game/store";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const SLOTS: Slot[] = ["shoes","chalk","outfit","bottoms","accessory","aura","title"];
-const SLOT_LABEL: Record<Slot,string> = {
-  shoes: "Shoes", chalk: "Chalk", outfit: "Top / Outfit", bottoms: "Bottoms", accessory: "Brush / Accessory", aura: "Aura", title: "Title",
+const SLOT_LABEL: Record<Slot, string> = {
+  outfit: "Top",
+  bottoms: "Bottom",
+  shoes: "Shoes",
+  hat: "Hat",
+  hand: "Hand",
+  chalk: "Chalk",
+  accessory: "Brush / Accessory",
+  aura: "Aura",
+  title: "Title",
+};
+
+const GROUP_LABEL: Record<ItemGroup, string> = {
+  outfit: "Outfit",
+  gear: "Gear",
+  power: "Power-ups",
+};
+
+const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
+  outfit: ["outfit", "bottoms", "shoes", "hat", "hand"],
+  gear: ["chalk", "accessory"],
+  power: ["aura", "title"],
 };
 
 export default function Inventory() {
   const s = useGame();
   const items = s.owned.map(id => ITEM_BY_ID[id]).filter(Boolean);
   const consumables = items.filter(i => i.rarity === "consumable");
-  const gear = items.filter(i => i.rarity !== "consumable");
-
   const totalBonusByActivity = gearBonusSummary(s.equipped);
 
   return (
@@ -24,8 +41,7 @@ export default function Inventory() {
       <div className="space-y-4">
         <Card className="gradient-card p-5 text-center">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
-          <div className="mt-4 font-display font-bold text-lg">Loadout</div>
-          <div className="text-xs text-muted-foreground capitalize">{s.gender} preset</div>
+          <div className="mt-4 text-xs text-muted-foreground capitalize">{s.gender} preset</div>
         </Card>
 
         <Card className="gradient-card p-4">
@@ -49,78 +65,86 @@ export default function Inventory() {
         </Card>
       </div>
 
-      <div className="space-y-5">
-        <Card className="gradient-card p-5">
-          <h2 className="font-display font-bold mb-3">Equipped Slots</h2>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {SLOTS.map(slot => {
-              const id = s.equipped[slot];
-              const it = id ? ITEM_BY_ID[id] : null;
-              return (
-                <div key={slot} className="flex items-center justify-between gap-2 p-3 rounded-lg border border-border bg-secondary/30">
-                  <div className="min-w-0">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{SLOT_LABEL[slot]}</div>
-                    <div className="font-medium truncate">{it ? `${it.emoji} ${it.name}` : <span className="italic text-muted-foreground">empty</span>}</div>
-                  </div>
-                  {it && it.id !== "rental_shoes" && it.id !== "plain_chalk" && (
-                    <Button size="sm" variant="ghost" onClick={() => unequipSlot(slot)}>Remove</Button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </Card>
+      <div className="space-y-6">
+        {(["outfit", "gear", "power"] as ItemGroup[]).map(group => {
+          const slots = GROUP_SLOTS[group];
+          const ownedInGroup = items.filter(it => it.rarity !== "consumable" && it.group === group);
+          return (
+            <section key={group} className="space-y-3">
+              <div className="menu-label">{GROUP_LABEL[group]}</div>
 
-        <Card className="gradient-card p-5">
-          <h2 className="font-display font-bold mb-3">Owned Gear ({gear.length})</h2>
-          {gear.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Empty inventory. Visit the shop and treat yourself.</p>
-          ) : (
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {gear.map(it => {
-                const equipped = s.equipped[it.slot] === it.id;
-                return (
-                  <div key={it.id} className={cn("p-3 rounded-lg border flex items-start gap-3", equipped ? "border-accent/60 bg-accent/5" : "border-border bg-secondary/20")}>
+              <Card className="gradient-card p-4">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {slots.map(slot => {
+                    const id = s.equipped[slot];
+                    const it = id ? ITEM_BY_ID[id] : null;
+                    return (
+                      <div key={slot} className="flex items-center justify-between gap-2 p-3 rounded-lg border border-border bg-secondary/30">
+                        <div className="min-w-0">
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{SLOT_LABEL[slot]}</div>
+                          <div className="font-medium truncate">{it ? `${it.emoji} ${it.name}` : <span className="italic text-muted-foreground">empty</span>}</div>
+                        </div>
+                        {it && it.id !== "rental_shoes" && it.id !== "plain_chalk" && (
+                          <Button size="sm" variant="ghost" onClick={() => unequipSlot(slot)}>Remove</Button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+
+              {ownedInGroup.length > 0 && (
+                <Card className="gradient-card p-4">
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {ownedInGroup.map(it => {
+                      const equipped = s.equipped[it.slot] === it.id;
+                      return (
+                        <div key={it.id} className={cn("p-3 rounded-lg border flex items-start gap-3", equipped ? "border-accent/60 bg-accent/5" : "border-border bg-secondary/20")}>
+                          <div className="text-2xl">{it.emoji}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold truncate">{it.name}</div>
+                            <div className={cn("text-[10px] uppercase font-bold inline-block px-1 rounded border", RARITY_COLOR[it.rarity])}>{it.rarity}</div>
+                            <div className="mt-2">
+                              {equipped ? (
+                                <span className="text-xs text-accent">Equipped</span>
+                              ) : (
+                                <Button size="sm" variant="secondary" onClick={() => { equipItem(it.id); toast.success(`Equipped ${it.name}`); }}>Equip</Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              )}
+            </section>
+          );
+        })}
+
+        {consumables.length > 0 && (
+          <section className="space-y-3">
+            <div className="menu-label">Consumables ({consumables.length})</div>
+            <Card className="gradient-card p-4">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {consumables.map((it, i) => (
+                  <div key={it.id + i} className="p-3 rounded-lg border border-chalk-glow/30 bg-chalk-glow/5 flex items-start gap-3">
                     <div className="text-2xl">{it.emoji}</div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold truncate">{it.name}</div>
-                      <div className={cn("text-[10px] uppercase font-bold inline-block px-1 rounded border", RARITY_COLOR[it.rarity])}>{it.rarity}</div>
+                      <div className="text-[10px] text-muted-foreground">+{Math.round((it.consumableBonus ?? 0) * 100)}% next log</div>
                       <div className="mt-2">
-                        {equipped ? (
-                          <span className="text-xs text-accent">Equipped</span>
-                        ) : (
-                          <Button size="sm" variant="secondary" onClick={() => { equipItem(it.id); toast.success(`Equipped ${it.name}`); }}>Equip</Button>
-                        )}
+                        <Button size="sm" variant="secondary" disabled={!!s.pendingConsumable}
+                          onClick={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}>
+                          {s.pendingConsumable === it.id ? "Primed" : "Use next log"}
+                        </Button>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </Card>
-
-        {consumables.length > 0 && (
-          <Card className="gradient-card p-5">
-            <h2 className="font-display font-bold mb-3">Consumables ({consumables.length})</h2>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {consumables.map((it, i) => (
-                <div key={it.id + i} className="p-3 rounded-lg border border-chalk-glow/30 bg-chalk-glow/5 flex items-start gap-3">
-                  <div className="text-2xl">{it.emoji}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold truncate">{it.name}</div>
-                    <div className="text-[10px] text-muted-foreground">+{Math.round((it.consumableBonus ?? 0) * 100)}% next log</div>
-                    <div className="mt-2">
-                      <Button size="sm" variant="secondary" disabled={!!s.pendingConsumable}
-                        onClick={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}>
-                        {s.pendingConsumable === it.id ? "Primed" : "Use next log"}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+                ))}
+              </div>
+            </Card>
+          </section>
         )}
       </div>
     </div>

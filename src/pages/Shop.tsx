@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { SHOP, ShopItem, RARITY_COLOR } from "@/game/data";
+import { SHOP, ShopItem, RARITY_COLOR, ItemGroup } from "@/game/data";
 import { buyItem, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -7,22 +7,39 @@ import { Lock, Check } from "lucide-react";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 
-const CATEGORIES = ["All","Shoes","Chalk","Outfits","Brushes","Accessories","Auras","Titles","Consumables"] as const;
+const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
+  { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Bottom", "Shoes", "Hat", "Hand"] },
+  { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk"] },
+  { key: "power",  label: "Power-ups", categories: ["All", "Accessories", "Auras", "Titles", "Consumables"] },
+];
 
 export default function Shop() {
   const s = useGame();
-  const [cat, setCat] = useState<typeof CATEGORIES[number]>("All");
-  const items = useMemo(() => cat === "All" ? SHOP : SHOP.filter(i => i.category === cat), [cat]);
+  const [group, setGroup] = useState<ItemGroup>("outfit");
+  const [cat, setCat] = useState<string>("All");
+
+  const activeGroup = GROUPS.find(g => g.key === group)!;
+  const items = useMemo(() => {
+    const inGroup = SHOP.filter(i => i.group === group);
+    return cat === "All" ? inGroup : inGroup.filter(i => i.category === cat);
+  }, [group, cat]);
 
   return (
     <div className="space-y-5 animate-float-up">
-      <div>
-        <h1 className="font-display text-2xl font-semibold">Chalk Shop</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Spend Chalk on silly gear. Bonuses apply to future logged sessions.</p>
+      <div className="flex flex-wrap gap-1.5">
+        {GROUPS.map(g => (
+          <button key={g.key} onClick={() => { setGroup(g.key); setCat("All"); }}
+            className={cn("text-sm px-4 py-2 rounded-md border-2 font-bold transition-colors",
+              group === g.key
+                ? "bg-secondary text-foreground border-[hsl(var(--panel-frame))]"
+                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>
+            {g.label}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {CATEGORIES.map(c => (
+        {activeGroup.categories.map(c => (
           <button key={c} onClick={() => setCat(c)}
             className={cn("text-xs px-3 py-1.5 rounded-md border transition-colors",
               cat === c ? "bg-secondary text-foreground border-border" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>

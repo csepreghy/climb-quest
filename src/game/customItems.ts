@@ -138,6 +138,7 @@ export async function updateCustomItem(itemId: string, patch: Partial<CustomItem
   if (patch.imageDataUrl !== undefined) row.image = patch.imageDataUrl ?? null;
   if (patch.bonusPct !== undefined) row.bonus_pct = patch.bonusPct;
   if (patch.appliesTo !== undefined) row.applies_to = patch.appliesTo as any;
+  if (patch.levelReq !== undefined) row.level_req = patch.levelReq ?? null;
   const { error } = await (supabase.from("shop_items") as any).update(row).eq("id", itemId);
   if (error) throw error;
   await refresh();

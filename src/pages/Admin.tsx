@@ -12,9 +12,12 @@ import { Plus, Minus, Upload, Trash2, Pencil, X } from "lucide-react";
 import {
   useAllItems,
   useCustomItems,
+  useHiddenBuiltins,
   addCustomItem,
   updateCustomItem,
   deleteCustomItem,
+  hideBuiltinItem,
+  restoreBuiltinItem,
   isImageEmoji,
   CustomItemInput,
 } from "@/game/customItems";

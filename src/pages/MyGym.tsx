@@ -177,7 +177,14 @@ function CreateCustomGradingSystem() {
 function GradingSystemCard({ gs }: { gs: GradingSystem }) {
   const labels = gradeLabels(gs);
   const [showEq, setShowEq] = useState(true);
-  const [scale, setScale] = useState<"v" | "french">("v");
+  const initialScale: "v" | "french" = (() => {
+    const eqs = Object.values(gs.equivalents ?? {});
+    const hasV = eqs.some(e => e.vStart || e.vEnd);
+    const hasFrench = eqs.some(e => e.frenchStart || e.frenchEnd);
+    return !hasV && hasFrench ? "french" : "v";
+  })();
+  const [scale, setScale] = useState<"v" | "french">(initialScale);
+  useEffect(() => { setScale(initialScale); }, [gs.id]);
   const options = (scale === "v" ? V_SCALE : FRENCH_SCALE) as readonly string[];
 
   // Local draft of equivalents — only commit on Save/Update

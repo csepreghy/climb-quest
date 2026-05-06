@@ -60,6 +60,7 @@ export interface State {
   bosses: Boss[];
   logs: BoulderLog[];
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
+  ignoreLevelReq?: boolean;
 }
 
 const STORAGE_KEY = "climbquest:v1";
@@ -79,6 +80,7 @@ const initialState = (): State => ({
   ],
   logs: [],
   stats: { totalLogs: 0, totalSends: 0, totalFlashes: 0, bossesSent: 0 },
+  ignoreLevelReq: false,
 });
 
 function spawnBoss(t: BossTemplate): Boss {
@@ -279,7 +281,7 @@ function addLevelBadges(b: string[], lvl: number): string[] {
 export function buyItem(id: string): { ok: boolean; reason?: string } {
   const item = getItem(id);
   if (!item) return { ok: false, reason: "Unknown item" };
-  if (item.levelReq && state.level < item.levelReq) return { ok: false, reason: `Requires Level ${item.levelReq}` };
+  if (!state.ignoreLevelReq && item.levelReq && state.level < item.levelReq) return { ok: false, reason: `Requires Level ${item.levelReq}` };
   if (!item.consumableBonus && state.owned.includes(id)) return { ok: false, reason: "Already owned" };
   if (state.chalk < item.price) return { ok: false, reason: "Not enough Chalk" };
   set(s => {
@@ -364,6 +366,10 @@ export function adminSetLevel(delta: number) {
     const next = Math.max(1, Math.min(max, s.level + delta));
     return { ...s, level: next };
   });
+}
+
+export function adminSetIgnoreLevelReq(value: boolean) {
+  set(s => ({ ...s, ignoreLevelReq: value }));
 }
 
 export function resetGame() {

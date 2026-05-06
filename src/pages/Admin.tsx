@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { adminAdjustChalk, adminSetLevel, useGame } from "@/game/store";
+import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { Plus, Minus, Upload, Trash2, Pencil, X } from "lucide-react";
 import {
@@ -67,6 +67,15 @@ export default function Admin() {
             <Minus className="h-4 w-4" /> Level Down
           </Button>
         </div>
+        <label className="flex items-center gap-2 mt-4 text-sm cursor-pointer select-none">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-[hsl(var(--btn-orange))]"
+            checked={!!s.ignoreLevelReq}
+            onChange={e => { adminSetIgnoreLevelReq(e.target.checked); toast.info(e.target.checked ? "Level requirements disabled" : "Level requirements enabled"); }}
+          />
+          <span>Ignore level requirements (shop)</span>
+        </label>
       </GameCard>
 
       <InventoryAdmin />

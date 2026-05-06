@@ -74,6 +74,7 @@ const empty: CustomItemInput = {
   price: 100,
   bonusPct: 0,
   imageDataUrl: undefined,
+  levelReq: undefined,
 };
 
 function InventoryAdmin() {

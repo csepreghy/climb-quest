@@ -23,8 +23,13 @@ const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
 
 export default function Layout() {
   const s = useGame();
+  const { isAdmin, signOut } = useAuth();
+  const nav = useNavigate();
+  const NAV = isAdmin ? [...NAV_BASE, NAV_ADMIN] : NAV_BASE;
+  const [levelsOpen, setLevelsOpen] = useState(false);
   return (
     <div className="min-h-screen flex flex-col">
+      <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} />
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
         <div className="container flex items-center justify-between gap-4 py-3">
           <NavLink to="/" className="flex items-center gap-2.5 group">
@@ -43,10 +48,14 @@ export default function Layout() {
           <div className="flex items-center gap-3">
             <ThemeButton />
             <ChalkChip value={s.chalk} />
-            <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)]">
+            <button type="button" onClick={() => setLevelsOpen(true)}
+              className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110">
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>
               <span className="font-bold tabular-nums text-[hsl(var(--sky))]">{s.level}</span>
-            </div>
+            </button>
+            <Button size="icon" variant="ghost" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out">
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
         {/* Top nav (desktop) */}

@@ -19,6 +19,7 @@ import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { AuthProvider } from "./hooks/useAuth";
 import { RequireAuth, RequireAdmin } from "./components/RequireAuth";
+import { GameSync } from "./game/sync";
 
 const queryClient = new QueryClient();
 

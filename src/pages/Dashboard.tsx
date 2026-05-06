@@ -163,3 +163,68 @@ export default function Dashboard() {
     </div>
   );
 }
+
+function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number }[] }) {
+  const data = useMemo(() => {
+    if (logs.length === 0) return [];
+    const buckets = new Map<string, { week: string; ts: number; chalk: number }>();
+    for (const l of logs) {
+      const d = new Date(l.date);
+      // Week start (Monday)
+      const day = (d.getDay() + 6) % 7;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - day);
+      monday.setHours(0, 0, 0, 0);
+      const key = monday.toISOString().slice(0, 10);
+      const existing = buckets.get(key);
+      if (existing) existing.chalk += l.chalkTotal;
+      else buckets.set(key, { week: key, ts: monday.getTime(), chalk: l.chalkTotal });
+    }
+    return Array.from(buckets.values())
+      .sort((a, b) => a.ts - b.ts)
+      .map(b => ({
+        ...b,
+        label: new Date(b.ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+      }));
+  }, [logs]);
+
+  return (
+    <GameCard className="p-5">
+      <h3 className="menu-label mb-3 flex items-center gap-1.5">
+        <TrendingUp className="h-3 w-3" /> Chalk per Week
+      </h3>
+      {data.length === 0 ? (
+        <div className="text-sm text-muted-foreground py-8 text-center">
+          No data yet. Log a session to start tracking your progress.
+        </div>
+      ) : (
+        <div className="h-56 -ml-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="chalkGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
+              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={36} />
+              <Tooltip
+                contentStyle={{
+                  background: "hsl(var(--popover))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: 8,
+                  fontSize: 12,
+                }}
+                labelStyle={{ color: "hsl(var(--foreground))" }}
+                formatter={(v: number) => [`${v.toLocaleString()} chalk`, "Earned"]}
+              />
+              <Area type="monotone" dataKey="chalk" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#chalkGrad)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </GameCard>
+  );
+}

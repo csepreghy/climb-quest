@@ -141,7 +141,7 @@ function ChalkChip({ value }: { value: number }) {
                 {activities.map(a => (
                   <div key={a.label} className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-foreground/90">{a.label}</span>
-                    <span className="tabular-nums font-bold text-[hsl(var(--accent))]">+{a.chalk}</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+{a.chalk}</span>
                   </div>
                 ))}
               </div>
@@ -153,7 +153,7 @@ function ChalkChip({ value }: { value: number }) {
                 {modifiers.map(m => (
                   <div key={m.label} className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-foreground/90">{m.label}</span>
-                    <span className="tabular-nums font-bold text-[hsl(var(--accent))]">+{m.amount}</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+{m.amount}</span>
                   </div>
                 ))}
               </div>

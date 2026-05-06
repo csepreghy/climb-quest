@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Boss, attemptBoss, createBoss, setActiveBoss, useGame } from "@/game/store";
@@ -11,6 +9,10 @@ import { STYLES, Style, BOSS_TEMPLATES } from "@/game/data";
 import { toast } from "sonner";
 import { Plus, Swords, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GameCard, PixelBar } from "@/components/ui/game-card";
+import { GameButton } from "@/components/ui/game-button";
+import { PixelSprite } from "@/components/pixel/PixelSprite";
+import { getBossSprite } from "@/components/pixel/sprites";
 
 const BOSS_EMOJIS = ["👹","👺","👻","😈","🗿","🐻","🦍","🐲","🦑","👽","🌀"];
 
@@ -59,31 +61,33 @@ function BossCard({ boss, active, onActivate }: { boss: Boss; active: boolean; o
   }
 
   return (
-    <Card className={cn("gradient-card p-5 relative overflow-hidden border", active && !boss.sent && "border-accent/60 shadow-glow")}>
-      {boss.sent && <div className="absolute top-3 right-3 text-xs px-2 py-1 rounded-full bg-legendary/20 text-legendary border border-legendary/50 flex items-center gap-1"><Crown className="h-3 w-3" /> SENT</div>}
-      {active && !boss.sent && <div className="absolute top-3 right-3 text-[10px] px-2 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/50">ACTIVE</div>}
+    <GameCard tone={boss.sent ? "legendary" : active ? "boss" : "default"} className={cn("p-5 relative overflow-hidden")}>
+      {boss.sent && <div className="absolute top-3 right-3 font-pixel text-[9px] px-2 py-1 rounded-md bg-legendary/20 text-legendary border-2 border-legendary/60 flex items-center gap-1"><Crown className="h-3 w-3" /> SENT</div>}
+      {active && !boss.sent && <div className="absolute top-3 right-3 font-pixel text-[9px] px-2 py-0.5 rounded-md bg-boss/20 text-boss border-2 border-boss/60">ACTIVE</div>}
 
       <div className="flex items-start gap-4">
-        <div className="text-5xl drop-shadow-glow">{boss.emoji}</div>
+        <div className="bg-background/60 rounded-md border-2 border-border p-1 shrink-0">
+          <PixelSprite sprite={getBossSprite(boss.id)} pixel={5} aura={boss.sent ? "hsl(var(--legendary))" : "hsl(var(--boss))"} />
+        </div>
         <div className="min-w-0 flex-1">
-          <div className="font-display font-bold text-lg truncate">{boss.name}</div>
-          <div className="text-xs text-muted-foreground">{boss.grade} · {boss.style} · difficulty {boss.difficulty}/10</div>
+          <div className="font-pixel text-sm leading-snug truncate">{boss.name}</div>
+          <div className="text-[10px] font-pixel text-muted-foreground mt-1">{boss.grade} · {boss.style} · DIFF {boss.difficulty}/10</div>
           <div className="text-xs italic text-muted-foreground mt-1">"{boss.flavor}"</div>
         </div>
       </div>
 
       <div className="mt-4">
-        <div className="flex justify-between text-xs text-muted-foreground mb-1">
-          <span>High point</span><span>{boss.highPoint}%</span>
+        <div className="flex justify-between text-[10px] font-pixel text-muted-foreground mb-1">
+          <span>HIGH POINT</span><span>{boss.highPoint}%</span>
         </div>
-        <Progress value={boss.highPoint} className="h-2" />
+        <PixelBar value={boss.highPoint} color="linear-gradient(90deg, hsl(var(--boss)), hsl(15 85% 60%))" />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {!boss.sent && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2"><Swords className="h-4 w-4" /> Attempt</Button>
+              <GameButton variant="danger" size="sm"><Swords className="h-4 w-4" /> Attempt</GameButton>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>How did it go on {boss.name}?</DialogTitle></DialogHeader>
@@ -99,7 +103,7 @@ function BossCard({ boss, active, onActivate }: { boss: Boss; active: boolean; o
             </DialogContent>
           </Dialog>
         )}
-        {!boss.sent && !active && <Button variant="outline" onClick={onActivate}>Set active</Button>}
+        {!boss.sent && !active && <GameButton variant="ghost" size="sm" onClick={onActivate}>Set active</GameButton>}
       </div>
 
       {boss.attempts.length > 0 && (

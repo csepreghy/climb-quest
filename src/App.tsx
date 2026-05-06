@@ -19,6 +19,7 @@ import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { AuthProvider } from "./hooks/useAuth";
 import { RequireAuth, RequireAdmin } from "./components/RequireAuth";
+import { GameSync } from "./game/sync";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <GameSync />
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route element={<RequireAuth />}>

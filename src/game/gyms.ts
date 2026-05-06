@@ -99,8 +99,25 @@ function load(): GymState {
     return merged;
   } catch { return initial(); }
 }
-function persist() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+  remoteSave?.(state);
+}
 function set(u: (s: GymState) => GymState) { state = u(state); persist(); listeners.forEach(l => l()); }
+
+let remoteSave: ((s: GymState) => void) | null = null;
+export function bindGymsRemoteSync(saver: ((s: GymState) => void) | null) {
+  remoteSave = saver;
+}
+export function getGymsSnapshot(): GymState { return state; }
+export function replaceGymsState(next: GymState) {
+  state = { ...initial(), ...next };
+  const ids = new Set(state.gradingSystems.map(g => g.id));
+  if (!ids.has("v_grades")) state.gradingSystems.unshift(V_GRADES);
+  if (!ids.has("french_grades")) state.gradingSystems.push(FRENCH_GRADES);
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+  listeners.forEach(l => l());
+}
 
 export function useGyms(): GymState {
   return useSyncExternalStore(

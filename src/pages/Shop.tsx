@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { SHOP, ShopItem, RARITY_COLOR, ItemGroup } from "@/game/data";
+import { ShopItem, RARITY_COLOR, ItemGroup } from "@/game/data";
+import { useAllItems, isImageEmoji } from "@/game/customItems";
 import { buyItem, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -15,14 +16,15 @@ const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
 
 export default function Shop() {
   const s = useGame();
+  const all = useAllItems();
   const [group, setGroup] = useState<ItemGroup>("outfit");
   const [cat, setCat] = useState<string>("All");
 
   const activeGroup = GROUPS.find(g => g.key === group)!;
   const items = useMemo(() => {
-    const inGroup = SHOP.filter(i => i.group === group);
+    const inGroup = all.filter(i => i.group === group);
     return cat === "All" ? inGroup : inGroup.filter(i => i.category === cat);
-  }, [group, cat]);
+  }, [group, cat, all]);
 
   return (
     <div className="space-y-5 animate-float-up">
@@ -72,7 +74,9 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
   return (
     <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3">
       <div className="flex items-start gap-3">
-        <div className="text-3xl">{item.emoji}</div>
+        {isImageEmoji(item.emoji)
+          ? <img src={item.emoji} alt={item.name} className="h-12 w-12 object-contain rounded" />
+          : <div className="text-3xl">{item.emoji}</div>}
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium leading-snug truncate">{item.name}</div>
           <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>

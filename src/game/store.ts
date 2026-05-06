@@ -3,6 +3,7 @@ import {
   ACTIVITY_LABELS, ActivityType, BADGES, BASE_CHALK, BOSS_TEMPLATES,
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
 } from "./data";
+import { getItem } from "./customItems";
 
 // ----- Types -----
 export interface BoulderLog {
@@ -142,7 +143,7 @@ export function computeChalk(activity: ActivityType, styles: Style[], sent = fal
   const eq = state.equipped;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
     const id = eq[slotKey]; if (!id) continue;
-    const item = ITEM_BY_ID[id]; if (!item?.bonus) continue;
+    const item = getItem(id); if (!item?.bonus) continue;
     const b = item.bonus;
     let applies = false;
     if (b.appliesTo === "all") applies = true;
@@ -154,7 +155,7 @@ export function computeChalk(activity: ActivityType, styles: Style[], sent = fal
   }
   // Consumable
   if (state.pendingConsumable) {
-    const item = ITEM_BY_ID[state.pendingConsumable];
+    const item = getItem(state.pendingConsumable);
     if (item?.consumableBonus) bonuses.push({ source: item.name + " (consumed)", amount: Math.round(base * item.consumableBonus) });
   }
   const total = base + bonuses.reduce((a,b)=>a+b.amount, 0);
@@ -254,7 +255,7 @@ function addLevelBadges(b: string[], lvl: number): string[] {
 }
 
 export function buyItem(id: string): { ok: boolean; reason?: string } {
-  const item = ITEM_BY_ID[id];
+  const item = getItem(id);
   if (!item) return { ok: false, reason: "Unknown item" };
   if (item.levelReq && state.level < item.levelReq) return { ok: false, reason: `Requires Level ${item.levelReq}` };
   if (item.rarity !== "consumable" && state.owned.includes(id)) return { ok: false, reason: "Already owned" };
@@ -271,7 +272,7 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
 }
 
 export function equipItem(id: string) {
-  const item = ITEM_BY_ID[id]; if (!item) return;
+  const item = getItem(id); if (!item) return;
   if (item.rarity === "consumable") {
     set(s => ({ ...s, pendingConsumable: id }));
     return;

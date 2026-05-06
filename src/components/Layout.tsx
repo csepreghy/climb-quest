@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { Home, ScrollText, Swords, User, Store, Backpack, Settings } from "lucide-react";
 import { useGame } from "@/game/store";
 import { cn } from "@/lib/utils";
+import { ThemeButton } from "@/components/ThemeSwitcher";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 const NAV = [
@@ -33,7 +34,7 @@ export default function Layout() {
             </div>
           </NavLink>
           <div className="flex items-center gap-2">
-            
+            <ThemeButton />
             <ChalkChip value={s.chalk} />
             <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)]">
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>

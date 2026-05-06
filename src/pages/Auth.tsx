@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GameCard } from "@/components/ui/game-card";
+import { GameButton } from "@/components/ui/game-button";
 import { toast } from "sonner";
 
 export default function Auth() {

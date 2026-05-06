@@ -106,7 +106,7 @@ export default function Inventory() {
                             <div className={cn("text-[10px] uppercase font-bold inline-block px-1 rounded border", RARITY_COLOR[it.rarity])}>{it.rarity}</div>
                             <div className="mt-2">
                               {equipped ? (
-                                <span className="text-xs text-accent">Equipped</span>
+                                <span className="text-xs font-bold text-[hsl(var(--btn-orange))]">Equipped</span>
                               ) : (
                                 <Button size="sm" variant="secondary" onClick={() => { equipItem(it.id); toast.success(`Equipped ${it.name}`); }}>Equip</Button>
                               )}

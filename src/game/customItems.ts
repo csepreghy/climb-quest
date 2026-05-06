@@ -51,8 +51,8 @@ function ensureInit() {
   if (initialized || typeof window === "undefined") return;
   initialized = true;
   refresh();
-  supabase
-    .channel("shop-items-sync")
+  const channel = supabase.channel("shop-items-sync-" + Math.random().toString(36).slice(2, 8));
+  channel
     .on("postgres_changes", { event: "*", schema: "public", table: "shop_items" }, () => refresh())
     .on("postgres_changes", { event: "*", schema: "public", table: "hidden_builtin_items" }, () => refresh())
     .subscribe();

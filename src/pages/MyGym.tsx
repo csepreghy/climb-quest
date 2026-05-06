@@ -139,10 +139,13 @@ function CreateCustomGradingSystem() {
 
       <div className="grid sm:grid-cols-[1fr,140px,auto] gap-2">
         <Input placeholder="System name (e.g. 'House numbers')" value={name} onChange={e => setName(e.target.value)} />
-        <select value={kind} onChange={e => setKind(e.target.value as GradingKind)} className={cn(SELECT_CLS, "h-10 text-sm")}>
-          <option value="number">Number range</option>
-          <option value="color">Colors</option>
-        </select>
+        <Select value={kind} onValueChange={v => setKind(v as GradingKind)}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="number">Number range</SelectItem>
+            <SelectItem value="color">Colors</SelectItem>
+          </SelectContent>
+        </Select>
         <GameButton variant="primary" onClick={() => {
           if (!name.trim()) { toast.error("Name required"); return; }
           if (kind === "number") {

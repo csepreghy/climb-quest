@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Home, ScrollText, Swords, User, Store, Backpack, Settings } from "lucide-react";
 import { useGame } from "@/game/store";
+import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 const NAV = [

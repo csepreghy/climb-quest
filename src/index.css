@@ -2,67 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ClimbQuest design system — dark bouldering RPG */
+/* ClimbQuest design system — warm cartoony RPG menu */
 @layer base {
   :root {
-    /* Near-black RPG dashboard */
-    --background: 240 10% 4%;
-    --foreground: 40 30% 96%;
+    /* Warm stone base */
+    --background: 24 18% 9%;
+    --foreground: 38 40% 94%;
 
-    --card: 240 10% 7%;
-    --card-foreground: 40 30% 96%;
+    --card: 26 22% 15%;
+    --card-foreground: 38 40% 94%;
 
-    --popover: 240 10% 6%;
-    --popover-foreground: 40 30% 96%;
+    --popover: 26 22% 13%;
+    --popover-foreground: 38 40% 94%;
 
-    /* Chalk white as primary */
-    --primary: 40 50% 92%;
-    --primary-foreground: 240 10% 6%;
+    /* Parchment-y primary */
+    --primary: 38 55% 88%;
+    --primary-foreground: 24 30% 12%;
 
-    --secondary: 240 8% 12%;
-    --secondary-foreground: 40 30% 96%;
+    --secondary: 26 18% 19%;
+    --secondary-foreground: 38 40% 94%;
 
-    --muted: 240 8% 12%;
-    --muted-foreground: 240 5% 60%;
+    --muted: 26 14% 18%;
+    --muted-foreground: 32 18% 66%;
 
-    --accent: 280 80% 60%;
-    --accent-foreground: 40 30% 96%;
+    /* Orange accent */
+    --accent: 24 90% 55%;
+    --accent-foreground: 24 40% 10%;
 
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 40 30% 96%;
+    --destructive: 0 75% 52%;
+    --destructive-foreground: 38 40% 96%;
 
-    --border: 240 8% 16%;
-    --input: 240 8% 14%;
-    --ring: 280 80% 60%;
+    --border: 28 28% 28%;
+    --input: 26 18% 18%;
+    --ring: 24 90% 55%;
 
-    --radius: 1rem;
+    --radius: 0.9rem;
 
-    /* Game-specific tokens */
-    --chalk: 40 60% 95%;
-    --chalk-glow: 40 90% 75%;
-    --xp: 145 70% 50%;
-    --boss: 350 80% 60%;
-    --legendary: 35 95% 60%;
-    --rare: 260 85% 70%;
-    --common: 200 30% 65%;
+    /* Game tokens */
+    --chalk: 42 90% 70%;          /* gold-ish coin */
+    --chalk-glow: 42 95% 60%;
+    --xp: 130 55% 48%;            /* play-button green */
+    --boss: 354 72% 52%;
+    --legendary: 42 95% 58%;
+    --rare: 268 70% 65%;
+    --common: 32 20% 65%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(280 80% 30% / 0.6), hsl(220 70% 25% / 0.6));
-    --gradient-chalk: linear-gradient(135deg, hsl(40 90% 75%), hsl(40 50% 92%));
-    --gradient-boss: linear-gradient(135deg, hsl(350 80% 50%), hsl(15 85% 55%));
-    --gradient-card: linear-gradient(160deg, hsl(240 10% 9%), hsl(240 10% 6%));
-    --gradient-legendary: linear-gradient(135deg, hsl(35 95% 60%), hsl(280 80% 60%));
+    /* Panel & frame */
+    --panel-frame: 30 35% 18%;            /* dark wood/stone outer */
+    --panel-edge: 30 30% 38%;             /* lighter inner edge */
+    --panel-fill-top: 28 24% 19%;
+    --panel-fill-bot: 26 22% 13%;
+    --panel-inset-light: 38 30% 92% / 0.06;
+    --panel-inset-dark: 0 0% 0% / 0.55;
 
-    --shadow-glow: 0 0 40px hsl(280 80% 60% / 0.25);
-    --shadow-chalk: 0 0 30px hsl(40 90% 75% / 0.35);
-    --shadow-card: 0 10px 30px -10px hsl(0 0% 0% / 0.6);
+    /* Button gradients */
+    --btn-orange-top: 30 95% 60%;
+    --btn-orange-bot: 18 85% 42%;
+    --btn-green-top: 130 60% 52%;
+    --btn-green-bot: 140 70% 30%;
+    --btn-red-top: 0 80% 60%;
+    --btn-red-bot: 354 78% 38%;
+    --btn-stone-top: 32 16% 30%;
+    --btn-stone-bot: 28 18% 18%;
+    --btn-gold-top: 46 95% 65%;
+    --btn-gold-bot: 32 85% 42%;
 
-    --transition-pop: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --shadow-panel:
+      0 0 0 2px hsl(var(--panel-frame)),
+      0 0 0 3px hsl(var(--panel-edge) / 0.7),
+      inset 0 1px 0 hsl(var(--panel-inset-light)),
+      inset 0 -2px 0 hsl(var(--panel-inset-dark)),
+      0 14px 28px -16px hsl(0 0% 0% / 0.7);
   }
 
-  /* Force dark theme always */
-  .dark {
-    color-scheme: dark;
-  }
+  .dark { color-scheme: dark; }
 }
 
 @layer base {
@@ -71,47 +84,64 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "cv11";
+    background-color: hsl(var(--background));
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -10%, hsl(280 80% 30% / 0.18), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 100%, hsl(220 70% 30% / 0.12), transparent);
+      radial-gradient(ellipse 70% 45% at 50% -5%, hsl(28 70% 30% / 0.30), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, hsl(18 70% 25% / 0.22), transparent 70%),
+      radial-gradient(ellipse 50% 35% at 0% 100%, hsl(36 60% 22% / 0.18), transparent 70%);
     background-attachment: fixed;
   }
 }
 
 @layer components {
-  .glow-chalk { box-shadow: var(--shadow-chalk); }
-  .glow-accent { box-shadow: var(--shadow-glow); }
-  .gradient-card { background: var(--gradient-card); }
-  .gradient-hero { background: var(--gradient-hero); }
-  .gradient-chalk-text {
-    background: var(--gradient-chalk);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Generic stone/wood panel */
+  .rpg-panel {
+    background:
+      linear-gradient(180deg, hsl(var(--panel-fill-top)), hsl(var(--panel-fill-bot)));
+    box-shadow: var(--shadow-panel);
+    border-radius: var(--radius);
+    position: relative;
   }
-  .gradient-legendary-text {
-    background: var(--gradient-legendary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Tiny rivets at corners */
+  .rpg-rivets::before,
+  .rpg-rivets::after,
+  .rpg-rivets > .rivet-tr,
+  .rpg-rivets > .rivet-br {
+    content: "";
+    position: absolute;
+    width: 6px; height: 6px; border-radius: 999px;
+    background: radial-gradient(circle at 35% 35%, hsl(38 40% 70%), hsl(28 30% 20%) 70%);
+    box-shadow: 0 1px 0 hsl(0 0% 0% / 0.6);
   }
+  .rpg-rivets::before { top: 7px; left: 7px; }
+  .rpg-rivets::after  { bottom: 7px; left: 7px; }
+  .rpg-rivets > .rivet-tr { top: 7px; right: 7px; }
+  .rpg-rivets > .rivet-br { bottom: 7px; right: 7px; }
+
   .menu-label {
-    @apply text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium;
+    @apply text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold;
+  }
+  .gradient-chalk-text {
+    background: linear-gradient(180deg, hsl(46 95% 70%), hsl(32 85% 50%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 1px 0 hsl(0 0% 0% / 0.25);
   }
 }
 
 @layer utilities {
   @keyframes pop-in {
-    0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+    0% { opacity: 0; transform: scale(0.9) translateY(8px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
   }
   @keyframes float-up {
-    0% { opacity: 0; transform: translateY(20px); }
+    0% { opacity: 0; transform: translateY(12px); }
     100% { opacity: 1; transform: translateY(0); }
   }
-  @keyframes chalk-pulse {
-    0%, 100% { box-shadow: 0 0 20px hsl(40 90% 75% / 0.3); }
-    50% { box-shadow: 0 0 40px hsl(40 90% 75% / 0.6); }
+  @keyframes coin-shine {
+    0%, 100% { box-shadow: 0 0 8px hsl(var(--chalk-glow) / 0.5); }
+    50%      { box-shadow: 0 0 18px hsl(var(--chalk-glow) / 0.9); }
   }
   @keyframes sprite-bob {
     0%, 100% { transform: translateY(0); }
@@ -121,49 +151,25 @@
     0%, 100% { transform: scale(1); opacity: 0.55; }
     50% { transform: scale(1.15); opacity: 0.85; }
   }
-  @keyframes chalk-drift {
-    0%   { transform: translateY(0) translateX(0); opacity: 0; }
-    10%  { opacity: 0.7; }
-    90%  { opacity: 0.5; }
-    100% { transform: translateY(-110vh) translateX(40px); opacity: 0; }
-  }
   @keyframes shimmer-band {
     0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
-  @keyframes reward-pop {
-    0%   { opacity: 0; transform: translate(-50%, 0) scale(0.6); }
-    20%  { opacity: 1; transform: translate(-50%, -10px) scale(1.1); }
-    100% { opacity: 0; transform: translate(-50%, -80px) scale(1); }
-  }
   @keyframes banner-pop {
-    0%   { opacity: 0; transform: scale(0.4) rotate(-6deg); }
-    50%  { opacity: 1; transform: scale(1.1) rotate(2deg); }
-    70%  { transform: scale(0.95) rotate(-1deg); }
+    0%   { opacity: 0; transform: scale(0.6) rotate(-4deg); }
+    60%  { opacity: 1; transform: scale(1.06) rotate(1deg); }
     100% { opacity: 1; transform: scale(1) rotate(0); }
   }
   @keyframes fade-overlay {
-    0%   { opacity: 0; }
-    20%  { opacity: 1; }
-    80%  { opacity: 1; }
-    100% { opacity: 0; }
-  }
-  @keyframes confetti-burst {
-    0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 0; transform: translate(calc(-50% + var(--cx)), calc(-50% + var(--cy))) scale(0.4) rotate(540deg); }
+    0%, 100% { opacity: 0; }
+    20%, 80% { opacity: 1; }
   }
   .animate-pop-in { animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .animate-float-up { animation: float-up 0.5s ease-out; }
-  .animate-chalk-pulse { animation: chalk-pulse 2.5s ease-in-out infinite; }
+  .animate-coin-shine { animation: coin-shine 2.4s ease-in-out infinite; }
   .animate-sprite-bob { animation: sprite-bob 2.4s ease-in-out infinite; }
   .animate-aura-pulse { animation: aura-pulse 3s ease-in-out infinite; }
-  .animate-chalk-drift { animation: chalk-drift linear infinite; }
   .animate-shimmer-band { animation: shimmer-band 3.5s linear infinite; }
-  .animate-reward-pop { animation: reward-pop 1.4s ease-out forwards; }
-  .animate-banner-pop { animation: banner-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .animate-banner-pop { animation: banner-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
   .animate-fade-overlay { animation: fade-overlay 2.6s ease-out both; }
-  .animate-confetti-burst { animation: confetti-burst 1.6s ease-out forwards; }
-
-  .pixelated { image-rendering: pixelated; }
-  .text-shadow-pixel { text-shadow: 2px 2px 0 hsl(240 10% 2%); }
 }

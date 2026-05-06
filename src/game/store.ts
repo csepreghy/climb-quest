@@ -283,7 +283,7 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
 
 export function equipItem(id: string) {
   const item = getItem(id); if (!item) return;
-  if (item.rarity === "consumable") {
+  if (item.consumableBonus) {
     set(s => ({ ...s, pendingConsumable: id }));
     return;
   }

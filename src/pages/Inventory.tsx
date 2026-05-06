@@ -66,7 +66,7 @@ function ItemCard({
       onClick={onClick}
     >
       {showPct > 0 && (
-        <div className="absolute top-4 right-4 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
+        <div className="absolute top-0 right-0 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
           +{showPct}%
         </div>
       )}

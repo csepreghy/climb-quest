@@ -116,9 +116,6 @@ function ShopTile({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
       {isImageEmoji(item.emoji)
         ? <img src={item.emoji} alt={item.name} className={cn("h-full w-full object-contain rounded bg-background/40 p-1", RARITY_BORDER[item.rarity])} />
         : <span className={cn("inline-flex items-center justify-center rounded leading-none text-5xl h-full w-full bg-background/40", RARITY_BORDER[item.rarity])}>{item.emoji}</span>}
-      <div className="absolute bottom-1 left-1 right-1 flex items-center justify-center gap-1 text-[10px] font-bold tabular-nums bg-background/80 rounded px-1 py-0.5">
-        {item.price === 0 ? "Free" : <>{item.price}<img src={chalkBagImg} alt="" className="h-3 w-3 object-contain" /></>}
-      </div>
     </button>
   );
 }

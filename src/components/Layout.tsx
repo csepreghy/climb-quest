@@ -40,16 +40,20 @@ export default function Layout() {
           </div>
         </div>
         {/* Top nav (desktop) */}
-        <nav className="hidden md:block border-t border-border/60">
-          <div className="container flex gap-1 py-1">
+        <nav className="hidden md:block border-t border-[hsl(var(--panel-frame))]/70">
+          <div className="container flex gap-1.5 py-2">
             {NAV.map(n => (
               <NavLink
                 key={n.to}
                 to={n.to}
                 end={n.to === "/"}
                 className={({ isActive }) =>
-                  cn("px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors",
-                    isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50")
+                  cn(
+                    "px-3.5 py-2 rounded-full text-sm font-semibold flex items-center gap-2 transition-all border",
+                    isActive
+                      ? "text-[hsl(24_40%_10%)] border-[hsl(18_60%_18%)] shadow-[inset_0_1px_0_hsl(0_0%_100%/0.3),inset_0_-2px_0_hsl(0_0%_0%/0.25),0_2px_0_hsl(18_70%_18%)] bg-[linear-gradient(180deg,hsl(var(--btn-orange-top)),hsl(var(--btn-orange-bot)))]"
+                      : "text-muted-foreground hover:text-foreground border-transparent hover:bg-secondary/50",
+                  )
                 }
               >
                 <n.icon className="h-4 w-4" /> {n.label}

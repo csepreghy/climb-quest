@@ -107,7 +107,7 @@ export default function Inventory() {
                       const equipped = s.equipped[it.slot] === it.id;
                       return (
                         <div key={it.id} className={cn("p-3 rounded-lg border flex items-start gap-3", equipped ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/5" : "border-border bg-secondary/20")}>
-                          <div className="text-2xl">{it.emoji}</div>
+                          <ItemIcon emoji={it.emoji} alt={it.name} className="text-2xl h-10 w-10" />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-semibold truncate">{it.name}</div>
                             <div className={cn("text-[10px] uppercase font-bold inline-block px-1 rounded border", RARITY_COLOR[it.rarity])}>{it.rarity}</div>

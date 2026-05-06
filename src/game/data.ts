@@ -145,15 +145,21 @@ export const BOSS_TEMPLATES: BossTemplate[] = [
 
 // Base Chalk per activity (before bonuses)
 export const BASE_CHALK: Record<ActivityType, number> = {
+  warmup_boulder: 30,
   boulder: 80,
+  hard_boulder: 160,
+  boulder_send: 60,
   boss_attempt: 50,
   boss_send: 250,
 };
 
 export const ACTIVITY_LABELS: Record<ActivityType, string> = {
-  boulder: "Boulder",
-  boss_attempt: "Boss Problem Attempt",
-  boss_send: "Boss Problem Send",
+  warmup_boulder: "Warm-up Boulder",
+  boulder: "Regular Boulder",
+  hard_boulder: "Hard Boulder",
+  boulder_send: "Boulder Send",
+  boss_attempt: "Boss Project Attempt",
+  boss_send: "Boss Project Send",
 };
 
 export const STYLES: Style[] = ["slab","vertical","overhang","cave","compression","coordination","dyno","mantle","crimp","sloper"];

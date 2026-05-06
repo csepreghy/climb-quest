@@ -74,6 +74,12 @@
     --btn-stone: 258 12% 32%;
     --btn-stone-shadow: 260 25% 10%;
 
+    /* Brand gradient stops (red → orange) */
+    --grad-red: 353 35% 42%;     /* #8f454e */
+    --grad-orange: 42 75% 68%;   /* #ebc770 */
+    --gradient-brand: linear-gradient(135deg, hsl(var(--grad-red)) 0%, hsl(var(--grad-orange)) 100%);
+    --gradient-brand-soft: linear-gradient(160deg, hsl(var(--grad-red) / 0.55) 0%, hsl(var(--grad-orange) / 0.35) 100%);
+
     --shadow-panel:
       0 0 0 3px hsl(var(--panel-frame)),
       0 0 0 4px hsl(var(--panel-edge) / 0.55),
@@ -93,7 +99,10 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "cv11";
-    background-color: hsl(var(--background));
+    background:
+      radial-gradient(ellipse at top left, hsl(var(--grad-red) / 0.45), transparent 55%),
+      radial-gradient(ellipse at bottom right, hsl(var(--grad-orange) / 0.35), transparent 55%),
+      hsl(var(--background));
     background-attachment: fixed;
   }
 }

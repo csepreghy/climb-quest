@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { adminAdjustChalk, useGame } from "@/game/store";
+import { adminAdjustChalk, adminSetLevel, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { Plus, Minus, Upload, Trash2, Pencil, X } from "lucide-react";
 import {

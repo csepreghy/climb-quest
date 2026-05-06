@@ -1,15 +1,16 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ITEM_BY_ID, RARITY_COLOR, Slot, ItemGroup } from "@/game/data";
+import { ITEM_BY_ID, RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity } from "@/game/data";
 import { equipItem, unequipSlot, useGame } from "@/game/store";
 import { getItem, useCustomItems, isImageEmoji } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-function ItemIcon({ emoji, alt, className }: { emoji: string; alt?: string; className?: string }) {
-  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("h-8 w-8 object-contain rounded", className)} />;
-  return <span className={className}>{emoji}</span>;
+function ItemIcon({ emoji, alt, className, rarity }: { emoji: string; alt?: string; className?: string; rarity?: Rarity }) {
+  const ring = rarity ? RARITY_BORDER[rarity] : "";
+  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("h-8 w-8 object-contain rounded bg-background/40 p-0.5", ring, className)} />;
+  return <span className={cn(rarity && "inline-flex items-center justify-center rounded bg-background/40", ring, className)}>{emoji}</span>;
 }
 
 const SLOT_LABEL: Record<Slot, string> = {

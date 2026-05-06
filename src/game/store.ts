@@ -103,6 +103,7 @@ function load(): State {
       merged.equipped = { shoes: "rental_shoes", chalk: "plain_chalk" };
       merged.pendingConsumable = null;
       localStorage.setItem(INVENTORY_RESET_KEY, "1");
+    if ((merged.gender as string) === "neutral") merged.gender = "male";
     }
     return merged;
   } catch { return initialState(); }

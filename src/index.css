@@ -46,8 +46,12 @@
     --boss-shadow: 354 70% 28%;
     --legendary: 42 95% 60%;
     --legendary-shadow: 32 80% 32%;
-    --rare: 353 55% 50%;
-    --rare-shadow: 353 60% 26%;
+    --epic: 270 70% 62%;
+    --epic-shadow: 270 60% 30%;
+    --uncommon: 210 80% 58%;
+    --uncommon-shadow: 210 60% 28%;
+    --rare: 210 80% 58%;
+    --rare-shadow: 210 60% 28%;
     --sky: 195 75% 55%;
     --sky-shadow: 198 70% 26%;
 

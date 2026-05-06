@@ -16,13 +16,12 @@ export default function Layout() {
   const s = useGame();
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.4),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/85 border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]">
         <div className="container flex items-center justify-between gap-4 py-3">
           <NavLink to="/" className="flex items-center gap-2.5 group">
-            <div className="h-10 w-10 rounded-lg grid place-items-center transition-transform group-hover:rotate-[-4deg]"
+            <div className="h-10 w-10 rounded-lg grid place-items-center transition-transform group-hover:rotate-[-4deg] bg-accent"
               style={{
-                background: "linear-gradient(180deg, hsl(28 30% 28%), hsl(26 25% 16%))",
-                boxShadow: "0 0 0 2px hsl(var(--panel-frame)), inset 0 1px 0 hsl(38 30% 92% / 0.15), inset 0 -2px 0 hsl(0 0% 0% / 0.4)",
+                boxShadow: "0 0 0 2px hsl(var(--panel-frame)), inset 0 1px 0 hsl(0 0% 100% / 0.35), inset 0 -2px 0 hsl(16 70% 32% / 0.55), 0 2px 0 hsl(16 70% 32%)",
               }}>
               <span className="text-lg">🧗</span>
             </div>
@@ -33,9 +32,9 @@ export default function Layout() {
           </NavLink>
           <div className="flex items-center gap-2">
             <ChalkChip value={s.chalk} />
-            <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border border-[hsl(var(--panel-frame))] bg-[hsl(26_22%_14%)] text-sm shadow-[inset_0_1px_0_hsl(38_30%_92%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.4)]">
+            <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)]">
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>
-              <span className="font-bold tabular-nums text-accent">{s.level}</span>
+              <span className="font-bold tabular-nums text-[hsl(var(--sky))]">{s.level}</span>
             </div>
           </div>
         </div>
@@ -51,7 +50,7 @@ export default function Layout() {
                   cn(
                     "px-3.5 py-2 rounded-full text-sm font-semibold flex items-center gap-2 transition-all border",
                     isActive
-                      ? "text-[hsl(24_40%_10%)] border-[hsl(18_60%_18%)] shadow-[inset_0_1px_0_hsl(0_0%_100%/0.3),inset_0_-2px_0_hsl(0_0%_0%/0.25),0_2px_0_hsl(18_70%_18%)] bg-[linear-gradient(180deg,hsl(var(--btn-orange-top)),hsl(var(--btn-orange-bot)))]"
+                      ? "text-[hsl(160_45%_12%)] border-[hsl(var(--panel-frame))] bg-[hsl(var(--btn-mint))] shadow-[inset_0_1px_0_hsl(0_0%_100%/0.35),inset_0_-2px_0_hsl(var(--btn-mint-shadow)/0.55),0_2px_0_hsl(var(--btn-mint-shadow))]"
                       : "text-muted-foreground hover:text-foreground border-transparent hover:bg-secondary/50",
                   )
                 }
@@ -89,20 +88,15 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   return (
     <div
-      className="flex items-center gap-2 pl-2 pr-3 h-9 rounded-full border border-[hsl(var(--panel-frame))]"
+      className="flex items-center gap-2 pl-2 pr-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary"
       style={{
-        background: "linear-gradient(180deg, hsl(26 22% 18%), hsl(26 22% 11%))",
-        boxShadow: "inset 0 1px 0 hsl(38 30% 92% / 0.08), inset 0 -1px 0 hsl(0 0% 0% / 0.5)",
+        boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.06), inset 0 -1px 0 hsl(0 0% 0% / 0.55)",
       }}
     >
       <span
-        className="h-5 w-5 rounded-full grid place-items-center animate-coin-shine"
-        style={{
-          background: "radial-gradient(circle at 35% 30%, hsl(50 100% 80%), hsl(38 95% 50%) 70%, hsl(28 80% 30%))",
-          boxShadow: "0 0 0 1px hsl(28 60% 18%), inset 0 -1px 0 hsl(0 0% 0% / 0.3)",
-        }}
+        className="h-5 w-5 rounded-full grid place-items-center animate-coin-shine bg-[hsl(var(--chalk))]"
       >
-        <span className="text-[9px] font-black text-[hsl(28_60%_22%)]">C</span>
+        <span className="text-[9px] font-black text-[hsl(38_60%_22%)]">C</span>
       </span>
       <span className="text-sm font-bold tabular-nums gradient-chalk-text">{value.toLocaleString()}</span>
       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>

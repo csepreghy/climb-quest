@@ -162,7 +162,7 @@ function gearBonusSummary(eq: ReturnType<typeof useGame>["equipped"]) {
   const out: { label: string; mult: number }[] = [];
   for (const id of Object.values(eq)) {
     if (!id) continue;
-    const it = ITEM_BY_ID[id]; if (!it?.bonus || it.bonus.mult <= 0) continue;
+    const it = getItem(id); if (!it?.bonus || it.bonus.mult <= 0) continue;
     let label = it.name + " — ";
     if (it.bonus.appliesTo === "all") label += "all logs";
     else if (it.bonus.appliesTo) label += it.bonus.appliesTo.join(", ");

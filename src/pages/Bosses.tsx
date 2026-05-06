@@ -26,8 +26,7 @@ export default function Bosses() {
     <div className="space-y-5 animate-float-up">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold">Boss Projects</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Long-term nemeses. Defeat them. Earn glory.</p>
+          <p className="text-sm text-muted-foreground">Long-term nemeses. Defeat them. Earn glory.</p>
         </div>
         <CreateBoss />
       </div>

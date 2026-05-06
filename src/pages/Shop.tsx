@@ -50,34 +50,34 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
     toast.success(`Looted ${item.name}!`, { description: isConsumable ? "Equip it to use on your next log." : "Equip it from your Inventory." });
   }
 
+  const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
+
   return (
-    <Card className={cn("gradient-card p-4 border flex flex-col gap-3 relative overflow-hidden",
-      item.rarity === "legendary" && "border-legendary/40")}>
-      {item.rarity === "legendary" && <div className="absolute -top-10 -right-10 h-32 w-32 bg-legendary/20 blur-3xl rounded-full pointer-events-none" />}
+    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3">
       <div className="flex items-start gap-3">
-        <div className="text-4xl">{item.emoji}</div>
+        <div className="text-4xl drop-shadow-[2px_2px_0_hsl(240_10%_2%)]">{item.emoji}</div>
         <div className="min-w-0 flex-1">
-          <div className="font-semibold truncate">{item.name}</div>
-          <div className={cn("text-[10px] uppercase tracking-wider font-bold inline-block px-1.5 py-0.5 rounded border mt-0.5", RARITY_COLOR[item.rarity])}>
+          <div className="font-pixel text-xs leading-snug truncate">{item.name}</div>
+          <div className={cn("text-[9px] font-pixel uppercase tracking-wider inline-block px-1.5 py-0.5 rounded border-2 mt-1", RARITY_COLOR[item.rarity])}>
             {item.rarity}
           </div>
         </div>
       </div>
       <p className="text-xs text-muted-foreground flex-1">{item.desc}</p>
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
-        <div className="text-sm">
-          {item.price === 0 ? <span className="text-muted-foreground">Starter</span> : <span className="font-bold gradient-chalk-text">🧂 {item.price}</span>}
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-dashed border-border/40">
+        <div className="font-pixel text-xs">
+          {item.price === 0 ? <span className="text-muted-foreground">STARTER</span> : <span className="gradient-chalk-text">🧂 {item.price}</span>}
         </div>
         {ownAlready ? (
-          <Button size="sm" variant="secondary" disabled className="gap-1"><Check className="h-3 w-3" /> Owned</Button>
+          <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Owned</GameButton>
         ) : locked ? (
-          <Button size="sm" variant="outline" disabled className="gap-1"><Lock className="h-3 w-3" /> Lv {item.levelReq}</Button>
+          <GameButton size="sm" variant="ghost" disabled><Lock className="h-3 w-3" /> Lv {item.levelReq}</GameButton>
         ) : (
-          <Button size="sm" disabled={!canAfford || item.price === 0} onClick={buy}>
-            {item.price === 0 ? "Free" : canAfford ? "Buy" : "Need Chalk"}
-          </Button>
+          <GameButton size="sm" variant={item.rarity === "legendary" ? "legendary" : "primary"} disabled={!canAfford || item.price === 0} onClick={buy}>
+            {item.price === 0 ? "Free" : canAfford ? "Buy" : "No Chalk"}
+          </GameButton>
         )}
       </div>
-    </Card>
+    </GameCard>
   );
 }

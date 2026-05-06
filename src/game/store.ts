@@ -291,17 +291,13 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
       if (b.id !== bossId) return b;
       let highPoint = b.highPoint;
       if (outcome === "send" || outcome === "flash") highPoint = 100;
-      else if (outcome === "high_point") highPoint = Math.min(95, highPoint + 20);
-      else if (outcome === "zone") highPoint = Math.max(highPoint, 60);
-      else if (outcome === "fell_crux") highPoint = Math.max(highPoint, 50);
-      else if (outcome === "fell_low") highPoint = Math.max(highPoint, 25);
+      else highPoint = Math.min(95, highPoint + 15);
       const sent = outcome === "send" || outcome === "flash";
       return { ...b, attempts: [att, ...b.attempts], highPoint, sent: b.sent || sent, sentDate: sent ? att.date : b.sentDate };
     });
     const sentNow = outcome === "send" || outcome === "flash";
     const badges = new Set(s.badges);
     if (sentNow) badges.add("crux_breaker");
-    if (outcome === "zone" || outcome === "high_point") badges.add("zone_reached");
     const bossesSent = bosses.filter(b => b.sent).length;
     if (bossesSent >= 3) badges.add("project_slayer");
     return {

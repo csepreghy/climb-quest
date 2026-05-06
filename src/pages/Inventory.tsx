@@ -76,7 +76,7 @@ export default function Inventory() {
       <div className="space-y-6">
         {(["outfit", "gear", "power"] as ItemGroup[]).map(group => {
           const slots = GROUP_SLOTS[group];
-          const ownedInGroup = items.filter(it => it.rarity !== "consumable" && it.group === group);
+          const ownedInGroup = items.filter(it => !it.consumableBonus && it.group === group);
           return (
             <section key={group} className="space-y-3">
               <div className="menu-label">{GROUP_LABEL[group]}</div>

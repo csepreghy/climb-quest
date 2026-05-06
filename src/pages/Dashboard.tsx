@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useGame, currentLevel, nextLevel, levelUp, activeBoss } from "@/game/store";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
@@ -5,8 +6,9 @@ import { GameCard, PixelBar } from "@/components/ui/game-card";
 import { Link, useNavigate } from "react-router-dom";
 import { ITEM_BY_ID, BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
 import { toast } from "sonner";
-import { ScrollText, Swords, ArrowUp, Sparkles, Trophy } from "lucide-react";
+import { ScrollText, Swords, ArrowUp, Sparkles, Trophy, TrendingUp } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function Dashboard() {
   const s = useGame();

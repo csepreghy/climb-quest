@@ -3,6 +3,7 @@ import type { Equipped } from "@/game/store";
 import { cn } from "@/lib/utils";
 import { PixelSprite } from "./pixel/PixelSprite";
 import { getClimberSprite } from "./pixel/sprites";
+import climberMale1 from "@/assets/climber-male-1.png";
 
 interface Props {
   level: number;
@@ -29,12 +30,29 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
     ? "hsl(var(--accent))"
     : undefined;
 
+  const useIllustration = level === 1 && gender === "male";
+
   return (
     <div className={cn("relative inline-flex items-center justify-center", FRAME_SIZE[size])}>
-      {/* Soft framed stage */}
-      <div className="absolute inset-0 rounded-xl border border-border bg-gradient-to-b from-secondary/40 to-background overflow-hidden" />
+      {/* Soft framed stage — light fill so character has contrast */}
+      <div className="absolute inset-0 rounded-xl border border-border bg-gradient-to-b from-[hsl(40_60%_92%)] to-[hsl(40_50%_82%)] overflow-hidden" />
 
-      <PixelSprite sprite={sprite} pixel={PIXEL_SIZE[size]} aura={auraColor} className="relative z-10" />
+      {auraColor && (
+        <div
+          className="absolute inset-2 rounded-full blur-2xl opacity-70 animate-aura-pulse z-0"
+          style={{ background: `radial-gradient(circle, ${auraColor} 0%, transparent 65%)` }}
+        />
+      )}
+
+      {useIllustration ? (
+        <img
+          src={climberMale1}
+          alt={lvl.title}
+          className="relative z-10 h-[92%] w-[92%] object-contain animate-sprite-bob drop-shadow-[0_3px_0_hsl(0_0%_0%/0.35)]"
+        />
+      ) : (
+        <PixelSprite sprite={sprite} pixel={PIXEL_SIZE[size]} aura={auraColor} className="relative z-10" />
+      )}
 
       {/* Item indicator chips */}
       <div className="absolute bottom-1.5 right-1.5 flex gap-1 z-20">

@@ -136,7 +136,6 @@ export default function LogBoulder() {
             )}
           </Field>
         </div>
-        </div>
 
         <label className="flex items-center gap-2 cursor-pointer select-none">
           <input

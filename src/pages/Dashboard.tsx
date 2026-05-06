@@ -16,7 +16,7 @@ export default function Dashboard() {
   const next = nextLevel(s);
   const boss = activeBoss(s);
   const nav = useNavigate();
-  const progress0 = 0; void progress0;
+  
   const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;
 
   const onLevelUp = () => {

@@ -57,7 +57,6 @@ export default function LogBoulder() {
     <div className="grid gap-6 lg:grid-cols-[1fr,360px] animate-float-up">
       <Card className="gradient-card p-5 sm:p-6 space-y-5">
         <div>
-          <h1 className="font-display text-2xl font-bold">Log a Boulder</h1>
           <p className="text-sm text-muted-foreground">Real-life climbing only. One boulder per log.</p>
         </div>
 

@@ -179,6 +179,17 @@ function GradingSystemCard({ gs }: { gs: GradingSystem }) {
   const [showEq, setShowEq] = useState(true);
   const [scale, setScale] = useState<"v" | "french">("v");
   const options = (scale === "v" ? V_SCALE : FRENCH_SCALE) as readonly string[];
+
+  // Local draft of equivalents — only commit on Save/Update
+  const [draft, setDraft] = useState<Record<string, GradeEquivalent>>(gs.equivalents ?? {});
+  // Reset draft when system changes (kind, labels, etc.) or saved equivalents change externally
+  React.useEffect(() => { setDraft(gs.equivalents ?? {}); }, [gs.id, gs.equivalents, gs.numberMin, gs.numberMax, gs.lastOpenEnded]);
+
+  const hasSaved = !!gs.equivalents && Object.values(gs.equivalents).some(e =>
+    e.vStart || e.vEnd || e.frenchStart || e.frenchEnd
+  );
+  const dirty = JSON.stringify(draft) !== JSON.stringify(gs.equivalents ?? {});
+
   return (
     <GameCard className="p-4 space-y-3">
       <div className="flex items-center justify-between">
@@ -229,7 +240,7 @@ function GradingSystemCard({ gs }: { gs: GradingSystem }) {
           </div>
           {labels.map((lab, i) => {
             const isLast = i === labels.length - 1;
-            const eq = gs.equivalents?.[lab] ?? {};
+            const eq = draft[lab] ?? {};
             const start = scale === "v" ? eq.vStart : eq.frenchStart;
             const end = scale === "v" ? eq.vEnd : eq.frenchEnd;
             return (
@@ -239,11 +250,25 @@ function GradingSystemCard({ gs }: { gs: GradingSystem }) {
                   options={options}
                   start={start} end={end}
                   allowOpenEnd={isLast}
-                  onChange={(s, e) => setEquivalent(gs.id, lab, scale === "v" ? { ...eq, vStart: s, vEnd: e } : { ...eq, frenchStart: s, frenchEnd: e })}
+                  onChange={(s, e) => setDraft(d => ({
+                    ...d,
+                    [lab]: scale === "v"
+                      ? { ...(d[lab] ?? {}), vStart: s, vEnd: e }
+                      : { ...(d[lab] ?? {}), frenchStart: s, frenchEnd: e },
+                  }))}
                 />
               </div>
             );
           })}
+          <div className="flex items-center justify-end gap-2 pt-2">
+            {dirty && <span className="text-[10px] uppercase text-muted-foreground">Unsaved changes</span>}
+            <GameButton size="sm" variant="primary" disabled={!dirty} onClick={() => {
+              labels.forEach(lab => setEquivalent(gs.id, lab, draft[lab] ?? {}));
+              toast.success(hasSaved ? "Equivalents updated" : "Equivalents saved");
+            }}>
+              {hasSaved ? "Update" : "Save"}
+            </GameButton>
+          </div>
         </div>
       )}
     </GameCard>

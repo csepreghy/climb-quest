@@ -8,8 +8,9 @@ export default {
     container: { center: true, padding: "1.5rem", screens: { "2xl": "1400px" } },
     extend: {
       fontFamily: {
-        display: ['"Space Grotesk"', "system-ui", "sans-serif"],
-        sans: ['"Inter"', "system-ui", "sans-serif"],
+        display: ['"JetBrains Mono"', "ui-monospace", "monospace"],
+        sans: ['"JetBrains Mono"', "ui-monospace", "monospace"],
+        mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
         pixel: ['"Press Start 2P"', "system-ui", "monospace"],
         hud: ['"VT323"', "ui-monospace", "monospace"],
       },

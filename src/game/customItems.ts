@@ -28,6 +28,7 @@ function rowToItem(r: any): ShopItem {
     price: r.price ?? 0,
     emoji: r.image ?? "🎁",
     desc: "",
+    levelReq: r.level_req ?? undefined,
     bonus: bonusPct > 0
       ? { mult: bonusPct / 100, appliesTo: (r.applies_to ?? "all") as ActivityType[] | "all" }
       : undefined,

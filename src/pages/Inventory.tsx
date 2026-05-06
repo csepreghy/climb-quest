@@ -133,22 +133,26 @@ export default function Inventory() {
           <section className="space-y-3">
             <div className="menu-label">Consumables ({consumables.length})</div>
             <Card className="gradient-card p-4">
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {consumables.map((it, i) => (
-                  <div key={it.id + i} className="p-3 rounded-lg border border-chalk-glow/30 bg-chalk-glow/5 flex items-start gap-3">
-                    <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-2xl h-10 w-10" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold truncate">{it.name}</div>
-                      <div className="text-[10px] text-muted-foreground">+{Math.round((it.consumableBonus ?? 0) * 100)}% next log</div>
-                      <div className="mt-2">
-                        <Button size="sm" variant="secondary" disabled={!!s.pendingConsumable}
-                          onClick={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}>
-                          {s.pendingConsumable === it.id ? "Primed" : "Use next log"}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="grid gap-3 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
+                {consumables.map((it, i) => {
+                  const primed = s.pendingConsumable === it.id;
+                  return (
+                    <button
+                      key={it.id + i}
+                      title={`${it.name} · +${Math.round((it.consumableBonus ?? 0) * 100)}% next log`}
+                      disabled={!!s.pendingConsumable && !primed}
+                      onClick={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}
+                      className={cn(
+                        "aspect-square p-2 rounded-lg border flex items-center justify-center transition-colors",
+                        primed
+                          ? "border-chalk-glow ring-2 ring-chalk-glow/40 bg-chalk-glow/10"
+                          : "border-chalk-glow/30 bg-chalk-glow/5 hover:bg-chalk-glow/10 disabled:opacity-50"
+                      )}
+                    >
+                      <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-5xl h-full w-full" />
+                    </button>
+                  );
+                })}
               </div>
             </Card>
           </section>

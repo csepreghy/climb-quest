@@ -119,7 +119,7 @@ function BossCard({ boss, active, onActivate }: { boss: Boss; active: boolean; o
           </div>
         </div>
       )}
-    </Card>
+    </GameCard>
   );
 }
 

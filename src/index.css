@@ -6,37 +6,34 @@
 @layer base {
   :root {
     /* Warm stone base */
-    --background: 20 14% 18%;
+    --background: 20 14% 12%;
     --foreground: 40 30% 94%;
 
-    --card: 22 14% 24%;
+    --card: 20 18% 10%;
     --card-foreground: 40 30% 94%;
 
-    --popover: 22 14% 22%;
+    --popover: 20 18% 10%;
     --popover-foreground: 40 30% 94%;
 
-    /* Orange primary action */
     --primary: 28 95% 58%;
     --primary-foreground: 24 50% 12%;
 
-    --secondary: 22 12% 28%;
+    --secondary: 20 14% 16%;
     --secondary-foreground: 40 30% 94%;
 
-    --muted: 22 12% 26%;
+    --muted: 20 14% 16%;
     --muted-foreground: 30 10% 72%;
 
-    /* Brand-red accent (replaces purple) */
     --accent: 353 45% 42%;
     --accent-foreground: 40 30% 96%;
 
     --destructive: 0 75% 52%;
     --destructive-foreground: 40 30% 96%;
 
-    --border: 22 22% 12%;
-    --input: 22 14% 22%;
+    --border: 20 30% 6%;
+    --input: 20 18% 12%;
     --ring: 28 95% 58%;
 
-    /* Sharp edges */
     --radius: 0rem;
 
     /* Saturated game tokens */
@@ -49,17 +46,17 @@
     --boss-shadow: 354 70% 28%;
     --legendary: 42 95% 60%;
     --legendary-shadow: 32 80% 32%;
-    --rare: 353 55% 50%;             /* now warm red instead of purple */
+    --rare: 353 55% 50%;
     --rare-shadow: 353 60% 26%;
     --sky: 195 75% 55%;
     --sky-shadow: 198 70% 26%;
 
-    /* Frame & bevel — very dark warm stone outline */
-    --panel-frame: 22 30% 8%;
-    --panel-edge: 22 12% 38%;
-    --panel-fill: 22 14% 24%;
-    --panel-inset-light: 40 30% 92% / 0.08;
-    --panel-inset-dark: 22 40% 4% / 0.7;
+    /* Frame & bevel — near-black warm outline */
+    --panel-frame: 20 40% 4%;
+    --panel-edge: 20 20% 22%;
+    --panel-fill: 20 18% 10%;
+    --panel-inset-light: 40 30% 92% / 0.06;
+    --panel-inset-dark: 20 50% 2% / 0.85;
 
     /* Solid button fills */
     --btn-orange: 28 95% 58%;

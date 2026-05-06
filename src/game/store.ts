@@ -13,7 +13,6 @@ export interface BoulderLog {
   location?: string;
   grade?: string;
   styles: Style[];
-  result: Result;
   problemsTried?: number;
   sends?: number;
   hardestSend?: string;

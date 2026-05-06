@@ -72,18 +72,19 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
 
   return (
-    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-0 flex flex-row gap-0 overflow-hidden">
-      {isImageEmoji(item.emoji)
-        ? <img src={item.emoji} alt={item.name} className={cn("h-32 w-32 shrink-0 object-cover bg-background/40", RARITY_BORDER[item.rarity])} />
-        : <div className={cn("h-32 w-32 shrink-0 text-6xl flex items-center justify-center bg-background/40", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
-      <div className="flex flex-col gap-2 p-3 flex-1 min-w-0">
-        <div className="min-w-0">
+    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        {isImageEmoji(item.emoji)
+          ? <img src={item.emoji} alt={item.name} className={cn("h-12 w-12 object-contain rounded bg-background/40 p-0.5", RARITY_BORDER[item.rarity])} />
+          : <div className={cn("text-3xl h-12 w-12 flex items-center justify-center rounded bg-background/40", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
+        <div className="min-w-0 flex-1">
           <div className="text-sm font-medium leading-snug truncate">{item.name}</div>
           <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
             {item.rarity}
           </div>
         </div>
-        {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
+      </div>
+      <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
         <div className="text-sm">
           {item.price === 0 ? <span className="text-muted-foreground text-xs">Starter</span> : <span className="font-medium tabular-nums">{item.price} <span className="text-muted-foreground text-xs">Chalk</span></span>}
@@ -97,7 +98,6 @@ function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolea
             {item.price === 0 ? "Free" : canAfford ? "Buy" : "No Chalk"}
           </GameButton>
         )}
-      </div>
       </div>
     </GameCard>
   );

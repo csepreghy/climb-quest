@@ -61,7 +61,7 @@ export default function Shop() {
 function ShopCard({ item, owned, chalk, level }: { item: ShopItem; owned: boolean; chalk: number; level: number }) {
   const locked = !!(item.levelReq && level < item.levelReq);
   const canAfford = chalk >= item.price;
-  const isConsumable = item.rarity === "consumable";
+  const isConsumable = !!item.consumableBonus;
   const ownAlready = owned && !isConsumable;
 
   function buy() {

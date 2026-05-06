@@ -34,10 +34,10 @@ export default function Character() {
             <div className="text-xs uppercase tracking-widest text-muted-foreground">Chalk</div>
             <div className="text-3xl font-bold gradient-chalk-text">{s.chalk.toLocaleString()}</div>
             {next && (
-              <Button className="mt-3 gap-2 bg-gradient-to-r from-legendary to-accent" disabled={s.chalk < next.cost}
+              <GameButton size="sm" variant="legendary" className="mt-3" disabled={s.chalk < next.cost}
                 onClick={() => { const target = next?.title ?? ""; const r = levelUp(); if (r.ok) { showLevelUpBanner(target, r.unlocks ?? []); toast.success("Level up!"); } else toast.error(r.reason ?? ""); }}>
                 <ArrowUp className="h-4 w-4" /> Level Up ({next.cost})
-              </Button>
+              </GameButton>
             )}
           </div>
         </div>

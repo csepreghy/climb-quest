@@ -16,9 +16,24 @@ import { Link } from "react-router-dom";
 
 export default function LogBoulder() {
   const s = useGame();
+  const gymState = useGyms();
+  const initialGymId = gymState.lastUsedGymId
+    ?? gymState.gyms.find(g => g.primary)?.id
+    ?? gymState.gyms[0]?.id
+    ?? "";
+  const [gymId, setGymId] = useState(initialGymId);
+  const gym = gymState.gyms.find(g => g.id === gymId) ?? null;
+  const gymGradingSystems = (gym?.gradingSystemIds ?? []).map(id => gymState.gradingSystems.find(g => g.id === id)).filter(Boolean);
+  const defaultGsId = gymGradingSystems[0]?.id ?? "v_grades";
+  const [gsId, setGsId] = useState(defaultGsId);
+  useEffect(() => { setGsId(defaultGsId); }, [defaultGsId]);
+  const gs = gymState.gradingSystems.find(g => g.id === gsId);
+  const grades = gs ? gradeLabels(gs) : [];
+
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [location, setLocation] = useState("Indoor gym");
-  const [grade, setGrade] = useState("V3");
+  const [holdColorId, setHoldColorId] = useState<string>("");
+  const [grade, setGrade] = useState(grades[0] ?? "V3");
+  useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
   const [type, setType] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder">>("boulder");
   const [sent, setSent] = useState(true);
   const [styles, setStyles] = useState<Style[]>([]);

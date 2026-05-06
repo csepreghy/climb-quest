@@ -283,7 +283,7 @@ export function setGender(g: Gender) { set(s => ({ ...s, gender: g })); }
 export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], notes?: string) {
   const boss = state.bosses.find(b => b.id === bossId); if (!boss) return null;
   let activity: ActivityType = outcome === "send" || outcome === "flash" ? "boss_send" : "boss_attempt";
-  const breakdown = computeChalk(activity, [boss.style], outcome === "send" ? "send" : outcome === "flash" ? "flash" : "session");
+  const breakdown = computeChalk(activity, [boss.style]);
   const att: BossAttempt = { id: crypto.randomUUID(), date: new Date().toISOString(), outcome, chalk: breakdown.total, notes };
 
   set(s => {

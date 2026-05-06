@@ -2,9 +2,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ITEM_BY_ID, RARITY_COLOR, Slot, ItemGroup } from "@/game/data";
 import { equipItem, unequipSlot, useGame } from "@/game/store";
+import { getItem, useCustomItems, isImageEmoji } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+function ItemIcon({ emoji, alt, className }: { emoji: string; alt?: string; className?: string }) {
+  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("h-8 w-8 object-contain rounded", className)} />;
+  return <span className={className}>{emoji}</span>;
+}
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",

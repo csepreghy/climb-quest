@@ -56,62 +56,7 @@ export interface ShopItem {
   levelReq?: number;
 }
 
-export const SHOP: ShopItem[] = [
-  // ===== OUTFIT =====
-  // Tops
-  { id: "hoodie",         name: "Project Hoodie",      group: "outfit", category: "Top",      slot: "outfit",   rarity: "rare",      price: 700,  emoji: "👕", desc: "+2% Chalk on boss attempts.", bonus: { mult: 0.02, appliesTo: ["boss_attempt"] } },
-  { id: "minimal_kit",    name: "Minimal Send Kit",    group: "outfit", category: "Top",      slot: "outfit",   rarity: "legendary", price: 2000, emoji: "🦾", desc: "+5% Chalk on boss sends.", bonus: { mult: 0.05, appliesTo: ["boss_send"] }, levelReq: 10 },
-  { id: "summer_fit",     name: "Summer Gym Tank",     group: "outfit", category: "Top",      slot: "outfit",   rarity: "rare",      price: 600,  emoji: "🎽", desc: "+2% Chalk on every boulder.", bonus: { mult: 0.02, appliesTo: ["boulder"] } },
-  { id: "project_beast",  name: "Project Beast Fit",   group: "outfit", category: "Top",      slot: "outfit",   rarity: "legendary", price: 1800, emoji: "🦍", desc: "+5% Chalk on boss attempts & sends.", bonus: { mult: 0.05, appliesTo: ["boss_attempt","boss_send"] }, levelReq: 9 },
-
-  // Bottoms
-  { id: "chunky_shorts",  name: "Chunky Shorts",       group: "outfit", category: "Bottom",   slot: "bottoms",  rarity: "common",    price: 250,  emoji: "🩳", desc: "+1% Chalk. Pockets full of crumbs.", bonus: { mult: 0.01, appliesTo: "all" } },
-  { id: "mammut_pants",   name: "Bouldering Pants",    group: "outfit", category: "Bottom",   slot: "bottoms",  rarity: "rare",      price: 800,  emoji: "👖", desc: "+2% Chalk on every boulder.", bonus: { mult: 0.02, appliesTo: ["boulder"] } },
-  { id: "neon_pants",     name: "Neon Send Pants",     group: "outfit", category: "Bottom",   slot: "bottoms",  rarity: "rare",      price: 950,  emoji: "🌈", desc: "+3% Chalk on dyno-style problems.", bonus: { mult: 0.03, styleMatch: ["dyno"] }, levelReq: 6 },
-
-  // Shoes
-  { id: "rental_shoes",   name: "Rental Shoes",        group: "outfit", category: "Shoes",    slot: "shoes",    rarity: "common",    price: 0,    emoji: "🥾", desc: "Smell included. Free with starter pack.", bonus: { mult: 0.00, appliesTo: "all" } },
-  { id: "aggressive",     name: "Aggressive Shoes",    group: "outfit", category: "Shoes",    slot: "shoes",    rarity: "rare",      price: 600,  emoji: "👟", desc: "+3% Chalk on every boulder logged.", bonus: { mult: 0.03, appliesTo: ["boulder"] } },
-  { id: "soft_comp",      name: "Soft Comp Shoes",     group: "outfit", category: "Shoes",    slot: "shoes",    rarity: "rare",      price: 750,  emoji: "🩰", desc: "+3% Chalk on coordination & dyno problems.", bonus: { mult: 0.03, styleMatch: ["coordination","dyno"] } },
-  { id: "board_shoes",    name: "Board Shoes",         group: "outfit", category: "Shoes",    slot: "shoes",    rarity: "rare",      price: 800,  emoji: "🥿", desc: "+3% Chalk on every boulder.", bonus: { mult: 0.03, appliesTo: ["boulder"] }, levelReq: 5 },
-
-  // Hat
-  { id: "beanie",         name: "Lucky Beanie",        group: "outfit", category: "Hat",      slot: "hat",      rarity: "common",    price: 150,  emoji: "🧢", desc: "+1% Chalk. Slightly itchy.", bonus: { mult: 0.01, appliesTo: "all" } },
-  { id: "bucket_hat",     name: "Crag Bucket Hat",     group: "outfit", category: "Hat",      slot: "hat",      rarity: "rare",      price: 500,  emoji: "👒", desc: "+2% Chalk on outdoor sends.", bonus: { mult: 0.02, appliesTo: ["boulder"] } },
-  { id: "headband",       name: "Sweat Headband",      group: "outfit", category: "Hat",      slot: "hat",      rarity: "common",    price: 220,  emoji: "🎽", desc: "+1% Chalk on hard boulders.", bonus: { mult: 0.01, appliesTo: ["hard_boulder"] } },
-
-  // Hand
-  { id: "small_tape",     name: "Small Tape",          group: "outfit", category: "Hand",     slot: "hand",     rarity: "common",    price: 150,  emoji: "🩹", desc: "+1% Chalk on crimp-style problems.", bonus: { mult: 0.01, styleMatch: ["crimp"] } },
-  { id: "taped_up",       name: "Taped Up",            group: "outfit", category: "Hand",     slot: "hand",     rarity: "rare",      price: 500,  emoji: "🤚", desc: "+2% Chalk on every boulder.", bonus: { mult: 0.02, appliesTo: ["boulder"] } },
-  { id: "crack_glove",    name: "Crack Climbing Glove",group: "outfit", category: "Hand",     slot: "hand",     rarity: "rare",      price: 750,  emoji: "🧤", desc: "+3% Chalk on hard boulders.", bonus: { mult: 0.03, appliesTo: ["hard_boulder"] } },
-
-  // ===== GEAR =====
-  { id: "boar_brush",     name: "Boar Hair Brush",     group: "gear",   category: "Brushes",  slot: "accessory",rarity: "common",    price: 180,  emoji: "🖌️", desc: "+1% Chalk on every boulder.", bonus: { mult: 0.01, appliesTo: ["boulder"] } },
-  { id: "premium_brush",  name: "Premium Brush",       group: "gear",   category: "Brushes",  slot: "accessory",rarity: "rare",      price: 700,  emoji: "🪮", desc: "+2% Chalk on boss attempts.", bonus: { mult: 0.02, appliesTo: ["boss_attempt","boss_send"] } },
-
-  { id: "plain_chalk",    name: "Plain Chalk Bag",     group: "gear",   category: "Chalk",    slot: "chalk",    rarity: "common",    price: 0,    emoji: "🎒", desc: "Holds chalk. Revolutionary.", bonus: { mult: 0.00, appliesTo: "all" } },
-  { id: "chalk_bucket",   name: "Chalk Bucket",        group: "gear",   category: "Chalk",    slot: "chalk",    rarity: "common",    price: 200,  emoji: "🪣", desc: "+1% Chalk on every boulder.", bonus: { mult: 0.01, appliesTo: ["boulder"] } },
-  { id: "liquid_chalk",   name: "Liquid Chalk",        group: "gear",   category: "Chalk",    slot: "chalk",    rarity: "rare",      price: 500,  emoji: "🧪", desc: "+2% Chalk from all logs.", bonus: { mult: 0.02, appliesTo: "all" } },
-  { id: "magdust",        name: "Magdust",             group: "gear",   category: "Chalk",    slot: "chalk",    rarity: "rare",      price: 900,  emoji: "✨", desc: "+3% Chalk from all logs.", bonus: { mult: 0.03, appliesTo: "all" }, levelReq: 5 },
-  { id: "cosmic_magdust", name: "Cosmic Magdust",      group: "gear",   category: "Chalk",    slot: "chalk",    rarity: "legendary", price: 2500, emoji: "🌌", desc: "+6% Chalk from all logs. Glows.", bonus: { mult: 0.06, appliesTo: "all" }, levelReq: 9 },
-
-  // ===== POWER-UPS =====
-  { id: "lucky_socks",    name: "Lucky Socks",         group: "power",  category: "Accessories", slot: "accessory", rarity: "common", price: 220, emoji: "🧦", desc: "+1% Chalk on boss sends.", bonus: { mult: 0.01, appliesTo: ["boss_send"] } },
-  { id: "crocs",          name: "Crocs",               group: "power",  category: "Accessories", slot: "accessory", rarity: "rare",   price: 800, emoji: "🩴", desc: "+2% Chalk on every boulder.", bonus: { mult: 0.02, appliesTo: ["boulder"] } },
-  { id: "golden_crocs",   name: "Golden Crocs",        group: "power",  category: "Accessories", slot: "accessory", rarity: "legendary", price: 2200, emoji: "👑", desc: "+5% Chalk on ALL logs.", bonus: { mult: 0.05, appliesTo: "all" }, levelReq: 10 },
-
-  { id: "chalk_cloud",    name: "Chalk Cloud Aura",    group: "power",  category: "Auras",       slot: "aura",      rarity: "rare",      price: 1100, emoji: "☁️", desc: "+2% Chalk from everything. Mystical.", bonus: { mult: 0.02, appliesTo: "all" } },
-  { id: "board_aura",     name: "Board Goblin Aura",   group: "power",  category: "Auras",       slot: "aura",      rarity: "rare",      price: 1300, emoji: "👹", desc: "+3% Chalk on every boulder.", bonus: { mult: 0.03, appliesTo: ["boulder"] }, levelReq: 7 },
-  { id: "crimp_demon",    name: "Crimp Demon Aura",    group: "power",  category: "Auras",       slot: "aura",      rarity: "legendary", price: 2400, emoji: "😈", desc: "+5% Chalk on crimp-style problems.", bonus: { mult: 0.05, styleMatch: ["crimp"] }, levelReq: 10 },
-
-  { id: "title_goblin",        name: "Title: Board Goblin", group: "power", category: "Titles", slot: "title", rarity: "rare",      price: 600,  emoji: "🏷️", desc: "Wear it with pride.", levelReq: 7 },
-  { id: "title_humbled",       name: "Title: Got Humbled",  group: "power", category: "Titles", slot: "title", rarity: "common",    price: 250,  emoji: "🥲", desc: "We've all been there." },
-  { id: "title_chalk_monster", name: "Title: Chalk Monster",group: "power", category: "Titles", slot: "title", rarity: "rare",      price: 700,  emoji: "👹", desc: "Coats every hold." },
-  { id: "title_demigod",       name: "Title: Crimp Demigod",group: "power", category: "Titles", slot: "title", rarity: "legendary", price: 1800, emoji: "👑", desc: "Endgame energy.", levelReq: 10 },
-
-  { id: "energy_gummies", name: "Send Gummies",        group: "power",  category: "Consumables", slot: "accessory", rarity: "common", price: 120, emoji: "🍬", desc: "+15% Chalk on your NEXT logged activity.", consumableBonus: 0.15 },
-  { id: "espresso",       name: "Pre-Send Espresso",   group: "power",  category: "Consumables", slot: "accessory", rarity: "common", price: 200, emoji: "☕", desc: "+25% Chalk on your NEXT logged activity.", consumableBonus: 0.25 },
-];
+export const SHOP: ShopItem[] = [];
 
 export const ITEM_BY_ID: Record<string, ShopItem> = Object.fromEntries(SHOP.map(i => [i.id, i]));
 

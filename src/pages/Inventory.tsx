@@ -146,28 +146,19 @@ export default function Inventory() {
               </Card>
 
               {ownedInGroup.length > 0 && (
-                <Card className="gradient-card p-4">
-                  <div className="grid gap-3 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
-                    {ownedInGroup.map(it => {
-                      const equipped = s.equipped[it.slot] === it.id;
-                      return (
-                        <button
-                          key={it.id}
-                          title={it.name}
-                          onClick={() => { if (!equipped) { equipItem(it.id); toast.success(`Equipped ${it.name}`); } }}
-                          className={cn(
-                            "aspect-square p-2 rounded-lg border flex items-center justify-center transition-colors",
-                            equipped
-                              ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/5"
-                              : "border-border bg-secondary/20 hover:bg-secondary/40"
-                          )}
-                        >
-                          <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-5xl h-full w-full" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </Card>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {ownedInGroup.map(it => {
+                    const equipped = s.equipped[it.slot] === it.id;
+                    return (
+                      <InventoryCard
+                        key={it.id}
+                        item={it}
+                        equipped={equipped}
+                        onEquip={() => { equipItem(it.id); toast.success(`Equipped ${it.name}`); }}
+                      />
+                    );
+                  })}
+                </div>
               )}
             </section>
           );

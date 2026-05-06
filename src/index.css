@@ -5,83 +5,83 @@
 /* ClimbQuest design system — pastel RPG menu (flat fills, gradients only in shadows) */
 @layer base {
   :root {
-    /* Cool dark slate base */
-    --background: 230 22% 10%;
-    --foreground: 220 25% 95%;
+    /* Stone-purple base from reference */
+    --background: 260 14% 18%;
+    --foreground: 40 30% 92%;
 
-    --card: 230 18% 14%;
-    --card-foreground: 220 25% 95%;
+    --card: 258 14% 24%;
+    --card-foreground: 40 30% 92%;
 
-    --popover: 230 20% 12%;
-    --popover-foreground: 220 25% 95%;
+    --popover: 258 14% 22%;
+    --popover-foreground: 40 30% 92%;
 
-    /* Mint as primary action */
-    --primary: 155 55% 65%;
-    --primary-foreground: 160 40% 12%;
+    /* Orange primary action */
+    --primary: 28 95% 58%;
+    --primary-foreground: 24 50% 12%;
 
-    --secondary: 230 16% 18%;
-    --secondary-foreground: 220 25% 95%;
+    --secondary: 258 12% 28%;
+    --secondary-foreground: 40 30% 92%;
 
-    --muted: 230 14% 16%;
-    --muted-foreground: 225 12% 65%;
+    --muted: 258 12% 26%;
+    --muted-foreground: 258 8% 70%;
 
-    /* Peach accent */
-    --accent: 18 85% 72%;
-    --accent-foreground: 18 50% 14%;
+    /* Purple accent (matches potion/lightning tile) */
+    --accent: 268 60% 55%;
+    --accent-foreground: 40 30% 96%;
 
-    --destructive: 350 75% 65%;
-    --destructive-foreground: 0 30% 12%;
+    --destructive: 0 75% 58%;
+    --destructive-foreground: 40 30% 96%;
 
-    --border: 230 18% 22%;
-    --input: 230 16% 16%;
-    --ring: 18 85% 72%;
+    --border: 258 18% 14%;
+    --input: 258 14% 22%;
+    --ring: 28 95% 58%;
 
     --radius: 0.9rem;
 
-    /* Pastel game tokens (flat) */
-    --chalk: 48 90% 70%;          /* lemon coin */
-    --chalk-glow: 48 95% 65%;
-    --chalk-shadow: 38 80% 38%;
-    --xp: 155 55% 60%;
-    --xp-shadow: 158 55% 28%;
-    --boss: 350 75% 72%;
-    --boss-shadow: 350 60% 38%;
-    --legendary: 48 90% 70%;
-    --legendary-shadow: 38 80% 38%;
-    --rare: 265 70% 78%;
-    --rare-shadow: 265 50% 40%;
-    --sky: 205 75% 70%;
-    --sky-shadow: 205 60% 32%;
+    /* Saturated game tokens */
+    --chalk: 42 95% 60%;             /* gold star */
+    --chalk-glow: 42 100% 65%;
+    --chalk-shadow: 32 80% 32%;
+    --xp: 150 60% 45%;               /* play green */
+    --xp-shadow: 152 70% 22%;
+    --boss: 354 75% 55%;
+    --boss-shadow: 354 70% 28%;
+    --legendary: 42 95% 60%;
+    --legendary-shadow: 32 80% 32%;
+    --rare: 268 60% 60%;             /* purple gem */
+    --rare-shadow: 268 55% 28%;
+    --sky: 195 75% 55%;              /* teal/cyan */
+    --sky-shadow: 198 70% 26%;
 
-    /* Frame & bevel colors */
-    --panel-frame: 230 30% 5%;
-    --panel-edge: 230 14% 28%;
-    --panel-fill: 230 18% 14%;
-    --panel-inset-light: 220 30% 96% / 0.06;
-    --panel-inset-dark: 230 40% 2% / 0.6;
+    /* Frame & bevel — very dark stone outline */
+    --panel-frame: 260 30% 8%;
+    --panel-edge: 258 12% 38%;
+    --panel-fill: 258 14% 24%;
+    --panel-inset-light: 40 30% 92% / 0.08;
+    --panel-inset-dark: 260 40% 4% / 0.7;
 
-    /* Per-variant solid button fills (no gradients) */
-    --btn-mint: 155 55% 65%;
-    --btn-mint-shadow: 158 55% 26%;
-    --btn-peach: 18 85% 72%;
-    --btn-peach-shadow: 16 70% 36%;
-    --btn-rose: 350 75% 72%;
-    --btn-rose-shadow: 350 60% 34%;
-    --btn-lemon: 48 90% 70%;
-    --btn-lemon-shadow: 38 80% 36%;
-    --btn-slate: 230 14% 24%;
-    --btn-slate-shadow: 230 30% 8%;
-    --btn-lavender: 265 70% 78%;
-    --btn-lavender-shadow: 265 50% 36%;
+    /* Solid button fills (no gradient) */
+    --btn-orange: 28 95% 58%;
+    --btn-orange-shadow: 18 80% 30%;
+    --btn-green: 150 60% 45%;
+    --btn-green-shadow: 152 70% 20%;
+    --btn-purple: 268 60% 55%;
+    --btn-purple-shadow: 268 55% 26%;
+    --btn-red: 354 75% 55%;
+    --btn-red-shadow: 354 70% 26%;
+    --btn-gold: 42 95% 60%;
+    --btn-gold-shadow: 32 80% 30%;
+    --btn-stone: 258 12% 32%;
+    --btn-stone-shadow: 260 25% 10%;
 
     --shadow-panel:
-      0 0 0 2px hsl(var(--panel-frame)),
-      0 0 0 4px hsl(230 35% 3%),
-      0 0 0 5px hsl(var(--panel-edge) / 0.9),
+      0 0 0 3px hsl(var(--panel-frame)),
+      0 0 0 4px hsl(var(--panel-edge) / 0.55),
       inset 0 1px 0 hsl(var(--panel-inset-light)),
       inset 0 -3px 0 hsl(var(--panel-inset-dark)),
-      inset 0 0 0 1px hsl(230 18% 26% / 0.5),
-      0 16px 32px -18px hsl(0 0% 0% / 0.85);
+      inset 0 0 0 1px hsl(258 14% 36% / 0.35),
+      0 6px 0 -1px hsl(var(--panel-frame)),
+      0 18px 32px -16px hsl(0 0% 0% / 0.85);
   }
 
   .dark { color-scheme: dark; }

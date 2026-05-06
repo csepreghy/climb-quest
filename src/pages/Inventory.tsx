@@ -9,8 +9,8 @@ import { toast } from "sonner";
 
 function ItemIcon({ emoji, alt, className, rarity }: { emoji: string; alt?: string; className?: string; rarity?: Rarity }) {
   const ring = rarity ? RARITY_BORDER[rarity] : "";
-  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("h-8 w-8 object-contain rounded bg-background/40 p-0.5", ring, className)} />;
-  return <span className={cn(rarity && "inline-flex items-center justify-center rounded bg-background/40", ring, className)}>{emoji}</span>;
+  if (isImageEmoji(emoji)) return <img src={emoji} alt={alt ?? ""} className={cn("object-contain rounded bg-background/40 p-0.5", ring, className)} />;
+  return <span className={cn("inline-flex items-center justify-center rounded leading-none", rarity && "bg-background/40", ring, className)}>{emoji}</span>;
 }
 
 const SLOT_LABEL: Record<Slot, string> = {
@@ -103,24 +103,23 @@ export default function Inventory() {
 
               {ownedInGroup.length > 0 && (
                 <Card className="gradient-card p-4">
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-3 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
                     {ownedInGroup.map(it => {
                       const equipped = s.equipped[it.slot] === it.id;
                       return (
-                        <div key={it.id} className={cn("p-3 rounded-lg border flex items-start gap-3", equipped ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/5" : "border-border bg-secondary/20")}>
-                          <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-2xl h-10 w-10" />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold truncate">{it.name}</div>
-                            <div className={cn("text-[10px] uppercase font-bold inline-block px-1 rounded border", RARITY_COLOR[it.rarity])}>{it.rarity}</div>
-                            <div className="mt-2">
-                              {equipped ? (
-                                <span className="text-xs font-bold text-[hsl(var(--btn-orange))]">Equipped</span>
-                              ) : (
-                                <Button size="sm" variant="secondary" onClick={() => { equipItem(it.id); toast.success(`Equipped ${it.name}`); }}>Equip</Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                        <button
+                          key={it.id}
+                          title={it.name}
+                          onClick={() => { if (!equipped) { equipItem(it.id); toast.success(`Equipped ${it.name}`); } }}
+                          className={cn(
+                            "aspect-square p-2 rounded-lg border flex items-center justify-center transition-colors",
+                            equipped
+                              ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/5"
+                              : "border-border bg-secondary/20 hover:bg-secondary/40"
+                          )}
+                        >
+                          <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-5xl h-full w-full" />
+                        </button>
                       );
                     })}
                   </div>
@@ -134,22 +133,26 @@ export default function Inventory() {
           <section className="space-y-3">
             <div className="menu-label">Consumables ({consumables.length})</div>
             <Card className="gradient-card p-4">
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {consumables.map((it, i) => (
-                  <div key={it.id + i} className="p-3 rounded-lg border border-chalk-glow/30 bg-chalk-glow/5 flex items-start gap-3">
-                    <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-2xl h-10 w-10" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold truncate">{it.name}</div>
-                      <div className="text-[10px] text-muted-foreground">+{Math.round((it.consumableBonus ?? 0) * 100)}% next log</div>
-                      <div className="mt-2">
-                        <Button size="sm" variant="secondary" disabled={!!s.pendingConsumable}
-                          onClick={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}>
-                          {s.pendingConsumable === it.id ? "Primed" : "Use next log"}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="grid gap-3 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
+                {consumables.map((it, i) => {
+                  const primed = s.pendingConsumable === it.id;
+                  return (
+                    <button
+                      key={it.id + i}
+                      title={`${it.name} · +${Math.round((it.consumableBonus ?? 0) * 100)}% next log`}
+                      disabled={!!s.pendingConsumable && !primed}
+                      onClick={() => { equipItem(it.id); toast.success(`Primed ${it.name} for next log`); }}
+                      className={cn(
+                        "aspect-square p-2 rounded-lg border flex items-center justify-center transition-colors",
+                        primed
+                          ? "border-chalk-glow ring-2 ring-chalk-glow/40 bg-chalk-glow/10"
+                          : "border-chalk-glow/30 bg-chalk-glow/5 hover:bg-chalk-glow/10 disabled:opacity-50"
+                      )}
+                    >
+                      <ItemIcon emoji={it.emoji} alt={it.name} rarity={it.rarity} className="text-5xl h-full w-full" />
+                    </button>
+                  );
+                })}
               </div>
             </Card>
           </section>

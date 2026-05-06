@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import {
   ACTIVITY_LABELS, ActivityType, BADGES, BASE_CHALK, BOSS_TEMPLATES,
-  ITEM_BY_ID, LEVELS, Result, ShopItem, Style, BossTemplate, Gender,
+  ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
 } from "./data";
 
 // ----- Types -----

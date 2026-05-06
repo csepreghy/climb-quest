@@ -11,19 +11,19 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 /** Flat fill + chunky bevel: thick dark outline, top highlight, bottom inner shade, hard drop shadow. */
 const bevel = (fill: string, shadow: string, frame = "var(--panel-frame)") => ({
-  background: `hsl(${fill})`,
+  background: fill.startsWith("linear-gradient") || fill.startsWith("var(--gradient") ? fill : `hsl(${fill})`,
   boxShadow: [
-    `0 0 0 2px hsl(${frame})`,                          // thick dark outline (cartoony)
-    `inset 0 2px 0 hsl(0 0% 100% / 0.32)`,              // glossy top highlight
-    `inset 0 -3px 0 hsl(${shadow})`,                    // inner bottom shade
-    `0 4px 0 0 hsl(${shadow})`,                         // chunky hard drop
-    `0 5px 0 0 hsl(${frame})`,                          // frame under drop
-    `0 10px 16px -6px hsl(0 0% 0% / 0.6)`,              // soft ground
+    `0 0 0 2px hsl(${frame})`,
+    `inset 0 2px 0 hsl(0 0% 100% / 0.32)`,
+    `inset 0 -3px 0 hsl(${shadow})`,
+    `0 4px 0 0 hsl(${shadow})`,
+    `0 5px 0 0 hsl(${frame})`,
+    `0 10px 16px -6px hsl(0 0% 0% / 0.6)`,
   ].join(", "),
 });
 
 const variantStyles: Record<Variant, React.CSSProperties> = {
-  primary:   bevel("var(--btn-orange)", "var(--btn-orange-shadow)"),
+  primary:   bevel("var(--gradient-brand)", "var(--btn-orange-shadow)"),
   success:   bevel("var(--btn-green)",  "var(--btn-green-shadow)"),
   secondary: bevel("var(--btn-stone)",  "var(--btn-stone-shadow)"),
   danger:    bevel("var(--btn-red)",    "var(--btn-red-shadow)"),

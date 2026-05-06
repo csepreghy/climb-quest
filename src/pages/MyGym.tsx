@@ -258,17 +258,24 @@ function RangePicker({
   allowOpenEnd: boolean;
   onChange: (start?: string, end?: string) => void;
 }) {
+  const NONE = "__none__";
   return (
     <div className="flex items-center gap-1">
-      <select value={start ?? ""} onChange={e => onChange(e.target.value || undefined, end)} className={cn(SELECT_CLS, "flex-1 min-w-0")}>
-        <option value="">—</option>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
-      </select>
+      <Select value={start ?? NONE} onValueChange={v => onChange(v === NONE ? undefined : v, end)}>
+        <SelectTrigger className="h-8 text-xs flex-1 min-w-0"><SelectValue placeholder="—" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NONE}>—</SelectItem>
+          {options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+        </SelectContent>
+      </Select>
       <span className="text-muted-foreground text-xs">→</span>
-      <select value={end ?? ""} onChange={e => onChange(start, e.target.value || undefined)} className={cn(SELECT_CLS, "flex-1 min-w-0")} disabled={!start}>
-        <option value="">{allowOpenEnd ? "open" : "—"}</option>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
-      </select>
+      <Select value={end ?? NONE} onValueChange={v => onChange(start, v === NONE ? undefined : v)} disabled={!start}>
+        <SelectTrigger className="h-8 text-xs flex-1 min-w-0"><SelectValue placeholder={allowOpenEnd ? "open" : "—"} /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NONE}>{allowOpenEnd ? "open" : "—"}</SelectItem>
+          {options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

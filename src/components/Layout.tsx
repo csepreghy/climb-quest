@@ -33,7 +33,7 @@ export default function Layout() {
               <div className="text-[11px] text-muted-foreground hidden sm:block">Log boulders. Earn Chalk. Send bosses.</div>
             </div>
           </NavLink>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <ThemeButton />
             <ChalkChip value={s.chalk} />
             <div className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)]">
@@ -92,7 +92,7 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   return (
     <div
-      className="flex items-center gap-3 pl-3 pr-4 h-11 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary"
+      className="flex items-center gap-3 pl-4 pr-5 h-11 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary"
       style={{
         boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.06), inset 0 -1px 0 hsl(0 0% 0% / 0.55)",
       }}

@@ -1,22 +1,126 @@
-## Why box backgrounds look weaker than buttons
+# Plan
 
-Three things make panels read as flatter than the Log Boulder / chalk-chip buttons:
+## 1. Authentication (Lovable Cloud)
 
-1. **Square corners.** `--radius` is `0rem`, so `.rpg-panel` has hard right-angle corners. Buttons (shadcn) and the chalk chip use rounded/pill shapes, which is most of the "chunky button" feel.
-2. **Inner content sits flush.** Buttons have tight padding around a single label; panels have a lot of inner content but no inner radius cue, so the bevel reads as a frame around emptiness instead of wrapping the content.
-3. **Bevel highlight is thin** on the default elevation (`inset 0 1px 0 / 0.06`) compared to buttons (`/ 0.18`), so the top edge doesn't catch light.
+Enable Lovable Cloud and set up Supabase auth.
 
-## Changes
+- **Email/password** signup + login page at `/auth`
+- **Google OAuth** button on the same page
+- `useAuth` hook with `onAuthStateChange` + `getSession`
+- Protect routes: redirect to `/auth` when signed out
+- Sign-out button in header (next to ThemeButton)
+- New `profiles` table (auto-created on signup via trigger) — stores `email`, `display_name`
+- New `user_roles` table + `app_role` enum (`admin`, `user`) + `has_role()` SECURITY DEFINER function (per security best practice — never store role on profile)
+- Seed: insert `admin` role for the user whose email is `andrew.chepreghy@gmail.com` after they first sign in (handled inside the signup trigger by checking email)
+- `useIsAdmin()` hook calling `has_role`
 
-1. **`src/index.css`**
-   - `--radius: 0rem` → `0.75rem` so all panels (and shadcn components that use `var(--radius)`) get soft corners.
-   - Bump the default `--shadow-panel` top highlight from `0.06` → `0.14` so flat panels still look lit, matching the button family.
+**Admin gating:**
+- Hide the **Admin** nav item unless `useIsAdmin()` is true
+- Guard `/admin` route — non-admins get redirected home
 
-2. **`src/components/Layout.tsx` — chalk chip area**
-   - Increase the gap between the avatar/level cluster and the chalk chip, and the chip and the theme switcher. Currently the header row is tight; add `gap` / horizontal padding so the chalk bag isn't crowded against its neighbors.
-   - Also nudge the chip's internal left padding (`pl-3` → `pl-4`) so the bag icon has air on its left.
+## 2. Admin chalk controls
 
-3. **`src/theme/themes.ts` — elevation presets**
-   - These all use box-shadow only, so they automatically pick up the new radius. No change needed, but verify `cartoon` (sticker offset) still looks right at `0.75rem` — if the offset shadow shows a square corner, switch its `5px 5px 0 0` to also be radius-aware (it is, since it's a `box-shadow`, so fine).
+In `src/pages/Admin.tsx`, add a card above ThemeStudio:
+- Number input + **Add Chalk** / **Subtract Chalk** buttons
+- Calls a new store action `adminAdjustChalk(delta)`
+- Only visible to admins (route already guarded)
 
-No component API changes. Purely CSS / spacing tweaks.
+## 3. Chalk modal cleanup (Layout.tsx)
+
+- Remove the entire **Bonuses** section
+- Sort base activities **ascending** by point value (lowest → highest)
+
+## 4. Levels modal (top-right Lv chip)
+
+- Make the Lv chip a button → opens a Dialog showing all 10 levels in a list with: emoji, title, cost, unlocks
+- Current level highlighted; locked future levels show a lock icon
+- **Rebalance costs to exponential** (achievable with multipliers stacking):
+  ```
+  L2: 200, L3: 500, L4: 1100, L5: 2200, L6: 4200,
+  L7: 7800, L8: 14000, L9: 24000, L10: 40000
+  ```
+  (~1.8x growth — reachable with multiple equipped multipliers and consumables)
+
+## 5. Slot unlocks by level
+
+Update `Equipped` model with capacities:
+- **Gear slots**: 1 at L1 → +1 each at L4, L7, L10 (max 4)
+- **Power-up slots**: 0 at L1 → 1 at L5, 2 at L10
+- Outfit slots (top/bottom/shoes/hat/hand) remain always available
+- In Inventory, render N gear/power slots based on level; locked slots show 🔒 with "Unlocks at Lv X"
+- Equipping more than capacity is blocked with a toast
+
+## 6. Inventory redesign
+
+**Layout**: keep two-column. Left = avatar + active bonuses + **Titles card** (using the same `GameCard` style as Home's Equipped card — fixes the readability issue).
+
+**Equipped slots (top of each group)**:
+- Square tiles (aspect-square), no text label — only the item image/emoji centered
+- Border color = rarity color (orange when equipped — replaces current red `accent` border)
+- Empty slot shows muted `+` icon
+- Hover → tooltip with name
+- Click → opens **Slot Picker Modal** (see below)
+
+**Owned grid**:
+- Square tiles, no text, only emoji/asset
+- Border = rarity color (white/blue/purple/gold per rarities update — see §7)
+- Equipped item gets **orange ring** (not red)
+- Hover → tooltip with name
+- Click → opens **Item Detail Modal**
+
+**Slot Picker Modal** (when clicking a slot):
+- Title: e.g. "Equip — Shoes"
+- Grid of all owned items where `item.slot === clickedSlot` (highlighted as equippable)
+- Greyed-out tiles for items that don't fit (none shown for that slot)
+- Clicking an owned item opens **Compare Modal**
+
+**Item Detail Modal** (click owned item):
+- Large square preview, name, rarity badge, bonus % (plain — not green)
+- Equip button if not equipped; Unequip if equipped
+- "Compare with equipped" inline section if a different item is in that slot
+
+**Compare Modal** (slot's equipped item ↔ candidate):
+- Two columns side by side: Equipped | Candidate
+- Show name, rarity, bonus %
+- Numeric diff line per applicable activity:
+  - **Green** if candidate is better
+  - **Red** if worse
+  - (Note: user said "green if better, green if worse" — assumed typo; using green=better, red=worse)
+- "Equip" button confirms swap
+
+## 7. Rarity colors
+
+Update `Rarity` type and CSS tokens:
+- Add `uncommon` and `epic` rarities → `Rarity = "common" | "uncommon" | "epic" | "legendary" | "consumable"`
+- Update `--common: 0 0% 95%` (white), `--uncommon: 210 80% 55%` (blue), `--epic: 270 70% 60%` (purple), `--legendary: 42 95% 60%` (gold, unchanged)
+- Add `uncommon`/`epic` to tailwind config + `RARITY_COLOR` map
+- Re-tag SHOP items: replace existing `rare` with `uncommon` (cheap rares) or `epic` (expensive rares) by price tier
+- Equipped ring color = orange (`--btn-orange`)
+
+## 8. Item assets
+
+User mentioned "these will be assets" — for now keep the emoji as placeholder inside each square tile with rarity-tinted background. When asset PNGs are uploaded later, swap `emoji` for `image` field. No code blocker.
+
+## Files to add/modify
+
+**New:**
+- `src/integrations/supabase/client.ts` (auto-generated by Cloud)
+- `src/pages/Auth.tsx` — login/signup with Google
+- `src/hooks/useAuth.ts`, `src/hooks/useIsAdmin.ts`
+- `src/components/RequireAuth.tsx`
+- `src/components/inventory/ItemTile.tsx`, `SlotPickerModal.tsx`, `ItemDetailModal.tsx`, `CompareModal.tsx`
+- `src/components/LevelsModal.tsx`
+- Migration: profiles, user_roles, app_role enum, has_role(), signup trigger that seeds admin role for `andrew.chepreghy@gmail.com`
+
+**Modified:**
+- `src/App.tsx` — `/auth` route, RequireAuth wrapper
+- `src/components/Layout.tsx` — sign-out, admin-only nav, Lv chip → modal, chalk modal cleanup
+- `src/pages/Inventory.tsx` — full rewrite for square tiles + modals + slot capacity
+- `src/pages/Admin.tsx` — chalk give/subtract card + admin guard
+- `src/game/data.ts` — exponential level costs, new rarities, re-tagged items, slot capacity table
+- `src/game/store.ts` — `adminAdjustChalk`, capacity check in `equipItem`
+- `src/index.css` + `tailwind.config.ts` — uncommon/epic tokens
+
+## Open question
+
+**Item assets**: keep emoji placeholders inside the square tiles for now? Or do you want to upload PNG/SVG assets first before I redo Inventory? (I'll proceed with emoji placeholders if you don't specify.)

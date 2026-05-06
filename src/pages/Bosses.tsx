@@ -17,12 +17,7 @@ const BOSS_EMOJIS = ["👹","👺","👻","😈","🗿","🐻","🦍","🐲","�
 const OUTCOMES: { v: Parameters<typeof attemptBoss>[1]; label: string; tone?: string }[] = [
   { v: "send", label: "Send 🏆", tone: "from-legendary to-accent" },
   { v: "flash", label: "Flash ⚡", tone: "from-legendary to-rare" },
-  { v: "high_point", label: "New high point" },
-  { v: "zone", label: "Reached zone" },
-  { v: "fell_crux", label: "Fell at crux" },
-  { v: "fell_low", label: "Fell low" },
-  { v: "humbled", label: "Got completely humbled" },
-  { v: "retreat", label: "Strategic retreat" },
+  { v: "attempt", label: "Attempt" },
 ];
 
 export default function Bosses() {

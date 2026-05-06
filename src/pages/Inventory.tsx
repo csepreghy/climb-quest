@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ITEM_BY_ID, RARITY_COLOR, Slot, ItemGroup, SHOP } from "@/game/data";
+import { ITEM_BY_ID, RARITY_COLOR, Slot, ItemGroup } from "@/game/data";
 import { equipItem, unequipSlot, useGame } from "@/game/store";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { cn } from "@/lib/utils";

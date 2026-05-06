@@ -66,7 +66,7 @@ export default function Inventory() {
           )}
           {s.pendingConsumable && (
             <div className="mt-3 text-xs px-2 py-1.5 rounded-md bg-chalk-glow/10 border border-chalk-glow/40">
-              ⚡ Next log boosted by {ITEM_BY_ID[s.pendingConsumable]?.name}
+              ⚡ Next log boosted by {getItem(s.pendingConsumable)?.name}
             </div>
           )}
         </Card>
@@ -84,7 +84,7 @@ export default function Inventory() {
                 <div className="grid gap-2 sm:grid-cols-2">
                   {slots.map(slot => {
                     const id = s.equipped[slot];
-                    const it = id ? ITEM_BY_ID[id] : null;
+                    const it = id ? getItem(id) : null;
                     return (
                       <div key={slot} className="flex items-center justify-between gap-2 p-3 rounded-lg border border-border bg-secondary/30">
                         <div className="min-w-0">

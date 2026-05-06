@@ -96,13 +96,6 @@ export default function Layout() {
 function ChalkChip({ value }: { value: number }) {
   const [open, setOpen] = useState(false);
 
-  // Bonus reference rows derived from store result modifiers
-  const bonusRows: { label: string; amount: string }[] = [
-    { label: "Send a boulder", amount: "+30" },
-    { label: "Flash a boulder", amount: "+60" },
-    { label: "Got humbled", amount: "−50%" },
-  ];
-
   // Activity rows
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))

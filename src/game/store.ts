@@ -287,6 +287,78 @@ export function logBoulder(input: LogInput) {
   return { log, breakdown, newBadges: computeNewBadgesAfter() };
 }
 
+export function deleteLog(id: string) {
+  set(s => {
+    const log = s.logs.find(l => l.id === id);
+    if (!log) return s;
+    const sentLike = log.attemptType === "flash" || log.attemptType === "send";
+    return {
+      ...s,
+      logs: s.logs.filter(l => l.id !== id),
+      chalk: Math.max(0, s.chalk - log.chalkTotal),
+      totalChalkEarned: Math.max(0, s.totalChalkEarned - log.chalkTotal),
+      stats: {
+        ...s.stats,
+        totalLogs: Math.max(0, s.stats.totalLogs - 1),
+        totalSends: Math.max(0, s.stats.totalSends - (sentLike ? 1 : 0)),
+        totalFlashes: Math.max(0, s.stats.totalFlashes - (log.attemptType === "flash" ? 1 : 0)),
+        bossesSent: Math.max(0, s.stats.bossesSent - (log.isBoss && sentLike ? 1 : 0)),
+      },
+    };
+  });
+}
+
+export function updateLog(id: string, input: LogInput) {
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash");
+  const mult = input.chalkMultiplier ?? 1;
+  const breakdown = mult === 1 ? raw : {
+    base: raw.base,
+    bonuses: raw.bonuses,
+    total: Math.round(raw.total * mult),
+  };
+  set(s => {
+    const old = s.logs.find(l => l.id === id);
+    if (!old) return s;
+    const updated: BoulderLog = {
+      ...old,
+      date: input.date ?? old.date,
+      activity: input.activity,
+      duration: input.duration,
+      location: input.location,
+      grade: input.grade,
+      gradeMax: input.gradeMax,
+      styles: input.styles,
+      problemsTried: input.problemsTried,
+      sends: input.sends,
+      hardestSend: input.hardestSend,
+      notes: input.notes,
+      chalkBase: breakdown.base,
+      chalkBonus: breakdown.total - breakdown.base,
+      chalkTotal: breakdown.total,
+      isBoss: input.isBoss,
+      attemptType: input.attemptType,
+      holdColorId: input.holdColorId,
+      gymId: input.gymId,
+    };
+    const chalkDelta = updated.chalkTotal - old.chalkTotal;
+    const oldSent = old.attemptType === "flash" || old.attemptType === "send";
+    const newSent = updated.attemptType === "flash" || updated.attemptType === "send";
+    return {
+      ...s,
+      logs: s.logs.map(l => l.id === id ? updated : l),
+      chalk: Math.max(0, s.chalk + chalkDelta),
+      totalChalkEarned: Math.max(0, s.totalChalkEarned + Math.max(0, chalkDelta)),
+      stats: {
+        ...s.stats,
+        totalSends: Math.max(0, s.stats.totalSends + ((newSent ? 1 : 0) - (oldSent ? 1 : 0))),
+        totalFlashes: Math.max(0, s.stats.totalFlashes + ((updated.attemptType === "flash" ? 1 : 0) - (old.attemptType === "flash" ? 1 : 0))),
+        bossesSent: Math.max(0, s.stats.bossesSent + ((updated.isBoss && newSent ? 1 : 0) - (old.isBoss && oldSent ? 1 : 0))),
+      },
+    };
+  });
+  return { breakdown };
+}
+
 let lastNewBadges: string[] = [];
 function computeNewBadges(s: State, log: BoulderLog): string[] {
   const have = new Set(s.badges);

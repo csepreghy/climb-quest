@@ -12,6 +12,7 @@ import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { LevelsModal } from "@/components/LevelsModal";
 import { LogModal } from "@/components/LogModal";
+import { OnboardingModal } from "@/components/OnboardingModal";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
@@ -19,6 +20,7 @@ import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import logoImg from "@/assets/climbquest-logo.png";
 import { LevelPreviewCard } from "@/components/LevelPreviewCard";
+import { useGyms } from "@/game/gyms";
 
 const NAV_BASE = [
   { to: "/home", label: "Home", icon: Home },

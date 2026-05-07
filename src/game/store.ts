@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import {
   ACTIVITY_LABELS, ActivityType, BADGES, BASE_CHALK, BOSS_TEMPLATES,
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
+  GEAR_SLOTS, gearSlotsUnlocked,
 } from "./data";
 import { getItem } from "./customItems";
 import { resolvedLevel } from "./levelOverrides";

@@ -40,7 +40,7 @@ export default function BoulderLogs() {
     return true;
   }), [s.logs, entryFilter, grade, gymId, search]);
 
-  useMemo(() => { setVisible(10); }, [entryFilter, grade, gymId, search]);
+  useEffect(() => { setVisible(10); }, [entryFilter, grade, gymId, search]);
   const shown = filtered.slice(0, visible);
 
   return (

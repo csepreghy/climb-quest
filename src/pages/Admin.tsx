@@ -15,6 +15,7 @@ import {
   updateCustomItem,
   deleteCustomItem,
   isImageEmoji,
+  backfillShopImages,
   CustomItemInput,
 } from "@/game/customItems";
 import { ItemGroup, Rarity, Slot, ShopItem } from "@/game/data";

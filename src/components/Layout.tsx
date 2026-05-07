@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ScrollText, Swords, User, Store, Backpack, Settings, LogOut, Building2 } from "lucide-react";
+import { GameButton } from "@/components/ui/game-button";
 import { useGame } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
@@ -38,7 +39,7 @@ export default function Layout() {
             <img
               src={logoImg}
               alt="ClimbQuest"
-              className="h-20 sm:h-24 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
+              className="h-16 sm:h-20 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
             />
             <div className="leading-tight hidden sm:block">
               <div className="text-sm text-muted-foreground">Log boulders. Earn Chalk. Send bosses.</div>
@@ -52,9 +53,9 @@ export default function Layout() {
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>
               <span className="font-bold tabular-nums text-[hsl(var(--sky))]">{s.level}</span>
             </button>
-            <Button size="icon" variant="ghost" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out">
-              <LogOut className="h-4 w-4" />
-            </Button>
+            <GameButton variant="danger" size="sm" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out">
+              <LogOut className="h-4 w-4" /> Sign out
+            </GameButton>
           </div>
         </div>
         {/* Top nav (desktop) */}

@@ -1,117 +1,97 @@
+## Goal
 
-# Progression rebalance plan
+Rebalance level thresholds, item prices, and item bonuses so early progression feels fast, late progression is a grind, and L10 takes ~6 months at 2–3 sessions/week (~3 months at 4/week). L10 cost = **1,000,000 chalk**. Chalk-reward scaling stays as previously implemented; this plan focuses on *thresholds, prices, bonuses, and discount items*.
 
-A complete overhaul of level thresholds, base chalk, item pricing/bonuses, and a new **relative-difficulty** scaler. Numbers are concrete starting points — easy to tune in `data.ts` later.
+## 1. Level thresholds (`src/game/data.ts` → `LEVELS`)
 
-## 1. Design principles
+Replace `cost` values with a steep curve. Cumulative ≈ 1.27M.
 
-- **First 2 weeks = dopamine.** Levels 1–4 reachable in ~1–2 weeks of casual logging (3 sessions/week). Several common items affordable after the first session.
-- **Months 1–3 = the buying loop.** From Level 5 onward, raw chalk income alone is too slow to level up — the player MUST buy and equip bonus items to keep climbing the curve. Each new tier of items unlocks ~+25–40% effective income.
-- **Months 4–6 = the grind with payoff.** Level 9–10 require deep stacking of legendary bonuses + price-reduction gear + boss sends. Reaching Lv 10 on a 3×/week cadence ≈ 5–6 months.
-- **Stacking is multiplicative on running subtotal** (already implemented in `computeChalk`), so each new item compounds — late-game items should give **larger %** but cost disproportionately more.
-- **Relative-difficulty scaling** keeps grade-1 warm-ups meaningful for beginners and trivial for veterans — pushes advanced players to log harder problems and bosses.
+| Lv | Cost to reach | Cumulative |
+|----|--------------:|-----------:|
+| 1  | 0             | 0          |
+| 2  | 100           | 100        |
+| 3  | 300           | 400        |
+| 4  | 800           | 1,200      |
+| 5  | 2,000         | 3,200      |
+| 6  | 5,000         | 8,200      |
+| 7  | 15,000        | 23,200     |
+| 8  | 50,000        | 73,200     |
+| 9  | 200,000       | 273,200    |
+| 10 | **1,000,000** | 1,273,200  |
 
-## 2. Level thresholds (chalk to reach next level)
+Pacing math: ~65 sessions in 6 months at 2.5/wk; with stacked bonuses + at-limit difficulty multiplier, late-game sessions earn 10k–20k chalk, making the L10 jump intentionally heavy but achievable.
 
-Replace `LEVELS[i].cost` (currently 0, 200, 500, 1.1k, 2.2k, 4.2k, 7.8k, 14k, 24k, 40k → ~94k total).
+## 2. Item bonuses (overwrite `bonus_pct` in `shop_items`)
 
-| Lv | New cost | Cumulative | Feel |
-|----|---------:|-----------:|------|
-| 1  | 0       | 0       | start |
-| 2  | 150     | 150     | first session |
-| 3  | 400     | 550     | day 2–3 |
-| 4  | 1,000   | 1,550   | week 1 |
-| 5  | 2,500   | 4,050   | week 2–3 — gear slot 3 |
-| 6  | 6,000   | 10,050  | month 1 |
-| 7  | 14,000  | 24,050  | month 2 |
-| 8  | 32,000  | 56,050  | month 3 — gear slot 4 |
-| 9  | 70,000  | 126,050 | month 4–5 |
-| 10 | 150,000 | 276,050 | month 5–6 endgame |
+New tiering (all values are `bonus_pct`, applied as `+%` chalk):
 
-Curve is roughly ×2.2/level — steeper than today, but income scales with item bonuses (see §4).
+- Common: **2%**
+- Rare: **6%**
+- Epic: **15%**
+- Legendary: **35%**
 
-## 3. Base chalk + relative-difficulty scaler
+Applied to every existing item by rarity (specific overwrites listed in section 5).
 
-Keep `BASE_CHALK` numbers (or slightly tune), and apply a **difficulty multiplier** based on `gradeClimbed` vs `playerCeiling`, where `playerCeiling` = the highest boss grade-rank the player has sent (default 1 if none).
+## 3. Item prices (overwrite `price` in `shop_items`)
 
-```text
-diffRatio = gradeRank(climb) / playerCeiling
-multiplier =
-  diffRatio <= 0.3   → 0.25   (waaay below — you’re basically jogging)
-  diffRatio <= 0.6   → 0.55
-  diffRatio <= 0.85  → 0.85
-  diffRatio <= 1.0   → 1.0
-  diffRatio <= 1.15  → 1.25   (at-limit)
-  diffRatio  > 1.15  → 1.5    (project zone)
-```
+Tier price bands (rounded per slot importance):
 
-`gradeRank` reads the V-scale or French-scale index from `gyms.ts` (or the gym's custom system). Bosses already store `difficulty` (1–10), so `playerCeiling = max(difficulty of sent bosses)`.
+- Common: 50–150
+- Rare: 400–1,500
+- Epic: 5,000–15,000
+- Legendary: 60,000–180,000
 
-Effects:
-- New player (no boss sent): everything ≥ ratio 1, so they keep getting full base chalk → fast early ramp.
-- Player who sent a difficulty-6 boss: a "grade 1 warm-up" → diffRatio ≈ 0.17 → ×0.25 multiplier (≈8 chalk for a warm-up boulder vs 30) — feels right.
-- Logging at-limit problems pays a 25% bonus, projects 50%.
+## 4. Shop-discount items (single source, no stacking)
 
-Tuned base values:
-```
-warmup_boulder: 25
-boulder:        70
-hard_boulder:   150
-boulder_send:   +50  (flat add-on)
-boss_attempt:   60
-boss_send:      400  (boss sends are the big push)
-```
+Per your call, **only the `study` slot** provides shop discounts. Their `bonus_pct` becomes 0 and `price_mult` carries the discount. Only the lowest equipped `priceMult` applies (already implemented).
 
-## 4. Item bonuses & pricing
+| Item                  | Rarity     | Lv req | Price   | priceMult | Discount |
+|-----------------------|------------|-------:|--------:|----------:|---------:|
+| Beta Book             | rare       | 2      | 600     | 0.95      | 5% off   |
+| Beta Breaker Book     | epic       | 4      | 6,000   | 0.85      | 15% off  |
+| **Sponsor Deal** (new)| legendary  | 8      | 80,000  | 0.70      | 30% off  |
 
-Items are admin-managed in the `shop_items` table — this plan defines **target ranges** the admin tool will use, plus a recommended starter catalogue migration.
+The new legendary study item will be inserted via migration. (If you'd rather rename one of the existing legendaries instead of adding, say so.)
 
-### Bonus tiers
+## 5. Concrete per-item overwrites (UPDATE migration)
 
-| Rarity     | Bonus %  | Typical level req | Price range |
-|------------|---------:|------------------:|------------:|
-| Common     | +3–5%    | Lv 1–3            | 100–600     |
-| Rare       | +6–10%   | Lv 3–6            | 1,500–6,000 |
-| Epic       | +12–18%  | Lv 5–8            | 10,000–35,000 |
-| Legendary  | +22–30%  | Lv 8–10           | 60,000–180,000 |
+All current rows updated to:
 
-Single-slot items give a flat % to **all** activities. Style-matched items (e.g. "Crimp Gloves" applies only to crimp logs) carry a **higher** % at the same price, rewarding specialisation.
+| Item                       | Rarity    | New price | New bonus% | priceMult |
+|----------------------------|-----------|----------:|-----------:|----------:|
+| Reliable Powder            | common    | 50        | 2          | 1         |
+| Liquid Chalk               | rare      | 500       | 6          | 1         |
+| Sticky                     | rare      | 1,200     | 6          | 1         |
+| Magdust                    | epic      | 8,000     | 15         | 1         |
+| Cosmic Magdust             | legendary | 120,000   | 35         | 1         |
+| Toe Hook Master            | rare      | 800       | 6          | 1         |
+| Comfy Beginner Shoes       | rare      | 600       | 6          | 1         |
+| Comp                       | epic      | 7,000     | 15         | 1         |
+| Golden Crocs               | legendary | 150,000   | 35         | 1         |
+| Shorts                     | common    | 100       | 2          | 1         |
+| Pants                      | rare      | 700       | 6          | 1         |
+| Rental                     | common    | 50        | 2          | 1         |
+| Climbing Tape              | common    | 80        | 2          | 1         |
+| Crack Climbing Gloves      | epic      | 5,000     | 15         | 1         |
+| Bear Paw Glove             | legendary | 90,000    | 35         | 1         |
+| Infinity Climbing          | legendary | 100,000   | 35         | 1         |
+| No Hats                    | common    | 0         | 0          | 1         |
+| Bare Bones                 | common    | 0         | 0          | 1         |
+| Baseball Cap               | rare      | 500       | 6          | 1         |
+| Cool Beanie                | epic      | 6,000     | 15         | 1         |
+| Sender Hoodie              | epic      | 9,000     | 15         | 1         |
+| Shirtless                  | legendary | 80,000    | 35         | 1         |
+| Beta Book                  | rare      | 600       | **0**      | **0.95**  |
+| Beta Breaker Book          | epic      | 6,000     | **0**      | **0.85**  |
+| Sponsor Deal *(insert)*    | legendary | 80,000    | 0          | 0.70      |
 
-### "Pricing math" check (3 sessions/week, ~12 logs/session)
+## 6. Files / migrations
 
-- Lv 1 → 2 with no items: ~150 chalk in 1 session ✓
-- Lv 4 → 5 with 2 commons (+8% combined): ~3k base/week × 1.08 → ~3.2k → ~1 week ✓
-- Lv 7 → 8 needs 32k. With 1 rare + 1 epic + 1 common (+~25%): ~5k/week × 1.25 → 6.2k/week → ~5 weeks ✓
-- Lv 9 → 10 needs 150k. With full epic + 2 legendaries (+~70%): ~9k/week × 1.7 → 15k/week → ~10 weeks ✓ (months 5–6)
+- **Migration**: `UPDATE shop_items SET ...` per row above; `INSERT` Sponsor Deal row.
+- **`src/game/data.ts`**: rewrite `LEVELS` cost values.
+- No code logic changes needed — discount + bonus systems already wired.
 
-If the math feels off after playtest, only `LEVELS[].cost` and the rarity ranges need to move.
+## Open questions
 
-### Should some items reduce shop prices?
-
-**Yes — recommended.** Adds genuine build-diversity instead of "always pick highest %". Two options, I recommend (a):
-
-- **(a) Discount-tagged gear (preferred):** introduce a new optional field `priceMult` on `ShopItem` (e.g. 0.95 = 5% cheaper shop). Equipped discounts stack multiplicatively on item price at the moment of purchase (computed in `buyItem`). One per slot makes sense (e.g. "Merchant's Belt" accessory). Discounts apply to outfit/gear/power purchases — not level-ups.
-- (b) Consumable coupons — single-use 20% off one purchase. Less interesting strategically.
-
-Why this is good: a player at Lv 7 deciding between "+15% chalk gloves" and "−10% prices belt" has a real tradeoff — the gloves help income forever, the belt frontloads a big-item buy. It also creates a "save up for Lv 10 outfit" archetype.
-
-UI/code touch points: `Shop.tsx` displays struck-through original price + new price; `buyItem` in `store.ts` computes effective price using equipped discounts.
-
-## 5. Migration / implementation steps (for build mode)
-
-1. **`src/game/data.ts`** — update `LEVELS[].cost`, tweak `BASE_CHALK`, add `priceMult?: number` to `ShopItem`.
-2. **`src/game/store.ts`** —
-   - Add `playerCeiling(state)` selector (max difficulty of sent bosses, default 1).
-   - Add `difficultyMultiplier(climbRank, ceiling)` and apply it inside `computeChalk` (right after `base`, before any other bonuses).
-   - In `buyItem`, compute `effectivePrice = item.price × ∏(equipped priceMult)`.
-3. **`src/game/gyms.ts`** — small helper `gradeRank(label, system)` returning a 1–N rank for a grade label (V-scale, French, custom number/color).
-4. **`src/components/LogModal.tsx`** — pass the gym's grade rank into `logBoulder`/`computeChalk` so the multiplier can fire.
-5. **`src/pages/Shop.tsx`** — render discounted price when `priceMult < 1`.
-6. **`shop_items` table** — add `price_mult numeric not null default 1` column via migration; admin form gets a "Shop discount %" field.
-7. **Admin seeder** — optional one-time button in `Admin.tsx` to populate a starter catalogue matching §4 ranges (so a fresh DB isn't empty).
-
-## 6. Open questions (will ask before building)
-
-- Do you want the difficulty scaler to also apply to **boss attempts/sends**, or only regular boulder activities? (My default: only regular boulders + warm-ups; bosses keep full payout because they're already gated.)
-- Discount items: cap total discount (e.g. min 60% of list price) so stacking doesn't trivialize Lv 10 items?
-- Is 3 sessions/week the right "target player" cadence to design around, or something else (2/week, 4/week)?
+- Insert a new legendary study item ("Sponsor Deal") or repurpose an existing legendary into the discount role? Default: insert new.
+- Keep current chalk reward base values (unchanged from last pass)? Default: yes.

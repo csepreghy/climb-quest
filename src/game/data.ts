@@ -38,16 +38,16 @@ export interface ClimberLevel {
 }
 
 export const LEVELS: ClimberLevel[] = [
-  { level: 1, title: "Rental Shoe Rookie", cost: 0,      emoji: "🥾", desc: "Oversized rentals, max enthusiasm.",            unlocks: ["Starter avatar", "Rental shoes", "Plain chalk bag", "1 Gear slot"] },
-  { level: 2, title: "Chalk Chaser",       cost: 150,    emoji: "💨", desc: "Obsessed with chalk. Still figuring it out.",   unlocks: ["Chalk bag skin", "Beanie", "First Send badge"] },
-  { level: 3, title: "Footwork Fiend",     cost: 400,    emoji: "👣", desc: "Discovers feet exist. Game-changing.",          unlocks: ["Footwork badge", "Cleaner shoes", "+1 Gear slot"] },
-  { level: 4, title: "Jug Juggler",        cost: 1000,   emoji: "🤹", desc: "Big holds, big confidence, slightly chaotic.",  unlocks: ["Chalk bucket", "Funny socks"] },
-  { level: 5, title: "Cute Crimper",       cost: 2500,   emoji: "🤏", desc: "Tiny holds = personality trait.",               unlocks: ["Magdust", "Wristband", "+1 Gear slot", "+1 Power-up slot"] },
-  { level: 6, title: "Dyno Devourer",      cost: 6000,   emoji: "🦘", desc: "Full commitment. No fear. Only flight.",        unlocks: ["Neon pants", "Neon chalk bag", "No Static badge"] },
-  { level: 7, title: "Board Goblin",       cost: 14000,  emoji: "👺", desc: "Lives on the board. Slightly feral.",           unlocks: ["Board shoes", "Tape pack"] },
-  { level: 8, title: "Beta Breaker",       cost: 32000,  emoji: "🧠", desc: "Reads sequences. Solves cruxes. Smug.",         unlocks: ["Beta notebook", "Smart glasses", "+1 Gear slot (max)", "Sequence Master"] },
-  { level: 9, title: "Project Beast",      cost: 70000,  emoji: "🦍", desc: "Long-term projects only. Locked in.",           unlocks: ["Project Beast Fit", "Premium brush", "Elite hoodie"] },
-  { level: 10,title: "Crimp Demigod",      cost: 150000, emoji: "👑", desc: "Endgame. Cute. Terrifying. Glowing.",           unlocks: ["Minimal Send Kit", "Golden Crocs", "+1 Power-up slot"] },
+  { level: 1, title: "Rental Shoe Rookie", cost: 0,        emoji: "🥾", desc: "Oversized rentals, max enthusiasm.",            unlocks: ["Starter avatar", "Rental shoes", "Plain chalk bag", "1 Gear slot"] },
+  { level: 2, title: "Chalk Chaser",       cost: 100,      emoji: "💨", desc: "Obsessed with chalk. Still figuring it out.",   unlocks: ["Chalk bag skin", "Beanie", "First Send badge"] },
+  { level: 3, title: "Footwork Fiend",     cost: 300,      emoji: "👣", desc: "Discovers feet exist. Game-changing.",          unlocks: ["Footwork badge", "Cleaner shoes", "+1 Gear slot"] },
+  { level: 4, title: "Jug Juggler",        cost: 800,      emoji: "🤹", desc: "Big holds, big confidence, slightly chaotic.",  unlocks: ["Chalk bucket", "Funny socks"] },
+  { level: 5, title: "Cute Crimper",       cost: 2000,     emoji: "🤏", desc: "Tiny holds = personality trait.",               unlocks: ["Magdust", "Wristband", "+1 Gear slot", "+1 Power-up slot"] },
+  { level: 6, title: "Dyno Devourer",      cost: 5000,     emoji: "🦘", desc: "Full commitment. No fear. Only flight.",        unlocks: ["Neon pants", "Neon chalk bag", "No Static badge"] },
+  { level: 7, title: "Board Goblin",       cost: 15000,    emoji: "👺", desc: "Lives on the board. Slightly feral.",           unlocks: ["Board shoes", "Tape pack"] },
+  { level: 8, title: "Beta Breaker",       cost: 50000,    emoji: "🧠", desc: "Reads sequences. Solves cruxes. Smug.",         unlocks: ["Beta notebook", "Smart glasses", "+1 Gear slot (max)", "Sequence Master"] },
+  { level: 9, title: "Project Beast",      cost: 200000,   emoji: "🦍", desc: "Long-term projects only. Locked in.",           unlocks: ["Project Beast Fit", "Premium brush", "Elite hoodie"] },
+  { level: 10,title: "Crimp Demigod",      cost: 1000000,  emoji: "👑", desc: "Endgame. Cute. Terrifying. Glowing.",           unlocks: ["Minimal Send Kit", "Golden Crocs", "+1 Power-up slot"] },
 ];
 
 export interface ShopItem {

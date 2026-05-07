@@ -410,6 +410,84 @@ export function adminSetIgnoreLevelReq(value: boolean) {
   set(s => ({ ...s, ignoreLevelReq: value }));
 }
 
+export function adminSeedMockData() {
+  const styles: Style[] = ["slab","vertical","overhang","crimp","sloper","compression","coordination","dyno","mantle","cave"];
+  const grades = ["V1","V2","V3","V4","V5","V6","V7"];
+  const locations = ["Local Gym","Boulder Cave","Garage Wall","The Spot","Sunset Crag","Movement HQ"];
+  const activities: ActivityType[] = ["warmup_boulder","boulder","hard_boulder","boulder_send"];
+  const attempts: AttemptType[] = ["flash","send","project"];
+
+  const now = Date.now();
+  const logs: BoulderLog[] = [];
+  let totalEarned = 0;
+  let totalSends = 0;
+  let totalFlashes = 0;
+
+  for (let i = 0; i < 18; i++) {
+    const activity = activities[i % activities.length];
+    const attemptType = attempts[i % attempts.length];
+    const styleSet: Style[] = [styles[i % styles.length], styles[(i * 3 + 1) % styles.length]];
+    const sent = attemptType === "send" || attemptType === "flash";
+    const breakdown = computeChalk(activity, styleSet, sent, attemptType === "flash");
+    logs.push({
+      id: crypto.randomUUID(),
+      date: new Date(now - i * 86400000 - Math.floor(Math.random() * 7200000)).toISOString(),
+      activity,
+      duration: 30 + (i % 4) * 15,
+      location: locations[i % locations.length],
+      grade: grades[i % grades.length],
+      styles: styleSet,
+      problemsTried: 5 + (i % 6),
+      sends: sent ? 1 + (i % 3) : 0,
+      hardestSend: sent ? grades[Math.min(grades.length - 1, (i % grades.length) + 1)] : undefined,
+      notes: i % 4 === 0 ? "Felt strong on the crimps." : undefined,
+      chalkBase: breakdown.base,
+      chalkBonus: breakdown.total - breakdown.base,
+      chalkTotal: breakdown.total,
+      attemptType,
+    });
+    totalEarned += breakdown.total;
+    if (sent) totalSends++;
+    if (attemptType === "flash") totalFlashes++;
+  }
+
+  set(s => {
+    const bosses: Boss[] = BOSS_TEMPLATES.slice(0, 5).map((t, i) => {
+      const sent = i < 2;
+      const sentDate = sent ? new Date(now - (i + 1) * 5 * 86400000).toISOString() : undefined;
+      const bossAttempts: BossAttempt[] = Array.from({ length: 2 + i }, (_, k) => ({
+        id: crypto.randomUUID(),
+        date: new Date(now - (i + 1) * 86400000 - k * 3600000).toISOString(),
+        outcome: sent && k === 0 ? (i === 0 ? "flash" : "send") : "attempt",
+        chalk: sent && k === 0 ? 250 : 50,
+        notes: k === 0 ? "Crux felt doable." : undefined,
+      }));
+      return {
+        ...spawnBoss(t),
+        active: i === 2,
+        sent,
+        sentDate,
+        highPoint: sent ? 100 : 30 + i * 15,
+        attempts: bossAttempts,
+      };
+    });
+    return {
+      ...s,
+      logs: [...logs, ...s.logs],
+      bosses,
+      chalk: s.chalk + totalEarned,
+      totalChalkEarned: s.totalChalkEarned + totalEarned,
+      stats: {
+        ...s.stats,
+        totalLogs: s.stats.totalLogs + logs.length,
+        totalSends: s.stats.totalSends + totalSends,
+        totalFlashes: s.stats.totalFlashes + totalFlashes,
+        bossesSent: 2,
+      },
+    };
+  });
+}
+
 export function resetGame() {
   state = initialState();
   persist();

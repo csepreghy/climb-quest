@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useGame, currentLevel, nextLevel, levelUp } from "@/game/store";
+import { useLevelOverrides } from "@/game/levelOverrides";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
@@ -14,6 +15,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 
 export default function Dashboard() {
   const s = useGame();
+  useLevelOverrides();
   const cur = currentLevel(s);
   const next = nextLevel(s);
   

@@ -13,6 +13,7 @@ import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 
 export default function Character() {
   const s = useGame();
+  useLevelOverrides();
   const cur = currentLevel(s);
   const next = nextLevel(s);
   const earnedBadges = new Set(s.badges);

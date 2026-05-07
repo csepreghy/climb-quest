@@ -39,7 +39,7 @@ export default function Layout() {
             <img
               src={logoImg}
               alt="ClimbQuest"
-              className="h-20 sm:h-24 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
+              className="h-16 sm:h-20 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
             />
             <div className="leading-tight hidden sm:block">
               <div className="text-sm text-muted-foreground">Log boulders. Earn Chalk. Send bosses.</div>

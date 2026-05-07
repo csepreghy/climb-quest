@@ -216,12 +216,20 @@ export default function Inventory() {
                   {slots.map(slot => {
                     const id = s.equipped[slot];
                     const it = id ? getItem(id) : null;
-                    if (!it) return (
-                      <div key={slot} className="flex flex-col">
-                        <div className="flex-1"><EmptySlotCard label={SLOT_LABEL[slot]} /></div>
-                        <div className="h-7 mt-1.5" aria-hidden />
-                      </div>
-                    );
+                    if (!it) {
+                      const slotOwned = owned.filter(o => o.slot === slot && !o.consumableBonus && o.id !== id);
+                      const onEmptyClick = () => {
+                        if (slotOwned.length === 0) { toast.info("No items for this slot — visit the shop"); return; }
+                        if (slotOwned.length === 1) { equipItem(slotOwned[0].id); toast.success(`Equipped ${slotOwned[0].name}`); return; }
+                        setCompareItem(slotOwned[0]);
+                      };
+                      return (
+                        <div key={slot} className="flex flex-col">
+                          <div className="flex-1"><EmptySlotCard label={SLOT_LABEL[slot]} onClick={onEmptyClick} /></div>
+                          <div className="h-7 mt-1.5" aria-hidden />
+                        </div>
+                      );
+                    }
                     return (
                       <div key={slot} className="flex flex-col">
                         <div className="flex-1"><ItemCard item={it} onClick={() => setSlotPicker(it)} /></div>

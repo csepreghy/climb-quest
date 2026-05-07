@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ShopItem, RARITY_COLOR, RARITY_BORDER, ItemGroup } from "@/game/data";
 import { useAllItems, useCatalogLoaded, isImageEmoji } from "@/game/customItems";
-import { buyItem, useGame } from "@/game/store";
+import { buyItem, useGame, effectivePrice } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Lock, Check } from "lucide-react";
@@ -60,16 +60,18 @@ export default function Shop() {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} ignoreLevelReq={!!s.ignoreLevelReq} />)}
+          {items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} state={s} ignoreLevelReq={!!s.ignoreLevelReq} />)}
         </div>
       )}
     </div>
   );
 }
 
-function ShopCard({ item, owned, chalk, level, ignoreLevelReq }: { item: ShopItem; owned: boolean; chalk: number; level: number; ignoreLevelReq: boolean }) {
+function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: ShopItem; owned: boolean; chalk: number; level: number; state: ReturnType<typeof useGame>; ignoreLevelReq: boolean }) {
   const locked = !ignoreLevelReq && !!(item.levelReq && level < item.levelReq);
-  const canAfford = chalk >= item.price;
+  const price = effectivePrice(state, item.price);
+  const discounted = price < item.price;
+  const canAfford = chalk >= price;
   const isConsumable = !!item.consumableBonus;
   const ownAlready = owned && !isConsumable;
 
@@ -82,12 +84,18 @@ function ShopCard({ item, owned, chalk, level, ignoreLevelReq }: { item: ShopIte
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
 
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
+  const discountPct = item.priceMult ? Math.round((1 - item.priceMult) * 100) : 0;
 
   return (
     <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3 relative">
       {bonusPct > 0 && (
         <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
           +{bonusPct}%
+        </div>
+      )}
+      {discountPct > 0 && bonusPct === 0 && (
+        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">
+          −{discountPct}% shop
         </div>
       )}
       <div className="flex items-start gap-3">
@@ -110,7 +118,15 @@ function ShopCard({ item, owned, chalk, level, ignoreLevelReq }: { item: ShopIte
       {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
         <div className="text-sm">
-          {item.price === 0 ? <span className="text-muted-foreground text-xs">Starter</span> : <span className="font-medium tabular-nums inline-flex items-center gap-1">{item.price} <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" /></span>}
+          {item.price === 0 ? (
+            <span className="text-muted-foreground text-xs">Starter</span>
+          ) : (
+            <span className="font-medium tabular-nums inline-flex items-center gap-1">
+              {discounted && <span className="text-[10px] text-muted-foreground line-through mr-1">{item.price}</span>}
+              {price}
+              <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" />
+            </span>
+          )}
         </div>
         {ownAlready ? (
           <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Owned</GameButton>

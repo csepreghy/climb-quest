@@ -162,20 +162,63 @@ export function activeBoss(s: State) {
   return s.bosses.find(b => b.active && !b.sent) ?? s.bosses.find(b => !b.sent);
 }
 
+/** Highest difficulty (1–10) of any boss the player has SENT. Default 1. */
+export function playerCeiling(s: State): number {
+  let max = 1;
+  for (const b of s.bosses) if (b.sent && b.difficulty > max) max = b.difficulty;
+  return max;
+}
+
+/** Effective shop price: applies the equipped discount item (no stacking). */
+export function effectivePrice(s: State, listPrice: number): number {
+  let bestMult = 1;
+  for (const slotKey of Object.keys(s.equipped) as (keyof Equipped)[]) {
+    const id = s.equipped[slotKey]; if (!id) continue;
+    const item = getItem(id); if (!item?.priceMult) continue;
+    if (item.priceMult < bestMult) bestMult = item.priceMult;
+  }
+  return Math.max(0, Math.round(listPrice * bestMult));
+}
+
+/** Same shape as gym difficulty curve, but operating on boss.difficulty (1–10). */
+function bossDifficultyMultiplier(climbDiff: number, ceilingDiff: number): number {
+  const ratio = climbDiff / Math.max(1, ceilingDiff);
+  if (ratio <= 0.3) return 0.25;
+  if (ratio <= 0.6) return 0.55;
+  if (ratio <= 0.85) return 0.85;
+  if (ratio <= 1.0) return 1.0;
+  if (ratio <= 1.15) return 1.25;
+  return 1.5;
+}
+
 // ----- Chalk computation -----
 export interface ChalkBreakdown {
   base: number;
   bonuses: { source: string; amount: number }[];
   total: number;
 }
-export function computeChalk(activity: ActivityType, styles: Style[], sent = false, flashed = false): ChalkBreakdown {
-  const base = BASE_CHALK[activity] ?? 50;
+export function computeChalk(
+  activity: ActivityType,
+  styles: Style[],
+  sent = false,
+  flashed = false,
+  difficultyMult = 1,
+): ChalkBreakdown {
+  const baseRaw = BASE_CHALK[activity] ?? 50;
+  const base = Math.max(1, Math.round(baseRaw * difficultyMult));
   const bonuses: { source: string; amount: number }[] = [];
   let running = base;
+  if (difficultyMult !== 1) {
+    const pct = Math.round((difficultyMult - 1) * 100);
+    bonuses.push({
+      source: difficultyMult > 1 ? `Difficulty (+${pct}%)` : `Below your level (${pct}%)`,
+      amount: 0, // already baked into base
+    });
+  }
 
   // Send flat bonus first (additive, not stacked %)
   if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
-    const amt = BASE_CHALK.boulder_send;
+    const amt = Math.round(BASE_CHALK.boulder_send * difficultyMult);
     bonuses.push({ source: "Send", amount: amt });
     running += amt;
   }
@@ -234,10 +277,12 @@ export interface LogInput {
   holdColorId?: string;
   gymId?: string;
   chalkMultiplier?: number;
+  /** Pre-computed difficulty multiplier (climb grade vs player ceiling). Default 1. */
+  difficultyMult?: number;
 }
 
 export function logBoulder(input: LogInput) {
-  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash");
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1);
   const mult = input.chalkMultiplier ?? 1;
   const breakdown = mult === 1 ? raw : {
     base: raw.base,
@@ -309,7 +354,7 @@ export function deleteLog(id: string) {
 }
 
 export function updateLog(id: string, input: LogInput) {
-  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash");
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1);
   const mult = input.chalkMultiplier ?? 1;
   const breakdown = mult === 1 ? raw : {
     base: raw.base,
@@ -401,14 +446,15 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
   if (!item) return { ok: false, reason: "Unknown item" };
   if (!state.ignoreLevelReq && item.levelReq && state.level < item.levelReq) return { ok: false, reason: `Requires Level ${item.levelReq}` };
   if (!item.consumableBonus && state.owned.includes(id)) return { ok: false, reason: "Already owned" };
-  if (state.chalk < item.price) return { ok: false, reason: "Not enough Chalk" };
+  const price = effectivePrice(state, item.price);
+  if (state.chalk < price) return { ok: false, reason: "Not enough Chalk" };
   set(s => {
     const owned = item.consumableBonus ? s.owned : [...s.owned, id];
     const badges = new Set(s.badges);
     if (id === "crocs") badges.add("crocs_equipped");
     if (id === "golden_crocs") badges.add("golden_crocs");
     if (id === "minimal_kit") { badges.add("minimal_kit"); badges.add("shirtless_form"); }
-    return { ...s, chalk: s.chalk - item.price, owned, badges: Array.from(badges) };
+    return { ...s, chalk: s.chalk - price, owned, badges: Array.from(badges) };
   });
   return { ok: true };
 }
@@ -452,7 +498,12 @@ export function setGender(g: Gender) { set(s => ({ ...s, gender: g })); }
 export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], notes?: string) {
   const boss = state.bosses.find(b => b.id === bossId); if (!boss) return null;
   let activity: ActivityType = outcome === "send" || outcome === "flash" ? "boss_send" : "boss_attempt";
-  const breakdown = computeChalk(activity, [boss.style]);
+  // Boss difficulty (1-10) vs player ceiling (1-10) → reuse the same ratio scale.
+  // Map boss.difficulty (1–10) to a V-rank-ish value (×1.4) so a difficulty-6 boss
+  // has the same "feel" as a V8 problem against a V8 ceiling.
+  const ceiling = playerCeiling(state);
+  const diffMult = bossDifficultyMultiplier(boss.difficulty, ceiling);
+  const breakdown = computeChalk(activity, [boss.style], outcome === "send" || outcome === "flash", outcome === "flash", diffMult);
   const att: BossAttempt = { id: crypto.randomUUID(), date: new Date().toISOString(), outcome, chalk: breakdown.total, notes };
 
   set(s => {

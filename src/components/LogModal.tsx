@@ -6,8 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog } from "@/game/store";
-import { useGyms, setLastUsedGym, gradeLabels } from "@/game/gyms";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling } from "@/game/store";
+import { useGyms, setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier } from "@/game/gyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Sparkles, Info, Swords, Trophy } from "lucide-react";
@@ -119,10 +119,16 @@ function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: 
 
   const sent = attemptType === "flash" || attemptType === "send";
   const flashed = attemptType === "flash";
+  const gameState = useGame();
+  const ceiling = playerCeiling(gameState);
+  const diffMult = useMemo(
+    () => difficultyMultiplier(gradeToVRank(grade, gs), ceiling),
+    [grade, gs, ceiling],
+  );
   const preview = useMemo(
-    () => computeChalk(activity, styles, sent, flashed),
+    () => computeChalk(activity, styles, sent, flashed, diffMult),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activity, attemptType, styles.join(",")],
+    [activity, attemptType, styles.join(","), diffMult],
   );
 
   function toggleStyle(st: Style) {
@@ -146,6 +152,7 @@ function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: 
       attemptType,
       holdColorId: holdColorId || undefined,
       gymId: gymId || undefined,
+      difficultyMult: diffMult,
     };
     if (editLog) {
       updateLog(editLog.id, input);

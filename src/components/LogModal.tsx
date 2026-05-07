@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling } from "@/game/store";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate } from "@/game/store";
 import { useGyms, setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier } from "@/game/gyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -341,6 +341,11 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
   }
 
   function commit(outcome: "attempt" | "defeat", attemptTier?: AttemptTier) {
+    const dateISO = new Date(date).toISOString();
+    if (outcome === "defeat" && !editLog && hasBossSendOnDate(dateISO)) {
+      toast.error("You seem to have defeated more than one boss in a single day, are you sure both were worthy of bosses?");
+      return;
+    }
     if (gymId) setLastUsedGym(gymId);
     const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
@@ -348,7 +353,7 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
     const mult = outcome === "attempt" ? (ATTEMPT_TIERS.find(t => t.v === attemptTier)?.mult ?? 1) : 1;
     const input = {
       activity,
-      date: new Date(date).toISOString(),
+      date: dateISO,
       location: locationStr || undefined,
       grade,
       styles,

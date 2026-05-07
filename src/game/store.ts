@@ -512,6 +512,16 @@ export function grantFreeItems(items: { id: string; price: number; slot: Slot; c
 }
 
 // ----- Boss actions -----
+/** True if a boss send was already logged on the given local date string (toDateString()). */
+export function hasBossSendOnDate(dateISO: string): boolean {
+  const target = new Date(dateISO).toDateString();
+  return state.logs.some(l =>
+    l.isBoss &&
+    (l.attemptType === "send" || l.attemptType === "flash") &&
+    new Date(l.date).toDateString() === target
+  );
+}
+
 export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], notes?: string) {
   const boss = state.bosses.find(b => b.id === bossId); if (!boss) return null;
   let activity: ActivityType = outcome === "send" || outcome === "flash" ? "boss_send" : "boss_attempt";

@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, AttemptType, useGame, ChalkBreakdown } from "@/game/store";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog } from "@/game/store";
 import { useGyms, setLastUsedGym, gradeLabels } from "@/game/gyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -21,11 +21,20 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 type Mode = "pick" | "form";
 type Kind = "boulder" | "boss";
 
-export function LogModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null }) {
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
 
-  useEffect(() => { if (open) setMode("pick"); }, [open]);
+  useEffect(() => {
+    if (open) {
+      if (editLog) {
+        setKind(editLog.isBoss ? "boss" : "boulder");
+        setMode("form");
+      } else {
+        setMode("pick");
+      }
+    }
+  }, [open, editLog]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,9 +62,9 @@ export function LogModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
             </div>
           </>
         ) : kind === "boss" ? (
-          <BossForm onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
+          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
         ) : (
-          <BoulderForm onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
+          <BoulderForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
         )}
       </DialogContent>
     </Dialog>
@@ -72,9 +81,10 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 
 // ===================== BOULDER FORM =====================
 
-function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null }) {
   const gymState = useGyms();
-  const initialGymId = gymState.lastUsedGymId
+  const initialGymId = editLog?.gymId
+    ?? gymState.lastUsedGymId
     ?? gymState.gyms.find(g => g.primary)?.id
     ?? gymState.gyms[0]?.id
     ?? "";
@@ -92,17 +102,19 @@ function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => voi
   const gs = gymState.gradingSystems.find(g => g.id === gsId);
   const grades = gs ? gradeLabels(gs) : [];
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [holdColorId, setHoldColorId] = useState<string>("");
-  const [grade, setGrade] = useState(grades[0] ?? "V3");
-  const [gradeMax, setGradeMax] = useState<string>("");
-  const [useRange, setUseRange] = useState(false);
+  const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
+  const [holdColorId, setHoldColorId] = useState<string>(editLog?.holdColorId ?? "");
+  const [grade, setGrade] = useState(editLog?.grade ?? grades[0] ?? "V3");
+  const [gradeMax, setGradeMax] = useState<string>(editLog?.gradeMax ?? "");
+  const [useRange, setUseRange] = useState(!!editLog?.gradeMax);
   useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
 
-  const [activity, setActivity] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder">>("boulder");
-  const [attemptType, setAttemptType] = useState<AttemptType>("send");
-  const [styles, setStyles] = useState<Style[]>([]);
-  const [notes, setNotes] = useState("");
+  const [activity, setActivity] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder">>(
+    (editLog?.activity as any) ?? "boulder"
+  );
+  const [attemptType, setAttemptType] = useState<AttemptType>(editLog?.attemptType ?? "send");
+  const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
+  const [notes, setNotes] = useState(editLog?.notes ?? "");
   const [celebrating, setCelebrating] = useState<{ total: number } | null>(null);
 
   const sent = attemptType === "flash" || attemptType === "send";
@@ -121,7 +133,7 @@ function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => voi
     if (gymId) setLastUsedGym(gymId);
     const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
-    const res = logBoulder({
+    const input = {
       activity,
       date: new Date(date).toISOString(),
       location: locationStr || undefined,
@@ -134,7 +146,14 @@ function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => voi
       attemptType,
       holdColorId: holdColorId || undefined,
       gymId: gymId || undefined,
-    });
+    };
+    if (editLog) {
+      updateLog(editLog.id, input);
+      toast.success("Log updated");
+      onDone();
+      return;
+    }
+    const res = logBoulder(input);
     setCelebrating({ total: res.log.chalkTotal });
     toast.success(`+${res.log.chalkTotal} Chalk earned`);
     setTimeout(() => { setCelebrating(null); onDone(); }, 1600);
@@ -263,8 +282,8 @@ function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => voi
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <GameButton variant="ghost" size="sm" onClick={onBack}>Back</GameButton>
-        <GameButton variant="success" size="md" onClick={submit}>Send it 🪨</GameButton>
+        <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
+        <GameButton variant="success" size="md" onClick={submit}>{editLog ? "Save changes" : "Send it 🪨"}</GameButton>
       </div>
     </>
   );
@@ -281,9 +300,10 @@ const ATTEMPT_TIERS: { v: AttemptTier; label: string; mult: number; desc: string
   { v: "10+", label: "10+ attempts", mult: 1.5, desc: "Full grind mode" },
 ];
 
-function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null }) {
   const gymState = useGyms();
-  const initialGymId = gymState.lastUsedGymId
+  const initialGymId = editLog?.gymId
+    ?? gymState.lastUsedGymId
     ?? gymState.gyms.find(g => g.primary)?.id
     ?? gymState.gyms[0]?.id
     ?? "";
@@ -299,12 +319,12 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
   const gs = gymState.gradingSystems.find(g => g.id === gsId);
   const grades = gs ? gradeLabels(gs) : [];
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [holdColorId, setHoldColorId] = useState<string>("");
-  const [grade, setGrade] = useState(grades[0] ?? "V5");
+  const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
+  const [holdColorId, setHoldColorId] = useState<string>(editLog?.holdColorId ?? "");
+  const [grade, setGrade] = useState(editLog?.grade ?? grades[0] ?? "V5");
   useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
-  const [styles, setStyles] = useState<Style[]>([]);
-  const [notes, setNotes] = useState("");
+  const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
+  const [notes, setNotes] = useState(editLog?.notes ?? "");
 
   const [step, setStep] = useState<BossStep>("main");
   const [celebrate, setCelebrate] = useState<{ total: number; defeated: boolean; breakdown: ReturnType<typeof computeChalk> } | null>(null);
@@ -319,7 +339,7 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
     const activity: ActivityType = outcome === "defeat" ? "boss_send" : "boss_attempt";
     const mult = outcome === "attempt" ? (ATTEMPT_TIERS.find(t => t.v === attemptTier)?.mult ?? 1) : 1;
-    const res = logBoulder({
+    const input = {
       activity,
       date: new Date(date).toISOString(),
       location: locationStr || undefined,
@@ -328,11 +348,18 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
       sent: outcome === "defeat",
       notes: outcome === "attempt" && attemptTier ? `${attemptTier} attempts${notes ? " · " + notes : ""}` : notes,
       isBoss: true,
-      attemptType: outcome === "defeat" ? "send" : "project",
+      attemptType: (outcome === "defeat" ? "send" : "project") as AttemptType,
       holdColorId: holdColorId || undefined,
       gymId: gymId || undefined,
       chalkMultiplier: mult,
-    });
+    };
+    if (editLog) {
+      updateLog(editLog.id, input);
+      toast.success("Log updated");
+      onDone();
+      return;
+    }
+    const res = logBoulder(input);
     const breakdown = computeChalk(activity, styles, outcome === "defeat", false);
     // Apply multiplier to displayed breakdown amounts so they match the saved total.
     const scaled: ReturnType<typeof computeChalk> = {
@@ -458,13 +485,21 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
       </div>
 
       <div className="flex justify-end gap-2 pt-3">
-        <GameButton variant="ghost" size="sm" onClick={onBack}>Back</GameButton>
-        <GameButton variant="primary" size="md" onClick={() => setStep("attempts")}>
-          <Swords className="h-4 w-4" /> Attempted
-        </GameButton>
-        <GameButton variant="danger" size="md" onClick={() => commit("defeat")}>
-          <Trophy className="h-4 w-4" /> Defeated Boss
-        </GameButton>
+        <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
+        {editLog ? (
+          <GameButton variant="success" size="md" onClick={() => commit(editLog.attemptType === "send" || editLog.attemptType === "flash" ? "defeat" : "attempt")}>
+            Save changes
+          </GameButton>
+        ) : (
+          <>
+            <GameButton variant="primary" size="md" onClick={() => setStep("attempts")}>
+              <Swords className="h-4 w-4" /> Attempted
+            </GameButton>
+            <GameButton variant="danger" size="md" onClick={() => commit("defeat")}>
+              <Trophy className="h-4 w-4" /> Defeated Boss
+            </GameButton>
+          </>
+        )}
       </div>
     </>
   );

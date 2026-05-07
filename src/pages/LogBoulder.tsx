@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useGame } from "@/game/store";
+import { useGame, deleteLog, BoulderLog } from "@/game/store";
 import { ACTIVITY_LABELS } from "@/game/data";
 import { useGyms } from "@/game/gyms";
 import { GameCard } from "@/components/ui/game-card";
@@ -7,8 +7,10 @@ import { GameButton } from "@/components/ui/game-button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LogModal } from "@/components/LogModal";
-import { Plus, Swords, Sparkles, Filter } from "lucide-react";
+import { Plus, Swords, Sparkles, Filter, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 type EntryFilter = "all" | "boulder" | "boss";
 
@@ -16,6 +18,8 @@ export default function BoulderLogs() {
   const s = useGame();
   const { gyms } = useGyms();
   const [open, setOpen] = useState(false);
+  const [editLog, setEditLog] = useState<BoulderLog | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [entryFilter, setEntryFilter] = useState<EntryFilter>("all");
   const [grade, setGrade] = useState<string>("all");
   const [gymId, setGymId] = useState<string>("all");
@@ -45,7 +49,31 @@ export default function BoulderLogs() {
 
   return (
     <div className="space-y-5 animate-float-up">
-      <LogModal open={open} onOpenChange={setOpen} />
+      <LogModal
+        open={open}
+        onOpenChange={(v) => { setOpen(v); if (!v) setEditLog(null); }}
+        editLog={editLog}
+      />
+
+      <AlertDialog open={!!deleteId} onOpenChange={(v) => { if (!v) setDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this log?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the log and refunds the chalk it earned. This can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteId) { deleteLog(deleteId); toast.success("Log deleted"); }
+                setDeleteId(null);
+              }}
+            >Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -139,9 +167,25 @@ export default function BoulderLogs() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{l.chalkTotal}</div>
-                    {l.chalkBonus > 0 && <div className="text-[10px] text-muted-foreground">+{l.chalkBonus} bonus</div>}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{l.chalkTotal}</div>
+                      {l.chalkBonus > 0 && <div className="text-[10px] text-muted-foreground">+{l.chalkBonus} bonus</div>}
+                    </div>
+                    <button
+                      onClick={() => { setEditLog(l); setOpen(true); }}
+                      aria-label="Edit log"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(l.id)}
+                      aria-label="Delete log"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               );

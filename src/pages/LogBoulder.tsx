@@ -167,9 +167,25 @@ export default function BoulderLogs() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{l.chalkTotal}</div>
-                    {l.chalkBonus > 0 && <div className="text-[10px] text-muted-foreground">+{l.chalkBonus} bonus</div>}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{l.chalkTotal}</div>
+                      {l.chalkBonus > 0 && <div className="text-[10px] text-muted-foreground">+{l.chalkBonus} bonus</div>}
+                    </div>
+                    <button
+                      onClick={() => { setEditLog(l); setOpen(true); }}
+                      aria-label="Edit log"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(l.id)}
+                      aria-label="Delete log"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               );

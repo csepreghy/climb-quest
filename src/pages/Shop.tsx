@@ -27,7 +27,11 @@ export default function Shop() {
   const activeGroup = GROUPS.find(g => g.key === group)!;
   const items = useMemo(() => {
     const inGroup = all.filter(i => i.group === group);
-    return cat === "All" ? inGroup : inGroup.filter(i => i.category === cat);
+    const filtered = cat === "All" ? inGroup : inGroup.filter(i => i.category === cat);
+    const rarityOrder: Record<string, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
+    return [...filtered].sort((a, b) =>
+      (rarityOrder[a.rarity] ?? 99) - (rarityOrder[b.rarity] ?? 99) || a.price - b.price
+    );
   }, [group, cat, all]);
 
   return (

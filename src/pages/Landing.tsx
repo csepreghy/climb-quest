@@ -34,7 +34,7 @@ export default function Landing() {
             <img
               src={logoImg}
               alt="ClimbQuest"
-              className="h-12 sm:h-14 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
+              className="h-16 sm:h-20 lg:h-24 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
             />
           </Link>
           <div className="flex items-center gap-2">

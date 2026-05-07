@@ -1,15 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const BUCKET = "shop-item-images";
-const MAX_DIM = 800;
+const SHOP_MAX_DIM = 360;
+const DEFAULT_MAX_DIM = 800;
 const QUALITY = 0.85;
 
-/** Resize an image source (File or data URL) to <=800x800 and return a webp Blob. */
-export async function toWebpBlob(src: File | string): Promise<Blob> {
+/** Resize an image source (File or data URL) to <=maxDim and return a webp Blob. */
+export async function toWebpBlob(src: File | string, maxDim: number = DEFAULT_MAX_DIM): Promise<Blob> {
   const url = typeof src === "string" ? src : URL.createObjectURL(src);
   try {
     const img = await loadImage(url);
-    const { width, height } = fit(img.naturalWidth, img.naturalHeight, MAX_DIM);
+    const { width, height } = fit(img.naturalWidth, img.naturalHeight, maxDim);
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;

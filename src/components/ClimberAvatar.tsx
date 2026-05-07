@@ -52,13 +52,15 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
       )}
 
       {customImage ? (
-        <img
-          src={customImage}
-          alt={lvl.title}
-          loading="lazy"
-          decoding="async"
-          className="relative z-10 h-full w-full object-contain"
-        />
+        <div className={cn("relative z-10 h-full w-full rounded-xl overflow-hidden bg-background/40", RARITY_BORDER[lvl.rarity ?? "common"])}>
+          <img
+            src={customImage}
+            alt={lvl.title}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-contain"
+          />
+        </div>
       ) : useIllustration ? (
         <img
           src={climberMale1}

@@ -191,20 +191,28 @@ export async function deleteCustomItem(itemId: string): Promise<void> {
   await refresh();
 }
 
-/** Backfill: convert any base64 images in the table to 800px webp in Storage. */
+/** Backfill: re-encode every shop item image to 360px webp in Storage. */
 export async function backfillShopImages(
   onProgress?: (done: number, total: number, label: string) => void
 ): Promise<{ converted: number; skipped: number; failed: number }> {
   const { data, error } = await supabase.from("shop_items").select("id,name,image");
   if (error) throw error;
   const rows = (data ?? []) as Array<{ id: string; name: string; image: string | null }>;
-  const targets = rows.filter(r => r.image && r.image.startsWith("data:"));
+  const targets = rows.filter(r => !!r.image);
   let converted = 0, failed = 0;
   for (let i = 0; i < targets.length; i++) {
     const r = targets[i];
     onProgress?.(i, targets.length, r.name);
     try {
-      const url = await processAndUpload(r.id, r.image!);
+      let src: string | File = r.image!;
+      // For remote URLs we need to fetch as blob to avoid canvas tainting / re-decode at smaller size.
+      if (r.image!.startsWith("http")) {
+        const resp = await fetch(r.image!, { mode: "cors", cache: "no-store" });
+        if (!resp.ok) throw new Error(`fetch ${resp.status}`);
+        const blob = await resp.blob();
+        src = new File([blob], `${r.id}.webp`, { type: blob.type || "image/webp" });
+      }
+      const url = await processAndUpload(r.id, src);
       const { error: upErr } = await (supabase.from("shop_items") as any).update({ image: url }).eq("id", r.id);
       if (upErr) throw upErr;
       converted++;

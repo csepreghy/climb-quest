@@ -46,12 +46,12 @@ export function LevelUpBanner() {
       {/* Chalk powder burst */}
       <div className="absolute inset-0 grid place-items-center">
         {PARTICLES.map(i => {
-          const angle = (i / PARTICLES.length) * Math.PI * 2 + (i % 3) * 0.2;
-          const dist = 180 + (i % 5) * 40;
+          const angle = (i / PARTICLES.length) * Math.PI * 2 + (i % 5) * 0.17;
+          const dist = 160 + (i * 53 % 280);
           const dx = Math.cos(angle) * dist;
-          const dy = Math.sin(angle) * dist - 40;
-          const size = 8 + (i % 4) * 4;
-          const delay = (i % 6) * 30;
+          const dy = Math.sin(angle) * dist - 30;
+          const size = 6 + (i % 6) * 3;
+          const delay = (i % 10) * 25;
           return (
             <span
               key={i}

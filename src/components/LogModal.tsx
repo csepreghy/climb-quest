@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, Sparkles, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
+import chalkBagImg from "@/assets/chalk-bag.png";
 import bossImg from "@/assets/log-boss.webp";
 import { PickCard } from "@/components/pixel/PickCard";
 

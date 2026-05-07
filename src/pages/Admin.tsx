@@ -83,6 +83,15 @@ export default function Admin() {
         </GameCard>
       )}
       <GameCard tone="legendary" className="p-5">
+        <div className="menu-label mb-3">Admin · Onboarding</div>
+        <p className="text-sm text-muted-foreground mb-3">
+          Reset the first-time onboarding flow on this account so you can watch it again.
+        </p>
+        <Button variant="secondary" onClick={() => { resetOnboarding(); toast.success("Onboarding reset — reload to see it"); }}>
+          Replay onboarding
+        </Button>
+      </GameCard>
+      <GameCard tone="legendary" className="p-5">
         <div className="menu-label mb-3">Admin · Chalk Controls</div>
         <div className="text-sm text-muted-foreground mb-3">Current balance: <span className="gradient-chalk-text font-bold tabular-nums">{s.chalk.toLocaleString()}</span></div>
         <div className="flex gap-2">

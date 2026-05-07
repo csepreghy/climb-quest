@@ -125,16 +125,40 @@ export default function Layout() {
             <ChalkChip value={s.chalk} />
             <button type="button" onClick={() => canLevel ? setConfirmLvOpen(true) : setLevelsOpen(true)}
               className={cn(
-                "hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110 transition",
+                "relative hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110 transition",
                 canLevel
-                  ? "bg-[hsl(var(--btn-orange))] text-white animate-pulse"
+                  ? "bg-[hsl(var(--btn-orange))] text-white"
                   : "bg-secondary"
               )}
               title={canLevel ? "Ready to level up!" : undefined}
             >
-              <span className={cn("text-[11px] uppercase tracking-wider", canLevel ? "text-white/90" : "text-muted-foreground")}>Lv</span>
-              <span className={cn("font-bold tabular-nums", canLevel ? "text-white" : "text-[hsl(var(--sky))]")}>{s.level}</span>
-              {canLevel && <ArrowUp className="h-3.5 w-3.5" />}
+              {canLevel && (
+                <span aria-hidden className="pointer-events-none absolute inset-0 overflow-visible">
+                  {Array.from({ length: 10 }).map((_, i) => {
+                    const dx = (i % 2 === 0 ? -1 : 1) * (8 + (i * 7) % 22);
+                    const delay = (i * 130) % 1300;
+                    const size = 4 + (i % 3) * 2;
+                    return (
+                      <span
+                        key={i}
+                        className="absolute left-1/2 top-1/2 rounded-full bg-white animate-chalk-fly"
+                        style={{
+                          width: size,
+                          height: size,
+                          marginLeft: -size / 2,
+                          marginTop: -size / 2,
+                          filter: "blur(1px)",
+                          ["--dx" as any]: `${dx}px`,
+                          animationDelay: `${delay}ms`,
+                        }}
+                      />
+                    );
+                  })}
+                </span>
+              )}
+              <span className={cn("relative text-[11px] uppercase tracking-wider", canLevel ? "text-white/90" : "text-muted-foreground")}>Lv</span>
+              <span className={cn("relative font-bold tabular-nums", canLevel ? "text-white" : "text-[hsl(var(--sky))]")}>{s.level}</span>
+              {canLevel && <ArrowUp className="relative h-3.5 w-3.5" />}
             </button>
             <GameButton variant="danger" size="sm" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out" aria-label="Sign out" className="!px-2.5">
               <LogOut className="h-4 w-4" />

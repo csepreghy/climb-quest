@@ -20,6 +20,7 @@ export default function BoulderLogs() {
   const [grade, setGrade] = useState<string>("all");
   const [gymId, setGymId] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [visible, setVisible] = useState(10);
 
   const grades = useMemo(() => {
     const set = new Set<string>();

@@ -91,7 +91,7 @@ export default function Landing() {
           <PickCard
             image={boulderImg}
             title="1. Log climbs"
-            desc="Every boulder, attempt, and flash counted in seconds."
+            desc="Every boulder, attempt, and flash and grade easily saved."
             ring="ring-[hsl(var(--btn-green))]/60"
           />
           <PickCard

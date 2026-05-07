@@ -9,6 +9,7 @@ import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { LevelsModal } from "@/components/LevelsModal";
 import { LogModal } from "@/components/LogModal";
+import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { toast } from "sonner";

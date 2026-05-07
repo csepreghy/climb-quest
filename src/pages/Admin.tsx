@@ -24,6 +24,7 @@ import {
 import { ItemGroup, Rarity, Slot, ShopItem, LEVELS, Gender } from "@/game/data";
 import { useLevelOverrides, resolvedLevel, saveLevel, clearLevel, hasAnyOverride } from "@/game/levelOverrides";
 import { cn } from "@/lib/utils";
+import { usePublicGyms, addPublicGym, updatePublicGym, deletePublicGym } from "@/game/publicGyms";
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
 const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [
@@ -140,6 +141,8 @@ export default function Admin() {
       <LevelsAdmin />
 
       <InventoryAdmin />
+
+      <PublicGymsAdmin />
 
       <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>
         <ThemeStudio />
@@ -529,5 +532,50 @@ function LevelEditor({ level, onDone }: { level: number; onDone: () => void; }) 
         </div>
       </div>
     </div>
+  );
+}
+
+function PublicGymsAdmin() {
+  const s = usePublicGyms();
+  const [name, setName] = useState("");
+  const [loc, setLoc] = useState("");
+
+  return (
+    <GameCard tone="accent" className="p-5 space-y-4">
+      <div>
+        <div className="menu-label mb-1">Admin · Public Gyms</div>
+        <p className="text-xs text-muted-foreground">
+          Gyms created here are visible to all users. Edit details inline. Custom grading systems for public gyms are seeded — extend later if needed.
+        </p>
+      </div>
+
+      <div className="grid sm:grid-cols-[1fr,1fr,auto] gap-2">
+        <Input placeholder="Gym name" value={name} onChange={e => setName(e.target.value)} />
+        <Input placeholder="Location (city)" value={loc} onChange={e => setLoc(e.target.value)} />
+        <GameButton variant="primary" onClick={async () => {
+          if (!name.trim()) { toast.error("Name required"); return; }
+          try { await addPublicGym(name.trim(), loc.trim()); setName(""); setLoc(""); toast.success("Public gym added"); }
+          catch (e: any) { toast.error(e?.message ?? "Failed"); }
+        }}><Plus className="h-4 w-4" /> Add</GameButton>
+      </div>
+
+      {s.gyms.length === 0 && (
+        <p className="text-sm text-muted-foreground italic">No public gyms yet.</p>
+      )}
+
+      <div className="space-y-2">
+        {s.gyms.map((g: any) => (
+          <div key={g.id} className="grid sm:grid-cols-[1fr,1fr,auto] gap-2 items-center p-3 rounded-md border border-border bg-secondary/30">
+            <Input value={g.name} onChange={e => updatePublicGym(g.id, { name: e.target.value })} />
+            <Input value={g.location} onChange={e => updatePublicGym(g.id, { location: e.target.value })} placeholder="Location" />
+            <Button variant="ghost" size="sm" onClick={async () => {
+              if (!confirm(`Delete public gym "${g.name}"? This affects all users.`)) return;
+              try { await deletePublicGym(g.id); toast.success("Deleted"); }
+              catch (e: any) { toast.error(e?.message ?? "Failed"); }
+            }}><Trash2 className="h-4 w-4" /></Button>
+          </div>
+        ))}
+      </div>
+    </GameCard>
   );
 }

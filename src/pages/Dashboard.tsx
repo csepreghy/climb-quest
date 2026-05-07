@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useGyms } from "@/game/gyms";
+import { useAllGyms as useGyms } from "@/game/allGyms";
 import { useGame, currentLevel, nextLevel, levelUp } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { ClimberAvatar } from "@/components/ClimberAvatar";

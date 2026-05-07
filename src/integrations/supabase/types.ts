@@ -92,6 +92,33 @@ export type Database = {
         }
         Relationships: []
       }
+      public_gyms: {
+        Row: {
+          created_at: string
+          data: Json
+          grading_systems: Json
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          grading_systems?: Json
+          id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          grading_systems?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       shop_items: {
         Row: {
           applies_to: Json

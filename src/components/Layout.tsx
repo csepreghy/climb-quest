@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import logoImg from "@/assets/climbquest-logo.png";
 import { LevelPreviewCard } from "@/components/LevelPreviewCard";
-import { useGyms } from "@/game/gyms";
+import { useAllGyms } from "@/game/allGyms";
 
 const NAV_BASE = [
   { to: "/home", label: "Home", icon: Home },
@@ -42,7 +42,7 @@ export default function Layout() {
   const [logOpen, setLogOpen] = useState(false);
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
   const [needGymOpen, setNeedGymOpen] = useState(false);
-  const gymState = useGyms();
+  const gymState = useAllGyms();
   const hasGym = gymState.gyms.length > 0;
   const showOnboarding = !!user && !s.onboardedAt;
 

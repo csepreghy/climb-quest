@@ -1,15 +1,19 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useGame, currentLevel, nextLevel, levelUp } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
+import { getItem, isImageEmoji } from "@/game/customItems";
+import { RARITY_BORDER, type Slot } from "@/game/data";
+import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
-import { Plus, ArrowUp, Trophy, TrendingUp } from "lucide-react";
+import { Plus, ArrowUp, Trophy, TrendingUp, Backpack, ShoppingBag, ChevronRight } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
@@ -22,7 +26,7 @@ export default function Dashboard() {
   
   const [logOpen, setLogOpen] = useState(false);
 
-  const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;
+  
 
   const onLevelUp = () => {
     const fromLevel = s.level;
@@ -45,17 +49,16 @@ export default function Dashboard() {
             <div className="menu-label">Level {s.level} · {cur.title}</div>
             <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
-            <div className="mt-5 space-y-1.5">
-              <div className="flex items-baseline justify-between text-xs">
-                <span className="text-muted-foreground">
-                  {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
-                </span>
-                <span className="tabular-nums text-muted-foreground">
-                  {next ? <><span className="text-foreground font-medium">{s.chalk.toLocaleString()}</span> / {next.cost.toLocaleString()}</> : `${s.chalk.toLocaleString()}`}
-                </span>
-              </div>
-              <PixelBar value={progress} max={100} color="hsl(var(--accent))" />
+            <div className="mt-4 flex items-baseline justify-between text-xs">
+              <span className="text-muted-foreground">
+                {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
+              </span>
+              <span className="tabular-nums text-muted-foreground">
+                {next ? <><span className="gradient-chalk-text font-bold">{s.chalk.toLocaleString()}</span> / {next.cost.toLocaleString()} chalk</> : `${s.chalk.toLocaleString()} chalk`}
+              </span>
             </div>
+
+            <EquippedStrip equipped={s.equipped} />
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
               <GameButton variant="success" onClick={() => setLogOpen(true)}>
@@ -66,6 +69,12 @@ export default function Dashboard() {
                   <ArrowUp className="h-4 w-4" /> Level Up
                 </GameButton>
               )}
+              <Link to="/inventory">
+                <GameButton variant="ghost"><Backpack className="h-4 w-4" /> Inventory</GameButton>
+              </Link>
+              <Link to="/shop">
+                <GameButton variant="ghost"><ShoppingBag className="h-4 w-4" /> Shop</GameButton>
+              </Link>
             </div>
           </div>
         </div>
@@ -139,6 +148,52 @@ function StatCard({ label, value }: { label: string; value: number }) {
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="text-2xl font-bold mt-1 gradient-chalk-text tabular-nums">{value.toLocaleString()}</div>
     </GameCard>
+  );
+}
+
+function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }) {
+  const SLOTS: Slot[] = ["outfit", "bottoms", "shoes", "hat", "chalk", "hand", "accessory", "aura"];
+  const equippedItems = SLOTS
+    .map(slot => ({ slot, id: equipped[slot] }))
+    .filter(e => !!e.id)
+    .map(e => ({ slot: e.slot, item: getItem(e.id!) }))
+    .filter(e => !!e.item)
+    .slice(0, 4);
+
+  return (
+    <div className="mt-4">
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Equipped</div>
+        <Link to="/inventory" className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground inline-flex items-center gap-0.5">
+          Manage <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      {equippedItems.length === 0 ? (
+        <Link to="/shop" className="block text-xs text-muted-foreground italic hover:text-foreground">
+          Nothing equipped — visit the shop to gear up.
+        </Link>
+      ) : (
+        <div className="flex gap-2 flex-wrap">
+          {equippedItems.map(({ slot, item }) => (
+            <Link
+              key={slot}
+              to="/inventory"
+              className={cn(
+                "h-14 w-14 rounded-lg bg-background/50 grid place-items-center transition-transform hover:-translate-y-0.5",
+                RARITY_BORDER[item!.rarity],
+              )}
+              title={item!.name}
+            >
+              {isImageEmoji(item!.emoji) ? (
+                <SmartImage src={item!.emoji} alt={item!.name} loaderSize={20} className="h-full w-full object-contain p-1" />
+              ) : (
+                <span className="text-2xl">{item!.emoji}</span>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

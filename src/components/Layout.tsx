@@ -2,14 +2,16 @@ import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ScrollText, User, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { LevelsModal } from "@/components/LevelsModal";
 import { LogModal } from "@/components/LogModal";
 import { useAuth } from "@/hooks/useAuth";
+import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
+import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import logoImg from "@/assets/climbquest-logo.png";
 

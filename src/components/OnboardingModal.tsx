@@ -67,7 +67,7 @@ export function OnboardingModal({ open, onClose }: Props) {
         {step === "gender" && (
           <div className="space-y-4 py-2">
             <div className="text-sm text-muted-foreground">
-              Pick your climber. <span className="text-foreground font-semibold">This can't be changed later.</span>
+              Pick your climber. <span className="text-destructive font-semibold">This can't be changed later.</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {(["male", "female"] as Gender[]).map(g => (

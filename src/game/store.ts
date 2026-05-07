@@ -151,12 +151,10 @@ export function useGame(): State {
 export function nextLevel(s: State) {
   const base = LEVELS.find(l => l.level === s.level + 1);
   if (!base) return undefined;
-  const { resolvedLevel } = require("./levelOverrides");
   return resolvedLevel(base.level, s.gender);
 }
 export function currentLevel(s: State) {
   const base = LEVELS.find(l => l.level === s.level)!;
-  const { resolvedLevel } = require("./levelOverrides");
   return resolvedLevel(base.level, s.gender);
 }
 export function activeBoss(s: State) {

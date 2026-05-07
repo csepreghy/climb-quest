@@ -80,6 +80,14 @@ export default function Admin() {
         </label>
       </GameCard>
 
+      <GameCard tone="accent" className="p-5">
+        <div className="menu-label mb-3">Admin · Mock Data</div>
+        <p className="text-sm text-muted-foreground mb-3">Add sample boulder logs and bosses for testing UI states.</p>
+        <Button onClick={() => { adminSeedMockData(); toast.success("Mock data added"); }}>
+          <Plus className="h-4 w-4" /> Seed mock boulders & bosses
+        </Button>
+      </GameCard>
+
       <BackfillImagesCard />
 
       <LevelsAdmin />

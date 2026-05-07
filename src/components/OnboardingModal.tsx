@@ -4,7 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { GameButton } from "@/components/ui/game-button";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { setGender, completeOnboarding } from "@/game/store";
-import { Gender } from "@/game/data";
+import { Gender, RARITY_BORDER } from "@/game/data";
+import { useAllItems, isImageEmoji } from "@/game/customItems";
+import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import boulderImg from "@/assets/log-boulder.webp";
@@ -101,6 +103,7 @@ export function OnboardingModal({ open, onClose }: Props) {
           <StepCard
             image={boulderImg}
             altImage={bossImg}
+            largeImages
             icon={<ScrollText className="h-5 w-5" />}
             title="Log climbs to earn Chalk"
             body={<>
@@ -119,7 +122,9 @@ export function OnboardingModal({ open, onClose }: Props) {
               Buy items in the <span className="font-semibold">Shop</span> with Chalk and equip them in your <span className="font-semibold">Inventory</span>.
               Equipped items boost the Chalk you earn from each climb.
             </>}
-          />
+          >
+            <ExampleItems />
+          </StepCard>
         )}
 
         {step === "level" && (
@@ -129,7 +134,9 @@ export function OnboardingModal({ open, onClose }: Props) {
             body={<>
               Spend Chalk to climb the ranks. Each level unlocks rarer items, more gear slots, and tougher bosses.
             </>}
-          />
+          >
+            <LevelExamples gender={picked ?? "male"} />
+          </StepCard>
         )}
 
         {step === "gym" && (
@@ -158,18 +165,19 @@ export function OnboardingModal({ open, onClose }: Props) {
 }
 
 function StepCard({
-  image, altImage, icon, secondaryIcon, title, body,
+  image, altImage, largeImages, icon, secondaryIcon, title, body, children,
 }: {
-  image?: string; altImage?: string;
+  image?: string; altImage?: string; largeImages?: boolean;
   icon: React.ReactNode; secondaryIcon?: React.ReactNode;
-  title: string; body: React.ReactNode;
+  title: string; body: React.ReactNode; children?: React.ReactNode;
 }) {
+  const imgSize = largeImages ? "h-40 w-40 sm:h-48 sm:w-48" : "h-24 w-24";
   return (
     <div className="space-y-4 py-2">
       {(image || altImage) && (
-        <div className="flex items-center justify-center gap-3">
-          {image && <img src={image} alt="" className="h-24 w-24 object-contain rounded-xl" />}
-          {altImage && <img src={altImage} alt="" className="h-24 w-24 object-contain rounded-xl" />}
+        <div className="flex items-center justify-center gap-4">
+          {image && <img src={image} alt="" className={cn(imgSize, "object-contain rounded-xl")} />}
+          {altImage && <img src={altImage} alt="" className={cn(imgSize, "object-contain rounded-xl")} />}
         </div>
       )}
       <div className="flex items-center gap-2 text-base font-semibold">
@@ -180,6 +188,48 @@ function StepCard({
         <span>{title}</span>
       </div>
       <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
+      {children}
+    </div>
+  );
+}
+
+function ExampleItems() {
+  const items = useAllItems();
+  const picks = [
+    items.find(i => i.rarity === "legendary"),
+    items.find(i => i.rarity === "rare"),
+    items.find(i => i.rarity === "common"),
+  ].filter(Boolean).slice(0, 3) as ReturnType<typeof useAllItems>;
+  if (picks.length === 0) return null;
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {picks.map(item => (
+        <div key={item.id} className={cn("rounded-lg p-2 bg-background/40 flex flex-col items-center gap-1.5", RARITY_BORDER[item.rarity])}>
+          {isImageEmoji(item.emoji) ? (
+            <SmartImage src={item.emoji!} alt={item.name} loaderSize={28} wrapperClassName="h-16 w-16" className="h-full w-full object-contain" />
+          ) : (
+            <div className="text-3xl h-16 w-16 flex items-center justify-center">{item.emoji ?? "🎒"}</div>
+          )}
+          <div className="text-[10px] text-center font-medium leading-tight line-clamp-2">{item.name}</div>
+          {item.bonus?.mult ? (
+            <div className="text-[10px] font-bold text-chalk-glow tabular-nums">+{Math.round(item.bonus.mult * 100)}%</div>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LevelExamples({ gender }: { gender: Gender }) {
+  const levels = [3, 6, 10];
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      {levels.map(lvl => (
+        <div key={lvl} className="flex flex-col items-center gap-1.5 rounded-lg p-2 bg-background/40 border border-border">
+          <ClimberAvatar level={lvl} gender={gender} equipped={{}} size="lg" />
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Level {lvl}</div>
+        </div>
+      ))}
     </div>
   );
 }

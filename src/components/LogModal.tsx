@@ -307,7 +307,7 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
   const [notes, setNotes] = useState("");
 
   const [step, setStep] = useState<BossStep>("main");
-  const [celebrate, setCelebrate] = useState<{ total: number; defeated: boolean } | null>(null);
+  const [celebrate, setCelebrate] = useState<{ total: number; defeated: boolean; breakdown: ReturnType<typeof computeChalk> } | null>(null);
 
   function toggleStyle(st: Style) {
     setStyles(prev => prev.includes(st) ? prev.filter(x => x !== st) : [...prev, st]);
@@ -333,14 +333,23 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
       gymId: gymId || undefined,
       chalkMultiplier: mult,
     });
-    setCelebrate({ total: res.log.chalkTotal, defeated: outcome === "defeat" });
+    const breakdown = computeChalk(activity, styles, outcome === "defeat", false);
+    // Apply multiplier to displayed breakdown amounts so they match the saved total.
+    const scaled: ReturnType<typeof computeChalk> = {
+      base: Math.round(breakdown.base * mult),
+      bonuses: breakdown.bonuses.map(b => ({ ...b, amount: Math.round(b.amount * mult) })),
+      total: res.log.chalkTotal,
+    };
+    setCelebrate({ total: res.log.chalkTotal, defeated: outcome === "defeat", breakdown: scaled });
     toast.success(`+${res.log.chalkTotal} Chalk earned`);
-    setTimeout(() => { setCelebrate(null); onDone(); }, outcome === "defeat" ? 2600 : 1600);
+    if (outcome !== "defeat") {
+      setTimeout(() => { setCelebrate(null); onDone(); }, 1600);
+    }
   }
 
   if (celebrate) {
     return celebrate.defeated
-      ? <BossCelebrate total={celebrate.total} />
+      ? <BossCelebrate total={celebrate.total} breakdown={celebrate.breakdown} onDone={() => { setCelebrate(null); onDone(); }} />
       : <SimpleCelebrate total={celebrate.total} label="Logged attempt!" image={bossImg} alt="Boss" />;
   }
 

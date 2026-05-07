@@ -255,16 +255,33 @@ function CharactersSlide() {
 
 function ItemsSlide() {
   const all = useAllItems();
-  const items: ShopItem[] = useMemo(() => {
-    const withImg = all.filter(i => !!i.emoji && (i.emoji.startsWith("http") || i.emoji.startsWith("data:") || i.emoji.startsWith("/")));
-    if (withImg.length === 0) return [];
-    const leg = withImg.filter(i => i.rarity === "legendary").slice(0, 1);
-    const epic = withImg.filter(i => i.rarity === "epic").slice(0, 1);
-    const rare = withImg.filter(i => i.rarity === "rare").slice(0, 2);
+  // Pick a curated 4 (legendary, epic, 2 rare) by metadata only.
+  const picks: ShopItem[] = useMemo(() => {
+    if (all.length === 0) return [];
+    const leg = all.filter(i => i.rarity === "legendary").slice(0, 1);
+    const epic = all.filter(i => i.rarity === "epic").slice(0, 1);
+    const rare = all.filter(i => i.rarity === "rare").slice(0, 2);
     const picked = [...leg, ...epic, ...rare];
-    const rest = withImg.filter(i => !picked.includes(i));
-    return [...picked, ...rest].slice(0, 4);
+    return picked.length >= 4 ? picked.slice(0, 4) : all.slice(0, 4);
   }, [all]);
+
+  // Fetch images for ONLY those 4 ids (small payload, avoids timeout).
+  const [imgs, setImgs] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (picks.length === 0) return;
+    const ids = picks.map(p => p.id);
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("shop_items").select("id,image").in("id", ids);
+      if (cancelled) return;
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { if (r.image) map[r.id] = r.image; });
+      setImgs(map);
+    })();
+    return () => { cancelled = true; };
+  }, [picks.map(p => p.id).join(",")]);
+
+  const items = picks.map(p => imgs[p.id] ? { ...p, emoji: imgs[p.id] } : p);
 
   if (items.length === 0) {
     return (

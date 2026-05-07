@@ -344,6 +344,18 @@ export function equipItem(id: string) {
 export function unequipSlot(slot: keyof Equipped) {
   set(s => { const eq = { ...s.equipped }; delete eq[slot]; return { ...s, equipped: eq }; });
 }
+export function removeOwnedItem(id: string) {
+  set(s => {
+    const eq = { ...s.equipped };
+    for (const k of Object.keys(eq) as (keyof Equipped)[]) if (eq[k] === id) delete eq[k];
+    return {
+      ...s,
+      owned: s.owned.filter(x => x !== id),
+      equipped: eq,
+      pendingConsumable: s.pendingConsumable === id ? null : s.pendingConsumable,
+    };
+  });
+}
 export function setGender(g: Gender) { set(s => ({ ...s, gender: g })); }
 
 // ----- Boss actions -----

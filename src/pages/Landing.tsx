@@ -94,12 +94,10 @@ export default function Landing() {
           <PickCard
             content={
               <img
-                src={goldenChalkBag}
-                alt="Golden chalk bag"
+                src={chalkBagImg}
+                alt="Chalk bag"
                 loading="lazy"
-                width={512}
-                height={512}
-                className="h-[80%] w-[80%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.5)] animate-aura-pulse"
+                className="h-[70%] w-[70%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.4)]"
               />
             }
             title="2. Earn Chalk"

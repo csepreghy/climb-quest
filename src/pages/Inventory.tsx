@@ -4,15 +4,17 @@ import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 import { Slot, ItemGroup, Rarity, ShopItem, GEAR_SLOTS, gearSlotsUnlocked, LEVELS } from "@/game/data";
-import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame } from "@/game/store";
+import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame, currentLevel, nextLevel } from "@/game/store";
 import { getItem, useCustomItems } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowRight, Lock } from "lucide-react";
+import { ArrowRight, Lock, ShoppingBag } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
+import { LevelsModal } from "@/components/LevelsModal";
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",
@@ -39,33 +41,49 @@ const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
   power: ["aura", "title"],
 };
 
-function EmptySlotCard({ label }: { label: string }) {
+function EmptySlotCard({ label, onClick }: { label: string; onClick?: () => void }) {
+  const Comp: any = onClick ? "button" : "div";
   return (
-    <GameCard className="p-4 flex flex-col gap-3 relative opacity-60 h-full">
-      <div className="flex items-start gap-3">
-        <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border text-2xl">∅</div>
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium leading-snug text-muted-foreground">Empty</div>
-          <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">{label}</div>
+    <Comp
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      className={cn("w-full text-left", onClick && "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 rounded-xl")}
+    >
+      <GameCard interactive={!!onClick} className={cn("p-4 flex flex-col gap-3 relative h-full", onClick ? "opacity-80 hover:opacity-100 transition" : "opacity-60")}>
+        <div className="flex items-start gap-3">
+          <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border text-2xl">∅</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium leading-snug text-muted-foreground">Empty</div>
+            <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">{label}</div>
+            {onClick && <div className="text-[10px] mt-1 text-[hsl(var(--btn-orange))]">Click to equip</div>}
+          </div>
         </div>
-      </div>
-    </GameCard>
+      </GameCard>
+    </Comp>
   );
 }
 
-function LockedSlotCard({ unlocksAt }: { unlocksAt: number }) {
+function LockedSlotCard({ unlocksAt, onClick }: { unlocksAt: number; onClick?: () => void }) {
+  const Comp: any = onClick ? "button" : "div";
   return (
-    <GameCard className="p-4 flex flex-col gap-3 relative opacity-50 h-full">
-      <div className="flex items-start gap-3">
-        <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border">
-          <Lock className="h-6 w-6 text-muted-foreground" />
+    <Comp
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      className={cn("w-full text-left", onClick && "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 rounded-xl")}
+    >
+      <GameCard interactive={!!onClick} className={cn("p-4 flex flex-col gap-3 relative h-full", onClick ? "opacity-70 hover:opacity-100 transition" : "opacity-50")}>
+        <div className="flex items-start gap-3">
+          <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border">
+            <Lock className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium leading-snug text-muted-foreground">Locked</div>
+            <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">Unlocks at Lv {unlocksAt}</div>
+            {onClick && <div className="text-[10px] mt-1 text-[hsl(var(--btn-orange))]">View levels</div>}
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium leading-snug text-muted-foreground">Locked</div>
-          <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">Unlocks at Lv {unlocksAt}</div>
-        </div>
-      </div>
-    </GameCard>
+      </GameCard>
+    </Comp>
   );
 }
 
@@ -83,6 +101,11 @@ export default function Inventory() {
 
   const [compareItem, setCompareItem] = useState<ShopItem | null>(null);
   const [slotPicker, setSlotPicker] = useState<ShopItem | null>(null);
+  const [emptyGearPicker, setEmptyGearPicker] = useState(false);
+  const [levelsOpen, setLevelsOpen] = useState(false);
+  const cur = currentLevel(s);
+  const nxt = nextLevel(s);
+  const canLevelUp = !!nxt && s.chalk >= nxt.cost;
   const equippedItem = compareItem
     ? (compareItem.consumableBonus
         ? (s.pendingConsumable ? getItem(s.pendingConsumable) ?? null : null)
@@ -91,6 +114,8 @@ export default function Inventory() {
   const slotAlternatives = slotPicker
     ? owned.filter(it => it.slot === slotPicker.slot && it.id !== slotPicker.id)
     : [];
+  const equippedGearIds = new Set(GEAR_SLOTS.map(sl => s.equipped[sl]).filter(Boolean) as string[]);
+  const availableGear = owned.filter(it => it.group === "gear" && !it.consumableBonus && !equippedGearIds.has(it.id));
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px,1fr] animate-float-up">
@@ -166,7 +191,7 @@ export default function Inventory() {
                     })}
                     {Array.from({ length: emptyCount }).map((_, i) => (
                       <div key={`empty-${i}`} className="flex flex-col">
-                        <div className="flex-1"><EmptySlotCard label="Gear" /></div>
+                        <div className="flex-1"><EmptySlotCard label="Gear" onClick={() => setEmptyGearPicker(true)} /></div>
                         <div className="h-7 mt-1.5" aria-hidden />
                       </div>
                     ))}
@@ -174,7 +199,7 @@ export default function Inventory() {
                       const slotIndex = max + i;
                       return (
                         <div key={`locked-${i}`} className="flex flex-col">
-                          <div className="flex-1"><LockedSlotCard unlocksAt={gearUnlockLevel(slotIndex)} /></div>
+                          <div className="flex-1"><LockedSlotCard unlocksAt={gearUnlockLevel(slotIndex)} onClick={() => setLevelsOpen(true)} /></div>
                           <div className="h-7 mt-1.5" aria-hidden />
                         </div>
                       );
@@ -191,12 +216,20 @@ export default function Inventory() {
                   {slots.map(slot => {
                     const id = s.equipped[slot];
                     const it = id ? getItem(id) : null;
-                    if (!it) return (
-                      <div key={slot} className="flex flex-col">
-                        <div className="flex-1"><EmptySlotCard label={SLOT_LABEL[slot]} /></div>
-                        <div className="h-7 mt-1.5" aria-hidden />
-                      </div>
-                    );
+                    if (!it) {
+                      const slotOwned = owned.filter(o => o.slot === slot && !o.consumableBonus && o.id !== id);
+                      const onEmptyClick = () => {
+                        if (slotOwned.length === 0) { toast.info("No items for this slot — visit the shop"); return; }
+                        if (slotOwned.length === 1) { equipItem(slotOwned[0].id); toast.success(`Equipped ${slotOwned[0].name}`); return; }
+                        setCompareItem(slotOwned[0]);
+                      };
+                      return (
+                        <div key={slot} className="flex flex-col">
+                          <div className="flex-1"><EmptySlotCard label={SLOT_LABEL[slot]} onClick={onEmptyClick} /></div>
+                          <div className="h-7 mt-1.5" aria-hidden />
+                        </div>
+                      );
+                    }
                     return (
                       <div key={slot} className="flex flex-col">
                         <div className="flex-1"><ItemCard item={it} onClick={() => setSlotPicker(it)} /></div>
@@ -356,6 +389,49 @@ export default function Inventory() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* EMPTY GEAR PICKER */}
+      <Dialog open={emptyGearPicker} onOpenChange={setEmptyGearPicker}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Equip gear</DialogTitle>
+          </DialogHeader>
+          {availableGear.length === 0 ? (
+            <div className="py-8 text-center space-y-4">
+              <div className="text-5xl">🎒</div>
+              <p className="text-sm text-muted-foreground">You don't have any gear to equip yet.</p>
+              <Link to="/shop" onClick={() => setEmptyGearPicker(false)}>
+                <GameButton variant="primary"><ShoppingBag className="h-4 w-4" /> Go to shop</GameButton>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {availableGear.map(it => (
+                <ItemCard
+                  key={it.id}
+                  item={it}
+                  onClick={() => {
+                    const r = equipItem(it.id);
+                    if (!r.ok) { toast.error(r.reason ?? "Cannot equip"); return; }
+                    toast.success(`Equipped ${it.name}`);
+                    setEmptyGearPicker(false);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <LevelsModal
+        open={levelsOpen}
+        onOpenChange={setLevelsOpen}
+        currentLevel={s.level}
+        gender={s.gender}
+        canLevelUp={canLevelUp}
+        nextCost={nxt?.cost}
+        onLevelUpClick={() => { setLevelsOpen(false); window.dispatchEvent(new CustomEvent("cq:open-level-up-confirm")); }}
+      />
     </div>
   );
 }

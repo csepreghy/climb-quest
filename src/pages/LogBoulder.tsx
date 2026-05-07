@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGame } from "@/game/store";
 import { ACTIVITY_LABELS } from "@/game/data";
 import { useGyms } from "@/game/gyms";

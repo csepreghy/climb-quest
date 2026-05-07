@@ -32,6 +32,42 @@ export type Database = {
         }
         Relationships: []
       }
+      level_overrides: {
+        Row: {
+          chalk_req: number | null
+          created_at: string
+          gender: string
+          image: string | null
+          level: number
+          name: string | null
+          tagline: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          chalk_req?: number | null
+          created_at?: string
+          gender: string
+          image?: string | null
+          level: number
+          name?: string | null
+          tagline?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          chalk_req?: number | null
+          created_at?: string
+          gender?: string
+          image?: string | null
+          level?: number
+          name?: string | null
+          tagline?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

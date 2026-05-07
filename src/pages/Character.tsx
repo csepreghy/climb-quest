@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useGame, currentLevel, nextLevel, levelUp, setGender, resetGame } from "@/game/store";
 import { LEVELS, BADGES, BADGE_BY_ID } from "@/game/data";
+import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -59,28 +60,7 @@ export default function Character() {
       </div>
 
       <Card className="gradient-card p-5">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {LEVELS.map(l => {
-            const unlocked = s.level >= l.level;
-            const isCurrent = s.level === l.level;
-            return (
-              <div key={l.level} className={cn("flex gap-3 p-3 rounded-xl border transition",
-                isCurrent ? "border-accent bg-accent/10" : unlocked ? "border-border bg-secondary/30" : "border-border/50 opacity-60")}>
-                <div className="text-3xl">{unlocked ? l.emoji : <Lock className="h-6 w-6 mt-1.5" />}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Lv {l.level}</span>
-                    <span className="font-semibold truncate">{l.title}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground line-clamp-1">{l.desc}</div>
-                  <div className="text-[10px] text-muted-foreground mt-1">
-                    {l.level === 1 ? "Starter" : `${l.cost.toLocaleString()} Chalk`} · {l.unlocks.length} unlocks
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <LevelsGrid currentLevel={s.level} gender={s.gender} />
       </Card>
 
       <Card className="gradient-card p-5">
@@ -117,5 +97,38 @@ function Stat({ label, value }: { label: string; value: number }) {
       <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="text-2xl font-bold mt-1 gradient-chalk-text">{value}</div>
     </Card>
+  );
+}
+
+function LevelsGrid({ currentLevel, gender }: { currentLevel: number; gender: "male" | "female" }) {
+  useLevelOverrides();
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {LEVELS.map(base => {
+        const l = resolvedLevel(base.level, gender);
+        const unlocked = currentLevel >= l.level;
+        const isCurrent = currentLevel === l.level;
+        return (
+          <div key={l.level} className={cn("flex gap-3 p-3 rounded-xl border transition",
+            isCurrent ? "border-accent bg-accent/10" : unlocked ? "border-border bg-secondary/30" : "border-border/50 opacity-60")}>
+            <div className="text-3xl shrink-0">
+              {!unlocked ? <Lock className="h-6 w-6 mt-1.5" /> : l.image
+                ? <img src={l.image} alt="" className="h-10 w-10 object-contain rounded" />
+                : l.emoji}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Lv {l.level}</span>
+                <span className="font-semibold truncate">{l.title}</span>
+              </div>
+              <div className="text-xs text-muted-foreground line-clamp-1">{l.desc}</div>
+              <div className="text-[10px] text-muted-foreground mt-1">
+                {l.level === 1 ? "Starter" : `${l.cost.toLocaleString()} Chalk`}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

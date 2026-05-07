@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
+import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp, FlaskConical, User as UserIcon } from "lucide-react";
+import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
 import { useGame, nextLevel, levelUp, currentLevel } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
@@ -30,7 +31,8 @@ const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
 
 export default function Layout() {
   const s = useGame();
-  const { isAdmin, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
+  const activeSlot = useActiveSlot(user?.id ?? null);
   const nav = useNavigate();
   const NAV = isAdmin ? [...NAV_BASE, NAV_ADMIN] : NAV_BASE;
   const [levelsOpen, setLevelsOpen] = useState(false);
@@ -138,6 +140,26 @@ export default function Layout() {
               <Plus className="h-4 w-4" />
             </GameButton>
             {isAdmin && <ThemeButton />}
+            {isAdmin && user && (
+              <button
+                type="button"
+                onClick={() => {
+                  const next = activeSlot === "test" ? "personal" : "test";
+                  switchToSlot(user.id, next);
+                  toast.success(`Switched to ${next} account`);
+                }}
+                title={`Active: ${activeSlot} account — click to switch`}
+                className={cn(
+                  "hidden sm:inline-flex items-center gap-1.5 px-2.5 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-xs font-semibold uppercase tracking-wider transition hover:brightness-110",
+                  activeSlot === "test"
+                    ? "bg-[hsl(var(--btn-orange))] text-white"
+                    : "bg-secondary text-foreground/90"
+                )}
+              >
+                {activeSlot === "test" ? <FlaskConical className="h-3.5 w-3.5" /> : <UserIcon className="h-3.5 w-3.5" />}
+                {activeSlot === "test" ? "Test" : "Personal"}
+              </button>
+            )}
             <ChalkChip value={s.chalk} />
             <button type="button" onClick={() => setLevelsOpen(true)}
               className={cn(

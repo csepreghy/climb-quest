@@ -377,6 +377,7 @@ function LevelEditor({ level, onDone }: { level: number; onDone: () => void; }) 
   const [name, setName] = useState<string>(rM.title === (LEVELS.find(l => l.level === level)?.title) && !hasAnyOverride(level) ? "" : rM.title);
   const [tagline, setTagline] = useState<string>(hasAnyOverride(level) ? rM.desc : "");
   const [chalkReq, setChalkReq] = useState<string>(hasAnyOverride(level) ? String(rM.cost) : "");
+  const [rarity, setRarity] = useState<Rarity>((rM.rarity as Rarity) ?? "common");
   const [maleImageUrl, setMaleImageUrl] = useState<string | null>(rM.image ?? null);
   const [femaleImageUrl, setFemaleImageUrl] = useState<string | null>(rF.image ?? null);
   const [maleImageFile, setMaleImageFile] = useState<File | null>(null);

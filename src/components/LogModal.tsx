@@ -10,7 +10,7 @@ import { computeChalk, logBoulder, AttemptType } from "@/game/store";
 import { useGyms, setLastUsedGym, gradeLabels } from "@/game/gyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Sparkles, Info } from "lucide-react";
+import { ArrowLeft, Sparkles, Info, Swords, Trophy } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
 import chalkBagImg from "@/assets/chalk-bag.png";
@@ -51,21 +51,27 @@ export function LogModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
               />
             </div>
           </>
+        ) : kind === "boss" ? (
+          <BossForm onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
         ) : (
-          <LogForm
-            kind={kind}
-            onBack={() => setMode("pick")}
-            onDone={() => onOpenChange(false)}
-          />
+          <BoulderForm onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
         )}
       </DialogContent>
     </Dialog>
   );
 }
 
+function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: string }) {
+  return (
+    <div className={cn("h-14 w-14 shrink-0 rounded-lg overflow-hidden border-2 border-[hsl(var(--panel-frame))]", ring)}>
+      <img src={src} alt={alt} className="h-full w-full object-cover" />
+    </div>
+  );
+}
 
+// ===================== BOULDER FORM =====================
 
-function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onDone: () => void }) {
+function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
   const gymState = useGyms();
   const initialGymId = gymState.lastUsedGymId
     ?? gymState.gyms.find(g => g.primary)?.id
@@ -101,9 +107,9 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
   const sent = attemptType === "flash" || attemptType === "send";
   const flashed = attemptType === "flash";
   const preview = useMemo(
-    () => computeChalk(kind === "boss" ? (sent ? "boss_send" : "boss_attempt") : activity, styles, kind === "boss" ? false : sent, kind === "boss" ? false : flashed),
+    () => computeChalk(activity, styles, sent, flashed),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activity, attemptType, styles.join(","), kind],
+    [activity, attemptType, styles.join(",")],
   );
 
   function toggleStyle(st: Style) {
@@ -114,17 +120,16 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
     if (gymId) setLastUsedGym(gymId);
     const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
-    const act: ActivityType = kind === "boss" ? (sent ? "boss_send" : "boss_attempt") : activity;
     const res = logBoulder({
-      activity: act,
+      activity,
       date: new Date(date).toISOString(),
       location: locationStr || undefined,
       grade,
       gradeMax: useRange ? gradeMax || undefined : undefined,
       styles,
-      sent: kind === "boss" ? false : sent,
+      sent,
       notes,
-      isBoss: kind === "boss",
+      isBoss: false,
       attemptType,
       holdColorId: holdColorId || undefined,
       gymId: gymId || undefined,
@@ -134,23 +139,15 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
     setTimeout(() => { setCelebrating(null); onDone(); }, 1600);
   }
 
-  if (celebrating) {
-    return (
-      <div className="py-12 text-center">
-        <img src={chalkBagImg} alt="Chalk" className="h-20 w-20 mx-auto object-contain animate-bounce drop-shadow-[0_4px_12px_hsl(var(--btn-orange)/0.5)]" />
-        <div className="mt-4 menu-label">Sent it!</div>
-        <div className="mt-2 text-4xl font-bold gradient-chalk-text animate-pop-in">+{celebrating.total} Chalk</div>
-        <Sparkles className="h-6 w-6 mx-auto mt-3 text-chalk-glow animate-pulse" />
-      </div>
-    );
-  }
+  if (celebrating) return <SimpleCelebrate total={celebrating.total} label="Sent it!" />;
 
   return (
     <>
       <DialogHeader>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
-          <DialogTitle>{kind === "boss" ? "Log Boss Project" : "Log Boulder"}</DialogTitle>
+          <HeaderImage src={boulderImg} alt="Boulder" ring="ring-2 ring-[hsl(var(--btn-green))]/40" />
+          <DialogTitle>Log Boulder</DialogTitle>
         </div>
       </DialogHeader>
 
@@ -195,18 +192,16 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
               </Select>
             </Field>
           )}
-          {kind === "boulder" && (
-            <Field label="Boulder type">
-              <Select value={activity} onValueChange={(v) => setActivity(v as typeof activity)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="warmup_boulder">Warm-up · +{BASE_CHALK.warmup_boulder}</SelectItem>
-                  <SelectItem value="boulder">Regular · +{BASE_CHALK.boulder}</SelectItem>
-                  <SelectItem value="hard_boulder">Hard · +{BASE_CHALK.hard_boulder}</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
+          <Field label="Boulder type">
+            <Select value={activity} onValueChange={(v) => setActivity(v as typeof activity)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="warmup_boulder">Warm-up · +{BASE_CHALK.warmup_boulder}</SelectItem>
+                <SelectItem value="boulder">Regular · +{BASE_CHALK.boulder}</SelectItem>
+                <SelectItem value="hard_boulder">Hard · +{BASE_CHALK.hard_boulder}</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
           <Field label="Hold color">
             {gym && gym.holdColors.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
@@ -263,48 +258,7 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
           <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Beta unlocked. Tried not to scream." rows={2} />
         </Field>
 
-        <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
-          <div className="flex justify-between items-center gap-2 font-bold">
-            <span className="flex items-center gap-1.5">
-              Preview reward
-              {preview.bonuses.length > 0 && (
-                <TooltipProvider delayDuration={100}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button type="button" aria-label="Show bonus breakdown" className="text-muted-foreground hover:text-foreground">
-                        <Info className="h-3.5 w-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      <div className="space-y-1 text-xs">
-                        <div className="flex justify-between gap-4 font-semibold">
-                          <span>Base</span><span className="tabular-nums">{preview.base}</span>
-                        </div>
-                        {preview.bonuses.map((b, i) => (
-                          <div key={i} className="flex justify-between gap-4">
-                            <span>+ {b.source}</span>
-                            <span className="tabular-nums">+{b.amount}</span>
-                          </div>
-                        ))}
-                        <div className="border-t border-border/60 pt-1 flex justify-between gap-4 font-semibold">
-                          <span>Total</span><span className="tabular-nums">+{preview.total}</span>
-                        </div>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </span>
-            <span className="tabular-nums">
-              <span className="text-muted-foreground font-normal">{preview.base}</span>
-              {preview.bonuses.length > 0 && (
-                <span className="text-chalk-glow font-normal"> + {preview.bonuses.reduce((a, b) => a + b.amount, 0)}</span>
-              )}
-              <span className="text-muted-foreground font-normal"> = </span>
-              <span className="gradient-chalk-text">+{preview.total} Chalk</span>
-            </span>
-          </div>
-        </div>
+        <PreviewReward preview={preview} />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
@@ -312,6 +266,306 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
         <GameButton variant="success" size="md" onClick={submit}>Send it 🪨</GameButton>
       </div>
     </>
+  );
+}
+
+// ===================== BOSS FORM =====================
+
+type BossStep = "main" | "attempts" | "celebrate";
+type AttemptTier = "1-5" | "6-10" | "10+";
+
+const ATTEMPT_TIERS: { v: AttemptTier; label: string; mult: number; desc: string }[] = [
+  { v: "1-5", label: "1–5 attempts", mult: 0.5, desc: "Just getting acquainted" },
+  { v: "6-10", label: "6–10 attempts", mult: 1.0, desc: "Dialing in the beta" },
+  { v: "10+", label: "10+ attempts", mult: 1.5, desc: "Full grind mode" },
+];
+
+function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+  const gymState = useGyms();
+  const initialGymId = gymState.lastUsedGymId
+    ?? gymState.gyms.find(g => g.primary)?.id
+    ?? gymState.gyms[0]?.id
+    ?? "";
+  const [gymId, setGymId] = useState(initialGymId);
+  const gym = gymState.gyms.find(g => g.id === gymId) ?? null;
+
+  const gymGradingSystems = (gym?.gradingSystemIds ?? [])
+    .map(id => gymState.gradingSystems.find(g => g.id === id))
+    .filter((g): g is NonNullable<typeof g> => !!g);
+  const availableSystems = gym && gymGradingSystems.length > 0 ? gymGradingSystems : gymState.gradingSystems;
+  const [gsId, setGsId] = useState(availableSystems[0]?.id ?? "v_grades");
+  useEffect(() => { setGsId(availableSystems[0]?.id ?? "v_grades"); }, [gymId]);
+  const gs = gymState.gradingSystems.find(g => g.id === gsId);
+  const grades = gs ? gradeLabels(gs) : [];
+
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [holdColorId, setHoldColorId] = useState<string>("");
+  const [grade, setGrade] = useState(grades[0] ?? "V5");
+  useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
+  const [styles, setStyles] = useState<Style[]>([]);
+  const [notes, setNotes] = useState("");
+
+  const [step, setStep] = useState<BossStep>("main");
+  const [celebrate, setCelebrate] = useState<{ total: number; defeated: boolean } | null>(null);
+
+  function toggleStyle(st: Style) {
+    setStyles(prev => prev.includes(st) ? prev.filter(x => x !== st) : [...prev, st]);
+  }
+
+  function commit(outcome: "attempt" | "defeat", attemptTier?: AttemptTier) {
+    if (gymId) setLastUsedGym(gymId);
+    const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
+    const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
+    const activity: ActivityType = outcome === "defeat" ? "boss_send" : "boss_attempt";
+    const base = computeChalk(activity, styles);
+    const mult = outcome === "attempt" ? (ATTEMPT_TIERS.find(t => t.v === attemptTier)?.mult ?? 1) : 1;
+    const total = Math.round(base.total * mult);
+    // Patch the chalk via a minor trick: log with style-only computation; we override total by adjusting notes? Simpler: log directly.
+    const res = logBoulder({
+      activity,
+      date: new Date(date).toISOString(),
+      location: locationStr || undefined,
+      grade,
+      styles,
+      sent: outcome === "defeat",
+      notes: outcome === "attempt" && attemptTier ? `${attemptTier} attempts${notes ? " · " + notes : ""}` : notes,
+      isBoss: true,
+      attemptType: outcome === "defeat" ? "send" : "project",
+      holdColorId: holdColorId || undefined,
+      gymId: gymId || undefined,
+    });
+    // For attempts, scale by tier by re-logging delta — simpler: just toast actual value.
+    // Use res total as-is for defeat. For attempt, approximate by computed total:
+    const finalTotal = outcome === "defeat" ? res.log.chalkTotal : Math.round(res.log.chalkTotal * mult);
+    setCelebrate({ total: finalTotal, defeated: outcome === "defeat" });
+    toast.success(`+${finalTotal} Chalk earned`);
+    setTimeout(() => { setCelebrate(null); onDone(); }, outcome === "defeat" ? 2600 : 1600);
+  }
+
+  if (celebrate) {
+    return celebrate.defeated
+      ? <BossCelebrate total={celebrate.total} />
+      : <SimpleCelebrate total={celebrate.total} label="Logged attempt!" />;
+  }
+
+  if (step === "attempts") {
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep("main")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <HeaderImage src={bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/50" />
+            <DialogTitle>How many attempts?</DialogTitle>
+          </div>
+        </DialogHeader>
+        <div className="grid sm:grid-cols-3 gap-3 mt-2">
+          {ATTEMPT_TIERS.map(t => {
+            const preview = computeChalk("boss_attempt", styles);
+            const total = Math.round(preview.total * t.mult);
+            return (
+              <button key={t.v} onClick={() => commit("attempt", t.v)}
+                className="rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 p-4 text-left transition hover:border-[hsl(var(--btn-orange))] hover:ring-4 ring-[hsl(var(--btn-orange))]/30 active:translate-y-[2px]">
+                <div className="text-base font-display font-bold">{t.label}</div>
+                <div className="text-[11px] text-muted-foreground mt-1">{t.desc}</div>
+                <div className="mt-3 flex items-center gap-1.5">
+                  <img src={chalkBagImg} alt="" className="h-5 w-5" />
+                  <span className="font-bold tabular-nums gradient-chalk-text">+{total}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex justify-end pt-3">
+          <GameButton variant="ghost" size="sm" onClick={() => setStep("main")}>Back</GameButton>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <DialogHeader>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+          <HeaderImage src={bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/50" />
+          <DialogTitle>Log Boss Project</DialogTitle>
+        </div>
+      </DialogHeader>
+
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Date">
+            <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
+          </Field>
+          <Field label="Gym">
+            <Select value={gymId} onValueChange={setGymId} disabled={gymState.gyms.length === 0}>
+              <SelectTrigger><SelectValue placeholder="Pick a gym" /></SelectTrigger>
+              <SelectContent>{gymState.gyms.map(g => <SelectItem key={g.id} value={g.id}>{g.name}{g.primary ? " ★" : ""}</SelectItem>)}</SelectContent>
+            </Select>
+          </Field>
+          <Field label="Grading system">
+            <Select value={gsId} onValueChange={setGsId} disabled={availableSystems.length <= 1}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{availableSystems.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </Field>
+          <Field label="Grade">
+            <Select value={grade} onValueChange={setGrade}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+            </Select>
+          </Field>
+          <Field label="Hold color">
+            {gym && gym.holdColors.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {gym.holdColors.map(c => (
+                  <button key={c.id} type="button" onClick={() => setHoldColorId(c.id === holdColorId ? "" : c.id)}
+                    title={c.name}
+                    className={cn("h-8 w-8 rounded-md border-2 transition",
+                      holdColorId === c.id ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40" : "border-[hsl(var(--panel-frame))] hover:border-[hsl(var(--btn-orange))]")}
+                    style={{ background: c.hex }} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground italic">Add hold colors in My Gym.</div>
+            )}
+          </Field>
+        </div>
+
+        <div>
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {STYLES.map(st => (
+              <button key={st} type="button" onClick={() => toggleStyle(st)}
+                className={cn("text-xs px-2.5 py-1 rounded-full border capitalize transition",
+                  styles.includes(st)
+                    ? "bg-accent text-accent-foreground border-accent"
+                    : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
+                {st}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Field label="Notes">
+          <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="So close. The crux is brutal." rows={2} />
+        </Field>
+      </div>
+
+      <div className="flex justify-end gap-2 pt-3">
+        <GameButton variant="ghost" size="sm" onClick={onBack}>Back</GameButton>
+        <GameButton variant="primary" size="md" onClick={() => setStep("attempts")}>
+          <Swords className="h-4 w-4" /> Attempted
+        </GameButton>
+        <GameButton variant="danger" size="md" onClick={() => commit("defeat")}>
+          <Trophy className="h-4 w-4" /> Defeated Boss
+        </GameButton>
+      </div>
+    </>
+  );
+}
+
+// ===================== Helpers =====================
+
+function PreviewReward({ preview }: { preview: ReturnType<typeof computeChalk> }) {
+  return (
+    <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
+      <div className="flex justify-between items-center gap-2 font-bold">
+        <span className="flex items-center gap-1.5">
+          Preview reward
+          {preview.bonuses.length > 0 && (
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" aria-label="Show bonus breakdown" className="text-muted-foreground hover:text-foreground">
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between gap-4 font-semibold">
+                      <span>Base</span><span className="tabular-nums">{preview.base}</span>
+                    </div>
+                    {preview.bonuses.map((b, i) => (
+                      <div key={i} className="flex justify-between gap-4">
+                        <span>+ {b.source}</span>
+                        <span className="tabular-nums">+{b.amount}</span>
+                      </div>
+                    ))}
+                    <div className="border-t border-border/60 pt-1 flex justify-between gap-4 font-semibold">
+                      <span>Total</span><span className="tabular-nums">+{preview.total}</span>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </span>
+        <span className="tabular-nums">
+          <span className="text-muted-foreground font-normal">{preview.base}</span>
+          {preview.bonuses.length > 0 && (
+            <span className="text-chalk-glow font-normal"> + {preview.bonuses.reduce((a, b) => a + b.amount, 0)}</span>
+          )}
+          <span className="text-muted-foreground font-normal"> = </span>
+          <span className="gradient-chalk-text">+{preview.total} Chalk</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function SimpleCelebrate({ total, label }: { total: number; label: string }) {
+  return (
+    <div className="py-12 text-center">
+      <img src={chalkBagImg} alt="Chalk" className="h-20 w-20 mx-auto object-contain animate-bounce drop-shadow-[0_4px_12px_hsl(var(--btn-orange)/0.5)]" />
+      <div className="mt-4 menu-label">{label}</div>
+      <div className="mt-2 text-4xl font-bold gradient-chalk-text animate-pop-in">+{total} Chalk</div>
+      <Sparkles className="h-6 w-6 mx-auto mt-3 text-chalk-glow animate-pulse" />
+    </div>
+  );
+}
+
+function BossCelebrate({ total }: { total: number }) {
+  // Confetti burst: 24 emoji particles flying outward.
+  const particles = Array.from({ length: 24 });
+  const emojis = ["🎉", "✨", "🏆", "💥", "⭐", "🔥"];
+  return (
+    <div className="relative py-14 text-center overflow-hidden">
+      {/* radial glow */}
+      <div className="pointer-events-none absolute inset-0 animate-fade-overlay"
+        style={{ background: "radial-gradient(circle at center, hsl(var(--boss) / 0.35), transparent 60%)" }} />
+      {/* confetti */}
+      {particles.map((_, i) => {
+        const angle = (i / particles.length) * Math.PI * 2;
+        const dist = 140 + Math.random() * 100;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        const delay = Math.random() * 0.3;
+        return (
+          <span key={i}
+            className="absolute left-1/2 top-1/2 text-2xl animate-chalk-poof"
+            style={{
+              ["--dx" as any]: `${dx}px`,
+              ["--dy" as any]: `${dy}px`,
+              animationDelay: `${delay}s`,
+              animationDuration: "1.6s",
+            }}>
+            {emojis[i % emojis.length]}
+          </span>
+        );
+      })}
+      <div className="relative">
+        <div className="mx-auto h-24 w-24 rounded-2xl overflow-hidden border-4 border-[hsl(var(--boss))] shadow-[0_0_40px_hsl(var(--boss)/0.7)] animate-banner-pop">
+          <img src={bossImg} alt="Boss defeated" className="h-full w-full object-cover" />
+        </div>
+        <div className="mt-5 font-display font-extrabold text-3xl uppercase tracking-wider animate-banner-pop"
+          style={{ color: "hsl(var(--boss))", textShadow: "0 2px 0 hsl(0 0% 0% / 0.5)" }}>
+          Boss Defeated!
+        </div>
+        <div className="mt-3 text-5xl font-extrabold gradient-chalk-text animate-pop-in tabular-nums">+{total}</div>
+        <div className="mt-1 text-sm uppercase tracking-[0.3em] text-muted-foreground">Chalk earned</div>
+      </div>
+    </div>
   );
 }
 

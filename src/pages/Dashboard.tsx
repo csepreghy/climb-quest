@@ -133,6 +133,15 @@ export default function Dashboard() {
   );
 }
 
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <GameCard className="p-4 text-center">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-2xl font-bold mt-1 gradient-chalk-text tabular-nums">{value.toLocaleString()}</div>
+    </GameCard>
+  );
+}
+
 function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number }[] }) {
   const data = useMemo(() => {
     const today = new Date();

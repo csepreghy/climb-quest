@@ -49,7 +49,31 @@ export default function BoulderLogs() {
 
   return (
     <div className="space-y-5 animate-float-up">
-      <LogModal open={open} onOpenChange={setOpen} />
+      <LogModal
+        open={open}
+        onOpenChange={(v) => { setOpen(v); if (!v) setEditLog(null); }}
+        editLog={editLog}
+      />
+
+      <AlertDialog open={!!deleteId} onOpenChange={(v) => { if (!v) setDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this log?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the log and refunds the chalk it earned. This can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteId) { deleteLog(deleteId); toast.success("Log deleted"); }
+                setDeleteId(null);
+              }}
+            >Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>

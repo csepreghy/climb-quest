@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
 import { SmartImage } from "@/components/SmartImage";
+import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",

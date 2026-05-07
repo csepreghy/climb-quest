@@ -59,7 +59,7 @@ export default function Layout() {
       <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} gender={s.gender} />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Level up?</DialogTitle>
             <DialogDescription>
@@ -67,37 +67,38 @@ export default function Layout() {
             </DialogDescription>
           </DialogHeader>
           {nxt && (
-            <div
-              className={cn(
-                "rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden",
-                "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
-                "ring-2 ring-[hsl(var(--btn-orange))]/60",
-              )}
-            >
-              <div className="aspect-[2/1] w-full bg-black/40 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-3">
-                <div className="flex flex-col items-center gap-1">
-                  <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="lg" />
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Lv {s.level}</div>
-                </div>
-                <ArrowUp className="h-7 w-7 rotate-90 text-[hsl(var(--btn-orange))] shrink-0" />
-                <div className="flex flex-col items-center gap-1">
-                  <ClimberAvatar level={nxt.level} gender={s.gender} equipped={s.equipped} size="lg" />
-                  <div className="text-[10px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">Lv {nxt.level}</div>
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="font-display font-bold text-lg flex items-center gap-2">
-                  <ArrowUp className="h-5 w-5 text-[hsl(var(--btn-orange))]" /> {nxt.title}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">{cur.title} → <span className="text-foreground font-medium">{nxt.title}</span></div>
-                <div className="text-xs mt-2">Costs <span className="font-bold gradient-chalk-text tabular-nums">{nxt.cost.toLocaleString()} Chalk</span></div>
-              </div>
+            <div className="grid sm:grid-cols-2 gap-3 mt-2">
+              <LevelPreviewCard
+                title={cur.title}
+                desc={cur.desc}
+                level={s.level}
+                gender={s.gender}
+                equipped={s.equipped}
+                ringClass="ring-[hsl(var(--panel-frame))]/40"
+                badgeLabel="Current"
+                badgeClass="bg-secondary text-foreground/80"
+                unlocks={cur.unlocks}
+                unlocksLabel="You have"
+              />
+              <LevelPreviewCard
+                title={nxt.title}
+                desc={nxt.desc}
+                level={nxt.level}
+                gender={s.gender}
+                equipped={s.equipped}
+                ringClass="ring-[hsl(var(--btn-orange))]/60"
+                badgeLabel="Next"
+                badgeClass="bg-[hsl(var(--btn-orange))] text-white"
+                unlocks={nxt.unlocks}
+                unlocksLabel="Unlocks"
+                cost={nxt.cost}
+              />
             </div>
           )}
           <DialogFooter className="gap-2 sm:gap-2">
             <GameButton variant="ghost" size="sm" onClick={() => setConfirmLvOpen(false)}>Cancel</GameButton>
             <GameButton variant="primary" size="sm" onClick={onConfirmLevelUp} disabled={!canLevel}>
-              <ArrowUp className="h-4 w-4" /> Level Up
+              <ArrowUp className="h-4 w-4" /> Level Up{nxt ? ` (${nxt.cost.toLocaleString()})` : ""}
             </GameButton>
           </DialogFooter>
         </DialogContent>

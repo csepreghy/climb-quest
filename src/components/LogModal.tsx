@@ -136,7 +136,7 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
   if (celebrating) {
     return (
       <div className="py-12 text-center">
-        <div className="text-7xl animate-bounce">🪨</div>
+        <img src={chalkBagImg} alt="Chalk" className="h-20 w-20 mx-auto object-contain animate-bounce drop-shadow-[0_4px_12px_hsl(var(--btn-orange)/0.5)]" />
         <div className="mt-4 menu-label">Sent it!</div>
         <div className="mt-2 text-4xl font-bold gradient-chalk-text animate-pop-in">+{celebrating.total} Chalk</div>
         <Sparkles className="h-6 w-6 mx-auto mt-3 text-chalk-glow animate-pulse" />

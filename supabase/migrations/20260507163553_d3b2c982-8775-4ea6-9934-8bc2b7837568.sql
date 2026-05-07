@@ -1,0 +1,1 @@
+ALTER TABLE public.shop_items ADD COLUMN IF NOT EXISTS price_mult numeric NOT NULL DEFAULT 1;

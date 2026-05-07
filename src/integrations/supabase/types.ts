@@ -104,6 +104,7 @@ export type Database = {
           level_req: number | null
           name: string
           price: number
+          price_mult: number
           rarity: string
           slot: string
           updated_at: string
@@ -119,6 +120,7 @@ export type Database = {
           level_req?: number | null
           name: string
           price?: number
+          price_mult?: number
           rarity: string
           slot: string
           updated_at?: string
@@ -134,6 +136,7 @@ export type Database = {
           level_req?: number | null
           name?: string
           price?: number
+          price_mult?: number
           rarity?: string
           slot?: string
           updated_at?: string

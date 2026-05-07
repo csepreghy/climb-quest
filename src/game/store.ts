@@ -514,6 +514,16 @@ export function grantFreeItems(items: { id: string; price: number; slot: Slot; c
 // ----- Boss actions -----
 export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], notes?: string) {
   const boss = state.bosses.find(b => b.id === bossId); if (!boss) return null;
+  const isSend = outcome === "send" || outcome === "flash";
+  if (isSend) {
+    const today = new Date().toDateString();
+    const sentToday = state.bosses.some(b =>
+      b.sent && b.sentDate && new Date(b.sentDate).toDateString() === today
+    );
+    if (sentToday) {
+      return { error: "You seem to have defeated more than one boss in a single day, are you sure both were worthy of bosses?" } as const;
+    }
+  }
   let activity: ActivityType = outcome === "send" || outcome === "flash" ? "boss_send" : "boss_attempt";
   // Boss difficulty (1-10) vs player ceiling (1-10) → reuse the same ratio scale.
   // Map boss.difficulty (1–10) to a V-rank-ish value (×1.4) so a difficulty-6 boss

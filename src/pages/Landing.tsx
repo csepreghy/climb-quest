@@ -55,8 +55,7 @@ export default function Landing() {
               Log boulders. Earn Chalk. Send bosses.
             </div>
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">
-              Turn every session<br />
-              into <span className="gradient-chalk-text">XP.</span>
+              Log climbs, earn <span className="gradient-chalk-text">chalk</span>, level up.
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
               ClimbQuest is a climbing tracker that plays like an RPG. Log climbs, earn chalk,

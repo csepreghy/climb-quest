@@ -572,8 +572,8 @@ function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: 
 
 function BossCelebrate({ total, breakdown, onDone }: { total: number; breakdown: ChalkBreakdown; onDone: () => void }) {
   const s = useGame();
-  // Chalk impact particles — one-shot burst at impact (~0.65s into player charge).
-  const particles = Array.from({ length: 18 });
+  // Chalk impact particles — one-shot burst exactly when cards collide (~0.69s into 1.1s charge).
+  const particles = Array.from({ length: 60 });
   return (
     <div className="relative py-8 px-2 text-center overflow-hidden">
       {/* radial glow background */}
@@ -595,20 +595,23 @@ function BossCelebrate({ total, breakdown, onDone }: { total: number; breakdown:
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 rounded-full animate-impact-flash"
           style={{ background: "radial-gradient(circle, hsl(0 0% 100% / 0.95), transparent 70%)" }} />
         {particles.map((_, i) => {
-          const angle = (i / particles.length) * Math.PI * 2 + Math.random() * 0.4;
-          const dist = 90 + Math.random() * 80;
+          const angle = (i / particles.length) * Math.PI * 2 + Math.random() * 0.5;
+          const dist = 50 + Math.random() * 90;
           const dx = Math.cos(angle) * dist;
           const dy = Math.sin(angle) * dist;
+          const size = 3 + Math.random() * 3;
           return (
             <span key={i}
-              className="pointer-events-none absolute left-1/2 top-1/2 h-2.5 w-2.5 rounded-full bg-white animate-chalk-poof"
+              className="pointer-events-none absolute left-1/2 top-1/2 rounded-full bg-white animate-chalk-poof"
               style={{
+                width: `${size}px`,
+                height: `${size}px`,
                 ["--dx" as any]: `${dx}px`,
                 ["--dy" as any]: `${dy}px`,
-                animationDelay: `${0.62 + Math.random() * 0.15}s`,
-                animationDuration: "1s",
+                animationDelay: `${0.69 + Math.random() * 0.06}s`,
+                animationDuration: "0.8s",
                 animationFillMode: "forwards",
-                boxShadow: "0 0 8px hsl(0 0% 100% / 0.8)",
+                boxShadow: "0 0 4px hsl(0 0% 100% / 0.7)",
               }} />
           );
         })}

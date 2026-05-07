@@ -25,26 +25,26 @@ export function LogModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-2xl">
         {mode === "pick" ? (
           <>
             <DialogHeader>
               <DialogTitle>Log a climb</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-3 mt-2">
+            <div className="grid sm:grid-cols-2 gap-3 mt-2">
               <PickCard
-                icon={<Mountain className="h-8 w-8" />}
+                image={boulderImg}
                 title="Boulder"
-                desc="Quick log a problem."
+                desc="Within your abilities — first try, or several goes in a single session."
                 onClick={() => { setKind("boulder"); setMode("form"); }}
-                tone="from-[hsl(var(--btn-green))] to-[hsl(var(--btn-orange))]"
+                ring="ring-[hsl(var(--btn-green))]/60"
               />
               <PickCard
-                icon={<Swords className="h-8 w-8" />}
+                image={bossImg}
                 title="Boss Project"
-                desc="A long-term nemesis."
+                desc="Hard. Multi-session grind. Your nemesis."
                 onClick={() => { setKind("boss"); setMode("form"); }}
-                tone="from-[hsl(var(--btn-red))] to-[hsl(var(--boss))]"
+                ring="ring-[hsl(var(--boss))]/70"
               />
             </div>
           </>
@@ -60,21 +60,25 @@ export function LogModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
   );
 }
 
-function PickCard({ icon, title, desc, onClick, tone }: { icon: React.ReactNode; title: string; desc: string; onClick: () => void; tone: string }) {
+function PickCard({ image, title, desc, onClick, ring }: { image: string; title: string; desc: string; onClick: () => void; ring: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-xl p-5 text-left border-2 border-[hsl(var(--panel-frame))] bg-gradient-to-br text-white",
-        "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.25),inset_0_-3px_0_hsl(0_0%_0%/0.3),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
-        "hover:brightness-110 active:translate-y-[2px] transition",
-        tone,
+        "group rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden",
+        "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
+        "hover:ring-4 transition active:translate-y-[2px]",
+        ring,
       )}
     >
-      <div className="opacity-90">{icon}</div>
-      <div className="mt-3 font-display font-bold text-xl">{title}</div>
-      <div className="text-sm opacity-90">{desc}</div>
+      <div className="aspect-square w-full overflow-hidden bg-black/40">
+        <img src={image} alt={title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+      </div>
+      <div className="p-4">
+        <div className="font-display font-bold text-lg">{title}</div>
+        <div className="text-xs text-muted-foreground mt-1 leading-snug">{desc}</div>
+      </div>
     </button>
   );
 }

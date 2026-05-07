@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useGame, currentLevel, nextLevel, levelUp, setGender, resetGame } from "@/game/store";
 import { LEVELS, BADGES, BADGE_BY_ID } from "@/game/data";
+import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";

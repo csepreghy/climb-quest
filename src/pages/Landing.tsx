@@ -191,26 +191,54 @@ function Showcase() {
 
 function CharactersSlide() {
   useLevelOverrides();
-  const showcase = [1, 4, 7, 10];
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setI(x => (x + 1) % (showcase.length * 2)), 1100);
-    return () => clearInterval(t);
+  // Build up to 15 slots cycling levels & genders, only those with custom images.
+  const slots = useMemo(() => {
+    const out: { level: number; gender: "male" | "female" }[] = [];
+    for (let lvl = 1; lvl <= 10; lvl++) {
+      for (const g of ["male", "female"] as const) {
+        const r = resolvedLevel(lvl, g);
+        if (r.image) out.push({ level: lvl, gender: g });
+      }
+    }
+    return out.slice(0, 15);
   }, []);
-  const lvl = showcase[Math.floor(i / 2) % showcase.length];
-  const gender = (i % 2 === 0 ? "male" : "female") as "male" | "female";
-  const l = resolvedLevel(lvl, gender);
+
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    setShown(0);
+    if (slots.length === 0) return;
+    const t = setInterval(() => {
+      setShown(s => (s >= slots.length ? 0 : s + 1));
+    }, 180);
+    return () => clearInterval(t);
+  }, [slots.length]);
+
+  if (slots.length === 0) {
+    return (
+      <div className="text-center text-sm text-muted-foreground py-10">
+        Ten levels. Male & female sprites. Custom art for every tier.
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div key={`${lvl}-${gender}`} className="animate-fade-in">
-        <ClimberAvatar level={lvl} gender={gender} equipped={{} as any} size="xl" glow />
+    <div className="flex flex-col items-center gap-3">
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        {slots.map((s, i) => (
+          <div
+            key={`${s.level}-${s.gender}-${i}`}
+            className={cn(
+              "transition-all duration-300",
+              i < shown ? "opacity-100 scale-100" : "opacity-0 scale-75"
+            )}
+          >
+            <div className="scale-[0.55] sm:scale-[0.7] origin-center -m-4">
+              <ClimberAvatar level={s.level} gender={s.gender} equipped={{} as any} size="lg" />
+            </div>
+          </div>
+        ))}
       </div>
-      <div className="text-center">
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Lv {l.level}</div>
-        <div className="font-display font-bold text-xl">{l.title}</div>
-        <div className="text-xs text-muted-foreground italic mt-1 max-w-xs">"{l.desc}"</div>
-      </div>
-      <div className="text-[10px] text-muted-foreground">10 levels · male & female sprites</div>
+      <div className="text-[10px] text-muted-foreground">10 levels · male & female · unique art</div>
     </div>
   );
 }

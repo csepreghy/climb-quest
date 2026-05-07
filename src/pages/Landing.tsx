@@ -64,7 +64,7 @@ export default function Landing() {
             </p>
             <div className="flex flex-wrap gap-3">
               <GameButton variant="success" size="lg" onClick={goAuth}>
-                Get started free <ArrowRight className="h-4 w-4" />
+                Get started <ArrowRight className="h-4 w-4" />
               </GameButton>
               <GameButton variant="ghost" size="lg" onClick={() => { document.getElementById("how")?.scrollIntoView({ behavior: "smooth" }); }}>
                 See how it works

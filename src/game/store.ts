@@ -180,6 +180,17 @@ export function effectivePrice(s: State, listPrice: number): number {
   return Math.max(0, Math.round(listPrice * bestMult));
 }
 
+/** Same shape as gym difficulty curve, but operating on boss.difficulty (1–10). */
+function bossDifficultyMultiplier(climbDiff: number, ceilingDiff: number): number {
+  const ratio = climbDiff / Math.max(1, ceilingDiff);
+  if (ratio <= 0.3) return 0.25;
+  if (ratio <= 0.6) return 0.55;
+  if (ratio <= 0.85) return 0.85;
+  if (ratio <= 1.0) return 1.0;
+  if (ratio <= 1.15) return 1.25;
+  return 1.5;
+}
+
 // ----- Chalk computation -----
 export interface ChalkBreakdown {
   base: number;

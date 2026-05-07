@@ -34,10 +34,10 @@ export function LevelPreviewCard({
         ringClass,
       )}
     >
-      <div className="aspect-square w-full bg-black/40 flex items-center justify-center relative">
+      <div className="aspect-square w-full bg-black/60 flex items-center justify-center relative">
         <ClimberAvatar level={level} gender={gender} equipped={equipped as any} size="xl" />
-        <span className={cn("absolute top-2 left-2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full", badgeClass)}>
-          {badgeLabel} · Lv {level}
+        <span className={cn("absolute top-2 right-2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full", badgeClass)}>
+          {badgeLabel}
         </span>
       </div>
       <div className="p-4">

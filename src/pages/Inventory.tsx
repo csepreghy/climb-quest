@@ -138,6 +138,51 @@ export default function Inventory() {
         <section className="space-y-4">
           <div className="menu-label">Equipped</div>
           {(["outfit", "gear", "power"] as ItemGroup[]).map(group => {
+            if (group === "gear") {
+              const max = gearSlotsUnlocked(s.level);
+              // Order equipped gear items first, then empty unlocked slots, then locked slots up to 4 total.
+              const equippedGear = GEAR_SLOTS
+                .map(sl => ({ slot: sl, id: s.equipped[sl] }))
+                .filter(x => !!x.id) as { slot: Slot; id: string }[];
+              const emptyCount = Math.max(0, max - equippedGear.length);
+              const lockedCount = Math.max(0, 4 - max);
+              return (
+                <div key={group} className="space-y-2">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1 flex items-center gap-2">
+                    <span>{GROUP_LABEL[group]}</span>
+                    <span className="text-muted-foreground/70">· {equippedGear.length}/{max} used</span>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {equippedGear.map(({ slot, id }) => {
+                      const it = getItem(id)!;
+                      return (
+                        <div key={slot} className="flex flex-col">
+                          <div className="flex-1"><ItemCard item={it} onClick={() => setSlotPicker(it)} /></div>
+                          <div className="flex justify-end mt-1.5">
+                            <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot(slot)}>Unequip</Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {Array.from({ length: emptyCount }).map((_, i) => (
+                      <div key={`empty-${i}`} className="flex flex-col">
+                        <div className="flex-1"><EmptySlotCard label="Gear" /></div>
+                        <div className="h-7 mt-1.5" aria-hidden />
+                      </div>
+                    ))}
+                    {Array.from({ length: lockedCount }).map((_, i) => {
+                      const slotIndex = max + i;
+                      return (
+                        <div key={`locked-${i}`} className="flex flex-col">
+                          <div className="flex-1"><LockedSlotCard unlocksAt={gearUnlockLevel(slotIndex)} /></div>
+                          <div className="h-7 mt-1.5" aria-hidden />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }
             const slots = GROUP_SLOTS[group];
             return (
               <div key={group} className="space-y-2">
@@ -148,7 +193,7 @@ export default function Inventory() {
                     const it = id ? getItem(id) : null;
                     if (!it) return (
                       <div key={slot} className="flex flex-col">
-                        <div className="flex-1"><EmptySlotCard slot={slot} /></div>
+                        <div className="flex-1"><EmptySlotCard label={SLOT_LABEL[slot]} /></div>
                         <div className="h-7 mt-1.5" aria-hidden />
                       </div>
                     );

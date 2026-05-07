@@ -8,6 +8,8 @@ import { Lock, Check } from "lucide-react";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import chalkBagImg from "@/assets/chalk-bag.png";
+import { SmartImage } from "@/components/SmartImage";
+import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 
 const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
@@ -52,13 +54,15 @@ export default function Shop() {
         ))}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {!loaded && all.length === 0
-          ? Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-44 rounded-xl border border-border bg-secondary/30 animate-pulse" />
-            ))
-          : items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} ignoreLevelReq={!!s.ignoreLevelReq} />)}
-      </div>
+      {!loaded && all.length === 0 ? (
+        <div className="flex justify-center py-16">
+          <ChalkBagLoader size={96} label="Loading shop…" />
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} ignoreLevelReq={!!s.ignoreLevelReq} />)}
+        </div>
+      )}
     </div>
   );
 }
@@ -88,7 +92,7 @@ function ShopCard({ item, owned, chalk, level, ignoreLevelReq }: { item: ShopIte
       )}
       <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji)
-          ? <img src={item.emoji} alt={item.name} loading="lazy" decoding="async" className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
+          ? <SmartImage src={item.emoji} alt={item.name} loaderSize={36} wrapperClassName={cn("h-20 w-20 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
           : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
         <div className="min-w-0 flex-1 pr-12">
           <div className="text-sm font-medium leading-snug">{item.name}</div>

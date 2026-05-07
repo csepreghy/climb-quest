@@ -11,6 +11,7 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
+import { SmartImage } from "@/components/SmartImage";
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",
@@ -72,7 +73,7 @@ function ItemCard({
       )}
       <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji)
-          ? <img src={item.emoji} alt={item.name} loading="lazy" decoding="async" className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
+          ? <SmartImage src={item.emoji} alt={item.name} loaderSize={36} wrapperClassName={cn("h-20 w-20 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
           : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
         <div className="min-w-0 flex-1 pr-12">
           <div className="text-sm font-medium leading-snug">{item.name}</div>

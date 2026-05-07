@@ -47,6 +47,7 @@ function ItemCard({
   onClick,
   primed,
   highlight,
+  onRemove,
 }: {
   item: ShopItem;
   showAction?: boolean;
@@ -55,6 +56,7 @@ function ItemCard({
   onClick?: () => void;
   primed?: boolean;
   highlight?: boolean;
+  onRemove?: () => void;
 }) {
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
@@ -72,6 +74,17 @@ function ItemCard({
         <div className="absolute top-0 right-0 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
           +{showPct}%
         </div>
+      )}
+      {onRemove && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          aria-label="Remove from inventory"
+          title="Remove from inventory (admin)"
+          className="absolute bottom-2 right-2 z-10 h-7 w-7 grid place-items-center rounded-md border border-destructive/40 text-destructive bg-background/70 hover:bg-destructive hover:text-destructive-foreground transition"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
       )}
       <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji) ? (

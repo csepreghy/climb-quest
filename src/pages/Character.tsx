@@ -60,28 +60,7 @@ export default function Character() {
       </div>
 
       <Card className="gradient-card p-5">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {LEVELS.map(l => {
-            const unlocked = s.level >= l.level;
-            const isCurrent = s.level === l.level;
-            return (
-              <div key={l.level} className={cn("flex gap-3 p-3 rounded-xl border transition",
-                isCurrent ? "border-accent bg-accent/10" : unlocked ? "border-border bg-secondary/30" : "border-border/50 opacity-60")}>
-                <div className="text-3xl">{unlocked ? l.emoji : <Lock className="h-6 w-6 mt-1.5" />}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Lv {l.level}</span>
-                    <span className="font-semibold truncate">{l.title}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground line-clamp-1">{l.desc}</div>
-                  <div className="text-[10px] text-muted-foreground mt-1">
-                    {l.level === 1 ? "Starter" : `${l.cost.toLocaleString()} Chalk`} · {l.unlocks.length} unlocks
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <LevelsGrid currentLevel={s.level} gender={s.gender} />
       </Card>
 
       <Card className="gradient-card p-5">

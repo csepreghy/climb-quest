@@ -164,7 +164,7 @@ function Showcase() {
       className="space-y-3"
     >
       <GameCard className="p-5 sm:p-6">
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
+        <div className="font-display font-bold text-xl sm:text-2xl tracking-tight mb-3">
           {SLIDE_LABELS[idx]}
         </div>
         <div className="min-h-[420px] sm:min-h-[460px] grid place-items-center">
@@ -212,16 +212,19 @@ function CharactersSlide() {
   useEffect(() => {
     setShown(0);
     if (slots.length === 0) return;
-    const t = setInterval(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const tick = () => {
       setShown(s => {
         if (s >= slots.length) {
-          clearInterval(t);
+          // hold the full set for 1s, then no more updates
           return s;
         }
+        t = setTimeout(tick, 180);
         return s + 1;
       });
-    }, 180);
-    return () => clearInterval(t);
+    };
+    t = setTimeout(tick, 180);
+    return () => clearTimeout(t);
   }, [slots.length]);
 
   if (slots.length === 0) {
@@ -256,17 +259,19 @@ function CharactersSlide() {
 
 function ItemsSlide() {
   const all = useAllItems();
-  // Pick a curated 4 (legendary, epic, 2 rare) by metadata only.
+  // Pick a randomized 6 (prefer rarer items first, then random fill).
   const picks: ShopItem[] = useMemo(() => {
     if (all.length === 0) return [];
-    const leg = all.filter(i => i.rarity === "legendary").slice(0, 1);
-    const epic = all.filter(i => i.rarity === "epic").slice(0, 1);
-    const rare = all.filter(i => i.rarity === "rare").slice(0, 2);
+    const shuffled = [...all].sort(() => Math.random() - 0.5);
+    const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 1);
+    const epic = shuffled.filter(i => i.rarity === "epic").slice(0, 2);
+    const rare = shuffled.filter(i => i.rarity === "rare").slice(0, 2);
     const picked = [...leg, ...epic, ...rare];
-    return picked.length >= 4 ? picked.slice(0, 4) : all.slice(0, 4);
+    const rest = shuffled.filter(i => !picked.includes(i));
+    return [...picked, ...rest].slice(0, 6);
   }, [all]);
 
-  // Fetch images for ONLY those 4 ids (small payload, avoids timeout).
+  // Fetch images for ONLY those ids (small payload, avoids timeout).
   const [imgs, setImgs] = useState<Record<string, string>>({});
   useEffect(() => {
     if (picks.length === 0) return;
@@ -284,6 +289,23 @@ function ItemsSlide() {
 
   const items = picks.map(p => imgs[p.id] ? { ...p, emoji: imgs[p.id] } : p);
 
+  // Animate in one by one, then hold.
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    setShown(0);
+    if (items.length === 0) return;
+    let t: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      setShown(s => {
+        if (s >= items.length) return s;
+        t = setTimeout(tick, 180);
+        return s + 1;
+      });
+    };
+    t = setTimeout(tick, 180);
+    return () => clearTimeout(t);
+  }, [items.length]);
+
   if (items.length === 0) {
     return (
       <div className="text-center text-sm text-muted-foreground py-10">
@@ -293,7 +315,17 @@ function ItemsSlide() {
   }
   return (
     <div className="grid grid-cols-2 gap-3">
-      {items.map(it => <ItemCard key={it.id} item={it} />)}
+      {items.map((it, i) => (
+        <div
+          key={it.id}
+          className={cn(
+            "transition-all duration-500",
+            i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-2"
+          )}
+        >
+          <ItemCard item={it} />
+        </div>
+      ))}
     </div>
   );
 }

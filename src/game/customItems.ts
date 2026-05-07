@@ -30,7 +30,7 @@ function rowToItem(r: any, image?: string | null): ShopItem {
     slot: r.slot as Slot,
     rarity: r.rarity as Rarity,
     price: r.price ?? 0,
-    emoji: (image ?? r.image) ?? "🎁",
+    emoji: (image ?? r.image) ?? "",
     desc: "",
     levelReq: r.level_req ?? undefined,
     bonus: bonusPct > 0
@@ -45,7 +45,7 @@ async function refresh() {
     (supabase.from("shop_items") as any).select(LIGHT_COLS).order("created_at", { ascending: true }),
     supabase.from("hidden_builtin_items").select("item_id"),
   ]);
-  const lightItems = (light.data ?? []).map((r: any) => rowToItem(r, "🎁"));
+  const lightItems = (light.data ?? []).map((r: any) => rowToItem(r, ""));
   setState(() => ({
     custom: lightItems,
     hidden: new Set((hidden.data ?? []).map((r: any) => r.item_id as string)),

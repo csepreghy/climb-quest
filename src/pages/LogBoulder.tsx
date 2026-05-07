@@ -102,7 +102,7 @@ export default function BoulderLogs() {
           </div>
         ) : (
           <div className="divide-y divide-border/40">
-            {filtered.map(l => {
+            {shown.map(l => {
               const isBoss = !!l.isBoss;
               const hold = l.gymId && l.holdColorId
                 ? gyms.find(g => g.id === l.gymId)?.holdColors.find(c => c.id === l.holdColorId)
@@ -112,20 +112,21 @@ export default function BoulderLogs() {
                   className={cn("px-4 py-3 flex items-center justify-between gap-3",
                     isBoss && "bg-boss/5 border-l-4 border-boss")}>
                   <div className="min-w-0 flex items-center gap-3">
-                    <div className={cn("h-9 w-9 grid place-items-center rounded-lg shrink-0",
-                      isBoss ? "bg-boss/20 text-boss" : "bg-secondary text-foreground/70")}>
-                      {isBoss ? <Swords className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-                    </div>
+                    {hold ? (
+                      <div
+                        title={`${hold.name} hold`}
+                        aria-label={`${hold.name} hold`}
+                        className="h-9 w-9 rounded-lg shrink-0 border-2 border-border"
+                        style={{ background: hold.hex }}
+                      />
+                    ) : (
+                      <div className={cn("h-9 w-9 grid place-items-center rounded-lg shrink-0",
+                        isBoss ? "bg-boss/20 text-boss" : "bg-secondary text-foreground/70")}>
+                        {isBoss ? <Swords className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <div className="text-sm font-medium truncate flex items-center gap-2">
-                        {hold && (
-                          <span
-                            title={`${hold.name} hold`}
-                            aria-label={`${hold.name} hold`}
-                            className="h-3 w-3 rounded-full border border-border shrink-0"
-                            style={{ background: hold.hex }}
-                          />
-                        )}
                         {ACTIVITY_LABELS[l.activity] ?? "Boulder"}
                         {isBoss && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-boss/20 text-boss border border-boss/40">Boss</span>}
                         {l.attemptType && <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{l.attemptType}</span>}
@@ -145,6 +146,13 @@ export default function BoulderLogs() {
                 </div>
               );
             })}
+            {filtered.length > visible && (
+              <div className="p-3 text-center">
+                <GameButton variant="ghost" size="sm" onClick={() => setVisible(v => v + 10)}>
+                  Load more ({filtered.length - visible} remaining)
+                </GameButton>
+              </div>
+            )}
           </div>
         )}
       </GameCard>

@@ -90,6 +90,45 @@ export default function Admin() {
   );
 }
 
+function BackfillImagesCard() {
+  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number; label: string } | null>(null);
+  const [result, setResult] = useState<{ converted: number; skipped: number; failed: number } | null>(null);
+
+  async function run() {
+    setBusy(true); setResult(null);
+    try {
+      const r = await backfillShopImages((done, total, label) => setProgress({ done, total, label }));
+      setResult(r);
+      toast.success(`Backfill complete: ${r.converted} converted, ${r.skipped} already up-to-date, ${r.failed} failed`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Backfill failed");
+    } finally { setBusy(false); setProgress(null); }
+  }
+
+  return (
+    <GameCard tone="accent" className="p-5">
+      <div className="menu-label mb-3">Admin · Image Backfill</div>
+      <p className="text-sm text-muted-foreground mb-3">
+        Convert legacy base64 item images to 800px webp in cloud storage. One-off operation; safe to re-run.
+      </p>
+      <div className="flex items-center gap-3">
+        <Button onClick={run} disabled={busy}>{busy ? "Working…" : "Run backfill"}</Button>
+        {progress && (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {progress.done}/{progress.total} · {progress.label}
+          </span>
+        )}
+        {result && !busy && (
+          <span className="text-xs text-muted-foreground">
+            ✓ {result.converted} converted · {result.skipped} skipped · {result.failed} failed
+          </span>
+        )}
+      </div>
+    </GameCard>
+  );
+}
+
 const empty: CustomItemInput = {
   name: "",
   group: "outfit",

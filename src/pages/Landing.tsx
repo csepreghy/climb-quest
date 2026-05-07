@@ -15,6 +15,7 @@ import { ArrowRight, ScrollText, Sparkles, ArrowUp, Trophy } from "lucide-react"
 import logoImg from "@/assets/climbquest-logo.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
+import crystalCaveImg from "@/assets/boss-crystal-cave.png";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 export default function Landing() {
@@ -99,7 +100,7 @@ export default function Landing() {
                 src={chalkBagImg}
                 alt="Chalk bag"
                 loading="lazy"
-                className="h-[70%] w-[70%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.4)]"
+                className="h-[45%] w-[45%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.4)]"
               />
             }
             title="2. Earn Chalk"
@@ -108,7 +109,7 @@ export default function Landing() {
           />
           <PickCard
             content={
-              <div className="scale-150">
+              <div className="scale-[2]">
                 <ClimberAvatar level={9} gender="male" equipped={{} as any} size="xl" glow />
               </div>
             }
@@ -311,6 +312,48 @@ function LogSlide() {
   );
 }
 
+function BossCard({
+  image,
+  name,
+  attempts,
+  pct,
+  ringClass = "ring-[hsl(var(--boss))]/60",
+  barColor = "hsl(var(--boss))",
+}: {
+  image: string;
+  name: string;
+  attempts: number;
+  pct: number;
+  ringClass?: string;
+  barColor?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden ring-2",
+        "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
+        ringClass,
+      )}
+    >
+      <div className="aspect-square w-full overflow-hidden bg-black/40">
+        <img src={image} alt={name} className="h-full w-full object-cover" />
+      </div>
+      <div className="p-3 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="font-display font-bold text-sm flex items-center gap-1.5 min-w-0">
+            <Trophy className="h-4 w-4 shrink-0" style={{ color: barColor }} /> <span className="truncate">{name}</span>
+          </div>
+          <div className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border shrink-0" style={{ background: `${barColor}33`, color: barColor, borderColor: `${barColor}66` }}>
+            Project
+          </div>
+        </div>
+        <div className="text-[10px] text-muted-foreground">{attempts} attempts · {pct}%</div>
+        <PixelBar value={pct} max={100} color={barColor} />
+      </div>
+    </div>
+  );
+}
+
 function BossSlide() {
   const [pct, setPct] = useState(15);
   useEffect(() => {
@@ -322,29 +365,16 @@ function BossSlide() {
     return () => clearInterval(t);
   }, []);
   return (
-    <div
-      className={cn(
-        "rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden ring-2 ring-[hsl(var(--boss))]/60",
-        "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]"
-      )}
-    >
-      <div className="aspect-[16/9] w-full overflow-hidden bg-black/40">
-        <img src={bossImg} alt="Boss" className="h-full w-full object-cover" />
-      </div>
-      <div className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-display font-bold text-lg flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-[hsl(var(--boss))]" /> The Crux Cave
-            </div>
-            <div className="text-xs text-muted-foreground">12 attempts · highest point: {pct}%</div>
-          </div>
-          <div className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[hsl(var(--boss))]/20 text-[hsl(var(--boss))] border border-[hsl(var(--boss))]/40">
-            Project
-          </div>
-        </div>
-        <PixelBar value={pct} max={100} color="hsl(var(--boss))" />
-      </div>
+    <div className="grid grid-cols-2 gap-3">
+      <BossCard image={bossImg} name="The Crux Cave" attempts={12} pct={pct} />
+      <BossCard
+        image={crystalCaveImg}
+        name="Crystal Cavern"
+        attempts={7}
+        pct={Math.max(10, pct - 25)}
+        ringClass="ring-[hsl(280_70%_60%)]/60"
+        barColor="hsl(280 70% 60%)"
+      />
     </div>
   );
 }

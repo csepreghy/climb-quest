@@ -1,8 +1,19 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
 export type Rarity = "common" | "rare" | "epic" | "legendary";
-export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "aura" | "title";
+export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title";
 export type ItemGroup = "outfit" | "gear" | "power";
+
+/** Slots that belong to the "gear" group, in display/unlock order. */
+export const GEAR_SLOTS: Slot[] = ["chalk", "accessory", "study"];
+
+/** How many gear slots are unlocked at a given player level (max 4). */
+export function gearSlotsUnlocked(level: number): number {
+  if (level >= 8) return 4;
+  if (level >= 5) return 3;
+  if (level >= 3) return 2;
+  return 1;
+}
 export type Gender = "male" | "female";
 
 export type ActivityType =

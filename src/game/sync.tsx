@@ -96,7 +96,7 @@ export function GameSync() {
       bindGameRemoteSync(null);
       bindGymsRemoteSync(null);
     };
-  }, [user?.id]);
+  }, [user?.id, isAdmin]);
 
   return null;
 }

@@ -240,8 +240,8 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
             <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="chalkGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(var(--btn-orange))" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="hsl(var(--btn-orange))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
@@ -257,7 +257,7 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
                 labelStyle={{ color: "hsl(var(--foreground))" }}
                 formatter={(v: number) => [`${v.toLocaleString()} chalk`, "Earned"]}
               />
-              <Area type="monotone" dataKey="chalk" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#chalkGrad)" />
+              <Area type="monotone" dataKey="chalk" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

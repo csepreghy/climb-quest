@@ -300,9 +300,10 @@ const ATTEMPT_TIERS: { v: AttemptTier; label: string; mult: number; desc: string
   { v: "10+", label: "10+ attempts", mult: 1.5, desc: "Full grind mode" },
 ];
 
-function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null }) {
   const gymState = useGyms();
-  const initialGymId = gymState.lastUsedGymId
+  const initialGymId = editLog?.gymId
+    ?? gymState.lastUsedGymId
     ?? gymState.gyms.find(g => g.primary)?.id
     ?? gymState.gyms[0]?.id
     ?? "";
@@ -318,12 +319,12 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
   const gs = gymState.gradingSystems.find(g => g.id === gsId);
   const grades = gs ? gradeLabels(gs) : [];
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [holdColorId, setHoldColorId] = useState<string>("");
-  const [grade, setGrade] = useState(grades[0] ?? "V5");
+  const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
+  const [holdColorId, setHoldColorId] = useState<string>(editLog?.holdColorId ?? "");
+  const [grade, setGrade] = useState(editLog?.grade ?? grades[0] ?? "V5");
   useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
-  const [styles, setStyles] = useState<Style[]>([]);
-  const [notes, setNotes] = useState("");
+  const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
+  const [notes, setNotes] = useState(editLog?.notes ?? "");
 
   const [step, setStep] = useState<BossStep>("main");
   const [celebrate, setCelebrate] = useState<{ total: number; defeated: boolean; breakdown: ReturnType<typeof computeChalk> } | null>(null);
@@ -338,7 +339,7 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
     const activity: ActivityType = outcome === "defeat" ? "boss_send" : "boss_attempt";
     const mult = outcome === "attempt" ? (ATTEMPT_TIERS.find(t => t.v === attemptTier)?.mult ?? 1) : 1;
-    const res = logBoulder({
+    const input = {
       activity,
       date: new Date(date).toISOString(),
       location: locationStr || undefined,
@@ -347,11 +348,18 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
       sent: outcome === "defeat",
       notes: outcome === "attempt" && attemptTier ? `${attemptTier} attempts${notes ? " · " + notes : ""}` : notes,
       isBoss: true,
-      attemptType: outcome === "defeat" ? "send" : "project",
+      attemptType: (outcome === "defeat" ? "send" : "project") as AttemptType,
       holdColorId: holdColorId || undefined,
       gymId: gymId || undefined,
       chalkMultiplier: mult,
-    });
+    };
+    if (editLog) {
+      updateLog(editLog.id, input);
+      toast.success("Log updated");
+      onDone();
+      return;
+    }
+    const res = logBoulder(input);
     const breakdown = computeChalk(activity, styles, outcome === "defeat", false);
     // Apply multiplier to displayed breakdown amounts so they match the saved total.
     const scaled: ReturnType<typeof computeChalk> = {

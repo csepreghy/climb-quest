@@ -1,56 +1,42 @@
-## 1. Add "Study" as a new Gear category
+## Boss Defeat Celebration — Redesign
 
-**New slot:** `study` (passive equippable, like `accessory`/`chalk`).
+Update `src/components/LogModal.tsx` only.
 
-**`src/game/data.ts`**
-- Add `"study"` to the `Slot` union.
-- Add `"Study"` to the `category` union on `ShopItem`.
-- Add helper `gearSlotsUnlocked(level)` (see §2).
+### 1. Chalk icon consistency
+- Both `SimpleCelebrate` and `BossCelebrate` currently use `goldenChalkBagImg`. Switch them to `chalkBagImg` (same icon shown next to chalk balance in the header via `Layout.tsx` / `ChalkChip`).
 
-**`src/pages/Shop.tsx`**
-- Update the `gear` group categories to: `["All", "Brushes", "Chalk", "Study"]`.
+### 2. Show chalk breakdown in boss defeat modal
+- `BossForm.commit("defeat")` currently passes only `total`. Capture the full breakdown from `logBoulder` (`res.log.chalkTotal` + recompute via `computeChalk("boss_send", styles, true, false)` to get `base` + `bonuses`) and pass to `BossCelebrate`.
+- Render rows in the modal: Base, each bonus (`+ <source>  +<amount>`), divider, Total. Mirror the styling from `PreviewReward`.
 
-**Seed items** (admin uploads 360×360 webp art via existing flow later):
-- `study_beta_book` — *Beta Book* (common, +3% all)
-- `study_beta_breaker` — *Beta Breaker* (rare, +5% boulder/hard_boulder)
-- `study_free_solo` — *Free Solo (doc)* — Consumable, one-shot +25% next log
-- `study_magnus_yt` — *Magnus YT Binge* (rare, +4% boss attempts/sends)
-- `study_wide_boyz` — *Wide Boyz Episode* (epic, +6% all)
+### 3. No auto-close, add "Keep Climbing" button
+- Remove the `setTimeout(...)` for the defeat path. Keep auto-close only for the attempt path.
+- Add a primary orange `GameButton` "Keep Climbing" inside `BossCelebrate` that calls `onDone` (pass it as a prop).
 
-Books = passive equippables in the new `study` slot. Videos/docs = `Consumables` (existing one-shot mechanic, no slot needed).
+### 4. Animated boss-defeat scene
+Replace the static centered boss image with a left/right composition:
 
-## 2. Generic gear slots, level-gated 1 → 4
-
-Gear slots become **generic** — each unlocked slot can hold any gear-group item, with the rule "one of each gear type" (so you can't equip two Chalks, but you can equip 1 Chalk + 1 Brush + 1 Study).
-
-**Unlock mapping (max 4):**
 ```text
-Level 1–2  → 1 gear slot
-Level 3–4  → 2 gear slots
-Level 5–7  → 3 gear slots
-Level 8+   → 4 gear slots
+[ Player ]   →→💥←←   [ Boss ]
+ (glowing)            (falls off)
 ```
 
-**`src/game/store.ts` — equip model unchanged**
-- Items still equip to their own `slot` key (`chalk` / `accessory` / `study`), so the "one per type" rule is automatic.
-- New check in `equipItem`: count currently-equipped gear items; if equipping a *new* gear type would exceed `gearSlotsUnlocked(state.level)`, reject with `{ ok: false, reason: "No free gear slot — level up to unlock more" }`. Replacing an already-equipped item in the same slot is always allowed.
-- On state load/sync: if a user has more equipped gear items than allowed (e.g. they leveled down via admin), auto-unequip the lowest-bonus extras until within limit.
+- Layout: `relative h-64` flex with player on left, boss on right.
+- Player: render `<ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />` (use `useGame()` inside `BossCelebrate`). Wrap in a div with a strong orange/gold radial glow + pulse.
+- Boss: existing `bossImg` in a bordered tile.
+- Animation sequence (CSS keyframes added inline via Tailwind arbitrary values, or new keyframes in `src/index.css`):
+  - `player-charge`: 0% rest → 60% slide right + slight scale → 70% impact shake → settles back to original spot.
+  - `boss-knockout`: 0–60% idle → 65% flash white + shake → 70–100% translateY(+400px) + rotate(35deg) + fade out.
+  - `impact-flash`: white radial flash at the midpoint, 65–80%.
+- Chalk impact particles: ~18 small white circle spans bursting from the impact point using existing `animate-chalk-poof` keyframe (already in `index.css`). Each has a random `--dx`/`--dy` and a `1.2s` duration starting at `~0.6s` delay (matching impact). Use `animation-fill-mode: forwards` so they end invisible — no lingering particles after the burst.
+- After ~1.4s the scene is static: glowing player on the left, empty space where the boss was, then the breakdown + "Keep Climbing" button appear (`animate-pop-in`).
 
-**`src/pages/Inventory.tsx`**
-- Replace the fixed `chalk`/`accessory` slot rendering for the `gear` group with a single row of N generic slot cells, where N = `gearSlotsUnlocked(s.level)`.
-- Cells are populated in equip order from `s.equipped` (any of `chalk`/`accessory`/`study`).
-- Empty cells show a generic **"Empty Gear"** placeholder (not "Brush"). Locked cells (4 − N of them) show "Unlocks at Lv X".
-- Update `SLOT_LABEL` to remove the "Brush" wording for empty UI; keep correct labels (`accessory: "Brush"`, `chalk: "Chalk"`, `study: "Study"`) for *equipped* items where the type is known.
+### Technical notes
+- New keyframes go in `src/index.css` under `@layer utilities`: `player-charge`, `boss-knockout`, `impact-flash`. Add matching `.animate-*` classes.
+- `BossCelebrate` signature becomes `({ total, breakdown, onDone })`.
+- `SimpleCelebrate` keeps its current auto-close behavior (attempts only).
+- No store/data changes needed.
 
-## 3. Level copy
-Update `LEVELS` `unlocks` strings in `src/game/data.ts` so gear-slot mentions match the 1/3/5/8 rule (remove stale "+1 Gear slot" lines on levels 4/7/10, add to 3/5/8).
-
-## Out of scope
-- No DB migration — `shop_items.slot` is `text`.
-- No avatar art changes for Study items.
-
-## Files touched
-- `src/game/data.ts`
-- `src/game/store.ts`
-- `src/pages/Shop.tsx`
-- `src/pages/Inventory.tsx`
+### Files touched
+- `src/components/LogModal.tsx`
+- `src/index.css` (new keyframes only)

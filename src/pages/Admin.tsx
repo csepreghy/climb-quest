@@ -536,7 +536,7 @@ function LevelEditor({ level, onDone }: { level: number; onDone: () => void; }) 
 }
 
 function PublicGymsAdmin() {
-  const { usePublicGyms, addPublicGym, updatePublicGym, deletePublicGym } = require("@/game/publicGyms");
+  function PublicGymsAdminBody() {
   const s = usePublicGyms();
   const [name, setName] = useState("");
   const [loc, setLoc] = useState("");

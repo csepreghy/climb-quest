@@ -115,11 +115,15 @@ export default function Inventory() {
   const totalBonusByActivity = gearBonusSummary(s.equipped);
 
   const [compareItem, setCompareItem] = useState<ShopItem | null>(null);
+  const [slotPicker, setSlotPicker] = useState<ShopItem | null>(null);
   const equippedItem = compareItem
     ? (compareItem.consumableBonus
         ? (s.pendingConsumable ? getItem(s.pendingConsumable) ?? null : null)
         : (s.equipped[compareItem.slot] ? getItem(s.equipped[compareItem.slot]!) ?? null : null))
     : null;
+  const slotAlternatives = slotPicker
+    ? owned.filter(it => it.slot === slotPicker.slot && it.id !== slotPicker.id)
+    : [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px,1fr] animate-float-up">

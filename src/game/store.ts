@@ -210,12 +210,17 @@ export interface LogInput {
   duration?: number;
   location?: string;
   grade?: string;
+  gradeMax?: string;
   styles: Style[];
   sent?: boolean;
   problemsTried?: number;
   sends?: number;
   hardestSend?: string;
   notes?: string;
+  isBoss?: boolean;
+  attemptType?: AttemptType;
+  holdColorId?: string;
+  gymId?: string;
 }
 
 export function logBoulder(input: LogInput) {
@@ -227,6 +232,7 @@ export function logBoulder(input: LogInput) {
     duration: input.duration,
     location: input.location,
     grade: input.grade,
+    gradeMax: input.gradeMax,
     styles: input.styles,
     problemsTried: input.problemsTried,
     sends: input.sends,
@@ -235,6 +241,10 @@ export function logBoulder(input: LogInput) {
     chalkBase: breakdown.base,
     chalkBonus: breakdown.total - breakdown.base,
     chalkTotal: breakdown.total,
+    isBoss: input.isBoss,
+    attemptType: input.attemptType,
+    holdColorId: input.holdColorId,
+    gymId: input.gymId,
   };
 
   set(s => {

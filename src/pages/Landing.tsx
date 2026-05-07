@@ -15,6 +15,7 @@ import { ArrowRight, ScrollText, Sparkles, ArrowUp, Trophy } from "lucide-react"
 import logoImg from "@/assets/climbquest-logo.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
+import crystalCaveImg from "@/assets/boss-crystal-cave.png";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 export default function Landing() {

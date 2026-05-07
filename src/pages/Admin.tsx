@@ -377,6 +377,7 @@ function LevelEditor({ level, onDone }: { level: number; onDone: () => void; }) 
   const [name, setName] = useState<string>(rM.title === (LEVELS.find(l => l.level === level)?.title) && !hasAnyOverride(level) ? "" : rM.title);
   const [tagline, setTagline] = useState<string>(hasAnyOverride(level) ? rM.desc : "");
   const [chalkReq, setChalkReq] = useState<string>(hasAnyOverride(level) ? String(rM.cost) : "");
+  const [rarity, setRarity] = useState<Rarity>((rM.rarity as Rarity) ?? "common");
   const [maleImageUrl, setMaleImageUrl] = useState<string | null>(rM.image ?? null);
   const [femaleImageUrl, setFemaleImageUrl] = useState<string | null>(rF.image ?? null);
   const [maleImageFile, setMaleImageFile] = useState<File | null>(null);
@@ -399,6 +400,7 @@ function LevelEditor({ level, onDone }: { level: number; onDone: () => void; }) 
         name: name.trim() || null,
         tagline: tagline.trim() || null,
         chalkReq: chalkReq === "" ? null : Math.max(0, parseInt(chalkReq) || 0),
+        rarity,
         maleImageFile: maleImageFile ?? undefined,
         femaleImageFile: femaleImageFile ?? undefined,
         clearMaleImage: clearMale,
@@ -442,6 +444,12 @@ function LevelEditor({ level, onDone }: { level: number; onDone: () => void; }) 
           <Input placeholder="Name (shared)" value={name} onChange={e => setName(e.target.value)} />
           <Input placeholder="Tagline (shared)" value={tagline} onChange={e => setTagline(e.target.value)} />
           <Input type="number" min={0} placeholder="Chalk requirement (shared)" value={chalkReq} onChange={e => setChalkReq(e.target.value)} />
+          <Select value={rarity} onValueChange={v => setRarity(v as Rarity)}>
+            <SelectTrigger><SelectValue placeholder="Rarity" /></SelectTrigger>
+            <SelectContent>
+              {RARITIES.map(r => <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="flex justify-between gap-2">

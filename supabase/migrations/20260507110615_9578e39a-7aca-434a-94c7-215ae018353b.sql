@@ -1,0 +1,1 @@
+ALTER TABLE public.level_overrides ADD COLUMN IF NOT EXISTS rarity text;

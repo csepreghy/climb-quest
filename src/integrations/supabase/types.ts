@@ -40,6 +40,7 @@ export type Database = {
           image: string | null
           level: number
           name: string | null
+          rarity: string | null
           tagline: string | null
           updated_at: string
           updated_by: string | null
@@ -51,6 +52,7 @@ export type Database = {
           image?: string | null
           level: number
           name?: string | null
+          rarity?: string | null
           tagline?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -62,6 +64,7 @@ export type Database = {
           image?: string | null
           level?: number
           name?: string | null
+          rarity?: string | null
           tagline?: string | null
           updated_at?: string
           updated_by?: string | null

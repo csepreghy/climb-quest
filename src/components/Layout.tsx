@@ -33,15 +33,15 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col">
       <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} />
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
-        <div className="container flex items-center justify-between gap-4 py-3">
-          <NavLink to="/" className="flex items-center gap-3 group">
+        <div className="container flex items-center justify-between gap-4 py-5">
+          <NavLink to="/" className="flex items-center gap-4 group">
             <img
               src={logoImg}
               alt="ClimbQuest"
-              className="h-12 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_4px_hsl(0_0%_0%/0.5)]"
+              className="h-20 sm:h-24 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
             />
             <div className="leading-tight hidden sm:block">
-              <div className="text-[11px] text-muted-foreground">Log boulders. Earn Chalk. Send bosses.</div>
+              <div className="text-sm text-muted-foreground">Log boulders. Earn Chalk. Send bosses.</div>
             </div>
           </NavLink>
           <div className="flex items-center gap-3">

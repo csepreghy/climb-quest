@@ -333,13 +333,23 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
   return { ok: true };
 }
 
-export function equipItem(id: string) {
-  const item = getItem(id); if (!item) return;
+export function equipItem(id: string): { ok: boolean; reason?: string } {
+  const item = getItem(id); if (!item) return { ok: false, reason: "Unknown item" };
   if (item.consumableBonus) {
     set(s => ({ ...s, pendingConsumable: id }));
-    return;
+    return { ok: true };
+  }
+  const state = get();
+  if (item.group === "gear") {
+    const max = gearSlotsUnlocked(state.level);
+    const equippedGearSlots = GEAR_SLOTS.filter(sl => !!state.equipped[sl]);
+    const alreadyInThisSlot = !!state.equipped[item.slot];
+    if (!alreadyInThisSlot && equippedGearSlots.length >= max) {
+      return { ok: false, reason: `No free gear slot — unlock more by leveling up (max ${max} at Lv ${state.level})` };
+    }
   }
   set(s => ({ ...s, equipped: { ...s.equipped, [item.slot]: id } }));
+  return { ok: true };
 }
 export function unequipSlot(slot: keyof Equipped) {
   set(s => { const eq = { ...s.equipped }; delete eq[slot]; return { ...s, equipped: eq }; });

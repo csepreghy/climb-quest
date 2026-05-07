@@ -474,8 +474,8 @@ function LevelUpSlide() {
   const cur = resolvedLevel(6, "male");
   const nxt = resolvedLevel(7, "male");
   const nextDef = LEVELS.find(l => l.level === 7)!;
-  return (
-    <div className="grid grid-cols-2 gap-3">
+  const cards = [
+    { key: "cur", node: (
       <LevelPreviewCard
         title={cur.title}
         desc={cur.desc}
@@ -488,6 +488,8 @@ function LevelUpSlide() {
         unlocks={[]}
         unlocksLabel=""
       />
+    )},
+    { key: "nxt", node: (
       <LevelPreviewCard
         title={nxt.title}
         desc={nxt.desc}
@@ -501,6 +503,22 @@ function LevelUpSlide() {
         unlocksLabel="Unlocks"
         cost={nextDef.cost}
       />
+    )},
+  ];
+  const shown = useStagger(cards.length);
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {cards.map((c, i) => (
+        <div
+          key={c.key}
+          className={cn(
+            "transition-all duration-500",
+            i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-2"
+          )}
+        >
+          {c.node}
+        </div>
+      ))}
     </div>
   );
 }

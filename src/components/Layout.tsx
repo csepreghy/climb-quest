@@ -12,6 +12,7 @@ import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { LevelsModal } from "@/components/LevelsModal";
 import { LogModal } from "@/components/LogModal";
+import { OnboardingModal } from "@/components/OnboardingModal";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
@@ -19,6 +20,7 @@ import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import logoImg from "@/assets/climbquest-logo.png";
 import { LevelPreviewCard } from "@/components/LevelPreviewCard";
+import { useGyms } from "@/game/gyms";
 
 const NAV_BASE = [
   { to: "/home", label: "Home", icon: Home },
@@ -39,6 +41,15 @@ export default function Layout() {
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
+  const [needGymOpen, setNeedGymOpen] = useState(false);
+  const gymState = useGyms();
+  const hasGym = gymState.gyms.length > 0;
+  const showOnboarding = !!user && !s.onboardedAt;
+
+  function tryOpenLog() {
+    if (!hasGym) { setNeedGymOpen(true); return; }
+    setLogOpen(true);
+  }
 
   useLevelOverrides();
   const allItems = useAllItems();
@@ -81,6 +92,22 @@ export default function Layout() {
         onLevelUpClick={() => { setLevelsOpen(false); setConfirmLvOpen(true); }}
       />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
+      <OnboardingModal open={showOnboarding} onClose={() => { /* completion handled inside */ }} />
+      <Dialog open={needGymOpen} onOpenChange={setNeedGymOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Set up your gym first</DialogTitle>
+            <DialogDescription>
+              You need at least one climbing gym before you can log climbs. Add a gym, its grading systems, and hold colors in My Gym.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <GameButton variant="primary" onClick={() => { setNeedGymOpen(false); nav("/gym"); }}>
+              <Building2 className="h-4 w-4" /> Set up my gym
+            </GameButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -139,10 +166,10 @@ export default function Layout() {
             </div>
           </NavLink>
           <div className="flex items-center gap-3">
-            <GameButton variant="success" size="sm" onClick={() => setLogOpen(true)} className="hidden sm:inline-flex">
+            <GameButton variant="success" size="sm" onClick={tryOpenLog} className="hidden sm:inline-flex">
               <Plus className="h-4 w-4" /> Log Boulder
             </GameButton>
-            <GameButton variant="success" size="sm" onClick={() => setLogOpen(true)} className="sm:hidden !px-2.5" aria-label="Log Boulder">
+            <GameButton variant="success" size="sm" onClick={tryOpenLog} className="sm:hidden !px-2.5" aria-label="Log Boulder">
               <Plus className="h-4 w-4" />
             </GameButton>
             {isAdmin && <ThemeButton />}

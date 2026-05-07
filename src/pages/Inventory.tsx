@@ -122,19 +122,21 @@ export default function Inventory() {
       <div className="space-y-4">
         <Card className="gradient-card p-5 text-center">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
-          <div className="mt-4 flex gap-2 justify-center">
-            {(["male","female"] as const).map(g => (
-              <Button
-                key={g}
-                size="sm"
-                variant={s.gender === g ? "default" : "secondary"}
-                onClick={() => setGender(g)}
-                className="capitalize"
-              >
-                {g}
-              </Button>
-            ))}
-          </div>
+          {isAdmin && (
+            <div className="mt-4 flex gap-2 justify-center">
+              {(["male","female"] as const).map(g => (
+                <Button
+                  key={g}
+                  size="sm"
+                  variant={s.gender === g ? "default" : "secondary"}
+                  onClick={() => setGender(g)}
+                  className="capitalize"
+                >
+                  {g}
+                </Button>
+              ))}
+            </div>
+          )}
         </Card>
 
         <Card className="gradient-card p-4">

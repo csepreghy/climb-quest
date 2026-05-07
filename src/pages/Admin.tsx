@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, resetGame, useGame } from "@/game/store";
+import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, resetGame, resetOnboarding, useGame } from "@/game/store";
 import { useAuth } from "@/hooks/useAuth";
 import { useActiveSlot, snapshotActiveSlot } from "@/game/adminAccounts";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -82,6 +82,15 @@ export default function Admin() {
           </AlertDialog>
         </GameCard>
       )}
+      <GameCard tone="legendary" className="p-5">
+        <div className="menu-label mb-3">Admin · Onboarding</div>
+        <p className="text-sm text-muted-foreground mb-3">
+          Reset the first-time onboarding flow on this account so you can watch it again.
+        </p>
+        <Button variant="secondary" onClick={() => { resetOnboarding(); toast.success("Onboarding reset — reload to see it"); }}>
+          Replay onboarding
+        </Button>
+      </GameCard>
       <GameCard tone="legendary" className="p-5">
         <div className="menu-label mb-3">Admin · Chalk Controls</div>
         <div className="text-sm text-muted-foreground mb-3">Current balance: <span className="gradient-chalk-text font-bold tabular-nums">{s.chalk.toLocaleString()}</span></div>

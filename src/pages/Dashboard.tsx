@@ -7,7 +7,7 @@ import { GameCard, PixelBar } from "@/components/ui/game-card";
 import { BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
 import { getItem } from "@/game/customItems";
 import { toast } from "sonner";
-import { ScrollText, ArrowUp, Sparkles, Trophy, TrendingUp } from "lucide-react";
+import { Plus, ArrowUp, Trophy, TrendingUp } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";

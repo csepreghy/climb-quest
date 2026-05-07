@@ -34,7 +34,7 @@ export default function Landing() {
             <img
               src={logoImg}
               alt="ClimbQuest"
-              className="h-12 sm:h-14 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
+              className="h-16 sm:h-20 lg:h-24 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
             />
           </Link>
           <div className="flex items-center gap-2">
@@ -52,10 +52,12 @@ export default function Landing() {
           <div className="space-y-6 animate-float-up">
             <div className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary/70 text-foreground/90 shadow-[inset_0_1px_0_hsl(0_0%_100%/0.06),inset_0_-1px_0_hsl(0_0%_0%/0.5)]">
               <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--btn-orange))]" />
-              Log boulders. Earn Chalk. Send bosses.
+              For every climber level
             </div>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">
-              Log climbs, earn <span className="gradient-chalk-text">chalk</span>, level up.
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] space-y-1">
+              <span className="block">Log climbs,</span>
+              <span className="block">earn <img src={chalkBagImg} alt="chalk" className="inline-block h-[0.9em] w-auto align-[-0.1em] mx-1 drop-shadow-[0_2px_4px_hsl(42_100%_55%/0.4)]" />,</span>
+              <span className="block">level up.</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
               ClimbQuest is a climbing tracker that plays like an RPG. Log climbs, earn chalk,
@@ -106,8 +108,8 @@ export default function Landing() {
           />
           <PickCard
             content={
-              <div className="scale-110">
-                <ClimberAvatar level={10} gender="male" equipped={{} as any} size="xl" glow />
+              <div className="scale-150">
+                <ClimberAvatar level={9} gender="male" equipped={{} as any} size="xl" glow />
               </div>
             }
             title="3. Level up"
@@ -196,6 +198,11 @@ function CharactersSlide() {
         const r = resolvedLevel(lvl, g);
         if (r.image) out.push({ level: lvl, gender: g });
       }
+    }
+    // Shuffle (Fisher-Yates) then take 12.
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
     }
     return out.slice(0, 12);
   }, [overrides]);

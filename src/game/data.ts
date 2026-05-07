@@ -1,8 +1,19 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
 export type Rarity = "common" | "rare" | "epic" | "legendary";
-export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "aura" | "title";
+export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title";
 export type ItemGroup = "outfit" | "gear" | "power";
+
+/** Slots that belong to the "gear" group, in display/unlock order. */
+export const GEAR_SLOTS: Slot[] = ["chalk", "accessory", "study"];
+
+/** How many gear slots are unlocked at a given player level (max 4). */
+export function gearSlotsUnlocked(level: number): number {
+  if (level >= 8) return 4;
+  if (level >= 5) return 3;
+  if (level >= 3) return 2;
+  return 1;
+}
 export type Gender = "male" | "female";
 
 export type ActivityType =
@@ -27,23 +38,23 @@ export interface ClimberLevel {
 }
 
 export const LEVELS: ClimberLevel[] = [
-  { level: 1, title: "Rental Shoe Rookie", cost: 0,     emoji: "🥾", desc: "Oversized rentals, max enthusiasm.",            unlocks: ["Starter avatar", "Rental shoes", "Plain chalk bag"] },
+  { level: 1, title: "Rental Shoe Rookie", cost: 0,     emoji: "🥾", desc: "Oversized rentals, max enthusiasm.",            unlocks: ["Starter avatar", "Rental shoes", "Plain chalk bag", "1 Gear slot"] },
   { level: 2, title: "Chalk Chaser",       cost: 200,   emoji: "💨", desc: "Obsessed with chalk. Still figuring it out.",   unlocks: ["Chalk bag skin", "Beanie", "First Send badge"] },
-  { level: 3, title: "Footwork Fiend",     cost: 500,   emoji: "👣", desc: "Discovers feet exist. Game-changing.",          unlocks: ["Footwork badge", "Cleaner shoes", "Technique fit"] },
-  { level: 4, title: "Jug Juggler",        cost: 1100,  emoji: "🤹", desc: "Big holds, big confidence, slightly chaotic.",  unlocks: ["Chalk bucket", "Funny socks", "+1 Gear slot"] },
-  { level: 5, title: "Cute Crimper",       cost: 2200,  emoji: "🤏", desc: "Tiny holds = personality trait.",               unlocks: ["Magdust", "Wristband", "+1 Power-up slot"] },
+  { level: 3, title: "Footwork Fiend",     cost: 500,   emoji: "👣", desc: "Discovers feet exist. Game-changing.",          unlocks: ["Footwork badge", "Cleaner shoes", "+1 Gear slot"] },
+  { level: 4, title: "Jug Juggler",        cost: 1100,  emoji: "🤹", desc: "Big holds, big confidence, slightly chaotic.",  unlocks: ["Chalk bucket", "Funny socks"] },
+  { level: 5, title: "Cute Crimper",       cost: 2200,  emoji: "🤏", desc: "Tiny holds = personality trait.",               unlocks: ["Magdust", "Wristband", "+1 Gear slot", "+1 Power-up slot"] },
   { level: 6, title: "Dyno Devourer",      cost: 4200,  emoji: "🦘", desc: "Full commitment. No fear. Only flight.",        unlocks: ["Neon pants", "Neon chalk bag", "No Static badge"] },
-  { level: 7, title: "Board Goblin",       cost: 7800,  emoji: "👺", desc: "Lives on the board. Slightly feral.",           unlocks: ["Board shoes", "Tape pack", "+1 Gear slot"] },
-  { level: 8, title: "Beta Breaker",       cost: 14000, emoji: "🧠", desc: "Reads sequences. Solves cruxes. Smug.",         unlocks: ["Beta notebook", "Smart glasses", "Sequence Master"] },
+  { level: 7, title: "Board Goblin",       cost: 7800,  emoji: "👺", desc: "Lives on the board. Slightly feral.",           unlocks: ["Board shoes", "Tape pack"] },
+  { level: 8, title: "Beta Breaker",       cost: 14000, emoji: "🧠", desc: "Reads sequences. Solves cruxes. Smug.",         unlocks: ["Beta notebook", "Smart glasses", "+1 Gear slot (max)", "Sequence Master"] },
   { level: 9, title: "Project Beast",      cost: 24000, emoji: "🦍", desc: "Long-term projects only. Locked in.",           unlocks: ["Project Beast Fit", "Premium brush", "Elite hoodie"] },
-  { level: 10,title: "Crimp Demigod",      cost: 40000, emoji: "👑", desc: "Endgame. Cute. Terrifying. Glowing.",           unlocks: ["Minimal Send Kit", "Golden Crocs", "+1 Gear slot", "+1 Power-up slot"] },
+  { level: 10,title: "Crimp Demigod",      cost: 40000, emoji: "👑", desc: "Endgame. Cute. Terrifying. Glowing.",           unlocks: ["Minimal Send Kit", "Golden Crocs", "+1 Power-up slot"] },
 ];
 
 export interface ShopItem {
   id: string;
   name: string;
   group: ItemGroup;          // outfit | gear | power
-  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Accessories" | "Auras" | "Titles" | "Consumables";
+  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Study" | "Accessories" | "Auras" | "Titles" | "Consumables";
   slot: Slot;
   rarity: Rarity;
   price: number;

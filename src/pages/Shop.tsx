@@ -13,7 +13,7 @@ import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 
 const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
-  { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk"] },
+  { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk", "Study"] },
   { key: "power",  label: "Power-ups", categories: ["All", "Accessories", "Auras", "Titles", "Consumables"] },
 ];
 

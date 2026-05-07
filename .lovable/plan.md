@@ -1,52 +1,56 @@
-A public ClimbQuest landing at `/` with a looping feature showcase that **renders the real in-app components** (same `GameCard`, `PickCard`, `ItemCard`, `ClimberAvatar`, `LevelPreviewCard`, `PixelBar`, etc.) so the preview is pixel-identical to the actual product.
+## 1. Add "Study" as a new Gear category
 
-## Routing
-- `/` → public `Landing` (no auth).
-- Move dashboard to `/home` (still in `RequireAuth` + `Layout`).
-- Signed-in users hitting `/` redirect to `/home`.
-- `Layout` logo + Home nav point to `/home`.
+**New slot:** `study` (passive equippable, like `accessory`/`chalk`).
 
-## Page structure (`src/pages/Landing.tsx`)
+**`src/game/data.ts`**
+- Add `"study"` to the `Slot` union.
+- Add `"Study"` to the `category` union on `ShopItem`.
+- Add helper `gearSlotsUnlocked(level)` (see §2).
 
-1. **Top bar** — `climbquest-logo.png`, "Sign in" ghost button, "Start climbing" `GameButton` → `/auth`. Same pultruded style as the app header (border + inset shadow).
+**`src/pages/Shop.tsx`**
+- Update the `gear` group categories to: `["All", "Brushes", "Chalk", "Study"]`.
 
-2. **Hero** — two columns:
-   - Left: orange "New" chip ("Log boulders. Earn Chalk. Send bosses."), big headline ("Turn every session into XP."), subhead, two CTAs (`GameButton` primary + ghost).
-   - Right: the **looping showcase card**.
+**Seed items** (admin uploads 360×360 webp art via existing flow later):
+- `study_beta_book` — *Beta Book* (common, +3% all)
+- `study_beta_breaker` — *Beta Breaker* (rare, +5% boulder/hard_boulder)
+- `study_free_solo` — *Free Solo (doc)* — Consumable, one-shot +25% next log
+- `study_magnus_yt` — *Magnus YT Binge* (rare, +4% boss attempts/sends)
+- `study_wide_boyz` — *Wide Boyz Episode* (epic, +6% all)
 
-3. **How it works** — 3 cards reusing the exact `PickCard` style from `LogModal` (pultruded `border-2 border-[hsl(var(--panel-frame))] bg-secondary/50` + inset shadows + `aspect-square` image area): Log, Earn Chalk, Level up.
+Books = passive equippables in the new `study` slot. Videos/docs = `Consumables` (existing one-shot mechanic, no slot needed).
 
-4. **Final CTA** — large `GameCard tone="accent"` with headline + primary `GameButton`.
+## 2. Generic gear slots, level-gated 1 → 4
 
-5. **Footer** — small © line.
+Gear slots become **generic** — each unlocked slot can hold any gear-group item, with the rule "one of each gear type" (so you can't equip two Chalks, but you can equip 1 Chalk + 1 Brush + 1 Study).
 
-## Looping showcase
+**Unlock mapping (max 4):**
+```text
+Level 1–2  → 1 gear slot
+Level 3–4  → 2 gear slots
+Level 5–7  → 3 gear slots
+Level 8+   → 4 gear slots
+```
 
-A single pultruded `GameCard` (same frame as the app's hero card) with fixed aspect ratio, auto-advancing every ~3.5s, dot indicators, pause on hover, `animate-fade-in` per slide.
+**`src/game/store.ts` — equip model unchanged**
+- Items still equip to their own `slot` key (`chalk` / `accessory` / `study`), so the "one per type" rule is automatic.
+- New check in `equipItem`: count currently-equipped gear items; if equipping a *new* gear type would exceed `gearSlotsUnlocked(state.level)`, reject with `{ ok: false, reason: "No free gear slot — level up to unlock more" }`. Replacing an already-equipped item in the same slot is always allowed.
+- On state load/sync: if a user has more equipped gear items than allowed (e.g. they leveled down via admin), auto-unequip the lowest-bonus extras until within limit.
 
-Each slide reuses **real components** from the app:
+**`src/pages/Inventory.tsx`**
+- Replace the fixed `chalk`/`accessory` slot rendering for the `gear` group with a single row of N generic slot cells, where N = `gearSlotsUnlocked(s.level)`.
+- Cells are populated in equip order from `s.equipped` (any of `chalk`/`accessory`/`study`).
+- Empty cells show a generic **"Empty Gear"** placeholder (not "Brush"). Locked cells (4 − N of them) show "Unlocks at Lv X".
+- Update `SLOT_LABEL` to remove the "Brush" wording for empty UI; keep correct labels (`accessory: "Brush"`, `chalk: "Chalk"`, `study: "Study"`) for *equipped* items where the type is known.
 
-1. **Characters** — `ClimberAvatar size="xl" glow` cycling L1/L4/L7/L10 (alternating gender), with the resolved level title + tagline below (from `LEVELS` + `useLevelOverrides`).
-2. **Items** — 2×3 grid of `ItemCard`-styled tiles for a hand-picked set of `BUILTIN_ITEMS` (mix of rarities), reusing `RARITY_BORDER`, `SmartImage`, and the same rarity ribbon used in `Inventory.tsx`. Extract `ItemCard` from `Inventory.tsx` into `src/components/ItemCard.tsx` so both pages can import it.
-3. **Log a climb** — render the actual `PickCard` pair (Boulder + Boss) used in `LogModal`. Extract `PickCard` from `LogModal.tsx` into `src/components/pixel/PickCard.tsx` and import in both. Caption: "Log every session in seconds."
-4. **Boss projects** — pultruded card showing `log-boss.webp` + a `PixelBar` filling 0→80% with a "Crux Cave · 12 attempts" line. Same style as boss section on Dashboard.
-5. **Level up** — the new `LevelPreviewCard` twin (current → next) from `Layout.tsx`. Extract it into `src/components/LevelPreviewCard.tsx` and import in both. Includes chalk-fly particles.
+## 3. Level copy
+Update `LEVELS` `unlocks` strings in `src/game/data.ts` so gear-slot mentions match the 1/3/5/8 rule (remove stale "+1 Gear slot" lines on levels 4/7/10, add to 3/5/8).
 
-Mechanics: `useState` index + `useEffect` interval (cleared on hover/unmount), dot row jumps to slide on click, container has fixed `aspect-[4/5]` on mobile / `aspect-square` on desktop so layout doesn't shift.
+## Out of scope
+- No DB migration — `shop_items.slot` is `text`.
+- No avatar art changes for Study items.
 
-## Background
-Soft radial gradient + 2-3 blurred orange/green orbs (CSS only, `pointer-events-none`) behind content. Uses existing tokens; no new colors or deps.
-
-## Refactors (so showcase mirrors the app exactly)
-- Extract `PickCard` from `LogModal.tsx` → `src/components/pixel/PickCard.tsx`; update `LogModal` to import it.
-- Extract `ItemCard` from `Inventory.tsx` → `src/components/ItemCard.tsx`; update `Inventory` to import it.
-- Extract `LevelPreviewCard` from `Layout.tsx` → `src/components/LevelPreviewCard.tsx`; update `Layout` to import it.
-
-## Files
-- Add: `src/pages/Landing.tsx`
-- Add: `src/components/pixel/PickCard.tsx`, `src/components/ItemCard.tsx`, `src/components/LevelPreviewCard.tsx`
-- Edit: `src/App.tsx` (public `/`, dashboard at `/home`, redirect)
-- Edit: `src/components/Layout.tsx` (logo/Home → `/home`, import extracted LevelPreviewCard)
-- Edit: `src/components/LogModal.tsx`, `src/pages/Inventory.tsx` (use extracted components)
-
-No backend or schema changes. No new dependencies.
+## Files touched
+- `src/game/data.ts`
+- `src/game/store.ts`
+- `src/pages/Shop.tsx`
+- `src/pages/Inventory.tsx`

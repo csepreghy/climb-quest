@@ -518,7 +518,7 @@ function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: 
       </div>
       <div className="mt-5 menu-label">{label}</div>
       <div className="mt-2 flex items-center justify-center gap-3 animate-pop-in">
-        <img src={goldenChalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--legendary)/0.6)]" />
+        <img src={chalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--chalk-glow)/0.6)]" />
         <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{total}</span>
       </div>
       <Sparkles className="h-6 w-6 mx-auto mt-3 text-chalk-glow animate-pulse" />
@@ -526,48 +526,89 @@ function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: 
   );
 }
 
-function BossCelebrate({ total }: { total: number }) {
-  // Confetti burst: 24 emoji particles flying outward.
-  const particles = Array.from({ length: 24 });
-  const emojis = ["🎉", "✨", "🏆", "💥", "⭐", "🔥"];
+function BossCelebrate({ total, breakdown, onDone }: { total: number; breakdown: ChalkBreakdown; onDone: () => void }) {
+  const s = useGame();
+  // Chalk impact particles — one-shot burst at impact (~0.65s into player charge).
+  const particles = Array.from({ length: 18 });
   return (
-    <div className="relative py-14 text-center overflow-hidden">
-      {/* radial glow */}
+    <div className="relative py-8 px-2 text-center overflow-hidden">
+      {/* radial glow background */}
       <div className="pointer-events-none absolute inset-0 animate-fade-overlay"
-        style={{ background: "radial-gradient(circle at center, hsl(var(--boss) / 0.35), transparent 60%)" }} />
-      {/* confetti */}
-      {particles.map((_, i) => {
-        const angle = (i / particles.length) * Math.PI * 2;
-        const dist = 140 + Math.random() * 100;
-        const dx = Math.cos(angle) * dist;
-        const dy = Math.sin(angle) * dist;
-        const delay = Math.random() * 0.3;
-        return (
-          <span key={i}
-            className="absolute left-1/2 top-1/2 text-2xl animate-chalk-poof"
-            style={{
-              ["--dx" as any]: `${dx}px`,
-              ["--dy" as any]: `${dy}px`,
-              animationDelay: `${delay}s`,
-              animationDuration: "1.6s",
-            }}>
-            {emojis[i % emojis.length]}
-          </span>
-        );
-      })}
-      <div className="relative">
-        <div className="mx-auto h-56 w-56 rounded-2xl overflow-hidden border-4 border-[hsl(var(--boss))] shadow-[0_0_60px_hsl(var(--boss)/0.75)] animate-banner-pop">
-          <img src={bossImg} alt="Boss defeated" className="h-full w-full object-cover" />
+        style={{ background: "radial-gradient(circle at center, hsl(var(--boss) / 0.3), transparent 65%)" }} />
+
+      {/* Battle scene */}
+      <div className="relative h-56 flex items-center justify-between px-6">
+        {/* Player */}
+        <div className="relative animate-player-charge">
+          <div className="absolute -inset-3 rounded-full blur-2xl pointer-events-none animate-aura-pulse"
+            style={{ background: "radial-gradient(circle, hsl(var(--legendary) / 0.85) 0%, transparent 65%)" }} />
+          <div className="relative">
+            <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
+          </div>
         </div>
-        <div className="mt-5 font-display font-extrabold text-3xl uppercase tracking-wider animate-banner-pop"
-          style={{ color: "hsl(var(--boss))", textShadow: "0 2px 0 hsl(0 0% 0% / 0.5)" }}>
-          Boss Defeated!
+
+        {/* Impact flash + chalk particles at center */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 rounded-full animate-impact-flash"
+          style={{ background: "radial-gradient(circle, hsl(0 0% 100% / 0.95), transparent 70%)" }} />
+        {particles.map((_, i) => {
+          const angle = (i / particles.length) * Math.PI * 2 + Math.random() * 0.4;
+          const dist = 90 + Math.random() * 80;
+          const dx = Math.cos(angle) * dist;
+          const dy = Math.sin(angle) * dist;
+          return (
+            <span key={i}
+              className="pointer-events-none absolute left-1/2 top-1/2 h-2.5 w-2.5 rounded-full bg-white animate-chalk-poof"
+              style={{
+                ["--dx" as any]: `${dx}px`,
+                ["--dy" as any]: `${dy}px`,
+                animationDelay: `${0.62 + Math.random() * 0.15}s`,
+                animationDuration: "1s",
+                animationFillMode: "forwards",
+                boxShadow: "0 0 8px hsl(0 0% 100% / 0.8)",
+              }} />
+          );
+        })}
+
+        {/* Boss */}
+        <div className="animate-boss-knockout">
+          <div className="h-40 w-40 rounded-2xl overflow-hidden border-4 border-[hsl(var(--boss))] shadow-[0_0_40px_hsl(var(--boss)/0.6)]">
+            <img src={bossImg} alt="Boss defeated" className="h-full w-full object-cover" />
+          </div>
         </div>
-        <div className="mt-3 flex items-center justify-center gap-3 animate-pop-in">
-          <img src={goldenChalkBagImg} alt="Chalk" className="h-14 w-14 object-contain drop-shadow-[0_4px_14px_hsl(var(--legendary)/0.7)]" />
-          <span className="text-5xl font-extrabold gradient-chalk-text tabular-nums">+{total}</span>
+      </div>
+
+      <div className="mt-2 font-display font-extrabold text-3xl uppercase tracking-wider animate-banner-pop"
+        style={{ color: "hsl(var(--boss))", textShadow: "0 2px 0 hsl(0 0% 0% / 0.5)" }}>
+        Boss Defeated!
+      </div>
+
+      {/* Chalk breakdown */}
+      <div className="mt-5 mx-auto max-w-sm rounded-lg border border-border bg-secondary/50 p-3 text-left animate-pop-in"
+        style={{ animationDelay: "1.4s", animationFillMode: "both" }}>
+        <div className="flex items-center gap-2 mb-2">
+          <img src={chalkBagImg} alt="Chalk" className="h-7 w-7 object-contain" />
+          <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Chalk earned</span>
         </div>
-        <div className="mt-1 text-sm uppercase tracking-[0.3em] text-muted-foreground">Chalk earned</div>
+        <div className="space-y-1 text-sm">
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Base</span>
+            <span className="tabular-nums">{breakdown.base}</span>
+          </div>
+          {breakdown.bonuses.map((b, i) => (
+            <div key={i} className="flex justify-between gap-4">
+              <span className="text-muted-foreground">+ {b.source}</span>
+              <span className="tabular-nums text-chalk-glow">+{b.amount}</span>
+            </div>
+          ))}
+          <div className="border-t border-border/60 pt-1.5 mt-1.5 flex justify-between gap-4 font-bold">
+            <span>Total</span>
+            <span className="tabular-nums gradient-chalk-text text-base">+{total}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 flex justify-center animate-pop-in" style={{ animationDelay: "1.6s", animationFillMode: "both" }}>
+        <GameButton variant="primary" size="lg" onClick={onDone}>Keep Climbing</GameButton>
       </div>
     </div>
   );

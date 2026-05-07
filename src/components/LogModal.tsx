@@ -305,6 +305,25 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
         <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
         <GameButton variant="success" size="md" onClick={submit}>{editLog ? "Save changes" : "Send it"}</GameButton>
       </div>
+
+      <Dialog open={projectPromptOpen} onOpenChange={setProjectPromptOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Log this as a Boss Project?</DialogTitle>
+            <DialogDescription>
+              If this boulder takes you more than one session, log it as a Boss Project instead. You'll get richer tracking and bigger rewards when you finally send it.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <GameButton variant="ghost" size="sm" onClick={() => { setProjectPromptOpen(false); setAttemptType("project"); }}>
+              No, just a boulder
+            </GameButton>
+            <GameButton variant="primary" size="sm" onClick={() => { setProjectPromptOpen(false); onSwitchToBoss?.(); }}>
+              Yes, log as Boss Project
+            </GameButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

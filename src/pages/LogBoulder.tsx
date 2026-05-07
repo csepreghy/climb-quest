@@ -40,6 +40,9 @@ export default function BoulderLogs() {
     return true;
   }), [s.logs, entryFilter, grade, gymId, search]);
 
+  useMemo(() => { setVisible(10); }, [entryFilter, grade, gymId, search]);
+  const shown = filtered.slice(0, visible);
+
   return (
     <div className="space-y-5 animate-float-up">
       <LogModal open={open} onOpenChange={setOpen} />

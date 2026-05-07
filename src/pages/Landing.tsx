@@ -61,8 +61,7 @@ export default function Landing() {
               <span className="block">level up.</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
-              ClimbQuest is a climbing tracker that plays like an RPG. Log climbs, earn chalk,
-              kit out your character, and slowly defeat your hardest projects.
+              ClimbQuest is a climbing tracker that plays like an RPG. Track your progress, defeat Boss Projects. Bouldering tracking made fun.
             </p>
             <div className="flex flex-wrap gap-3">
               <GameButton variant="success" size="lg" onClick={goAuth}>

@@ -1,4 +1,4 @@
-import { LEVELS, Gender } from "@/game/data";
+import { LEVELS, Gender, RARITY_BORDER } from "@/game/data";
 import { getItem } from "@/game/customItems";
 import { useLevelOverrides, resolvedLevel } from "@/game/levelOverrides";
 import type { Equipped } from "@/game/store";

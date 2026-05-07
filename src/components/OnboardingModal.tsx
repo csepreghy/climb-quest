@@ -45,7 +45,7 @@ export function OnboardingModal({ open, onClose }: Props) {
   return (
     <Dialog open={open} onOpenChange={() => { /* not dismissable */ }}>
       <DialogContent
-        className="max-w-xl"
+        className="max-w-xl [&>button.absolute]:hidden"
         onInteractOutside={e => e.preventDefault()}
         onEscapeKeyDown={e => e.preventDefault()}
       >

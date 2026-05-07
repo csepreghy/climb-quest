@@ -121,6 +121,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
   const [notes, setNotes] = useState(editLog?.notes ?? "");
   const [celebrating, setCelebrating] = useState<{ total: number } | null>(null);
+  const [projectPromptOpen, setProjectPromptOpen] = useState(false);
 
   const sent = attemptType === "flash" || attemptType === "send";
   const flashed = attemptType === "flash";

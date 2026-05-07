@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
 import { GameButton } from "@/components/ui/game-button";

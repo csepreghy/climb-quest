@@ -41,6 +41,11 @@ export default function Layout() {
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
 
   useLevelOverrides();
+  const allItems = useAllItems();
+  const catalogLoaded = useCatalogLoaded();
+  useEffect(() => {
+    if (catalogLoaded) grantFreeItems(allItems);
+  }, [catalogLoaded, allItems]);
 
   useEffect(() => {
     const h = () => setConfirmLvOpen(true);

@@ -79,6 +79,8 @@ export default function Admin() {
         </label>
       </GameCard>
 
+      <BackfillImagesCard />
+
       <InventoryAdmin />
 
       <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>

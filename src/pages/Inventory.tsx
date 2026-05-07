@@ -132,6 +132,7 @@ function EmptySlotCard({ slot }: { slot: Slot }) {
 
 export default function Inventory() {
   const s = useGame();
+  const { isAdmin } = useAuth();
   useCustomItems();
   const owned = s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[];
   const totalBonusByActivity = gearBonusSummary(s.equipped);

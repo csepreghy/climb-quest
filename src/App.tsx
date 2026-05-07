@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import LogBoulder from "./pages/LogBoulder";
-import Bosses from "./pages/Bosses";
 import Character from "./pages/Character";
 import Shop from "./pages/Shop";
 import Inventory from "./pages/Inventory";

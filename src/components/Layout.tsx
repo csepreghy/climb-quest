@@ -10,6 +10,7 @@ import { LevelsModal } from "@/components/LevelsModal";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import chalkBagImg from "@/assets/chalk-bag.png";
+import logoImg from "@/assets/climbquest-logo.png";
 
 const NAV_BASE = [
   { to: "/", label: "Home", icon: Home },

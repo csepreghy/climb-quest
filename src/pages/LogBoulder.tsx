@@ -63,9 +63,7 @@ export default function BoulderLogs() {
               <button key={f} onClick={() => setEntryFilter(f)}
                 className={cn("text-xs px-3 py-1.5 rounded-full border capitalize",
                   entryFilter === f
-                    ? f === "boss"
-                      ? "bg-boss/20 border-boss text-boss"
-                      : "bg-accent text-accent-foreground border-accent"
+                    ? "bg-[hsl(var(--btn-orange))] border-[hsl(var(--btn-orange))] text-white"
                     : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
                 {f === "all" ? "All" : f === "boss" ? "Bosses" : "Boulders"}
               </button>

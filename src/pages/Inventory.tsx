@@ -5,12 +5,13 @@ import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity, ShopItem } from "@/game/data";
-import { equipItem, unequipSlot, useGame } from "@/game/store";
+import { equipItem, unequipSlot, removeOwnedItem, useGame } from "@/game/store";
 import { getItem, useCustomItems, isImageEmoji } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 

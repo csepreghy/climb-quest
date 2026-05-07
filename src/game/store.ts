@@ -6,6 +6,8 @@ import {
 import { getItem } from "./customItems";
 
 // ----- Types -----
+export type AttemptType = "flash" | "send" | "project";
+
 export interface BoulderLog {
   id: string;
   date: string;            // ISO
@@ -13,6 +15,7 @@ export interface BoulderLog {
   duration?: number;       // minutes
   location?: string;
   grade?: string;
+  gradeMax?: string;       // optional grade range upper bound
   styles: Style[];
   problemsTried?: number;
   sends?: number;
@@ -21,6 +24,10 @@ export interface BoulderLog {
   chalkBase: number;
   chalkBonus: number;
   chalkTotal: number;
+  isBoss?: boolean;
+  attemptType?: AttemptType;
+  holdColorId?: string;
+  gymId?: string;
 }
 
 export interface BossAttempt {

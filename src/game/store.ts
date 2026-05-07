@@ -340,7 +340,7 @@ export function equipItem(id: string): { ok: boolean; reason?: string } {
     set(s => ({ ...s, pendingConsumable: id }));
     return { ok: true };
   }
-  const state = get();
+  const state = getGameStateSnapshot();
   if (item.group === "gear") {
     const max = gearSlotsUnlocked(state.level);
     const equippedGearSlots = GEAR_SLOTS.filter(sl => !!state.equipped[sl]);

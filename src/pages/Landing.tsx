@@ -8,6 +8,7 @@ import { LevelPreviewCard } from "@/components/LevelPreviewCard";
 import { ItemCard } from "@/components/ItemCard";
 import { LEVELS, ShopItem } from "@/game/data";
 import { useAllItems } from "@/game/customItems";
+import { supabase } from "@/integrations/supabase/client";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -61,8 +62,7 @@ export default function Landing() {
               <span className="block">level up.</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
-              ClimbQuest is a climbing tracker that plays like an RPG. Log climbs, earn chalk,
-              kit out your character, and slowly defeat your hardest projects.
+              ClimbQuest is a climbing tracker that plays like an RPG. Track your progress, defeat Boss Projects. Bouldering tracking made fun.
             </p>
             <div className="flex flex-wrap gap-3">
               <GameButton variant="success" size="lg" onClick={goAuth}>
@@ -109,7 +109,7 @@ export default function Landing() {
           />
           <PickCard
             content={
-              <div className="scale-[2]">
+              <div className="scale-110">
                 <ClimberAvatar level={9} gender="male" equipped={{} as any} size="xl" glow />
               </div>
             }
@@ -256,16 +256,33 @@ function CharactersSlide() {
 
 function ItemsSlide() {
   const all = useAllItems();
-  const items: ShopItem[] = useMemo(() => {
-    const withImg = all.filter(i => !!i.emoji && (i.emoji.startsWith("http") || i.emoji.startsWith("data:") || i.emoji.startsWith("/")));
-    if (withImg.length === 0) return [];
-    const leg = withImg.filter(i => i.rarity === "legendary").slice(0, 1);
-    const epic = withImg.filter(i => i.rarity === "epic").slice(0, 1);
-    const rare = withImg.filter(i => i.rarity === "rare").slice(0, 2);
+  // Pick a curated 4 (legendary, epic, 2 rare) by metadata only.
+  const picks: ShopItem[] = useMemo(() => {
+    if (all.length === 0) return [];
+    const leg = all.filter(i => i.rarity === "legendary").slice(0, 1);
+    const epic = all.filter(i => i.rarity === "epic").slice(0, 1);
+    const rare = all.filter(i => i.rarity === "rare").slice(0, 2);
     const picked = [...leg, ...epic, ...rare];
-    const rest = withImg.filter(i => !picked.includes(i));
-    return [...picked, ...rest].slice(0, 4);
+    return picked.length >= 4 ? picked.slice(0, 4) : all.slice(0, 4);
   }, [all]);
+
+  // Fetch images for ONLY those 4 ids (small payload, avoids timeout).
+  const [imgs, setImgs] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (picks.length === 0) return;
+    const ids = picks.map(p => p.id);
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("shop_items").select("id,image").in("id", ids);
+      if (cancelled) return;
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { if (r.image) map[r.id] = r.image; });
+      setImgs(map);
+    })();
+    return () => { cancelled = true; };
+  }, [picks.map(p => p.id).join(",")]);
+
+  const items = picks.map(p => imgs[p.id] ? { ...p, emoji: imgs[p.id] } : p);
 
   if (items.length === 0) {
     return (

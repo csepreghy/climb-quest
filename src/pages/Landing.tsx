@@ -93,13 +93,26 @@ export default function Landing() {
             ring="ring-[hsl(var(--btn-green))]/60"
           />
           <PickCard
-            image={bossImg}
+            content={
+              <img
+                src={goldenChalkBag}
+                alt="Golden chalk bag"
+                loading="lazy"
+                width={512}
+                height={512}
+                className="h-[80%] w-[80%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.5)] animate-aura-pulse"
+              />
+            }
             title="2. Earn Chalk"
             desc="Style bonuses, equipped gear, and consumables stack into XP."
             ring="ring-[hsl(var(--btn-orange))]/60"
           />
           <PickCard
-            image={boulderImg}
+            content={
+              <div className="scale-110">
+                <ClimberAvatar level={10} gender="male" equipped={{} as any} size="xl" glow />
+              </div>
+            }
             title="3. Level up"
             desc="Unlock new avatars, items, badges, and gear slots."
             ring="ring-[hsl(var(--accent))]/60"

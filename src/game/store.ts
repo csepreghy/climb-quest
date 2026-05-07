@@ -4,6 +4,7 @@ import {
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
 } from "./data";
 import { getItem } from "./customItems";
+import { resolvedLevel } from "./levelOverrides";
 
 // ----- Types -----
 export type AttemptType = "flash" | "send" | "project";

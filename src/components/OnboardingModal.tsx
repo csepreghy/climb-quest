@@ -4,7 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { GameButton } from "@/components/ui/game-button";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { setGender, completeOnboarding } from "@/game/store";
-import { Gender } from "@/game/data";
+import { Gender, RARITY_BORDER } from "@/game/data";
+import { useAllItems, isImageEmoji } from "@/game/customItems";
+import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import boulderImg from "@/assets/log-boulder.webp";

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -18,7 +18,9 @@ import bossImg from "@/assets/log-boss.webp";
 
 export default function Landing() {
   const { user, loading } = useAuth();
+  const nav = useNavigate();
   if (!loading && user) return <Navigate to="/home" replace />;
+  const goAuth = () => nav("/auth");
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -35,11 +37,9 @@ export default function Landing() {
             />
           </Link>
           <div className="flex items-center gap-2">
-            <GameButton asChild variant="ghost" size="sm">
-              <Link to="/auth">Sign in</Link>
-            </GameButton>
-            <GameButton asChild variant="primary" size="sm">
-              <Link to="/auth">Start climbing <ArrowRight className="h-4 w-4" /></Link>
+            <GameButton variant="ghost" size="sm" onClick={goAuth}>Sign in</GameButton>
+            <GameButton variant="primary" size="sm" onClick={goAuth}>
+              Start climbing <ArrowRight className="h-4 w-4" />
             </GameButton>
           </div>
         </div>
@@ -62,11 +62,11 @@ export default function Landing() {
               kit out your character, and slowly defeat your hardest projects.
             </p>
             <div className="flex flex-wrap gap-3">
-              <GameButton asChild variant="success" size="lg">
-                <Link to="/auth">Get started free <ArrowRight className="h-4 w-4" /></Link>
+              <GameButton variant="success" size="lg" onClick={goAuth}>
+                Get started free <ArrowRight className="h-4 w-4" />
               </GameButton>
-              <GameButton asChild variant="ghost" size="lg">
-                <a href="#how">See how it works</a>
+              <GameButton variant="ghost" size="lg" onClick={() => { document.getElementById("how")?.scrollIntoView({ behavior: "smooth" }); }}>
+                See how it works
               </GameButton>
             </div>
           </div>
@@ -114,8 +114,8 @@ export default function Landing() {
             Free to start. Your projects, your gear, your story.
           </p>
           <div className="mt-6 flex justify-center">
-            <GameButton asChild variant="primary" size="lg">
-              <Link to="/auth">Start climbing <ArrowRight className="h-4 w-4" /></Link>
+            <GameButton variant="primary" size="lg" onClick={goAuth}>
+              Start climbing <ArrowRight className="h-4 w-4" />
             </GameButton>
           </div>
         </GameCard>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useGame } from "@/game/store";
+import { useGame, deleteLog, BoulderLog } from "@/game/store";
 import { ACTIVITY_LABELS } from "@/game/data";
 import { useGyms } from "@/game/gyms";
 import { GameCard } from "@/components/ui/game-card";
@@ -7,8 +7,10 @@ import { GameButton } from "@/components/ui/game-button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LogModal } from "@/components/LogModal";
-import { Plus, Swords, Sparkles, Filter } from "lucide-react";
+import { Plus, Swords, Sparkles, Filter, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 type EntryFilter = "all" | "boulder" | "boss";
 
@@ -16,6 +18,8 @@ export default function BoulderLogs() {
   const s = useGame();
   const { gyms } = useGyms();
   const [open, setOpen] = useState(false);
+  const [editLog, setEditLog] = useState<BoulderLog | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [entryFilter, setEntryFilter] = useState<EntryFilter>("all");
   const [grade, setGrade] = useState<string>("all");
   const [gymId, setGymId] = useState<string>("all");

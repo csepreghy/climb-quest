@@ -29,9 +29,11 @@ export default function Layout() {
   const nav = useNavigate();
   const NAV = isAdmin ? [...NAV_BASE, NAV_ADMIN] : NAV_BASE;
   const [levelsOpen, setLevelsOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
   return (
     <div className="min-h-screen flex flex-col">
       <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} />
+      <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
         <div className="container flex items-center justify-between gap-4 py-5">
           <NavLink to="/" className="flex items-center gap-4 group">
@@ -45,7 +47,13 @@ export default function Layout() {
             </div>
           </NavLink>
           <div className="flex items-center gap-3">
-            <ThemeButton />
+            <GameButton variant="success" size="sm" onClick={() => setLogOpen(true)} className="hidden sm:inline-flex">
+              <Plus className="h-4 w-4" /> Log Boulder
+            </GameButton>
+            <GameButton variant="success" size="sm" onClick={() => setLogOpen(true)} className="sm:hidden !px-2.5" aria-label="Log Boulder">
+              <Plus className="h-4 w-4" />
+            </GameButton>
+            {isAdmin && <ThemeButton />}
             <ChalkChip value={s.chalk} />
             <button type="button" onClick={() => setLevelsOpen(true)}
               className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110">

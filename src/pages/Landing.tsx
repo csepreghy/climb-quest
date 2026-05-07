@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ScrollText, Sparkles, ArrowUp, Trophy } from "lucide-react";
+import { ArrowRight, ScrollText, Sparkles, ArrowUp, Swords } from "lucide-react";
 import logoImg from "@/assets/climbquest-logo.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";

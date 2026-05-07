@@ -142,7 +142,7 @@ export function OnboardingModal({ open, onClose }: Props) {
             disabled={step === "gender" && !picked}
             className="w-full sm:w-auto"
           >
-            <Building2 className="h-4 w-4" /> Set up my gym
+            {isLast ? <><Building2 className="h-4 w-4" /> Set up my gym</> : <>Next</>}
           </GameButton>
         </DialogFooter>
       </DialogContent>

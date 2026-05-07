@@ -22,7 +22,7 @@ export function showLevelUpBanner(
   trigger({ title, unlocks, ...extra });
 }
 
-const PARTICLES = Array.from({ length: 26 }, (_, i) => i);
+const PARTICLES = Array.from({ length: 80 }, (_, i) => i);
 
 export function LevelUpBanner() {
   const [data, setData] = useState<BannerData | null>(null);

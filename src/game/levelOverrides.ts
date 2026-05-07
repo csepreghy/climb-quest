@@ -68,26 +68,28 @@ export function getOverride(level: number, gender: Gender): LevelOverride | unde
   return state.map.get(k(level, gender));
 }
 
-/** Returns a level definition merged with any override for the given gender. */
+/** Returns a level definition merged with any override. Text/chalk are shared across genders; image is per-gender. */
 export function resolvedLevel(level: number, gender: Gender): ClimberLevel & { image?: string | null } {
   const base = LEVELS.find(l => l.level === level) ?? LEVELS[0];
-  const o = state.map.get(k(level, gender));
+  const own = state.map.get(k(level, gender));
+  const other = state.map.get(k(level, gender === "male" ? "female" : "male"));
+  const pickText = (key: "name" | "tagline") =>
+    (own?.[key]?.trim() ? own[key] : other?.[key]?.trim() ? other[key] : null) as string | null;
+  const sharedChalk = own?.chalkReq != null ? own.chalkReq : other?.chalkReq != null ? other.chalkReq : null;
+  const name = pickText("name");
+  const tagline = pickText("tagline");
   return {
     ...base,
-    title: o?.name?.trim() ? o.name : base.title,
-    desc: o?.tagline?.trim() ? o.tagline : base.desc,
-    cost: o?.chalkReq != null ? o.chalkReq : base.cost,
-    image: o?.image ?? null,
+    title: name ?? base.title,
+    desc: tagline ?? base.desc,
+    cost: sharedChalk != null ? sharedChalk : base.cost,
+    image: own?.image ?? null,
   };
 }
 
-export interface LevelOverrideInput {
-  name?: string | null;
-  tagline?: string | null;
-  chalkReq?: number | null;
-  imageFile?: File | null;
-  /** Pass null to clear the existing image. */
-  image?: string | null;
+/** True if any per-gender override row exists for this level (text/chalk/image). */
+export function hasAnyOverride(level: number): boolean {
+  return !!state.map.get(k(level, "male")) || !!state.map.get(k(level, "female"));
 }
 
 async function uploadLevelImage(level: number, gender: Gender, file: File): Promise<string> {
@@ -101,28 +103,62 @@ async function uploadLevelImage(level: number, gender: Gender, file: File): Prom
   return `${data.publicUrl}?v=${Date.now()}`;
 }
 
-export async function saveLevelOverride(level: number, gender: Gender, input: LevelOverrideInput): Promise<void> {
-  let image: string | null | undefined = input.image;
-  if (input.imageFile) image = await uploadLevelImage(level, gender, input.imageFile);
+export interface SharedLevelInput {
+  name?: string | null;
+  tagline?: string | null;
+  chalkReq?: number | null;
+  /** Per-gender image: undefined = leave alone, null = clear, File = upload. */
+  maleImageFile?: File | null;
+  femaleImageFile?: File | null;
+  clearMaleImage?: boolean;
+  clearFemaleImage?: boolean;
+}
 
-  const row: any = { level, gender };
-  if (input.name !== undefined) row.name = input.name;
-  if (input.tagline !== undefined) row.tagline = input.tagline;
-  if (input.chalkReq !== undefined) row.chalk_req = input.chalkReq;
-  if (image !== undefined) row.image = image;
-
+/** Save level data: text/chalk are mirrored to both gender rows; image is per-gender. */
+export async function saveLevel(level: number, input: SharedLevelInput): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  row.updated_by = user?.id ?? null;
+  const updatedBy = user?.id ?? null;
+
+  const existingMale = state.map.get(k(level, "male"));
+  const existingFemale = state.map.get(k(level, "female"));
+
+  let maleImage: string | null | undefined = existingMale?.image ?? null;
+  let femaleImage: string | null | undefined = existingFemale?.image ?? null;
+  if (input.maleImageFile) maleImage = await uploadLevelImage(level, "male", input.maleImageFile);
+  if (input.femaleImageFile) femaleImage = await uploadLevelImage(level, "female", input.femaleImageFile);
+  if (input.clearMaleImage) {
+    await supabase.storage.from("level-images").remove([`male/level-${level}.webp`]).catch(() => {});
+    maleImage = null;
+  }
+  if (input.clearFemaleImage) {
+    await supabase.storage.from("level-images").remove([`female/level-${level}.webp`]).catch(() => {});
+    femaleImage = null;
+  }
+
+  const sharedRow = {
+    name: input.name ?? null,
+    tagline: input.tagline ?? null,
+    chalk_req: input.chalkReq ?? null,
+    updated_by: updatedBy,
+  };
+
+  const rows = [
+    { level, gender: "male", ...sharedRow, image: maleImage },
+    { level, gender: "female", ...sharedRow, image: femaleImage },
+  ];
 
   const { error } = await (supabase.from("level_overrides") as any)
-    .upsert(row, { onConflict: "level,gender" });
+    .upsert(rows, { onConflict: "level,gender" });
   if (error) throw error;
   await refresh();
 }
 
-export async function clearLevelOverride(level: number, gender: Gender): Promise<void> {
-  await supabase.storage.from("level-images").remove([`${gender}/level-${level}.webp`]).catch(() => {});
-  const { error } = await supabase.from("level_overrides").delete().eq("level", level).eq("gender", gender);
+export async function clearLevel(level: number): Promise<void> {
+  await supabase.storage.from("level-images").remove([
+    `male/level-${level}.webp`,
+    `female/level-${level}.webp`,
+  ]).catch(() => {});
+  const { error } = await supabase.from("level_overrides").delete().eq("level", level);
   if (error) throw error;
   await refresh();
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useGame, deleteLog, BoulderLog } from "@/game/store";
 import { ACTIVITY_LABELS } from "@/game/data";
-import { useGyms } from "@/game/gyms";
+import { useAllGyms as useGyms } from "@/game/allGyms";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Input } from "@/components/ui/input";

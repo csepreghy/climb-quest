@@ -572,8 +572,8 @@ function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: 
 
 function BossCelebrate({ total, breakdown, onDone }: { total: number; breakdown: ChalkBreakdown; onDone: () => void }) {
   const s = useGame();
-  // Chalk impact particles — one-shot burst exactly when cards collide (~0.69s into 1.1s charge).
-  const particles = Array.from({ length: 60 });
+  // Chalk impact particles — one-shot burst exactly when cards collide (~0.72s into 1.1s charge).
+  const particles = Array.from({ length: 110 });
   return (
     <div className="relative py-8 px-2 text-center overflow-hidden">
       {/* radial glow background */}

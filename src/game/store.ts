@@ -6,6 +6,8 @@ import {
 import { getItem } from "./customItems";
 
 // ----- Types -----
+export type AttemptType = "flash" | "send" | "project";
+
 export interface BoulderLog {
   id: string;
   date: string;            // ISO
@@ -13,6 +15,7 @@ export interface BoulderLog {
   duration?: number;       // minutes
   location?: string;
   grade?: string;
+  gradeMax?: string;       // optional grade range upper bound
   styles: Style[];
   problemsTried?: number;
   sends?: number;
@@ -21,6 +24,10 @@ export interface BoulderLog {
   chalkBase: number;
   chalkBonus: number;
   chalkTotal: number;
+  isBoss?: boolean;
+  attemptType?: AttemptType;
+  holdColorId?: string;
+  gymId?: string;
 }
 
 export interface BossAttempt {
@@ -158,12 +165,17 @@ export interface ChalkBreakdown {
 }
 export function computeChalk(activity: ActivityType, styles: Style[], sent = false): ChalkBreakdown {
   const base = BASE_CHALK[activity] ?? 50;
-
   const bonuses: { source: string; amount: number }[] = [];
+  let running = base;
+
+  // Send flat bonus first (additive, not stacked %)
   if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
-    bonuses.push({ source: "Send", amount: BASE_CHALK.boulder_send });
+    const amt = BASE_CHALK.boulder_send;
+    bonuses.push({ source: "Send", amount: amt });
+    running += amt;
   }
-  // Equipped items
+
+  // Equipped percentage bonuses — stack multiplicatively on running subtotal
   const eq = state.equipped;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
     const id = eq[slotKey]; if (!id) continue;
@@ -174,16 +186,21 @@ export function computeChalk(activity: ActivityType, styles: Style[], sent = fal
     else if (b.appliesTo && b.appliesTo.includes(activity)) applies = true;
     if (b.styleMatch && styles.some(s => b.styleMatch!.includes(s))) applies = true;
     if (applies && b.mult > 0) {
-      bonuses.push({ source: item.name, amount: Math.round(base * b.mult) });
+      const amt = Math.round(running * b.mult);
+      bonuses.push({ source: item.name, amount: amt });
+      running += amt;
     }
   }
-  // Consumable
+  // Consumable — stacked last
   if (state.pendingConsumable) {
     const item = getItem(state.pendingConsumable);
-    if (item?.consumableBonus) bonuses.push({ source: item.name + " (consumed)", amount: Math.round(base * item.consumableBonus) });
+    if (item?.consumableBonus) {
+      const amt = Math.round(running * item.consumableBonus);
+      bonuses.push({ source: item.name + " (consumed)", amount: amt });
+      running += amt;
+    }
   }
-  const total = base + bonuses.reduce((a,b)=>a+b.amount, 0);
-  return { base, bonuses, total };
+  return { base, bonuses, total: running };
 }
 
 // ----- Actions -----
@@ -193,12 +210,17 @@ export interface LogInput {
   duration?: number;
   location?: string;
   grade?: string;
+  gradeMax?: string;
   styles: Style[];
   sent?: boolean;
   problemsTried?: number;
   sends?: number;
   hardestSend?: string;
   notes?: string;
+  isBoss?: boolean;
+  attemptType?: AttemptType;
+  holdColorId?: string;
+  gymId?: string;
 }
 
 export function logBoulder(input: LogInput) {
@@ -210,6 +232,7 @@ export function logBoulder(input: LogInput) {
     duration: input.duration,
     location: input.location,
     grade: input.grade,
+    gradeMax: input.gradeMax,
     styles: input.styles,
     problemsTried: input.problemsTried,
     sends: input.sends,
@@ -218,6 +241,10 @@ export function logBoulder(input: LogInput) {
     chalkBase: breakdown.base,
     chalkBonus: breakdown.total - breakdown.base,
     chalkTotal: breakdown.total,
+    isBoss: input.isBoss,
+    attemptType: input.attemptType,
+    holdColorId: input.holdColorId,
+    gymId: input.gymId,
   };
 
   set(s => {
@@ -232,9 +259,9 @@ export function logBoulder(input: LogInput) {
       stats: {
         ...s.stats,
         totalLogs: s.stats.totalLogs + 1,
-        totalSends: s.stats.totalSends + (log.sends ?? 1),
-        totalFlashes: s.stats.totalFlashes,
-        bossesSent: s.stats.bossesSent,
+        totalSends: s.stats.totalSends + (input.sent || input.attemptType === "flash" || input.attemptType === "send" ? 1 : 0),
+        totalFlashes: s.stats.totalFlashes + (input.attemptType === "flash" ? 1 : 0),
+        bossesSent: s.stats.bossesSent + (input.isBoss && (input.attemptType === "flash" || input.attemptType === "send") ? 1 : 0),
       },
     };
   });

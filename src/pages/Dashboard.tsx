@@ -1,23 +1,24 @@
-import { useMemo } from "react";
-import { useGame, currentLevel, nextLevel, levelUp, activeBoss } from "@/game/store";
+import { useMemo, useState } from "react";
+import { useGame, currentLevel, nextLevel, levelUp } from "@/game/store";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
-import { Link, useNavigate } from "react-router-dom";
-import { ITEM_BY_ID, BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
+
+import { BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
 import { getItem } from "@/game/customItems";
 import { toast } from "sonner";
-import { ScrollText, Swords, ArrowUp, Sparkles, Trophy, TrendingUp } from "lucide-react";
+import { ScrollText, ArrowUp, Sparkles, Trophy, TrendingUp } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
+import { LogModal } from "@/components/LogModal";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function Dashboard() {
   const s = useGame();
   const cur = currentLevel(s);
   const next = nextLevel(s);
-  const boss = activeBoss(s);
-  const nav = useNavigate();
   
+  const [logOpen, setLogOpen] = useState(false);
+
   const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;
 
   const onLevelUp = () => {
@@ -28,6 +29,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-float-up">
+      <LogModal open={logOpen} onOpenChange={setLogOpen} />
       {/* Hero card */}
       <GameCard tone="accent" className="p-5 sm:p-7">
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">
@@ -49,11 +51,8 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
-              <GameButton variant="success" onClick={() => nav("/log")}>
+              <GameButton variant="success" onClick={() => setLogOpen(true)}>
                 <ScrollText className="h-4 w-4" /> Log Boulder
-              </GameButton>
-              <GameButton variant="danger" onClick={() => nav("/bosses")}>
-                <Swords className="h-4 w-4" /> Boss Project
               </GameButton>
               {next && s.chalk >= next.cost && (
                 <GameButton variant="legendary" onClick={onLevelUp}>
@@ -67,7 +66,7 @@ export default function Dashboard() {
 
       <ChalkOverTimeChart logs={s.logs} />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Equipped */}
         <GameCard className="p-5">
           <h3 className="menu-label mb-3 flex items-center gap-1.5"><Sparkles className="h-3 w-3" /> Equipped</h3>
@@ -92,25 +91,6 @@ export default function Dashboard() {
           )}
         </GameCard>
 
-        {/* Active boss */}
-        <GameCard tone="boss" className="p-5">
-          <h3 className="menu-label mb-3 flex items-center gap-1.5"><Swords className="h-3 w-3" /> Active Boss</h3>
-          {boss ? (
-            <Link to="/bosses" className="block group">
-              <div className="font-medium truncate group-hover:text-boss transition-colors">{boss.name}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{boss.grade} · {boss.style}</div>
-              <div className="mt-3">
-                <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
-                  <span>High point</span><span className="tabular-nums">{boss.highPoint}%</span>
-                </div>
-                <PixelBar value={boss.highPoint} color="hsl(var(--boss))" />
-              </div>
-              <div className="mt-2 text-[11px] text-muted-foreground">{boss.attempts.length} attempts</div>
-            </Link>
-          ) : (
-            <div className="text-sm text-muted-foreground">No active boss. Pick a nemesis →</div>
-          )}
-        </GameCard>
 
         {/* Badges */}
         <GameCard tone="legendary" className="p-5">

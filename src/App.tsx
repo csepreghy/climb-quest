@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import LogBoulder from "./pages/LogBoulder";
-import Bosses from "./pages/Bosses";
 import Character from "./pages/Character";
 import Shop from "./pages/Shop";
 import Inventory from "./pages/Inventory";
@@ -40,7 +39,7 @@ const App = () => (
               <Route element={<Layout />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/log" element={<LogBoulder />} />
-                <Route path="/bosses" element={<Bosses />} />
+                
                 <Route path="/character" element={<Character />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/inventory" element={<Inventory />} />

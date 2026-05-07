@@ -325,3 +325,116 @@ function InventoryAdmin() {
     </GameCard>
   );
 }
+
+function LevelsAdmin() {
+  const overrides = useLevelOverrides();
+  const [gender, setGender] = useState<Gender>("male");
+  const [editing, setEditing] = useState<number | null>(null);
+
+  return (
+    <GameCard tone="legendary" className="p-5 space-y-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <div className="menu-label">Levels</div>
+          <p className="text-xs text-muted-foreground mt-1">Override the name, tagline, chalk requirement and character image for each level. Saved per gender.</p>
+        </div>
+        <div className="flex gap-1.5">
+          {(["male","female"] as const).map(g => (
+            <Button key={g} size="sm" variant={gender === g ? "default" : "secondary"} onClick={() => { setGender(g); setEditing(null); }} className="capitalize">{g}</Button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        {LEVELS.map(base => {
+          const o = overrides.get(`${base.level}:${gender}` as any);
+          const r = resolvedLevel(base.level, gender);
+          const hasOverride = !!o;
+          const isEditing = editing === base.level;
+          return (
+            <div key={base.level} className={cn("rounded-lg border p-3", hasOverride ? "border-accent/40 bg-accent/5" : "border-border bg-secondary/20")}>
+              <div className="flex items-start gap-3">
+                <div className="h-12 w-12 grid place-items-center text-2xl shrink-0 rounded bg-background/40 border border-border">
+                  {r.image ? <img src={r.image} alt="" className="h-12 w-12 object-contain" /> : <span className="text-muted-foreground text-base">Lv {base.level}</span>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Lv {base.level}{hasOverride ? "" : " · empty"}</div>
+                  <div className="text-sm font-semibold truncate">{hasOverride ? r.title : <span className="text-muted-foreground italic">No name</span>}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">{hasOverride ? r.desc : <span className="italic">No tagline</span>}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{r.cost.toLocaleString()} Chalk</div>
+                </div>
+                <button className="text-muted-foreground hover:text-foreground" onClick={() => setEditing(isEditing ? null : base.level)} title="Edit"><Pencil className="h-4 w-4" /></button>
+              </div>
+              {isEditing && <LevelEditor level={base.level} gender={gender} initial={o} onDone={() => setEditing(null)} />}
+            </div>
+          );
+        })}
+      </div>
+    </GameCard>
+  );
+}
+
+function LevelEditor({ level, gender, initial, onDone }: { level: number; gender: Gender; initial: any; onDone: () => void; }) {
+  const [name, setName] = useState<string>(initial?.name ?? "");
+  const [tagline, setTagline] = useState<string>(initial?.tagline ?? "");
+  const [chalkReq, setChalkReq] = useState<string>(initial?.chalkReq != null ? String(initial.chalkReq) : "");
+  const [imageUrl, setImageUrl] = useState<string | null>(initial?.image ?? null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  function pick(file: File) {
+    if (file.size > 20 * 1024 * 1024) { toast.error("Image too large (max 20 MB)"); return; }
+    setImageFile(file);
+    setImageUrl(URL.createObjectURL(file));
+  }
+
+  async function save() {
+    setBusy(true);
+    try {
+      await saveLevelOverride(level, gender, {
+        name: name.trim() || null,
+        tagline: tagline.trim() || null,
+        chalkReq: chalkReq === "" ? null : Math.max(0, parseInt(chalkReq) || 0),
+        imageFile: imageFile ?? undefined,
+        image: imageFile ? undefined : imageUrl,
+      });
+      toast.success("Level saved");
+      onDone();
+    } catch (e: any) { toast.error(e?.message ?? "Save failed"); }
+    finally { setBusy(false); }
+  }
+
+  async function clearAll() {
+    if (!confirm(`Clear Lv ${level} (${gender})?`)) return;
+    setBusy(true);
+    try { await clearLevelOverride(level, gender); toast.success("Cleared"); onDone(); }
+    catch (e: any) { toast.error(e?.message ?? "Clear failed"); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="mt-3 pt-3 border-t border-border space-y-2">
+      <div className="grid gap-2 grid-cols-[80px,1fr]">
+        <label className="flex flex-col items-center justify-center h-20 w-20 rounded-lg border-2 border-dashed border-[hsl(var(--panel-frame))] bg-secondary/40 cursor-pointer hover:border-[hsl(var(--btn-orange))] overflow-hidden">
+          {imageUrl
+            ? <img src={imageUrl} alt="" className="h-full w-full object-contain" />
+            : <div className="text-center text-muted-foreground text-[10px]"><Upload className="h-4 w-4 mx-auto mb-0.5" />Image</div>}
+          <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) pick(f); }} />
+        </label>
+        <div className="grid gap-2">
+          <Input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+          <Input placeholder="Tagline" value={tagline} onChange={e => setTagline(e.target.value)} />
+          <Input type="number" min={0} placeholder="Chalk requirement" value={chalkReq} onChange={e => setChalkReq(e.target.value)} />
+        </div>
+      </div>
+      <div className="flex justify-between gap-2">
+        <Button variant="ghost" size="sm" className="text-destructive" onClick={clearAll} disabled={busy}><Trash2 className="h-4 w-4" /> Clear</Button>
+        <div className="flex gap-2">
+          {imageUrl && <Button variant="ghost" size="sm" onClick={() => { setImageUrl(null); setImageFile(null); }}>Remove image</Button>}
+          <Button variant="ghost" size="sm" onClick={onDone}><X className="h-4 w-4" /> Cancel</Button>
+          <GameButton variant="primary" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save"}</GameButton>
+        </div>
+      </div>
+    </div>
+  );
+}

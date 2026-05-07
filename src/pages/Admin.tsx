@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, useGame } from "@/game/store";
+import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, resetGame, useGame } from "@/game/store";
+import { useAuth } from "@/hooks/useAuth";
+import { useActiveSlot, snapshotActiveSlot } from "@/game/adminAccounts";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Plus, Minus, Upload, Trash2, Pencil, X } from "lucide-react";
 import {

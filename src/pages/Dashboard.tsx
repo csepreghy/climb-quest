@@ -15,6 +15,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 
 export default function Dashboard() {
   const s = useGame();
+  useLevelOverrides();
   const cur = currentLevel(s);
   const next = nextLevel(s);
   

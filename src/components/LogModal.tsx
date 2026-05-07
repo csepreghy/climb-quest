@@ -35,7 +35,7 @@ export function LogModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
               <PickCard
                 image={boulderImg}
                 title="Boulder"
-                desc="Within your abilities — first try, or several goes in a single session."
+                desc="Within your abilities — first try, or several attempts in a single session."
                 onClick={() => { setKind("boulder"); setMode("form"); }}
                 ring="ring-[hsl(var(--btn-green))]/60"
               />

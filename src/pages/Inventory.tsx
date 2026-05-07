@@ -101,6 +101,11 @@ export default function Inventory() {
 
   const [compareItem, setCompareItem] = useState<ShopItem | null>(null);
   const [slotPicker, setSlotPicker] = useState<ShopItem | null>(null);
+  const [emptyGearPicker, setEmptyGearPicker] = useState(false);
+  const [levelsOpen, setLevelsOpen] = useState(false);
+  const cur = currentLevel(s);
+  const nxt = nextLevel(s);
+  const canLevelUp = !!nxt && s.chalk >= nxt.cost;
   const equippedItem = compareItem
     ? (compareItem.consumableBonus
         ? (s.pendingConsumable ? getItem(s.pendingConsumable) ?? null : null)
@@ -109,6 +114,8 @@ export default function Inventory() {
   const slotAlternatives = slotPicker
     ? owned.filter(it => it.slot === slotPicker.slot && it.id !== slotPicker.id)
     : [];
+  const equippedGearIds = new Set(GEAR_SLOTS.map(sl => s.equipped[sl]).filter(Boolean) as string[]);
+  const availableGear = owned.filter(it => it.group === "gear" && !it.consumableBonus && !equippedGearIds.has(it.id));
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px,1fr] animate-float-up">

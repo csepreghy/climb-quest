@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
+import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp, FlaskConical, User as UserIcon } from "lucide-react";
+import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
 import { useGame, nextLevel, levelUp, currentLevel } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";

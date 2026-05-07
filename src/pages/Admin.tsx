@@ -109,10 +109,10 @@ function InventoryAdmin() {
   function reset() { setDraft(empty); setEditingId(null); }
 
   async function pickImage(file: File) {
-    if (file.size > 2 * 1024 * 1024) { toast.error("Image too large (max 2 MB)"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setDraft(d => ({ ...d, imageDataUrl: reader.result as string }));
-    reader.readAsDataURL(file);
+    if (file.size > 20 * 1024 * 1024) { toast.error("Image too large (max 20 MB)"); return; }
+    // Show local preview immediately; actual upload happens in save() (resized to 800px webp).
+    const previewUrl = URL.createObjectURL(file);
+    setDraft(d => ({ ...d, imageDataUrl: previewUrl, imageFile: file }));
   }
 
   async function save() {

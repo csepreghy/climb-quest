@@ -139,7 +139,8 @@ export default function Dashboard() {
                   {l.chalkBonus > 0 && <div className="text-[10px] text-muted-foreground">+{l.chalkBonus} bonus</div>}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </GameCard>

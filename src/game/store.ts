@@ -266,10 +266,12 @@ export interface LogInput {
   holdColorId?: string;
   gymId?: string;
   chalkMultiplier?: number;
+  /** Pre-computed difficulty multiplier (climb grade vs player ceiling). Default 1. */
+  difficultyMult?: number;
 }
 
 export function logBoulder(input: LogInput) {
-  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash");
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1);
   const mult = input.chalkMultiplier ?? 1;
   const breakdown = mult === 1 ? raw : {
     base: raw.base,
@@ -341,7 +343,7 @@ export function deleteLog(id: string) {
 }
 
 export function updateLog(id: string, input: LogInput) {
-  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash");
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1);
   const mult = input.chalkMultiplier ?? 1;
   const breakdown = mult === 1 ? raw : {
     base: raw.base,

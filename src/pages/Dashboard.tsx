@@ -49,13 +49,8 @@ export default function Dashboard() {
             <div className="menu-label">Level {s.level} · {cur.title}</div>
             <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
-            <div className="mt-4 flex items-baseline justify-between text-xs">
-              <span className="text-muted-foreground">
-                {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
-              </span>
-              <span className="tabular-nums text-muted-foreground">
-                {next ? <><span className="gradient-chalk-text font-bold">{s.chalk.toLocaleString()}</span> / {next.cost.toLocaleString()} chalk</> : `${s.chalk.toLocaleString()} chalk`}
-              </span>
+            <div className="mt-4 text-xs text-muted-foreground">
+              {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
             </div>
 
             <EquippedStrip equipped={s.equipped} />
@@ -152,6 +147,8 @@ function StatCard({ label, value }: { label: string; value: number }) {
 }
 
 function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }) {
+  // Subscribe to catalog so strip re-renders once custom item images load on refresh.
+  useCustomItems();
   const SLOTS: Slot[] = ["outfit", "bottoms", "shoes", "hat", "chalk", "hand", "accessory", "aura"];
   const equippedItems = SLOTS
     .map(slot => ({ slot, id: equipped[slot] }))
@@ -162,12 +159,7 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
 
   return (
     <div className="mt-4">
-      <div className="flex items-center justify-between mb-1.5">
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Equipped</div>
-        <Link to="/inventory" className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground inline-flex items-center gap-0.5">
-          Manage <ChevronRight className="h-3 w-3" />
-        </Link>
-      </div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Equipped</div>
       {equippedItems.length === 0 ? (
         <Link to="/shop" className="block text-xs text-muted-foreground italic hover:text-foreground">
           Nothing equipped — visit the shop to gear up.

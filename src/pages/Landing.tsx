@@ -40,7 +40,6 @@ export default function Landing() {
             />
           </Link>
           <div className="flex items-center gap-2">
-            <GameButton variant="ghost" size="sm" onClick={goAuth}>Sign in</GameButton>
             <GameButton variant="primary" size="sm" onClick={goAuth}>
               Start climbing <ArrowRight className="h-4 w-4" />
             </GameButton>

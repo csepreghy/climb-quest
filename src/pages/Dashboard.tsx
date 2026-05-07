@@ -52,10 +52,10 @@ export default function Dashboard() {
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
               <GameButton variant="success" onClick={() => setLogOpen(true)}>
-                <ScrollText className="h-4 w-4" /> Log Boulder
+                <Plus className="h-4 w-4" /> Log Boulder
               </GameButton>
               {next && s.chalk >= next.cost && (
-                <GameButton variant="legendary" onClick={onLevelUp}>
+                <GameButton variant="primary" onClick={onLevelUp}>
                   <ArrowUp className="h-4 w-4" /> Level Up
                 </GameButton>
               )}

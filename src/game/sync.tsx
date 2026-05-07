@@ -45,9 +45,17 @@ export function GameSync() {
     if (isAdmin && slot === "personal") {
       bindGameRemoteSync(null);
       bindGymsRemoteSync(null);
-      // Personal blob is saved/loaded by switchToSlot in adminAccounts.ts.
-      // Persist any further changes to that blob.
       const persistKey = `climbquest:admin:slot:personal:${uid}`;
+      // Load the personal blob into live state (or empty profile if none).
+      try {
+        const raw = localStorage.getItem(persistKey);
+        const blob = raw ? JSON.parse(raw) : {};
+        replaceGameState((blob.game ?? {}) as GameState);
+        replaceGymsState((blob.gyms ?? {}) as GymState);
+      } catch {
+        replaceGameState({} as GameState);
+        replaceGymsState({} as GymState);
+      }
       const writeBlob = () => {
         try {
           localStorage.setItem(persistKey, JSON.stringify({

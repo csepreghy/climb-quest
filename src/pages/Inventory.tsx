@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Slot, ItemGroup, Rarity, ShopItem } from "@/game/data";
+import { Slot, ItemGroup, Rarity, ShopItem, GEAR_SLOTS, gearSlotsUnlocked, LEVELS } from "@/game/data";
 import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame } from "@/game/store";
 import { getItem, useCustomItems } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Lock } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
 
 const SLOT_LABEL: Record<Slot, string> = {
@@ -22,6 +22,7 @@ const SLOT_LABEL: Record<Slot, string> = {
   hand: "Hand",
   chalk: "Chalk",
   accessory: "Brush",
+  study: "Study",
   aura: "Aura",
   title: "Title",
 };
@@ -34,22 +35,43 @@ const GROUP_LABEL: Record<ItemGroup, string> = {
 
 const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
   outfit: ["outfit", "bottoms", "shoes", "hat", "hand"],
-  gear: ["chalk", "accessory"],
+  gear: GEAR_SLOTS,
   power: ["aura", "title"],
 };
 
-function EmptySlotCard({ slot }: { slot: Slot }) {
+function EmptySlotCard({ label }: { label: string }) {
   return (
     <GameCard className="p-4 flex flex-col gap-3 relative opacity-60 h-full">
       <div className="flex items-start gap-3">
         <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border text-2xl">∅</div>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium leading-snug text-muted-foreground">Empty</div>
-          <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">{SLOT_LABEL[slot]}</div>
+          <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">{label}</div>
         </div>
       </div>
     </GameCard>
   );
+}
+
+function LockedSlotCard({ unlocksAt }: { unlocksAt: number }) {
+  return (
+    <GameCard className="p-4 flex flex-col gap-3 relative opacity-50 h-full">
+      <div className="flex items-start gap-3">
+        <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border">
+          <Lock className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-medium leading-snug text-muted-foreground">Locked</div>
+          <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">Unlocks at Lv {unlocksAt}</div>
+        </div>
+      </div>
+    </GameCard>
+  );
+}
+
+function gearUnlockLevel(slotIndex: number): number {
+  // slot 0: lvl 1, slot 1: lvl 3, slot 2: lvl 5, slot 3: lvl 8
+  return [1, 3, 5, 8][slotIndex] ?? 99;
 }
 
 export default function Inventory() {

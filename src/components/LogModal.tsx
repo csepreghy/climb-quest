@@ -280,23 +280,18 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
           <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Beta unlocked. Tried not to scream." rows={2} />
         </Field>
 
-        <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm space-y-1">
-          <div className="flex justify-between font-bold">
+        <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
+          <div className="flex justify-between items-baseline font-bold">
             <span>Preview reward</span>
-            <span className="gradient-chalk-text">+{preview.total} Chalk</span>
+            <span className="tabular-nums">
+              <span className="text-muted-foreground font-normal">{preview.base}</span>
+              {preview.bonuses.length > 0 && (
+                <span className="text-chalk-glow font-normal"> + {preview.bonuses.reduce((a, b) => a + b.amount, 0)}</span>
+              )}
+              <span className="text-muted-foreground font-normal"> = </span>
+              <span className="gradient-chalk-text">+{preview.total} Chalk</span>
+            </span>
           </div>
-          <div className="text-xs text-muted-foreground flex justify-between">
-            <span>Base</span><span className="tabular-nums">{preview.base}</span>
-          </div>
-          {preview.bonuses.map((b, i) => (
-            <div key={i} className="text-xs text-muted-foreground flex justify-between">
-              <span>+ {b.source}</span>
-              <span className="tabular-nums text-chalk-glow">+{b.amount}</span>
-            </div>
-          ))}
-          {preview.bonuses.length > 1 && (
-            <div className="text-[10px] text-muted-foreground italic pt-1">Bonuses stack on the running total.</div>
-          )}
         </div>
       </div>
 

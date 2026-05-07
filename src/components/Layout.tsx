@@ -36,6 +36,7 @@ export default function Layout() {
   const [logOpen, setLogOpen] = useState(false);
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
 
+  useLevelOverrides();
   const cur = currentLevel(s);
   const nxt = nextLevel(s);
   const canLevel = !!nxt && s.chalk >= nxt.cost;

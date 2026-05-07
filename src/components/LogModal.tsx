@@ -317,10 +317,7 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
     const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
     const activity: ActivityType = outcome === "defeat" ? "boss_send" : "boss_attempt";
-    const base = computeChalk(activity, styles);
     const mult = outcome === "attempt" ? (ATTEMPT_TIERS.find(t => t.v === attemptTier)?.mult ?? 1) : 1;
-    const total = Math.round(base.total * mult);
-    // Patch the chalk via a minor trick: log with style-only computation; we override total by adjusting notes? Simpler: log directly.
     const res = logBoulder({
       activity,
       date: new Date(date).toISOString(),
@@ -333,12 +330,10 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
       attemptType: outcome === "defeat" ? "send" : "project",
       holdColorId: holdColorId || undefined,
       gymId: gymId || undefined,
+      chalkMultiplier: mult,
     });
-    // For attempts, scale by tier by re-logging delta — simpler: just toast actual value.
-    // Use res total as-is for defeat. For attempt, approximate by computed total:
-    const finalTotal = outcome === "defeat" ? res.log.chalkTotal : Math.round(res.log.chalkTotal * mult);
-    setCelebrate({ total: finalTotal, defeated: outcome === "defeat" });
-    toast.success(`+${finalTotal} Chalk earned`);
+    setCelebrate({ total: res.log.chalkTotal, defeated: outcome === "defeat" });
+    toast.success(`+${res.log.chalkTotal} Chalk earned`);
     setTimeout(() => { setCelebrate(null); onDone(); }, outcome === "defeat" ? 2600 : 1600);
   }
 

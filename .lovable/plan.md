@@ -1,63 +1,52 @@
-# Fix slow image loading
+A public ClimbQuest landing at `/` with a looping feature showcase that **renders the real in-app components** (same `GameCard`, `PickCard`, `ItemCard`, `ClimberAvatar`, `LevelPreviewCard`, `PixelBar`, etc.) so the preview is pixel-identical to the actual product.
 
-## Diagnosis (confirmed)
+## Routing
+- `/` → public `Landing` (no auth).
+- Move dashboard to `/home` (still in `RequireAuth` + `Layout`).
+- Signed-in users hitting `/` redirect to `/home`.
+- `Layout` logo + Home nav point to `/home`.
 
-`shop_items.image` stores **base64 data URLs**. Catalog today: 20 items, **41 MB total**, **~2 MB avg**, biggest 2.5 MB. Every Shop/Inventory mount runs `select("*")` and downloads the whole 41 MB JSON before any card paints. No HTTP caching, no CDN, no lazy loading.
+## Page structure (`src/pages/Landing.tsx`)
 
-## Plan
+1. **Top bar** — `climbquest-logo.png`, "Sign in" ghost button, "Start climbing" `GameButton` → `/auth`. Same pultruded style as the app header (border + inset shadow).
 
-### 1. Storage bucket for item images
+2. **Hero** — two columns:
+   - Left: orange "New" chip ("Log boulders. Earn Chalk. Send bosses."), big headline ("Turn every session into XP."), subhead, two CTAs (`GameButton` primary + ghost).
+   - Right: the **looping showcase card**.
 
-Migration:
-- Create public bucket `shop-item-images`
-- RLS on `storage.objects` for that bucket: public SELECT; INSERT/UPDATE/DELETE only when `has_role(auth.uid(), 'admin')`
+3. **How it works** — 3 cards reusing the exact `PickCard` style from `LogModal` (pultruded `border-2 border-[hsl(var(--panel-frame))] bg-secondary/50` + inset shadows + `aspect-square` image area): Log, Earn Chalk, Level up.
 
-### 2. One-time backfill (admin-only edge function)
+4. **Final CTA** — large `GameCard tone="accent"` with headline + primary `GameButton`.
 
-New edge function `backfill-shop-images` (admin-gated, invoked once from a button on `/admin`):
-- For each `shop_items` row where `image LIKE 'data:%'`:
-  - Decode base64
-  - Re-encode to **webp, max 800×800** (preserve aspect, no upscale)
-  - Upload to `shop-item-images/{id}.webp`
-  - `update shop_items set image = '<public url>'`
-- Show progress + result summary in the admin UI
+5. **Footer** — small © line.
 
-### 3. Admin upload flow → bucket (not base64)
+## Looping showcase
 
-In the admin item editor:
-- On image pick: client-side resize to ≤800×800 + convert to webp via canvas
-- Upload to `shop-item-images/{id}.webp`
-- Save returned public URL into `shop_items.image`
-- Drop the FileReader→data URL path
+A single pultruded `GameCard` (same frame as the app's hero card) with fixed aspect ratio, auto-advancing every ~3.5s, dot indicators, pause on hover, `animate-fade-in` per slide.
 
-### 4. Split catalog query (helps even mid-backfill)
+Each slide reuses **real components** from the app:
 
-`src/game/customItems.ts`:
-- `refresh()` selects everything **except** `image` first → cards render names/prices/rarity instantly
-- Parallel `select("id, image")` merges in as it arrives
-- Expose a `loaded` flag
+1. **Characters** — `ClimberAvatar size="xl" glow` cycling L1/L4/L7/L10 (alternating gender), with the resolved level title + tagline below (from `LEVELS` + `useLevelOverrides`).
+2. **Items** — 2×3 grid of `ItemCard`-styled tiles for a hand-picked set of `BUILTIN_ITEMS` (mix of rarities), reusing `RARITY_BORDER`, `SmartImage`, and the same rarity ribbon used in `Inventory.tsx`. Extract `ItemCard` from `Inventory.tsx` into `src/components/ItemCard.tsx` so both pages can import it.
+3. **Log a climb** — render the actual `PickCard` pair (Boulder + Boss) used in `LogModal`. Extract `PickCard` from `LogModal.tsx` into `src/components/pixel/PickCard.tsx` and import in both. Caption: "Log every session in seconds."
+4. **Boss projects** — pultruded card showing `log-boss.webp` + a `PixelBar` filling 0→80% with a "Crux Cave · 12 attempts" line. Same style as boss section on Dashboard.
+5. **Level up** — the new `LevelPreviewCard` twin (current → next) from `Layout.tsx`. Extract it into `src/components/LevelPreviewCard.tsx` and import in both. Includes chalk-fly particles.
 
-### 5. Lazy load + skeletons
+Mechanics: `useState` index + `useEffect` interval (cleared on hover/unmount), dot row jumps to slide on click, container has fixed `aspect-[4/5]` on mobile / `aspect-square` on desktop so layout doesn't shift.
 
-`Shop.tsx`, `Inventory.tsx`, `ClimberAvatar.tsx`:
-- All item `<img>` get `loading="lazy"` + `decoding="async"`
-- Render 6 rarity-bordered skeleton tiles while `!loaded`
-- Keep rarity-bordered placeholder square visible until image decodes (no layout shift)
+## Background
+Soft radial gradient + 2-3 blurred orange/green orbs (CSS only, `pointer-events-none`) behind content. Uses existing tokens; no new colors or deps.
 
-## Expected result
-
-- Initial JSON payload: **41 MB → ~5 KB**
-- Per-image bytes: **~2 MB base64 → ~30–80 KB webp**, served from CDN with cache headers
-- Cards visible in <200 ms; images stream in as the user scrolls
+## Refactors (so showcase mirrors the app exactly)
+- Extract `PickCard` from `LogModal.tsx` → `src/components/pixel/PickCard.tsx`; update `LogModal` to import it.
+- Extract `ItemCard` from `Inventory.tsx` → `src/components/ItemCard.tsx`; update `Inventory` to import it.
+- Extract `LevelPreviewCard` from `Layout.tsx` → `src/components/LevelPreviewCard.tsx`; update `Layout` to import it.
 
 ## Files
+- Add: `src/pages/Landing.tsx`
+- Add: `src/components/pixel/PickCard.tsx`, `src/components/ItemCard.tsx`, `src/components/LevelPreviewCard.tsx`
+- Edit: `src/App.tsx` (public `/`, dashboard at `/home`, redirect)
+- Edit: `src/components/Layout.tsx` (logo/Home → `/home`, import extracted LevelPreviewCard)
+- Edit: `src/components/LogModal.tsx`, `src/pages/Inventory.tsx` (use extracted components)
 
-**New**
-- Migration: bucket + RLS policies
-- `supabase/functions/backfill-shop-images/index.ts`
-- Admin button to trigger backfill
-
-**Modified**
-- `src/game/customItems.ts` — split query, `loaded` flag, upload to Storage
-- `src/pages/Admin.tsx` (item editor) — resize+webp+upload flow, backfill button
-- `src/pages/Shop.tsx`, `src/pages/Inventory.tsx`, `src/components/ClimberAvatar.tsx` — lazy `<img>`, skeletons
+No backend or schema changes. No new dependencies.

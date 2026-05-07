@@ -13,6 +13,7 @@ import MyGym from "./pages/MyGym";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import Landing from "./pages/Landing";
 import { GameBackground } from "./components/pixel/GameBackground";
 import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 import { ThemeProvider } from "./theme/ThemeProvider";
@@ -34,10 +35,11 @@ const App = () => (
         <AuthProvider>
           <GameSync />
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route element={<RequireAuth />}>
               <Route element={<Layout />}>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/home" element={<Dashboard />} />
                 <Route path="/log" element={<LogBoulder />} />
                 
                 <Route path="/shop" element={<Shop />} />

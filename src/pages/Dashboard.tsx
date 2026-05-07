@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useGyms } from "@/game/gyms";
 import { useGame, currentLevel, nextLevel, levelUp } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -21,6 +22,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 export default function Dashboard() {
   const s = useGame();
   useLevelOverrides();
+  const { gyms } = useGyms();
   const cur = currentLevel(s);
   const next = nextLevel(s);
   
@@ -29,13 +31,7 @@ export default function Dashboard() {
   
 
   const onLevelUp = () => {
-    const fromLevel = s.level;
-    const fromTitle = cur.title;
-    const toLevel = next?.level;
-    const target = next?.title ?? cur.title;
-    const r = levelUp();
-    if (!r.ok) { toast.error(r.reason ?? "Cannot level up"); return; }
-    showLevelUpBanner(target, r.unlocks ?? [], { fromLevel, toLevel, fromTitle, gender: s.gender });
+    window.dispatchEvent(new CustomEvent("cq:open-level-up-confirm"));
   };
 
   return (
@@ -116,12 +112,26 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="divide-y divide-border/40">
-            {s.logs.slice(0, 6).map(l => (
+            {s.logs.slice(0, 6).map(l => {
+              const hold = l.gymId && l.holdColorId
+                ? gyms.find(g => g.id === l.gymId)?.holdColors.find(c => c.id === l.holdColorId)
+                : null;
+              return (
               <div key={l.id} className="py-2.5 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-sm font-medium truncate">{ACTIVITY_LABELS[l.activity] ?? "Boulder"}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(l.date).toLocaleDateString()} · {l.styles.slice(0,2).join(", ") || "—"}{l.grade ? ` · ${l.grade}` : ""}
+                <div className="min-w-0 flex items-center gap-2">
+                  {hold && (
+                    <span
+                      title={`${hold.name} hold`}
+                      aria-label={`${hold.name} hold`}
+                      className="h-3 w-3 rounded-full border border-border shrink-0"
+                      style={{ background: hold.hex }}
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate">{ACTIVITY_LABELS[l.activity] ?? "Boulder"}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(l.date).toLocaleDateString()} · {l.styles.slice(0,2).join(", ") || "—"}{l.grade ? ` · ${l.grade}` : ""}
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -129,7 +139,8 @@ export default function Dashboard() {
                   {l.chalkBonus > 0 && <div className="text-[10px] text-muted-foreground">+{l.chalkBonus} bonus</div>}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </GameCard>

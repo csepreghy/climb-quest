@@ -102,6 +102,9 @@ export default function BoulderLogs() {
           <div className="divide-y divide-border/40">
             {filtered.map(l => {
               const isBoss = !!l.isBoss;
+              const hold = l.gymId && l.holdColorId
+                ? gyms.find(g => g.id === l.gymId)?.holdColors.find(c => c.id === l.holdColorId)
+                : null;
               return (
                 <div key={l.id}
                   className={cn("px-4 py-3 flex items-center justify-between gap-3",
@@ -113,6 +116,14 @@ export default function BoulderLogs() {
                     </div>
                     <div className="min-w-0">
                       <div className="text-sm font-medium truncate flex items-center gap-2">
+                        {hold && (
+                          <span
+                            title={`${hold.name} hold`}
+                            aria-label={`${hold.name} hold`}
+                            className="h-3 w-3 rounded-full border border-border shrink-0"
+                            style={{ background: hold.hex }}
+                          />
+                        )}
                         {ACTIVITY_LABELS[l.activity] ?? "Boulder"}
                         {isBoss && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-boss/20 text-boss border border-boss/40">Boss</span>}
                         {l.attemptType && <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{l.attemptType}</span>}

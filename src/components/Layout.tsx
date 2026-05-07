@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
 import { GameButton } from "@/components/ui/game-button";
@@ -38,6 +38,12 @@ export default function Layout() {
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
 
   useLevelOverrides();
+
+  useEffect(() => {
+    const h = () => setConfirmLvOpen(true);
+    window.addEventListener("cq:open-level-up-confirm", h);
+    return () => window.removeEventListener("cq:open-level-up-confirm", h);
+  }, []);
   const cur = currentLevel(s);
   const nxt = nextLevel(s);
   const canLevel = !!nxt && s.chalk >= nxt.cost;

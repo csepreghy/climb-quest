@@ -104,21 +104,74 @@ export default function MyGym() {
   );
 }
 
+const HOLD_COLOR_PRESETS: { name: string; hex: string }[] = [
+  { name: "Red", hex: "#ef4444" },
+  { name: "Orange", hex: "#f97316" },
+  { name: "Yellow", hex: "#eab308" },
+  { name: "Green", hex: "#22c55e" },
+  { name: "Blue", hex: "#3b82f6" },
+  { name: "Purple", hex: "#a855f7" },
+  { name: "Pink", hex: "#ec4899" },
+  { name: "Black", hex: "#0a0a0a" },
+  { name: "White", hex: "#f5f5f5" },
+  { name: "Grey", hex: "#737373" },
+  { name: "Brown", hex: "#92400e" },
+  { name: "Tan", hex: "#d4a373" },
+];
+
 function AddHoldColor({ onAdd }: { onAdd: (name: string, hex: string) => void }) {
   const [open, setOpen] = useState(false);
+  const [custom, setCustom] = useState(false);
   const [name, setName] = useState("");
   const [hex, setHex] = useState("#22c55e");
+
   if (!open) return (
     <button onClick={() => setOpen(true)} className="text-xs px-3 py-1 rounded-md border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-[hsl(var(--btn-orange))]">
       <Plus className="h-3 w-3 inline" /> Add color
     </button>
   );
+
+  const close = () => { setOpen(false); setCustom(false); setName(""); setHex("#22c55e"); };
+
   return (
-    <div className="flex items-center gap-2 p-2 rounded-md border border-border bg-secondary/40">
-      <input type="color" value={hex} onChange={e => setHex(e.target.value)} className="h-8 w-8 cursor-pointer rounded" />
-      <Input value={name} onChange={e => setName(e.target.value)} placeholder="Name" className="h-8 w-28" />
-      <GameButton size="sm" variant="primary" onClick={() => { if (!name.trim()) return; onAdd(name.trim(), hex); setName(""); setOpen(false); }}>Add</GameButton>
-      <button onClick={() => setOpen(false)} className="text-muted-foreground"><X className="h-4 w-4" /></button>
+    <div className="w-full p-3 rounded-md border border-border bg-secondary/40 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="text-xs font-semibold">Pick a hold color</div>
+        <button onClick={close} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+      </div>
+      {!custom ? (
+        <>
+          <div className="flex flex-wrap gap-2">
+            {HOLD_COLOR_PRESETS.map(p => (
+              <button
+                key={p.hex}
+                onClick={() => { onAdd(p.name, p.hex); close(); }}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-border bg-background/50 hover:border-[hsl(var(--btn-orange))] text-xs"
+              >
+                <span className="h-4 w-4 rounded-full border border-[hsl(var(--panel-frame))]" style={{ background: p.hex }} />
+                {p.name}
+              </button>
+            ))}
+            <button
+              onClick={() => setCustom(true)}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-dashed border-border bg-background/50 hover:border-[hsl(var(--btn-orange))] text-xs"
+            >
+              <span
+                className="h-4 w-4 rounded-full border border-[hsl(var(--panel-frame))]"
+                style={{ background: "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)" }}
+              />
+              Custom
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2">
+          <input type="color" value={hex} onChange={e => setHex(e.target.value)} className="h-8 w-8 cursor-pointer rounded" />
+          <Input value={name} onChange={e => setName(e.target.value)} placeholder="Name" className="h-8 w-32" />
+          <GameButton size="sm" variant="primary" onClick={() => { if (!name.trim()) return; onAdd(name.trim(), hex); close(); }}>Add</GameButton>
+          <button onClick={() => setCustom(false)} className="text-xs text-muted-foreground hover:text-foreground">Back</button>
+        </div>
+      )}
     </div>
   );
 }

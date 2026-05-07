@@ -496,6 +496,12 @@ export function removeOwnedItem(id: string) {
   });
 }
 export function setGender(g: Gender) { set(s => ({ ...s, gender: g })); }
+export function completeOnboarding() {
+  set(s => ({ ...s, onboardedAt: new Date().toISOString() }));
+}
+export function resetOnboarding() {
+  set(s => ({ ...s, onboardedAt: null }));
+}
 
 /** Auto-grant & auto-equip every catalog item priced 0. Idempotent. */
 export function grantFreeItems(items: { id: string; price: number; slot: Slot; consumableBonus?: number }[]) {

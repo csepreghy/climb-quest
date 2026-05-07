@@ -9,6 +9,7 @@ import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { LevelsModal } from "@/components/LevelsModal";
 import { LogModal } from "@/components/LogModal";
+import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { toast } from "sonner";
@@ -56,13 +57,30 @@ export default function Layout() {
       <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} gender={s.gender} />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><ArrowUp className="h-5 w-5 text-[hsl(var(--btn-orange))]" /> Level up?</DialogTitle>
             <DialogDescription>
-              {nxt ? <>Spend <span className="font-bold gradient-chalk-text">{nxt.cost.toLocaleString()} Chalk</span> to advance from Lv {s.level} · {cur.title} to <span className="font-semibold text-foreground">Lv {nxt.level} · {nxt.title}</span>.</> : "Already at max level."}
+              {nxt ? <>Spend <span className="font-bold gradient-chalk-text">{nxt.cost.toLocaleString()} Chalk</span> to advance.</> : "Already at max level."}
             </DialogDescription>
           </DialogHeader>
+          {nxt && (
+            <div className="flex items-center justify-center gap-3 py-2">
+              <div className="flex flex-col items-center gap-1.5 flex-1">
+                <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="md" />
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Current</div>
+                <div className="text-sm font-bold">Lv {s.level}</div>
+                <div className="text-xs text-muted-foreground text-center leading-tight">{cur.title}</div>
+              </div>
+              <ArrowUp className="h-6 w-6 rotate-90 text-[hsl(var(--btn-orange))] shrink-0" />
+              <div className="flex flex-col items-center gap-1.5 flex-1">
+                <ClimberAvatar level={nxt.level} gender={s.gender} equipped={s.equipped} size="md" glow />
+                <div className="text-[10px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">Next</div>
+                <div className="text-sm font-bold">Lv {nxt.level}</div>
+                <div className="text-xs text-muted-foreground text-center leading-tight">{nxt.title}</div>
+              </div>
+            </div>
+          )}
           <DialogFooter className="gap-2 sm:gap-2">
             <GameButton variant="ghost" size="sm" onClick={() => setConfirmLvOpen(false)}>Cancel</GameButton>
             <GameButton variant="primary" size="sm" onClick={onConfirmLevelUp} disabled={!canLevel}>

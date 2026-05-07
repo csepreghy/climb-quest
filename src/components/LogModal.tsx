@@ -260,7 +260,14 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
               { v: "send", label: "Send 🏆", desc: "Multi-try, 1 sesh" },
               { v: "project", label: "Project 🎯", desc: "Multi-session" },
             ] as { v: AttemptType; label: string; desc: string }[]).map(o => (
-              <button key={o.v} type="button" onClick={() => setAttemptType(o.v)}
+              <button key={o.v} type="button"
+                onClick={() => {
+                  if (o.v === "project" && !editLog && onSwitchToBoss) {
+                    setProjectPromptOpen(true);
+                  } else {
+                    setAttemptType(o.v);
+                  }
+                }}
                 className={cn("rounded-lg p-2.5 text-left border-2 transition",
                   attemptType === o.v
                     ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15"

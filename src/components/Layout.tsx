@@ -53,8 +53,8 @@ export default function Layout() {
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>
               <span className="font-bold tabular-nums text-[hsl(var(--sky))]">{s.level}</span>
             </button>
-            <GameButton variant="danger" size="sm" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out">
-              <LogOut className="h-4 w-4" /> Sign out
+            <GameButton variant="danger" size="icon" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out" aria-label="Sign out">
+              <LogOut className="h-4 w-4" />
             </GameButton>
           </div>
         </div>

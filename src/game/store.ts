@@ -435,15 +435,18 @@ export function adminSeedMockData() {
   let totalSends = 0;
   let totalFlashes = 0;
 
-  for (let i = 0; i < 18; i++) {
+  const SEED_COUNT = 40;
+  const SPAN_DAYS = 90;
+  for (let i = 0; i < SEED_COUNT; i++) {
     const activity = activities[i % activities.length];
     const attemptType = attempts[i % attempts.length];
     const styleSet: Style[] = [styles[i % styles.length], styles[(i * 3 + 1) % styles.length]];
     const sent = attemptType === "send" || attemptType === "flash";
     const breakdown = computeChalk(activity, styleSet, sent, attemptType === "flash");
+    const dayOffset = Math.floor((i / (SEED_COUNT - 1)) * (SPAN_DAYS - 1));
     logs.push({
       id: crypto.randomUUID(),
-      date: new Date(now - i * 86400000 - Math.floor(Math.random() * 7200000)).toISOString(),
+      date: new Date(now - dayOffset * 86400000 - Math.floor(Math.random() * 7200000)).toISOString(),
       activity,
       duration: 30 + (i % 4) * 15,
       location: locations[i % locations.length],

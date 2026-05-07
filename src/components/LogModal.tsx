@@ -10,7 +10,8 @@ import { computeChalk, logBoulder, AttemptType } from "@/game/store";
 import { useGyms, setLastUsedGym, gradeLabels } from "@/game/gyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
 
@@ -117,8 +118,9 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
   const [celebrating, setCelebrating] = useState<{ total: number } | null>(null);
 
   const sent = attemptType === "flash" || attemptType === "send";
+  const flashed = attemptType === "flash";
   const preview = useMemo(
-    () => computeChalk(kind === "boss" ? (sent ? "boss_send" : "boss_attempt") : activity, styles, kind === "boss" ? false : sent),
+    () => computeChalk(kind === "boss" ? (sent ? "boss_send" : "boss_attempt") : activity, styles, kind === "boss" ? false : sent, kind === "boss" ? false : flashed),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activity, attemptType, styles.join(","), kind],
   );
@@ -281,8 +283,37 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
         </Field>
 
         <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
-          <div className="flex justify-between items-baseline font-bold">
-            <span>Preview reward</span>
+          <div className="flex justify-between items-center gap-2 font-bold">
+            <span className="flex items-center gap-1.5">
+              Preview reward
+              {preview.bonuses.length > 0 && (
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" aria-label="Show bonus breakdown" className="text-muted-foreground hover:text-foreground">
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between gap-4 font-semibold">
+                          <span>Base</span><span className="tabular-nums">{preview.base}</span>
+                        </div>
+                        {preview.bonuses.map((b, i) => (
+                          <div key={i} className="flex justify-between gap-4">
+                            <span>+ {b.source}</span>
+                            <span className="tabular-nums">+{b.amount}</span>
+                          </div>
+                        ))}
+                        <div className="border-t border-border/60 pt-1 flex justify-between gap-4 font-semibold">
+                          <span>Total</span><span className="tabular-nums">+{preview.total}</span>
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </span>
             <span className="tabular-nums">
               <span className="text-muted-foreground font-normal">{preview.base}</span>
               {preview.bonuses.length > 0 && (

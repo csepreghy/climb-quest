@@ -34,10 +34,12 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
 
   return (
     <div className={cn("relative inline-flex items-center justify-center", FRAME_SIZE[size])}>
-      <div
-        className="absolute inset-0 rounded-xl border border-[hsl(var(--panel-frame))] overflow-hidden"
-        style={{ background: "var(--avatar-stage, transparent)" }}
-      />
+      {!customImage && (
+        <div
+          className="absolute inset-0 rounded-xl border border-[hsl(var(--panel-frame))] overflow-hidden"
+          style={{ background: "var(--avatar-stage, transparent)" }}
+        />
+      )}
 
       {showGlow && (
         <div
@@ -55,7 +57,7 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
           alt={lvl.title}
           loading="lazy"
           decoding="async"
-          className="relative z-10 h-[92%] w-[92%] object-contain drop-shadow-[0_3px_0_hsl(0_0%_0%/0.35)]"
+          className="relative z-10 h-full w-full object-contain"
         />
       ) : useIllustration ? (
         <img

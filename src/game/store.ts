@@ -167,7 +167,7 @@ export interface ChalkBreakdown {
   bonuses: { source: string; amount: number }[];
   total: number;
 }
-export function computeChalk(activity: ActivityType, styles: Style[], sent = false): ChalkBreakdown {
+export function computeChalk(activity: ActivityType, styles: Style[], sent = false, flashed = false): ChalkBreakdown {
   const base = BASE_CHALK[activity] ?? 50;
   const bonuses: { source: string; amount: number }[] = [];
   let running = base;
@@ -176,6 +176,13 @@ export function computeChalk(activity: ActivityType, styles: Style[], sent = fal
   if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
     const amt = BASE_CHALK.boulder_send;
     bonuses.push({ source: "Send", amount: amt });
+    running += amt;
+  }
+
+  // Flash: +50% on the base chalk
+  if (flashed && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
+    const amt = Math.round(base * 0.5);
+    bonuses.push({ source: "Flash (+50%)", amount: amt });
     running += amt;
   }
 
@@ -228,7 +235,7 @@ export interface LogInput {
 }
 
 export function logBoulder(input: LogInput) {
-  const breakdown = computeChalk(input.activity, input.styles, input.sent);
+  const breakdown = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash");
   const log: BoulderLog = {
     id: crypto.randomUUID(),
     date: input.date ?? new Date().toISOString(),

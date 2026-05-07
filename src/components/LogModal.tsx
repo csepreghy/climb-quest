@@ -353,7 +353,7 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
     const mult = outcome === "attempt" ? (ATTEMPT_TIERS.find(t => t.v === attemptTier)?.mult ?? 1) : 1;
     const input = {
       activity,
-      date: new Date(date).toISOString(),
+      date: dateISO,
       location: locationStr || undefined,
       grade,
       styles,

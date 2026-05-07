@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ShopItem, RARITY_COLOR, RARITY_BORDER, ItemGroup } from "@/game/data";
-import { useAllItems, isImageEmoji } from "@/game/customItems";
+import { useAllItems, useCatalogLoaded, isImageEmoji } from "@/game/customItems";
 import { buyItem, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

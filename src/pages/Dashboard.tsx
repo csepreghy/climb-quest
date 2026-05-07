@@ -29,13 +29,7 @@ export default function Dashboard() {
   
 
   const onLevelUp = () => {
-    const fromLevel = s.level;
-    const fromTitle = cur.title;
-    const toLevel = next?.level;
-    const target = next?.title ?? cur.title;
-    const r = levelUp();
-    if (!r.ok) { toast.error(r.reason ?? "Cannot level up"); return; }
-    showLevelUpBanner(target, r.unlocks ?? [], { fromLevel, toLevel, fromTitle, gender: s.gender });
+    window.dispatchEvent(new CustomEvent("cq:open-level-up-confirm"));
   };
 
   return (

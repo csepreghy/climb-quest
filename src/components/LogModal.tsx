@@ -556,14 +556,17 @@ function BossCelebrate({ total }: { total: number }) {
         );
       })}
       <div className="relative">
-        <div className="mx-auto h-24 w-24 rounded-2xl overflow-hidden border-4 border-[hsl(var(--boss))] shadow-[0_0_40px_hsl(var(--boss)/0.7)] animate-banner-pop">
+        <div className="mx-auto h-56 w-56 rounded-2xl overflow-hidden border-4 border-[hsl(var(--boss))] shadow-[0_0_60px_hsl(var(--boss)/0.75)] animate-banner-pop">
           <img src={bossImg} alt="Boss defeated" className="h-full w-full object-cover" />
         </div>
         <div className="mt-5 font-display font-extrabold text-3xl uppercase tracking-wider animate-banner-pop"
           style={{ color: "hsl(var(--boss))", textShadow: "0 2px 0 hsl(0 0% 0% / 0.5)" }}>
           Boss Defeated!
         </div>
-        <div className="mt-3 text-5xl font-extrabold gradient-chalk-text animate-pop-in tabular-nums">+{total}</div>
+        <div className="mt-3 flex items-center justify-center gap-3 animate-pop-in">
+          <img src={goldenChalkBagImg} alt="Chalk" className="h-14 w-14 object-contain drop-shadow-[0_4px_14px_hsl(var(--legendary)/0.7)]" />
+          <span className="text-5xl font-extrabold gradient-chalk-text tabular-nums">+{total}</span>
+        </div>
         <div className="mt-1 text-sm uppercase tracking-[0.3em] text-muted-foreground">Chalk earned</div>
       </div>
     </div>

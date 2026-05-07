@@ -57,7 +57,15 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} gender={s.gender} />
+      <LevelsModal
+        open={levelsOpen}
+        onOpenChange={setLevelsOpen}
+        currentLevel={s.level}
+        gender={s.gender}
+        canLevelUp={canLevel}
+        nextCost={nxt?.cost}
+        onLevelUpClick={() => { setLevelsOpen(false); setConfirmLvOpen(true); }}
+      />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
         <DialogContent className="max-w-2xl">

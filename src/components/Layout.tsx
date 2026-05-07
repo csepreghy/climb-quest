@@ -162,7 +162,7 @@ export default function Layout() {
               <span className={cn("relative font-bold tabular-nums", canLevel ? "text-white" : "text-[hsl(var(--sky))]")}>{s.level}</span>
               {canLevel && <ArrowUp className="relative h-3.5 w-3.5" />}
             </button>
-            <GameButton variant="danger" size="sm" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out" aria-label="Sign out" className="!px-2.5">
+            <GameButton variant="danger" size="sm" onClick={async () => { await signOut(); nav("/"); }} title="Sign out" aria-label="Sign out" className="!px-2.5">
               <LogOut className="h-4 w-4" />
             </GameButton>
           </div>

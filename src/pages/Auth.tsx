@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import logoImg from "@/assets/climbquest-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,12 +48,16 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen grid place-items-center p-6">
+    <div className="min-h-screen grid place-items-center p-6 relative">
+      <Link to="/" className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition">
+        <ArrowLeft className="h-3.5 w-3.5" /> Back to home
+      </Link>
       <GameCard tone="accent" className="p-6 w-full max-w-sm space-y-4">
         <div className="text-center">
-          <div className="text-2xl">🧗</div>
-          <div className="font-display font-bold text-lg">ClimbQuest</div>
-          <div className="text-xs text-muted-foreground">{mode === "signin" ? "Sign in to continue" : "Create your account"}</div>
+          <Link to="/" aria-label="ClimbQuest home" className="inline-block">
+            <img src={logoImg} alt="ClimbQuest" className="h-20 w-auto mx-auto drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]" />
+          </Link>
+          <div className="text-xs text-muted-foreground mt-1">{mode === "signin" ? "Sign in to continue" : "Create your account"}</div>
         </div>
         <GameButton type="button" variant="primary" className="w-full" onClick={google}>Continue with Google</GameButton>
         <div className="text-[10px] text-center text-muted-foreground uppercase tracking-wider">or</div>

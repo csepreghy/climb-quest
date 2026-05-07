@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import LogBoulder from "./pages/LogBoulder";
-import Character from "./pages/Character";
+
 import Shop from "./pages/Shop";
 import Inventory from "./pages/Inventory";
 import MyGym from "./pages/MyGym";
@@ -40,7 +40,6 @@ const App = () => (
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/log" element={<LogBoulder />} />
                 
-                <Route path="/character" element={<Character />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/gym" element={<MyGym />} />

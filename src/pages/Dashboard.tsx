@@ -5,7 +5,8 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
 
-import { BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
+import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
+import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
 import { Plus, ArrowUp, Trophy, TrendingUp } from "lucide-react";
@@ -70,25 +71,35 @@ export default function Dashboard() {
         </div>
       </GameCard>
 
+      {/* Stats */}
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+        <StatCard label="Total logs" value={s.stats.totalLogs} />
+        <StatCard label="Total sends" value={s.stats.totalSends} />
+        <StatCard label="Total flashes" value={s.stats.totalFlashes} />
+        <StatCard label="Bosses defeated" value={s.stats.bossesSent} />
+      </div>
+
       <ChalkOverTimeChart logs={s.logs} />
 
-      {/* Badges */}
+      {/* All Badges */}
       <GameCard tone="legendary" className="p-5">
-        <h3 className="menu-label mb-3 flex items-center gap-1.5"><Trophy className="h-3 w-3" /> Badges</h3>
-        {s.badges.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No badges yet. Log something — anything!</div>
-        ) : (
-          <div className="flex flex-wrap gap-1.5">
-            {s.badges.slice(0, 12).map(id => {
-              const b = BADGE_BY_ID[id]; if (!b) return null;
-              return (
-                <div key={id} title={b.desc} className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-secondary/60 border border-border">
-                  <span>{b.emoji}</span><span>{b.name}</span>
+        <h3 className="menu-label mb-3 flex items-center gap-1.5">
+          <Trophy className="h-3 w-3" /> Badges ({s.badges.length}/{BADGES.length})
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {BADGES.map(b => {
+            const have = s.badges.includes(b.id);
+            return (
+              <div key={b.id} className={cn("flex items-center gap-2 p-2.5 rounded-lg border", have ? "border-legendary/40 bg-legendary/5" : "border-border opacity-50")}>
+                <div className="text-xl">{have ? b.emoji : "❔"}</div>
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold truncate">{have ? b.name : "Locked"}</div>
+                  <div className="text-[10px] text-muted-foreground line-clamp-1">{b.desc}</div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
       </GameCard>
 
       {/* Recent logs */}
@@ -119,6 +130,15 @@ export default function Dashboard() {
         )}
       </GameCard>
     </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <GameCard className="p-4 text-center">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-2xl font-bold mt-1 gradient-chalk-text tabular-nums">{value.toLocaleString()}</div>
+    </GameCard>
   );
 }
 

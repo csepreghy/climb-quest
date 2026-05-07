@@ -124,19 +124,31 @@ export default function Dashboard() {
 
 function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number }[] }) {
   const data = useMemo(() => {
-    if (logs.length === 0) return [];
-    const buckets = new Map<string, { week: string; ts: number; chalk: number }>();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayIdx = (today.getDay() + 6) % 7;
+    const currentMonday = new Date(today);
+    currentMonday.setDate(today.getDate() - dayIdx);
+
+    const WEEKS = 13; // ~3 months
+    const buckets = new Map<string, { ts: number; chalk: number }>();
+    for (let i = WEEKS - 1; i >= 0; i--) {
+      const m = new Date(currentMonday);
+      m.setDate(currentMonday.getDate() - i * 7);
+      buckets.set(m.toISOString().slice(0, 10), { ts: m.getTime(), chalk: 0 });
+    }
+    const earliest = Array.from(buckets.values())[0]?.ts ?? 0;
+
     for (const l of logs) {
       const d = new Date(l.date);
-      // Week start (Monday)
       const day = (d.getDay() + 6) % 7;
       const monday = new Date(d);
       monday.setDate(d.getDate() - day);
       monday.setHours(0, 0, 0, 0);
+      if (monday.getTime() < earliest || monday.getTime() > currentMonday.getTime()) continue;
       const key = monday.toISOString().slice(0, 10);
       const existing = buckets.get(key);
       if (existing) existing.chalk += l.chalkTotal;
-      else buckets.set(key, { week: key, ts: monday.getTime(), chalk: l.chalkTotal });
     }
     return Array.from(buckets.values())
       .sort((a, b) => a.ts - b.ts)

@@ -596,9 +596,10 @@ function BossCelebrate({ total, breakdown, onDone }: { total: number; breakdown:
           style={{ background: "radial-gradient(circle, hsl(0 0% 100% / 0.95), transparent 70%)" }} />
         {particles.map((_, i) => {
           const angle = (i / particles.length) * Math.PI * 2 + Math.random() * 0.5;
-          const dist = 50 + Math.random() * 90;
-          const dx = Math.cos(angle) * dist;
-          const dy = Math.sin(angle) * dist;
+          const burst = 30 + Math.random() * 60;
+          const dx = Math.cos(angle) * burst;
+          // Bias vertical motion downward so particles drift/fall after the burst.
+          const dy = Math.sin(angle) * burst * 0.4 + 80 + Math.random() * 100;
           const size = 3 + Math.random() * 3;
           return (
             <span key={i}
@@ -609,7 +610,8 @@ function BossCelebrate({ total, breakdown, onDone }: { total: number; breakdown:
                 ["--dx" as any]: `${dx}px`,
                 ["--dy" as any]: `${dy}px`,
                 animationDelay: `${0.72 + Math.random() * 0.06}s`,
-                animationDuration: "0.8s",
+                animationDuration: `${1.8 + Math.random() * 0.6}s`,
+                animationTimingFunction: "cubic-bezier(0.22, 0.6, 0.4, 1)",
                 animationFillMode: "forwards",
                 boxShadow: "0 0 4px hsl(0 0% 100% / 0.7)",
               }} />

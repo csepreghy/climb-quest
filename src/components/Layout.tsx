@@ -146,7 +146,7 @@ export default function Layout() {
               <Plus className="h-4 w-4" />
             </GameButton>
             {isAdmin && <ThemeButton />}
-            {isAdmin && user && (
+            {hasAdminRole && user && (
               <button
                 type="button"
                 onClick={() => {

@@ -18,6 +18,7 @@ const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
 export default function Shop() {
   const s = useGame();
   const all = useAllItems();
+  const loaded = useCatalogLoaded();
   const [group, setGroup] = useState<ItemGroup>("outfit");
   const [cat, setCat] = useState<string>("All");
 

@@ -21,11 +21,20 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 type Mode = "pick" | "form";
 type Kind = "boulder" | "boss";
 
-export function LogModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null }) {
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
 
-  useEffect(() => { if (open) setMode("pick"); }, [open]);
+  useEffect(() => {
+    if (open) {
+      if (editLog) {
+        setKind(editLog.isBoss ? "boss" : "boulder");
+        setMode("form");
+      } else {
+        setMode("pick");
+      }
+    }
+  }, [open, editLog]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,9 +62,9 @@ export function LogModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
             </div>
           </>
         ) : kind === "boss" ? (
-          <BossForm onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
+          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
         ) : (
-          <BoulderForm onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
+          <BoulderForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
         )}
       </DialogContent>
     </Dialog>

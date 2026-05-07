@@ -389,6 +389,49 @@ export default function Inventory() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* EMPTY GEAR PICKER */}
+      <Dialog open={emptyGearPicker} onOpenChange={setEmptyGearPicker}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Equip gear</DialogTitle>
+          </DialogHeader>
+          {availableGear.length === 0 ? (
+            <div className="py-8 text-center space-y-4">
+              <div className="text-5xl">🎒</div>
+              <p className="text-sm text-muted-foreground">You don't have any gear to equip yet.</p>
+              <Link to="/shop" onClick={() => setEmptyGearPicker(false)}>
+                <GameButton variant="primary"><ShoppingBag className="h-4 w-4" /> Go to shop</GameButton>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {availableGear.map(it => (
+                <ItemCard
+                  key={it.id}
+                  item={it}
+                  onClick={() => {
+                    const r = equipItem(it.id);
+                    if (!r.ok) { toast.error(r.reason ?? "Cannot equip"); return; }
+                    toast.success(`Equipped ${it.name}`);
+                    setEmptyGearPicker(false);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <LevelsModal
+        open={levelsOpen}
+        onOpenChange={setLevelsOpen}
+        currentLevel={s.level}
+        gender={s.gender}
+        canLevelUp={canLevelUp}
+        nextCost={nxt?.cost}
+        onLevelUpClick={() => { setLevelsOpen(false); window.dispatchEvent(new CustomEvent("cq:open-level-up-confirm")); }}
+      />
     </div>
   );
 }

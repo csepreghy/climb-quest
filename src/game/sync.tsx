@@ -14,19 +14,19 @@ import {
   replaceGymsState,
   GymState,
 } from "./gyms";
-import { getActiveSlot, useActiveSlot } from "./adminAccounts";
+import { getActiveSlot, useActiveSlot, AccountSlot } from "./adminAccounts";
 
 /**
- * Mounts once. Loads the user's saved game + gyms state from the backend on
- * sign-in, and debounce-saves all subsequent changes back. When signed out,
- * we leave local state alone (localStorage still works as a fallback).
+ * Loads the active slot's game + gyms from the backend on sign-in (and on slot
+ * change), and debounce-saves changes back to that same (user_id, slot) row.
  *
- * Admin accounts have two slots: "test" (synced to backend) and "personal"
- * (local-only). Switching slots re-runs this loader.
+ * Admins have two slots ("test" and "personal"), each persisted as its own
+ * row in `user_game_state`. Non-admins always use "test".
  */
 export function GameSync() {
   const { user, isAdmin } = useAuth();
-  const slot = useActiveSlot(user?.id ?? null);
+  const slot: AccountSlot = useActiveSlot(user?.id ?? null);
+  const slotRef = useRef<AccountSlot>(slot);
   const userIdRef = useRef<string | null>(null);
   const saveTimer = useRef<number | null>(null);
   const pending = useRef<{ game?: GameState; gyms?: GymState }>({});
@@ -34,42 +34,12 @@ export function GameSync() {
   useEffect(() => {
     const uid = user?.id ?? null;
     userIdRef.current = uid;
+    slotRef.current = slot;
 
     if (!uid) {
       bindGameRemoteSync(null);
       bindGymsRemoteSync(null);
       return;
-    }
-
-    // Personal slot: local-only. Load from localStorage personal blob.
-    if (isAdmin && slot === "personal") {
-      bindGameRemoteSync(null);
-      bindGymsRemoteSync(null);
-      const persistKey = `climbquest:admin:slot:personal:${uid}`;
-      // Load the personal blob into live state (or empty profile if none).
-      try {
-        const raw = localStorage.getItem(persistKey);
-        const blob = raw ? JSON.parse(raw) : {};
-        replaceGameState((blob.game ?? {}) as GameState);
-        replaceGymsState((blob.gyms ?? {}) as GymState);
-      } catch {
-        replaceGameState({} as GameState);
-        replaceGymsState({} as GymState);
-      }
-      const writeBlob = () => {
-        try {
-          localStorage.setItem(persistKey, JSON.stringify({
-            game: getGameStateSnapshot(),
-            gyms: getGymsSnapshot(),
-          }));
-        } catch {}
-      };
-      bindGameRemoteSync(() => writeBlob());
-      bindGymsRemoteSync(() => writeBlob());
-      return () => {
-        bindGameRemoteSync(null);
-        bindGymsRemoteSync(null);
-      };
     }
 
     let cancelled = false;
@@ -78,6 +48,7 @@ export function GameSync() {
         .from("user_game_state")
         .select("game, gyms")
         .eq("user_id", uid)
+        .eq("slot", slot)
         .maybeSingle();
 
       if (cancelled) return;
@@ -85,17 +56,24 @@ export function GameSync() {
       if (!error && data) {
         const game = data.game as unknown as GameState | Record<string, never>;
         const gyms = data.gyms as unknown as GymState | Record<string, never>;
-        if (game && Object.keys(game).length) replaceGameState(game as GameState);
-        if (gyms && Object.keys(gyms).length) replaceGymsState(gyms as GymState);
+        // Always replace — empty object yields a fresh profile, which is what
+        // a brand-new personal slot should look like.
+        replaceGameState((game ?? {}) as GameState);
+        replaceGymsState((gyms ?? {}) as GymState);
       } else {
+        // No row yet for this slot — start fresh and create the row.
+        replaceGameState({} as GameState);
+        replaceGymsState({} as GymState);
         await supabase.from("user_game_state").upsert({
           user_id: uid,
+          slot,
           game: getGameStateSnapshot() as any,
           gyms: getGymsSnapshot() as any,
-        });
+        }, { onConflict: "user_id,slot" });
       }
 
-      if (isAdmin) {
+      // Only seed mock data into the admin's TEST slot, never personal.
+      if (isAdmin && slot === "test") {
         const snap = getGameStateSnapshot();
         if (!snap.logs || snap.logs.length === 0) {
           adminSeedMockData();
@@ -106,14 +84,19 @@ export function GameSync() {
 
       const flush = () => {
         if (!userIdRef.current) return;
-        if (getActiveSlot(userIdRef.current) === "personal") return;
-        const payload: Record<string, any> = { user_id: userIdRef.current };
+        const payload: Record<string, any> = {
+          user_id: userIdRef.current,
+          slot: slotRef.current,
+        };
         if (pending.current.game) payload.game = pending.current.game;
         if (pending.current.gyms) payload.gyms = pending.current.gyms;
         pending.current = {};
-        supabase.from("user_game_state").upsert(payload).then(({ error }) => {
-          if (error) console.warn("[sync] save failed", error.message);
-        });
+        supabase
+          .from("user_game_state")
+          .upsert(payload, { onConflict: "user_id,slot" })
+          .then(({ error }) => {
+            if (error) console.warn("[sync] save failed", error.message);
+          });
       };
 
       const schedule = () => {

@@ -246,13 +246,15 @@ function CharactersSlide() {
 function ItemsSlide() {
   const all = useAllItems();
   const items: ShopItem[] = useMemo(() => {
-    if (all.length >= 4) {
-      const rare = all.filter(i => i.rarity === "rare").slice(0, 2);
-      const epic = all.filter(i => i.rarity === "epic").slice(0, 1);
-      const leg = all.filter(i => i.rarity === "legendary").slice(0, 1);
-      const picked = [...leg, ...epic, ...rare].slice(0, 4);
-      if (picked.length >= 4) return picked;
-      return all.slice(0, 4);
+    // Only items with a loaded image (so we never show loaders).
+    const withImg = all.filter(i => !!i.emoji && (i.emoji.startsWith("http") || i.emoji.startsWith("data:") || i.emoji.startsWith("/")));
+    if (withImg.length >= 4) {
+      const leg = withImg.filter(i => i.rarity === "legendary").slice(0, 1);
+      const epic = withImg.filter(i => i.rarity === "epic").slice(0, 1);
+      const rare = withImg.filter(i => i.rarity === "rare").slice(0, 2);
+      const picked = [...leg, ...epic, ...rare];
+      const rest = withImg.filter(i => !picked.includes(i));
+      return [...picked, ...rest].slice(0, 4);
     }
     // Fallback mock items
     return [

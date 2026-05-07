@@ -165,12 +165,17 @@ export interface ChalkBreakdown {
 }
 export function computeChalk(activity: ActivityType, styles: Style[], sent = false): ChalkBreakdown {
   const base = BASE_CHALK[activity] ?? 50;
-
   const bonuses: { source: string; amount: number }[] = [];
+  let running = base;
+
+  // Send flat bonus first (additive, not stacked %)
   if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
-    bonuses.push({ source: "Send", amount: BASE_CHALK.boulder_send });
+    const amt = BASE_CHALK.boulder_send;
+    bonuses.push({ source: "Send", amount: amt });
+    running += amt;
   }
-  // Equipped items
+
+  // Equipped percentage bonuses — stack multiplicatively on running subtotal
   const eq = state.equipped;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
     const id = eq[slotKey]; if (!id) continue;
@@ -181,16 +186,21 @@ export function computeChalk(activity: ActivityType, styles: Style[], sent = fal
     else if (b.appliesTo && b.appliesTo.includes(activity)) applies = true;
     if (b.styleMatch && styles.some(s => b.styleMatch!.includes(s))) applies = true;
     if (applies && b.mult > 0) {
-      bonuses.push({ source: item.name, amount: Math.round(base * b.mult) });
+      const amt = Math.round(running * b.mult);
+      bonuses.push({ source: item.name, amount: amt });
+      running += amt;
     }
   }
-  // Consumable
+  // Consumable — stacked last
   if (state.pendingConsumable) {
     const item = getItem(state.pendingConsumable);
-    if (item?.consumableBonus) bonuses.push({ source: item.name + " (consumed)", amount: Math.round(base * item.consumableBonus) });
+    if (item?.consumableBonus) {
+      const amt = Math.round(running * item.consumableBonus);
+      bonuses.push({ source: item.name + " (consumed)", amount: amt });
+      running += amt;
+    }
   }
-  const total = base + bonuses.reduce((a,b)=>a+b.amount, 0);
-  return { base, bonuses, total };
+  return { base, bonuses, total: running };
 }
 
 // ----- Actions -----

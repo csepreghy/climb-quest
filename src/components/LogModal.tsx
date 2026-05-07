@@ -608,7 +608,7 @@ function BossCelebrate({ total, breakdown, onDone }: { total: number; breakdown:
                 height: `${size}px`,
                 ["--dx" as any]: `${dx}px`,
                 ["--dy" as any]: `${dy}px`,
-                animationDelay: `${0.69 + Math.random() * 0.06}s`,
+                animationDelay: `${0.72 + Math.random() * 0.06}s`,
                 animationDuration: "0.8s",
                 animationFillMode: "forwards",
                 boxShadow: "0 0 4px hsl(0 0% 100% / 0.7)",

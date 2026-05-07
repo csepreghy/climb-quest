@@ -26,7 +26,7 @@ export default function Dashboard() {
   
   const [logOpen, setLogOpen] = useState(false);
 
-  const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;
+  
 
   const onLevelUp = () => {
     const fromLevel = s.level;

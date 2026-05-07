@@ -164,7 +164,7 @@ function Showcase() {
       className="space-y-3"
     >
       <GameCard className="p-5 sm:p-6">
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
+        <div className="font-display font-bold text-xl sm:text-2xl tracking-tight mb-3">
           {SLIDE_LABELS[idx]}
         </div>
         <div className="min-h-[420px] sm:min-h-[460px] grid place-items-center">

@@ -15,6 +15,7 @@ import { ArrowRight, ScrollText, Sparkles, ArrowUp, Trophy } from "lucide-react"
 import logoImg from "@/assets/climbquest-logo.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
+import goldenChalkBag from "@/assets/golden-chalk-bag.png";
 
 export default function Landing() {
   const { user, loading } = useAuth();
@@ -23,7 +24,7 @@ export default function Landing() {
   const goAuth = () => nav("/auth");
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden bg-[hsl(var(--background))]" style={{ backgroundImage: "radial-gradient(ellipse at top, hsl(var(--background)) 0%, hsl(0 0% 4%) 100%)" }}>
       <BackgroundOrbs />
 
       {/* Top bar */}
@@ -63,7 +64,7 @@ export default function Landing() {
             </p>
             <div className="flex flex-wrap gap-3">
               <GameButton variant="success" size="lg" onClick={goAuth}>
-                Get started free <ArrowRight className="h-4 w-4" />
+                Get started <ArrowRight className="h-4 w-4" />
               </GameButton>
               <GameButton variant="ghost" size="lg" onClick={() => { document.getElementById("how")?.scrollIntoView({ behavior: "smooth" }); }}>
                 See how it works
@@ -92,13 +93,26 @@ export default function Landing() {
             ring="ring-[hsl(var(--btn-green))]/60"
           />
           <PickCard
-            image={bossImg}
+            content={
+              <img
+                src={goldenChalkBag}
+                alt="Golden chalk bag"
+                loading="lazy"
+                width={512}
+                height={512}
+                className="h-[80%] w-[80%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.5)] animate-aura-pulse"
+              />
+            }
             title="2. Earn Chalk"
             desc="Style bonuses, equipped gear, and consumables stack into XP."
             ring="ring-[hsl(var(--btn-orange))]/60"
           />
           <PickCard
-            image={boulderImg}
+            content={
+              <div className="scale-110">
+                <ClimberAvatar level={10} gender="male" equipped={{} as any} size="xl" glow />
+              </div>
+            }
             title="3. Level up"
             desc="Unlock new avatars, items, badges, and gear slots."
             ring="ring-[hsl(var(--accent))]/60"
@@ -177,26 +191,54 @@ function Showcase() {
 
 function CharactersSlide() {
   useLevelOverrides();
-  const showcase = [1, 4, 7, 10];
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setI(x => (x + 1) % (showcase.length * 2)), 1100);
-    return () => clearInterval(t);
+  // Build up to 15 slots cycling levels & genders, only those with custom images.
+  const slots = useMemo(() => {
+    const out: { level: number; gender: "male" | "female" }[] = [];
+    for (let lvl = 1; lvl <= 10; lvl++) {
+      for (const g of ["male", "female"] as const) {
+        const r = resolvedLevel(lvl, g);
+        if (r.image) out.push({ level: lvl, gender: g });
+      }
+    }
+    return out.slice(0, 15);
   }, []);
-  const lvl = showcase[Math.floor(i / 2) % showcase.length];
-  const gender = (i % 2 === 0 ? "male" : "female") as "male" | "female";
-  const l = resolvedLevel(lvl, gender);
+
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    setShown(0);
+    if (slots.length === 0) return;
+    const t = setInterval(() => {
+      setShown(s => (s >= slots.length ? 0 : s + 1));
+    }, 180);
+    return () => clearInterval(t);
+  }, [slots.length]);
+
+  if (slots.length === 0) {
+    return (
+      <div className="text-center text-sm text-muted-foreground py-10">
+        Ten levels. Male & female sprites. Custom art for every tier.
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div key={`${lvl}-${gender}`} className="animate-fade-in">
-        <ClimberAvatar level={lvl} gender={gender} equipped={{} as any} size="xl" glow />
+    <div className="flex flex-col items-center gap-3">
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        {slots.map((s, i) => (
+          <div
+            key={`${s.level}-${s.gender}-${i}`}
+            className={cn(
+              "transition-all duration-300",
+              i < shown ? "opacity-100 scale-100" : "opacity-0 scale-75"
+            )}
+          >
+            <div className="scale-[0.55] sm:scale-[0.7] origin-center -m-4">
+              <ClimberAvatar level={s.level} gender={s.gender} equipped={{} as any} size="lg" />
+            </div>
+          </div>
+        ))}
       </div>
-      <div className="text-center">
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Lv {l.level}</div>
-        <div className="font-display font-bold text-xl">{l.title}</div>
-        <div className="text-xs text-muted-foreground italic mt-1 max-w-xs">"{l.desc}"</div>
-      </div>
-      <div className="text-[10px] text-muted-foreground">10 levels · male & female sprites</div>
+      <div className="text-[10px] text-muted-foreground">10 levels · male & female · unique art</div>
     </div>
   );
 }
@@ -204,13 +246,15 @@ function CharactersSlide() {
 function ItemsSlide() {
   const all = useAllItems();
   const items: ShopItem[] = useMemo(() => {
-    if (all.length >= 4) {
-      const rare = all.filter(i => i.rarity === "rare").slice(0, 2);
-      const epic = all.filter(i => i.rarity === "epic").slice(0, 1);
-      const leg = all.filter(i => i.rarity === "legendary").slice(0, 1);
-      const picked = [...leg, ...epic, ...rare].slice(0, 4);
-      if (picked.length >= 4) return picked;
-      return all.slice(0, 4);
+    // Only items with a loaded image (so we never show loaders).
+    const withImg = all.filter(i => !!i.emoji && (i.emoji.startsWith("http") || i.emoji.startsWith("data:") || i.emoji.startsWith("/")));
+    if (withImg.length >= 4) {
+      const leg = withImg.filter(i => i.rarity === "legendary").slice(0, 1);
+      const epic = withImg.filter(i => i.rarity === "epic").slice(0, 1);
+      const rare = withImg.filter(i => i.rarity === "rare").slice(0, 2);
+      const picked = [...leg, ...epic, ...rare];
+      const rest = withImg.filter(i => !picked.includes(i));
+      return [...picked, ...rest].slice(0, 4);
     }
     // Fallback mock items
     return [

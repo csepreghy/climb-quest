@@ -1,17 +1,22 @@
 import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
 export function PickCard({
   image,
+  content,
   title,
   desc,
   onClick,
   ring,
+  imageClassName,
 }: {
-  image: string;
+  image?: string;
+  content?: ReactNode;
   title: string;
   desc: string;
   onClick?: () => void;
   ring: string;
+  imageClassName?: string;
 }) {
   const Comp: any = onClick ? "button" : "div";
   return (
@@ -25,8 +30,16 @@ export function PickCard({
         ring,
       )}
     >
-      <div className="aspect-square w-full overflow-hidden bg-black/40">
-        <img src={image} alt={title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+      <div className="aspect-square w-full overflow-hidden bg-black/60 grid place-items-center">
+        {content
+          ? content
+          : image && (
+              <img
+                src={image}
+                alt={title}
+                className={cn("h-full w-full object-cover transition-transform group-hover:scale-105", imageClassName)}
+              />
+            )}
       </div>
       <div className="p-4">
         <div className="font-display font-bold text-lg">{title}</div>

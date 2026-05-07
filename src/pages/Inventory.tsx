@@ -276,7 +276,7 @@ export default function Inventory() {
                   </div>
                   {equippedItem
                     ? <ItemCard item={equippedItem} />
-                    : <EmptySlotCard slot={compareItem.slot} />}
+                    : <EmptySlotCard label={SLOT_LABEL[compareItem.slot]} />}
                 </div>
 
                 <div className="hidden md:flex justify-center">

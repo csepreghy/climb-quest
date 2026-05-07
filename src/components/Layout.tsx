@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, ScrollText, User, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
+import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
 import { GameButton } from "@/components/ui/game-button";
 import { useGame, nextLevel, levelUp, currentLevel } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
@@ -22,7 +22,7 @@ const NAV_BASE = [
   { to: "/inventory", label: "Inventory", icon: Backpack },
   { to: "/shop", label: "Shop", icon: Store },
   { to: "/log", label: "Boulder Logs", icon: ScrollText },
-  { to: "/character", label: "Character", icon: User },
+  
   { to: "/gym", label: "My Gym", icon: Building2 },
 ];
 const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };

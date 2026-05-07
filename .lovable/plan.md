@@ -1,126 +1,63 @@
-# Plan
+# Fix slow image loading
 
-## 1. Authentication (Lovable Cloud)
+## Diagnosis (confirmed)
 
-Enable Lovable Cloud and set up Supabase auth.
+`shop_items.image` stores **base64 data URLs**. Catalog today: 20 items, **41 MB total**, **~2 MB avg**, biggest 2.5 MB. Every Shop/Inventory mount runs `select("*")` and downloads the whole 41 MB JSON before any card paints. No HTTP caching, no CDN, no lazy loading.
 
-- **Email/password** signup + login page at `/auth`
-- **Google OAuth** button on the same page
-- `useAuth` hook with `onAuthStateChange` + `getSession`
-- Protect routes: redirect to `/auth` when signed out
-- Sign-out button in header (next to ThemeButton)
-- New `profiles` table (auto-created on signup via trigger) — stores `email`, `display_name`
-- New `user_roles` table + `app_role` enum (`admin`, `user`) + `has_role()` SECURITY DEFINER function (per security best practice — never store role on profile)
-- Seed: insert `admin` role for the user whose email is `andrew.chepreghy@gmail.com` after they first sign in (handled inside the signup trigger by checking email)
-- `useIsAdmin()` hook calling `has_role`
+## Plan
 
-**Admin gating:**
-- Hide the **Admin** nav item unless `useIsAdmin()` is true
-- Guard `/admin` route — non-admins get redirected home
+### 1. Storage bucket for item images
 
-## 2. Admin chalk controls
+Migration:
+- Create public bucket `shop-item-images`
+- RLS on `storage.objects` for that bucket: public SELECT; INSERT/UPDATE/DELETE only when `has_role(auth.uid(), 'admin')`
 
-In `src/pages/Admin.tsx`, add a card above ThemeStudio:
-- Number input + **Add Chalk** / **Subtract Chalk** buttons
-- Calls a new store action `adminAdjustChalk(delta)`
-- Only visible to admins (route already guarded)
+### 2. One-time backfill (admin-only edge function)
 
-## 3. Chalk modal cleanup (Layout.tsx)
+New edge function `backfill-shop-images` (admin-gated, invoked once from a button on `/admin`):
+- For each `shop_items` row where `image LIKE 'data:%'`:
+  - Decode base64
+  - Re-encode to **webp, max 800×800** (preserve aspect, no upscale)
+  - Upload to `shop-item-images/{id}.webp`
+  - `update shop_items set image = '<public url>'`
+- Show progress + result summary in the admin UI
 
-- Remove the entire **Bonuses** section
-- Sort base activities **ascending** by point value (lowest → highest)
+### 3. Admin upload flow → bucket (not base64)
 
-## 4. Levels modal (top-right Lv chip)
+In the admin item editor:
+- On image pick: client-side resize to ≤800×800 + convert to webp via canvas
+- Upload to `shop-item-images/{id}.webp`
+- Save returned public URL into `shop_items.image`
+- Drop the FileReader→data URL path
 
-- Make the Lv chip a button → opens a Dialog showing all 10 levels in a list with: emoji, title, cost, unlocks
-- Current level highlighted; locked future levels show a lock icon
-- **Rebalance costs to exponential** (achievable with multipliers stacking):
-  ```
-  L2: 200, L3: 500, L4: 1100, L5: 2200, L6: 4200,
-  L7: 7800, L8: 14000, L9: 24000, L10: 40000
-  ```
-  (~1.8x growth — reachable with multiple equipped multipliers and consumables)
+### 4. Split catalog query (helps even mid-backfill)
 
-## 5. Slot unlocks by level
+`src/game/customItems.ts`:
+- `refresh()` selects everything **except** `image` first → cards render names/prices/rarity instantly
+- Parallel `select("id, image")` merges in as it arrives
+- Expose a `loaded` flag
 
-Update `Equipped` model with capacities:
-- **Gear slots**: 1 at L1 → +1 each at L4, L7, L10 (max 4)
-- **Power-up slots**: 0 at L1 → 1 at L5, 2 at L10
-- Outfit slots (top/bottom/shoes/hat/hand) remain always available
-- In Inventory, render N gear/power slots based on level; locked slots show 🔒 with "Unlocks at Lv X"
-- Equipping more than capacity is blocked with a toast
+### 5. Lazy load + skeletons
 
-## 6. Inventory redesign
+`Shop.tsx`, `Inventory.tsx`, `ClimberAvatar.tsx`:
+- All item `<img>` get `loading="lazy"` + `decoding="async"`
+- Render 6 rarity-bordered skeleton tiles while `!loaded`
+- Keep rarity-bordered placeholder square visible until image decodes (no layout shift)
 
-**Layout**: keep two-column. Left = avatar + active bonuses + **Titles card** (using the same `GameCard` style as Home's Equipped card — fixes the readability issue).
+## Expected result
 
-**Equipped slots (top of each group)**:
-- Square tiles (aspect-square), no text label — only the item image/emoji centered
-- Border color = rarity color (orange when equipped — replaces current red `accent` border)
-- Empty slot shows muted `+` icon
-- Hover → tooltip with name
-- Click → opens **Slot Picker Modal** (see below)
+- Initial JSON payload: **41 MB → ~5 KB**
+- Per-image bytes: **~2 MB base64 → ~30–80 KB webp**, served from CDN with cache headers
+- Cards visible in <200 ms; images stream in as the user scrolls
 
-**Owned grid**:
-- Square tiles, no text, only emoji/asset
-- Border = rarity color (white/blue/purple/gold per rarities update — see §7)
-- Equipped item gets **orange ring** (not red)
-- Hover → tooltip with name
-- Click → opens **Item Detail Modal**
+## Files
 
-**Slot Picker Modal** (when clicking a slot):
-- Title: e.g. "Equip — Shoes"
-- Grid of all owned items where `item.slot === clickedSlot` (highlighted as equippable)
-- Greyed-out tiles for items that don't fit (none shown for that slot)
-- Clicking an owned item opens **Compare Modal**
+**New**
+- Migration: bucket + RLS policies
+- `supabase/functions/backfill-shop-images/index.ts`
+- Admin button to trigger backfill
 
-**Item Detail Modal** (click owned item):
-- Large square preview, name, rarity badge, bonus % (plain — not green)
-- Equip button if not equipped; Unequip if equipped
-- "Compare with equipped" inline section if a different item is in that slot
-
-**Compare Modal** (slot's equipped item ↔ candidate):
-- Two columns side by side: Equipped | Candidate
-- Show name, rarity, bonus %
-- Numeric diff line per applicable activity:
-  - **Green** if candidate is better
-  - **Red** if worse
-  - (Note: user said "green if better, green if worse" — assumed typo; using green=better, red=worse)
-- "Equip" button confirms swap
-
-## 7. Rarity colors
-
-Update `Rarity` type and CSS tokens:
-- Add `uncommon` and `epic` rarities → `Rarity = "common" | "uncommon" | "epic" | "legendary" | "consumable"`
-- Update `--common: 0 0% 95%` (white), `--uncommon: 210 80% 55%` (blue), `--epic: 270 70% 60%` (purple), `--legendary: 42 95% 60%` (gold, unchanged)
-- Add `uncommon`/`epic` to tailwind config + `RARITY_COLOR` map
-- Re-tag SHOP items: replace existing `rare` with `uncommon` (cheap rares) or `epic` (expensive rares) by price tier
-- Equipped ring color = orange (`--btn-orange`)
-
-## 8. Item assets
-
-User mentioned "these will be assets" — for now keep the emoji as placeholder inside each square tile with rarity-tinted background. When asset PNGs are uploaded later, swap `emoji` for `image` field. No code blocker.
-
-## Files to add/modify
-
-**New:**
-- `src/integrations/supabase/client.ts` (auto-generated by Cloud)
-- `src/pages/Auth.tsx` — login/signup with Google
-- `src/hooks/useAuth.ts`, `src/hooks/useIsAdmin.ts`
-- `src/components/RequireAuth.tsx`
-- `src/components/inventory/ItemTile.tsx`, `SlotPickerModal.tsx`, `ItemDetailModal.tsx`, `CompareModal.tsx`
-- `src/components/LevelsModal.tsx`
-- Migration: profiles, user_roles, app_role enum, has_role(), signup trigger that seeds admin role for `andrew.chepreghy@gmail.com`
-
-**Modified:**
-- `src/App.tsx` — `/auth` route, RequireAuth wrapper
-- `src/components/Layout.tsx` — sign-out, admin-only nav, Lv chip → modal, chalk modal cleanup
-- `src/pages/Inventory.tsx` — full rewrite for square tiles + modals + slot capacity
-- `src/pages/Admin.tsx` — chalk give/subtract card + admin guard
-- `src/game/data.ts` — exponential level costs, new rarities, re-tagged items, slot capacity table
-- `src/game/store.ts` — `adminAdjustChalk`, capacity check in `equipItem`
-- `src/index.css` + `tailwind.config.ts` — uncommon/epic tokens
-
-## Open question
-
-**Item assets**: keep emoji placeholders inside the square tiles for now? Or do you want to upload PNG/SVG assets first before I redo Inventory? (I'll proceed with emoji placeholders if you don't specify.)
+**Modified**
+- `src/game/customItems.ts` — split query, `loaded` flag, upload to Storage
+- `src/pages/Admin.tsx` (item editor) — resize+webp+upload flow, backfill button
+- `src/pages/Shop.tsx`, `src/pages/Inventory.tsx`, `src/components/ClimberAvatar.tsx` — lazy `<img>`, skeletons

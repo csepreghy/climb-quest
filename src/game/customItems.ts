@@ -4,6 +4,7 @@
 import { useSyncExternalStore, useEffect } from "react";
 import { ShopItem, SHOP, ITEM_BY_ID, Rarity, ItemGroup, Slot, ActivityType } from "./data";
 import { supabase } from "@/integrations/supabase/client";
+import { processAndUpload } from "@/lib/imageUpload";
 
 interface State {
   custom: ShopItem[];
@@ -16,7 +17,10 @@ const listeners = new Set<() => void>();
 function emit() { listeners.forEach(l => l()); }
 function setState(u: (s: State) => State) { state = u(state); emit(); }
 
-function rowToItem(r: any): ShopItem {
+// Lightweight columns — excludes `image` so the initial payload is tiny.
+const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,created_at";
+
+function rowToItem(r: any, image?: string | null): ShopItem {
   const bonusPct = Number(r.bonus_pct ?? 0);
   return {
     id: r.id,
@@ -26,7 +30,7 @@ function rowToItem(r: any): ShopItem {
     slot: r.slot as Slot,
     rarity: r.rarity as Rarity,
     price: r.price ?? 0,
-    emoji: r.image ?? "🎁",
+    emoji: (image ?? r.image) ?? "🎁",
     desc: "",
     levelReq: r.level_req ?? undefined,
     bonus: bonusPct > 0
@@ -36,14 +40,28 @@ function rowToItem(r: any): ShopItem {
 }
 
 async function refresh() {
-  const [items, hidden] = await Promise.all([
-    supabase.from("shop_items").select("*").order("created_at", { ascending: true }),
+  // 1. Fast: lightweight columns only — cards render instantly.
+  const [light, hidden] = await Promise.all([
+    (supabase.from("shop_items") as any).select(LIGHT_COLS).order("created_at", { ascending: true }),
     supabase.from("hidden_builtin_items").select("item_id"),
   ]);
+  const lightItems = (light.data ?? []).map((r: any) => rowToItem(r, "🎁"));
   setState(() => ({
-    custom: (items.data ?? []).map(rowToItem),
+    custom: lightItems,
     hidden: new Set((hidden.data ?? []).map((r: any) => r.item_id as string)),
     loaded: true,
+  }));
+
+  // 2. Stream images in as a separate query (still small for URLs, large only for legacy base64).
+  const imgs = await supabase.from("shop_items").select("id,image");
+  const imgById = new Map<string, string | null>();
+  (imgs.data ?? []).forEach((r: any) => imgById.set(r.id, r.image));
+  setState(s => ({
+    ...s,
+    custom: s.custom.map(it => {
+      const img = imgById.get(it.id);
+      return img ? { ...it, emoji: img } : it;
+    }),
   }));
 }
 
@@ -73,6 +91,10 @@ export function useHiddenBuiltins(): Set<string> {
   return useSyncExternalStore(subscribe, () => state.hidden, () => state.hidden);
 }
 
+export function useCatalogLoaded(): boolean {
+  return useSyncExternalStore(subscribe, () => state.loaded, () => state.loaded);
+}
+
 /** Get any item by id (built-in OR custom). Hidden built-ins still resolve so owned items render. */
 export function getItem(id: string): ShopItem | undefined {
   return ITEM_BY_ID[id] ?? state.custom.find(i => i.id === id);
@@ -98,13 +120,15 @@ export interface CustomItemInput {
   slot: Slot;
   rarity: Rarity;
   price: number;
+  /** Either a public URL (preferred), a data: URL (legacy), or a File to upload. */
   imageDataUrl?: string;
+  imageFile?: File;
   bonusPct: number;
   appliesTo?: ActivityType[] | "all";
   levelReq?: number;
 }
 
-function inputToRow(id: string, input: CustomItemInput) {
+function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null) {
   return {
     id,
     name: input.name,
@@ -113,7 +137,7 @@ function inputToRow(id: string, input: CustomItemInput) {
     slot: input.slot,
     rarity: input.rarity,
     price: input.price,
-    image: input.imageDataUrl ?? null,
+    image: imageUrl ?? input.imageDataUrl ?? null,
     bonus_pct: input.bonusPct,
     applies_to: (input.appliesTo ?? "all") as any,
     level_req: input.levelReq ?? null,
@@ -121,7 +145,16 @@ function inputToRow(id: string, input: CustomItemInput) {
 }
 
 export async function addCustomItem(input: CustomItemInput): Promise<void> {
-  const row = inputToRow(newId(), input);
+  const id = newId();
+  let imageUrl: string | undefined;
+  if (input.imageFile) {
+    imageUrl = await processAndUpload(id, input.imageFile);
+  } else if (input.imageDataUrl?.startsWith("data:")) {
+    imageUrl = await processAndUpload(id, input.imageDataUrl);
+  } else {
+    imageUrl = input.imageDataUrl;
+  }
+  const row = inputToRow(id, input, imageUrl ?? null);
   const { error } = await supabase.from("shop_items").insert(row);
   if (error) throw error;
   await refresh();
@@ -135,7 +168,13 @@ export async function updateCustomItem(itemId: string, patch: Partial<CustomItem
   if (patch.slot !== undefined) row.slot = patch.slot;
   if (patch.rarity !== undefined) row.rarity = patch.rarity;
   if (patch.price !== undefined) row.price = patch.price;
-  if (patch.imageDataUrl !== undefined) row.image = patch.imageDataUrl ?? null;
+  if (patch.imageFile) {
+    row.image = await processAndUpload(itemId, patch.imageFile);
+  } else if (patch.imageDataUrl !== undefined) {
+    row.image = patch.imageDataUrl?.startsWith("data:")
+      ? await processAndUpload(itemId, patch.imageDataUrl)
+      : (patch.imageDataUrl ?? null);
+  }
   if (patch.bonusPct !== undefined) row.bonus_pct = patch.bonusPct;
   if (patch.appliesTo !== undefined) row.applies_to = patch.appliesTo as any;
   if (patch.levelReq !== undefined) row.level_req = patch.levelReq ?? null;
@@ -147,7 +186,36 @@ export async function updateCustomItem(itemId: string, patch: Partial<CustomItem
 export async function deleteCustomItem(itemId: string): Promise<void> {
   const { error } = await supabase.from("shop_items").delete().eq("id", itemId);
   if (error) throw error;
+  // best-effort cleanup of stored image
+  await supabase.storage.from("shop-item-images").remove([`${itemId}.webp`]).catch(() => {});
   await refresh();
+}
+
+/** Backfill: convert any base64 images in the table to 800px webp in Storage. */
+export async function backfillShopImages(
+  onProgress?: (done: number, total: number, label: string) => void
+): Promise<{ converted: number; skipped: number; failed: number }> {
+  const { data, error } = await supabase.from("shop_items").select("id,name,image");
+  if (error) throw error;
+  const rows = (data ?? []) as Array<{ id: string; name: string; image: string | null }>;
+  const targets = rows.filter(r => r.image && r.image.startsWith("data:"));
+  let converted = 0, failed = 0;
+  for (let i = 0; i < targets.length; i++) {
+    const r = targets[i];
+    onProgress?.(i, targets.length, r.name);
+    try {
+      const url = await processAndUpload(r.id, r.image!);
+      const { error: upErr } = await (supabase.from("shop_items") as any).update({ image: url }).eq("id", r.id);
+      if (upErr) throw upErr;
+      converted++;
+    } catch (e) {
+      console.error("backfill failed for", r.id, e);
+      failed++;
+    }
+  }
+  onProgress?.(targets.length, targets.length, "done");
+  await refresh();
+  return { converted, skipped: rows.length - targets.length, failed };
 }
 
 /** Hide a built-in item from every user's shop. */

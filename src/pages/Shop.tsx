@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ShopItem, RARITY_COLOR, RARITY_BORDER, ItemGroup } from "@/game/data";
-import { useAllItems, isImageEmoji } from "@/game/customItems";
+import { useAllItems, useCatalogLoaded, isImageEmoji } from "@/game/customItems";
 import { buyItem, useGame } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
 export default function Shop() {
   const s = useGame();
   const all = useAllItems();
+  const loaded = useCatalogLoaded();
   const [group, setGroup] = useState<ItemGroup>("outfit");
   const [cat, setCat] = useState<string>("All");
 
@@ -52,7 +53,11 @@ export default function Shop() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} ignoreLevelReq={!!s.ignoreLevelReq} />)}
+        {!loaded && all.length === 0
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-44 rounded-xl border border-border bg-secondary/30 animate-pulse" />
+            ))
+          : items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} ignoreLevelReq={!!s.ignoreLevelReq} />)}
       </div>
     </div>
   );
@@ -83,7 +88,7 @@ function ShopCard({ item, owned, chalk, level, ignoreLevelReq }: { item: ShopIte
       )}
       <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji)
-          ? <img src={item.emoji} alt={item.name} className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
+          ? <img src={item.emoji} alt={item.name} loading="lazy" decoding="async" className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
           : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
         <div className="min-w-0 flex-1 pr-12">
           <div className="text-sm font-medium leading-snug">{item.name}</div>

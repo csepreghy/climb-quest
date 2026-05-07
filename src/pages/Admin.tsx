@@ -15,6 +15,7 @@ import {
   updateCustomItem,
   deleteCustomItem,
   isImageEmoji,
+  backfillShopImages,
   CustomItemInput,
 } from "@/game/customItems";
 import { ItemGroup, Rarity, Slot, ShopItem } from "@/game/data";
@@ -78,12 +79,53 @@ export default function Admin() {
         </label>
       </GameCard>
 
+      <BackfillImagesCard />
+
       <InventoryAdmin />
 
       <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>
         <ThemeStudio />
       </div>
     </div>
+  );
+}
+
+function BackfillImagesCard() {
+  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number; label: string } | null>(null);
+  const [result, setResult] = useState<{ converted: number; skipped: number; failed: number } | null>(null);
+
+  async function run() {
+    setBusy(true); setResult(null);
+    try {
+      const r = await backfillShopImages((done, total, label) => setProgress({ done, total, label }));
+      setResult(r);
+      toast.success(`Backfill complete: ${r.converted} converted, ${r.skipped} already up-to-date, ${r.failed} failed`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Backfill failed");
+    } finally { setBusy(false); setProgress(null); }
+  }
+
+  return (
+    <GameCard tone="accent" className="p-5">
+      <div className="menu-label mb-3">Admin · Image Backfill</div>
+      <p className="text-sm text-muted-foreground mb-3">
+        Convert legacy base64 item images to 800px webp in cloud storage. One-off operation; safe to re-run.
+      </p>
+      <div className="flex items-center gap-3">
+        <Button onClick={run} disabled={busy}>{busy ? "Working…" : "Run backfill"}</Button>
+        {progress && (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {progress.done}/{progress.total} · {progress.label}
+          </span>
+        )}
+        {result && !busy && (
+          <span className="text-xs text-muted-foreground">
+            ✓ {result.converted} converted · {result.skipped} skipped · {result.failed} failed
+          </span>
+        )}
+      </div>
+    </GameCard>
   );
 }
 
@@ -108,10 +150,10 @@ function InventoryAdmin() {
   function reset() { setDraft(empty); setEditingId(null); }
 
   async function pickImage(file: File) {
-    if (file.size > 2 * 1024 * 1024) { toast.error("Image too large (max 2 MB)"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setDraft(d => ({ ...d, imageDataUrl: reader.result as string }));
-    reader.readAsDataURL(file);
+    if (file.size > 20 * 1024 * 1024) { toast.error("Image too large (max 20 MB)"); return; }
+    // Show local preview immediately; actual upload happens in save() (resized to 800px webp).
+    const previewUrl = URL.createObjectURL(file);
+    setDraft(d => ({ ...d, imageDataUrl: previewUrl, imageFile: file }));
   }
 
   async function save() {

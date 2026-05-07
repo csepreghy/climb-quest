@@ -72,7 +72,7 @@ function ItemCard({
       )}
       <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji)
-          ? <img src={item.emoji} alt={item.name} className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
+          ? <img src={item.emoji} alt={item.name} loading="lazy" decoding="async" className={cn("h-20 w-20 object-contain rounded-lg bg-background/40 p-1 shrink-0", RARITY_BORDER[item.rarity])} />
           : <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>}
         <div className="min-w-0 flex-1 pr-12">
           <div className="text-sm font-medium leading-snug">{item.name}</div>

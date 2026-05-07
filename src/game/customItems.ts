@@ -18,10 +18,11 @@ function emit() { listeners.forEach(l => l()); }
 function setState(u: (s: State) => State) { state = u(state); emit(); }
 
 // Lightweight columns — excludes `image` so the initial payload is tiny.
-const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,created_at";
+const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,price_mult,created_at";
 
 function rowToItem(r: any, image?: string | null): ShopItem {
   const bonusPct = Number(r.bonus_pct ?? 0);
+  const priceMult = r.price_mult !== undefined && r.price_mult !== null ? Number(r.price_mult) : 1;
   return {
     id: r.id,
     name: r.name,
@@ -33,6 +34,7 @@ function rowToItem(r: any, image?: string | null): ShopItem {
     emoji: (image ?? r.image) ?? "",
     desc: "",
     levelReq: r.level_req ?? undefined,
+    priceMult: priceMult !== 1 ? priceMult : undefined,
     bonus: bonusPct > 0
       ? { mult: bonusPct / 100, appliesTo: (r.applies_to ?? "all") as ActivityType[] | "all" }
       : undefined,
@@ -126,9 +128,12 @@ export interface CustomItemInput {
   bonusPct: number;
   appliesTo?: ActivityType[] | "all";
   levelReq?: number;
+  /** Shop discount as a percentage off (0–100). 0 means no discount. */
+  discountPct?: number;
 }
 
 function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null) {
+  const discount = Math.max(0, Math.min(100, input.discountPct ?? 0));
   return {
     id,
     name: input.name,
@@ -141,6 +146,7 @@ function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null
     bonus_pct: input.bonusPct,
     applies_to: (input.appliesTo ?? "all") as any,
     level_req: input.levelReq ?? null,
+    price_mult: 1 - discount / 100,
   };
 }
 
@@ -178,6 +184,10 @@ export async function updateCustomItem(itemId: string, patch: Partial<CustomItem
   if (patch.bonusPct !== undefined) row.bonus_pct = patch.bonusPct;
   if (patch.appliesTo !== undefined) row.applies_to = patch.appliesTo as any;
   if (patch.levelReq !== undefined) row.level_req = patch.levelReq ?? null;
+  if (patch.discountPct !== undefined) {
+    const d = Math.max(0, Math.min(100, patch.discountPct));
+    row.price_mult = 1 - d / 100;
+  }
   const { error } = await (supabase.from("shop_items") as any).update(row).eq("id", itemId);
   if (error) throw error;
   await refresh();

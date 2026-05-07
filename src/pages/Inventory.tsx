@@ -4,15 +4,17 @@ import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 import { Slot, ItemGroup, Rarity, ShopItem, GEAR_SLOTS, gearSlotsUnlocked, LEVELS } from "@/game/data";
-import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame } from "@/game/store";
+import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame, currentLevel, nextLevel } from "@/game/store";
 import { getItem, useCustomItems } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowRight, Lock } from "lucide-react";
+import { ArrowRight, Lock, ShoppingBag } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
+import { LevelsModal } from "@/components/LevelsModal";
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",

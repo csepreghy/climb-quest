@@ -5,7 +5,7 @@ import { useLevelOverrides } from "@/game/levelOverrides";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
-import { getItem, isImageEmoji } from "@/game/customItems";
+import { getItem, isImageEmoji, useCustomItems } from "@/game/customItems";
 import { RARITY_BORDER, type Slot } from "@/game/data";
 import { SmartImage } from "@/components/SmartImage";
 

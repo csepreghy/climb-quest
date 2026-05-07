@@ -2,7 +2,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import {
   ACTIVITY_LABELS, ActivityType, BADGES, BASE_CHALK, BOSS_TEMPLATES,
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
-  GEAR_SLOTS, gearSlotsUnlocked,
+  GEAR_SLOTS, gearSlotsUnlocked, Slot,
 } from "./data";
 import { getItem } from "./customItems";
 import { resolvedLevel } from "./levelOverrides";
@@ -493,6 +493,23 @@ export function removeOwnedItem(id: string) {
   });
 }
 export function setGender(g: Gender) { set(s => ({ ...s, gender: g })); }
+
+/** Auto-grant & auto-equip every catalog item priced 0. Idempotent. */
+export function grantFreeItems(items: { id: string; price: number; slot: Slot; consumableBonus?: number }[]) {
+  const free = items.filter(i => i.price === 0 && !i.consumableBonus);
+  if (!free.length) return;
+  set(s => {
+    const ownedSet = new Set(s.owned);
+    const equipped = { ...s.equipped };
+    let changed = false;
+    for (const it of free) {
+      if (!ownedSet.has(it.id)) { ownedSet.add(it.id); changed = true; }
+      if (!equipped[it.slot]) { equipped[it.slot] = it.id; changed = true; }
+    }
+    if (!changed) return s;
+    return { ...s, owned: Array.from(ownedSet), equipped };
+  });
+}
 
 // ----- Boss actions -----
 export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], notes?: string) {

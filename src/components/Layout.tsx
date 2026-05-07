@@ -32,7 +32,7 @@ export default function Layout() {
   const [logOpen, setLogOpen] = useState(false);
   return (
     <div className="min-h-screen flex flex-col">
-      <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} />
+      <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} gender={s.gender} />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
         <div className="container flex items-center justify-between gap-4 py-5">

@@ -358,7 +358,7 @@ function BossCard({
       <div className="p-3 space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="font-display font-bold text-sm flex items-center gap-1.5 min-w-0">
-            <Trophy className="h-4 w-4 shrink-0" style={{ color: barColor }} /> <span className="truncate">{name}</span>
+            <Swords className="h-4 w-4 shrink-0" style={{ color: barColor }} /> <span className="truncate">{name}</span>
           </div>
           <div className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border shrink-0" style={{ background: `${barColor}33`, color: barColor, borderColor: `${barColor}66` }}>
             Project

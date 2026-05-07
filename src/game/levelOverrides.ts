@@ -1,7 +1,7 @@
-// Admin-managed per-gender level overrides (name, tagline, chalk req, image).
+// Admin-managed per-gender level overrides (name, tagline, chalk req, image, rarity).
 import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { LEVELS, Gender, ClimberLevel } from "./data";
+import { LEVELS, Gender, ClimberLevel, Rarity } from "./data";
 import { toWebpBlob } from "@/lib/imageUpload";
 
 export interface LevelOverride {
@@ -11,6 +11,7 @@ export interface LevelOverride {
   tagline: string | null;
   chalkReq: number | null;
   image: string | null;
+  rarity: Rarity | null;
 }
 
 type Key = `${number}:${Gender}`;
@@ -29,6 +30,7 @@ function rowToOverride(r: any): LevelOverride {
     tagline: r.tagline,
     chalkReq: r.chalk_req,
     image: r.image,
+    rarity: (r.rarity ?? null) as Rarity | null,
   };
 }
 

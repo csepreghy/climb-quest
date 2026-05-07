@@ -356,28 +356,45 @@ function mockItem(name: string, rarity: ShopItem["rarity"], emoji: string): Shop
   } as ShopItem;
 }
 
-function logMockItem(opts: { id: string; name: string; image: string; rarity: ShopItem["rarity"]; desc: string }): ShopItem {
-  return {
-    id: opts.id,
-    name: opts.name,
-    group: "gear",
-    category: "Brushes" as any,
-    slot: "accessory",
-    rarity: opts.rarity,
-    price: 0,
-    emoji: opts.image,
-    desc: opts.desc,
-  };
+function useStagger(count: number, delay = 180) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    setShown(0);
+    if (count === 0) return;
+    let t: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      setShown(s => {
+        if (s >= count) return s;
+        t = setTimeout(tick, delay);
+        return s + 1;
+      });
+    };
+    t = setTimeout(tick, delay);
+    return () => clearTimeout(t);
+  }, [count, delay]);
+  return shown;
 }
 
 function LogSlide() {
-  const boulder = logMockItem({ id: "log_boulder", name: "Boulder", image: boulderImg, rarity: "rare", desc: "First try, or a few attempts in a session." });
-  const boss = logMockItem({ id: "log_boss", name: "Boss Project", image: bossImg, rarity: "legendary", desc: "Hard. Multi-session grind. Your nemesis." });
+  const items = [
+    { image: boulderImg, title: "Boulder", desc: "First try, or a few attempts in a session.", ring: "ring-[hsl(var(--btn-green))]/60" },
+    { image: bossImg, title: "Boss Project", desc: "Hard. Multi-session grind. Your nemesis.", ring: "ring-[hsl(var(--btn-orange))]/60" },
+  ];
+  const shown = useStagger(items.length);
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        <ItemCard item={boulder} />
-        <ItemCard item={boss} />
+        {items.map((it, i) => (
+          <div
+            key={it.title}
+            className={cn(
+              "transition-all duration-500",
+              i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-2"
+            )}
+          >
+            <PickCard image={it.image} title={it.title} desc={it.desc} ring={it.ring} />
+          </div>
+        ))}
       </div>
       <div className="text-center">
         <div className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-[hsl(var(--btn-green))]/15 border border-[hsl(var(--btn-green))]/40">
@@ -393,30 +410,24 @@ function BossCard({
   name,
   attempts,
   pct,
-  rarity = "legendary",
+  ring = "ring-[hsl(var(--boss))]/60",
   barColor = "hsl(var(--boss))",
 }: {
   image: string;
   name: string;
   attempts: number;
   pct: number;
-  rarity?: ShopItem["rarity"];
+  ring?: string;
   barColor?: string;
 }) {
-  const item: ShopItem = {
-    id: `boss_${name}`,
-    name,
-    group: "gear",
-    category: "Brushes" as any,
-    slot: "accessory",
-    rarity,
-    price: 0,
-    emoji: image,
-    desc: `${attempts} attempts · ${pct}% to send`,
-  };
   return (
     <div className="space-y-2">
-      <ItemCard item={item} />
+      <PickCard
+        image={image}
+        title={name}
+        desc={`${attempts} attempts · ${pct}% to send`}
+        ring={ring}
+      />
       <div className="px-1 flex items-center gap-2">
         <Swords className="h-3.5 w-3.5 shrink-0" style={{ color: barColor }} />
         <div className="flex-1"><PixelBar value={pct} max={100} color={barColor} /></div>
@@ -436,17 +447,24 @@ function BossSlide() {
     }, 300);
     return () => clearInterval(t);
   }, []);
+  const bosses = [
+    { image: bossImg, name: "The Crux Cave", attempts: 12, pct, ring: "ring-[hsl(var(--btn-orange))]/60", barColor: "hsl(var(--boss))" },
+    { image: crystalCaveImg, name: "Crystal Cavern", attempts: 7, pct: Math.max(10, pct - 25), ring: "ring-[hsl(280_70%_60%)]/60", barColor: "hsl(280 70% 60%)" },
+  ];
+  const shown = useStagger(bosses.length);
   return (
     <div className="grid grid-cols-2 gap-3">
-      <BossCard image={bossImg} name="The Crux Cave" attempts={12} pct={pct} rarity="epic" />
-      <BossCard
-        image={crystalCaveImg}
-        name="Crystal Cavern"
-        attempts={7}
-        pct={Math.max(10, pct - 25)}
-        rarity="legendary"
-        barColor="hsl(280 70% 60%)"
-      />
+      {bosses.map((b, i) => (
+        <div
+          key={b.name}
+          className={cn(
+            "transition-all duration-500",
+            i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-2"
+          )}
+        >
+          <BossCard {...b} />
+        </div>
+      ))}
     </div>
   );
 }

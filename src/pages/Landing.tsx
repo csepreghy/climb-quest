@@ -451,30 +451,6 @@ function BossSlide() {
   );
 }
 
-function BossSlide() {
-  const [pct, setPct] = useState(15);
-  useEffect(() => {
-    let v = 15;
-    const t = setInterval(() => {
-      v = v >= 80 ? 15 : v + 5;
-      setPct(v);
-    }, 300);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <div className="grid grid-cols-2 gap-3">
-      <BossCard image={bossImg} name="The Crux Cave" attempts={12} pct={pct} />
-      <BossCard
-        image={crystalCaveImg}
-        name="Crystal Cavern"
-        attempts={7}
-        pct={Math.max(10, pct - 25)}
-        ringClass="ring-[hsl(280_70%_60%)]/60"
-        barColor="hsl(280 70% 60%)"
-      />
-    </div>
-  );
-}
 
 function LevelUpSlide() {
   useLevelOverrides();

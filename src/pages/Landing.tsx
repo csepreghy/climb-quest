@@ -143,7 +143,7 @@ export default function Landing() {
 
 /* ---------------- Showcase ---------------- */
 
-const SLIDE_LABELS = ["Characters", "Gear", "Log climbs", "Boss projects", "Level up"];
+const SLIDE_LABELS = ["Unlock Characters", "Buy Gear", "Log Climbs", "Defeat Boss Projects", "Level Up"];
 
 function Showcase() {
   const [idx, setIdx] = useState(0);

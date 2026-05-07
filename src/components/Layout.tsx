@@ -133,7 +133,7 @@ export default function Layout() {
             </GameButton>
             {isAdmin && <ThemeButton />}
             <ChalkChip value={s.chalk} />
-            <button type="button" onClick={() => canLevel ? setConfirmLvOpen(true) : setLevelsOpen(true)}
+            <button type="button" onClick={() => setLevelsOpen(true)}
               className={cn(
                 "relative hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110 transition",
                 canLevel

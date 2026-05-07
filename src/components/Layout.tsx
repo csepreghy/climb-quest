@@ -166,10 +166,10 @@ export default function Layout() {
             </div>
           </NavLink>
           <div className="flex items-center gap-3">
-            <GameButton variant="success" size="sm" onClick={() => setLogOpen(true)} className="hidden sm:inline-flex">
+            <GameButton variant="success" size="sm" onClick={tryOpenLog} className="hidden sm:inline-flex">
               <Plus className="h-4 w-4" /> Log Boulder
             </GameButton>
-            <GameButton variant="success" size="sm" onClick={() => setLogOpen(true)} className="sm:hidden !px-2.5" aria-label="Log Boulder">
+            <GameButton variant="success" size="sm" onClick={tryOpenLog} className="sm:hidden !px-2.5" aria-label="Log Boulder">
               <Plus className="h-4 w-4" />
             </GameButton>
             {isAdmin && <ThemeButton />}

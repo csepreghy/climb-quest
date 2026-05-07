@@ -36,9 +36,11 @@ export function LevelPreviewCard({
     >
       <div className="aspect-square w-full bg-black/60 flex items-center justify-center relative">
         <ClimberAvatar level={level} gender={gender} equipped={equipped as any} size="xl" />
-        <span className={cn("absolute top-2 right-2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full", badgeClass)}>
-          {badgeLabel}
-        </span>
+        {badgeLabel && (
+          <span className={cn("absolute top-2 right-2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full", badgeClass)}>
+            {badgeLabel}
+          </span>
+        )}
       </div>
       <div className="p-4">
         <div className="font-display font-bold text-lg">{title}</div>

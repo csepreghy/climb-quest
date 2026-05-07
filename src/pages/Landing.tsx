@@ -15,7 +15,7 @@ import { ArrowRight, ScrollText, Sparkles, ArrowUp, Trophy } from "lucide-react"
 import logoImg from "@/assets/climbquest-logo.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
-import goldenChalkBag from "@/assets/golden-chalk-bag.png";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 export default function Landing() {
   const { user, loading } = useAuth();
@@ -55,8 +55,7 @@ export default function Landing() {
               Log boulders. Earn Chalk. Send bosses.
             </div>
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">
-              Turn every session<br />
-              into <span className="gradient-chalk-text">XP.</span>
+              Log climbs, earn <span className="gradient-chalk-text">chalk</span>, level up.
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
               ClimbQuest is a climbing tracker that plays like an RPG. Log climbs, earn chalk,
@@ -95,12 +94,10 @@ export default function Landing() {
           <PickCard
             content={
               <img
-                src={goldenChalkBag}
-                alt="Golden chalk bag"
+                src={chalkBagImg}
+                alt="Chalk bag"
                 loading="lazy"
-                width={512}
-                height={512}
-                className="h-[80%] w-[80%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.5)] animate-aura-pulse"
+                className="h-[70%] w-[70%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.4)]"
               />
             }
             title="2. Earn Chalk"
@@ -190,8 +187,8 @@ function Showcase() {
 }
 
 function CharactersSlide() {
-  useLevelOverrides();
-  // Build up to 15 slots cycling levels & genders, only those with custom images.
+  const overrides = useLevelOverrides();
+  // Build up to 12 slots cycling levels & genders, only those with custom images.
   const slots = useMemo(() => {
     const out: { level: number; gender: "male" | "female" }[] = [];
     for (let lvl = 1; lvl <= 10; lvl++) {
@@ -200,15 +197,21 @@ function CharactersSlide() {
         if (r.image) out.push({ level: lvl, gender: g });
       }
     }
-    return out.slice(0, 15);
-  }, []);
+    return out.slice(0, 12);
+  }, [overrides]);
 
   const [shown, setShown] = useState(0);
   useEffect(() => {
     setShown(0);
     if (slots.length === 0) return;
     const t = setInterval(() => {
-      setShown(s => (s >= slots.length ? 0 : s + 1));
+      setShown(s => {
+        if (s >= slots.length) {
+          clearInterval(t);
+          return s;
+        }
+        return s + 1;
+      });
     }, 180);
     return () => clearInterval(t);
   }, [slots.length]);
@@ -222,17 +225,17 @@ function CharactersSlide() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+    <div className="flex flex-col items-center gap-4">
+      <div className="grid grid-cols-4 gap-4 sm:gap-6">
         {slots.map((s, i) => (
           <div
             key={`${s.level}-${s.gender}-${i}`}
             className={cn(
-              "transition-all duration-300",
-              i < shown ? "opacity-100 scale-100" : "opacity-0 scale-75"
+              "transition-all duration-500",
+              i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-75 translate-y-2"
             )}
           >
-            <div className="scale-[0.55] sm:scale-[0.7] origin-center -m-4">
+            <div className="scale-[0.6] sm:scale-[0.75] origin-center -m-3">
               <ClimberAvatar level={s.level} gender={s.gender} equipped={{} as any} size="lg" />
             </div>
           </div>
@@ -246,24 +249,23 @@ function CharactersSlide() {
 function ItemsSlide() {
   const all = useAllItems();
   const items: ShopItem[] = useMemo(() => {
-    // Only items with a loaded image (so we never show loaders).
     const withImg = all.filter(i => !!i.emoji && (i.emoji.startsWith("http") || i.emoji.startsWith("data:") || i.emoji.startsWith("/")));
-    if (withImg.length >= 4) {
-      const leg = withImg.filter(i => i.rarity === "legendary").slice(0, 1);
-      const epic = withImg.filter(i => i.rarity === "epic").slice(0, 1);
-      const rare = withImg.filter(i => i.rarity === "rare").slice(0, 2);
-      const picked = [...leg, ...epic, ...rare];
-      const rest = withImg.filter(i => !picked.includes(i));
-      return [...picked, ...rest].slice(0, 4);
-    }
-    // Fallback mock items
-    return [
-      mockItem("Magdust", "legendary", "🪄"),
-      mockItem("Crimp Demigod Fit", "epic", "👑"),
-      mockItem("Board Shoes", "rare", "🥿"),
-      mockItem("Beanie", "common", "🧢"),
-    ];
+    if (withImg.length === 0) return [];
+    const leg = withImg.filter(i => i.rarity === "legendary").slice(0, 1);
+    const epic = withImg.filter(i => i.rarity === "epic").slice(0, 1);
+    const rare = withImg.filter(i => i.rarity === "rare").slice(0, 2);
+    const picked = [...leg, ...epic, ...rare];
+    const rest = withImg.filter(i => !picked.includes(i));
+    return [...picked, ...rest].slice(0, 4);
   }, [all]);
+
+  if (items.length === 0) {
+    return (
+      <div className="text-center text-sm text-muted-foreground py-10">
+        Gear, outfits, brushes & power-ups — earned with chalk.
+      </div>
+    );
+  }
   return (
     <div className="grid grid-cols-2 gap-3">
       {items.map(it => <ItemCard key={it.id} item={it} />)}
@@ -354,8 +356,8 @@ function LevelUpSlide() {
         gender="male"
         equipped={{}}
         ringClass="ring-[hsl(var(--panel-frame))]/40"
-        badgeLabel="Current"
-        badgeClass="bg-secondary text-foreground/80"
+        badgeLabel=""
+        badgeClass=""
         unlocks={[]}
         unlocksLabel=""
       />
@@ -366,8 +368,8 @@ function LevelUpSlide() {
         gender="male"
         equipped={{}}
         ringClass="ring-[hsl(var(--btn-orange))]/60"
-        badgeLabel="Next"
-        badgeClass="bg-[hsl(var(--btn-orange))] text-white"
+        badgeLabel=""
+        badgeClass=""
         unlocks={nextDef.unlocks}
         unlocksLabel="Unlocks"
         cost={nextDef.cost}

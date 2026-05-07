@@ -81,6 +81,8 @@ export default function Admin() {
 
       <BackfillImagesCard />
 
+      <LevelsAdmin />
+
       <InventoryAdmin />
 
       <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>

@@ -435,14 +435,15 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
   if (!item) return { ok: false, reason: "Unknown item" };
   if (!state.ignoreLevelReq && item.levelReq && state.level < item.levelReq) return { ok: false, reason: `Requires Level ${item.levelReq}` };
   if (!item.consumableBonus && state.owned.includes(id)) return { ok: false, reason: "Already owned" };
-  if (state.chalk < item.price) return { ok: false, reason: "Not enough Chalk" };
+  const price = effectivePrice(state, item.price);
+  if (state.chalk < price) return { ok: false, reason: "Not enough Chalk" };
   set(s => {
     const owned = item.consumableBonus ? s.owned : [...s.owned, id];
     const badges = new Set(s.badges);
     if (id === "crocs") badges.add("crocs_equipped");
     if (id === "golden_crocs") badges.add("golden_crocs");
     if (id === "minimal_kit") { badges.add("minimal_kit"); badges.add("shirtless_form"); }
-    return { ...s, chalk: s.chalk - item.price, owned, badges: Array.from(badges) };
+    return { ...s, chalk: s.chalk - price, owned, badges: Array.from(badges) };
   });
   return { ok: true };
 }
@@ -486,7 +487,12 @@ export function setGender(g: Gender) { set(s => ({ ...s, gender: g })); }
 export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], notes?: string) {
   const boss = state.bosses.find(b => b.id === bossId); if (!boss) return null;
   let activity: ActivityType = outcome === "send" || outcome === "flash" ? "boss_send" : "boss_attempt";
-  const breakdown = computeChalk(activity, [boss.style]);
+  // Boss difficulty (1-10) vs player ceiling (1-10) → reuse the same ratio scale.
+  // Map boss.difficulty (1–10) to a V-rank-ish value (×1.4) so a difficulty-6 boss
+  // has the same "feel" as a V8 problem against a V8 ceiling.
+  const ceiling = playerCeiling(state);
+  const diffMult = bossDifficultyMultiplier(boss.difficulty, ceiling);
+  const breakdown = computeChalk(activity, [boss.style], outcome === "send" || outcome === "flash", outcome === "flash", diffMult);
   const att: BossAttempt = { id: crypto.randomUUID(), date: new Date().toISOString(), outcome, chalk: breakdown.total, notes };
 
   set(s => {

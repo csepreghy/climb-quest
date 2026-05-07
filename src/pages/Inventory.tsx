@@ -191,7 +191,7 @@ export default function Inventory() {
                     })}
                     {Array.from({ length: emptyCount }).map((_, i) => (
                       <div key={`empty-${i}`} className="flex flex-col">
-                        <div className="flex-1"><EmptySlotCard label="Gear" /></div>
+                        <div className="flex-1"><EmptySlotCard label="Gear" onClick={() => setEmptyGearPicker(true)} /></div>
                         <div className="h-7 mt-1.5" aria-hidden />
                       </div>
                     ))}
@@ -199,7 +199,7 @@ export default function Inventory() {
                       const slotIndex = max + i;
                       return (
                         <div key={`locked-${i}`} className="flex flex-col">
-                          <div className="flex-1"><LockedSlotCard unlocksAt={gearUnlockLevel(slotIndex)} /></div>
+                          <div className="flex-1"><LockedSlotCard unlocksAt={gearUnlockLevel(slotIndex)} onClick={() => setLevelsOpen(true)} /></div>
                           <div className="h-7 mt-1.5" aria-hidden />
                         </div>
                       );

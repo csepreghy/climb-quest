@@ -282,8 +282,8 @@ function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: 
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <GameButton variant="ghost" size="sm" onClick={onBack}>Back</GameButton>
-        <GameButton variant="success" size="md" onClick={submit}>Send it 🪨</GameButton>
+        <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
+        <GameButton variant="success" size="md" onClick={submit}>{editLog ? "Save changes" : "Send it 🪨"}</GameButton>
       </div>
     </>
   );

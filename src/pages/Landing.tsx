@@ -8,6 +8,7 @@ import { LevelPreviewCard } from "@/components/LevelPreviewCard";
 import { ItemCard } from "@/components/ItemCard";
 import { LEVELS, ShopItem } from "@/game/data";
 import { useAllItems } from "@/game/customItems";
+import { supabase } from "@/integrations/supabase/client";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";

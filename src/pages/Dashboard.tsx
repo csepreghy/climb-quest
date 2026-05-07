@@ -66,7 +66,7 @@ export default function Dashboard() {
 
       <ChalkOverTimeChart logs={s.logs} />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Equipped */}
         <GameCard className="p-5">
           <h3 className="menu-label mb-3 flex items-center gap-1.5"><Sparkles className="h-3 w-3" /> Equipped</h3>

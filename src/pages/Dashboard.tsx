@@ -22,9 +22,13 @@ export default function Dashboard() {
   const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;
 
   const onLevelUp = () => {
+    const fromLevel = s.level;
+    const fromTitle = cur.title;
+    const toLevel = next?.level;
+    const target = next?.title ?? cur.title;
     const r = levelUp();
     if (!r.ok) { toast.error(r.reason ?? "Cannot level up"); return; }
-    showLevelUpBanner(nextLevel(s)?.title ?? cur.title, r.unlocks ?? []);
+    showLevelUpBanner(target, r.unlocks ?? [], { fromLevel, toLevel, fromTitle, gender: s.gender });
   };
 
   return (

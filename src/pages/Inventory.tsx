@@ -189,28 +189,39 @@ export default function Inventory() {
         </section>
 
         {/* OWNED */}
-        <section className="space-y-3">
+        <section className="space-y-4">
           <div className="menu-label">Owned ({owned.length})</div>
           {owned.length === 0 ? (
             <Card className="gradient-card p-4">
               <p className="text-sm text-muted-foreground italic">No items yet. Visit the shop to gear up.</p>
             </Card>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {owned.map(it => {
-                const isEquipped = !it.consumableBonus && s.equipped[it.slot] === it.id;
-                const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
-                return (
-                  <ItemCard
-                    key={it.id}
-                    item={it}
-                    primed={isPrimed}
-                    highlight={isEquipped}
-                    onClick={() => setCompareItem(it)}
-                  />
-                );
-              })}
-            </div>
+            (["outfit", "gear", "power"] as ItemGroup[]).map(group => {
+              const groupItems = owned.filter(it => it.group === group);
+              if (groupItems.length === 0) return null;
+              return (
+                <div key={group} className="space-y-2">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">
+                    {GROUP_LABEL[group]} ({groupItems.length})
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {groupItems.map(it => {
+                      const isEquipped = !it.consumableBonus && s.equipped[it.slot] === it.id;
+                      const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
+                      return (
+                        <ItemCard
+                          key={it.id}
+                          item={it}
+                          primed={isPrimed}
+                          highlight={isEquipped}
+                          onClick={() => setCompareItem(it)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })
           )}
         </section>
       </div>

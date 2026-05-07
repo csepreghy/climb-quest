@@ -41,33 +41,49 @@ const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
   power: ["aura", "title"],
 };
 
-function EmptySlotCard({ label }: { label: string }) {
+function EmptySlotCard({ label, onClick }: { label: string; onClick?: () => void }) {
+  const Comp: any = onClick ? "button" : "div";
   return (
-    <GameCard className="p-4 flex flex-col gap-3 relative opacity-60 h-full">
-      <div className="flex items-start gap-3">
-        <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border text-2xl">∅</div>
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium leading-snug text-muted-foreground">Empty</div>
-          <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">{label}</div>
+    <Comp
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      className={cn("w-full text-left", onClick && "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 rounded-xl")}
+    >
+      <GameCard interactive={!!onClick} className={cn("p-4 flex flex-col gap-3 relative h-full", onClick ? "opacity-80 hover:opacity-100 transition" : "opacity-60")}>
+        <div className="flex items-start gap-3">
+          <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border text-2xl">∅</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium leading-snug text-muted-foreground">Empty</div>
+            <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">{label}</div>
+            {onClick && <div className="text-[10px] mt-1 text-[hsl(var(--btn-orange))]">Click to equip</div>}
+          </div>
         </div>
-      </div>
-    </GameCard>
+      </GameCard>
+    </Comp>
   );
 }
 
-function LockedSlotCard({ unlocksAt }: { unlocksAt: number }) {
+function LockedSlotCard({ unlocksAt, onClick }: { unlocksAt: number; onClick?: () => void }) {
+  const Comp: any = onClick ? "button" : "div";
   return (
-    <GameCard className="p-4 flex flex-col gap-3 relative opacity-50 h-full">
-      <div className="flex items-start gap-3">
-        <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border">
-          <Lock className="h-6 w-6 text-muted-foreground" />
+    <Comp
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      className={cn("w-full text-left", onClick && "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 rounded-xl")}
+    >
+      <GameCard interactive={!!onClick} className={cn("p-4 flex flex-col gap-3 relative h-full", onClick ? "opacity-70 hover:opacity-100 transition" : "opacity-50")}>
+        <div className="flex items-start gap-3">
+          <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0 border border-dashed border-border">
+            <Lock className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium leading-snug text-muted-foreground">Locked</div>
+            <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">Unlocks at Lv {unlocksAt}</div>
+            {onClick && <div className="text-[10px] mt-1 text-[hsl(var(--btn-orange))]">View levels</div>}
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium leading-snug text-muted-foreground">Locked</div>
-          <div className="text-[10px] uppercase tracking-wider mt-1 text-muted-foreground">Unlocks at Lv {unlocksAt}</div>
-        </div>
-      </div>
-    </GameCard>
+      </GameCard>
+    </Comp>
   );
 }
 

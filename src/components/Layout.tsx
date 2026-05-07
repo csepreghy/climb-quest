@@ -42,7 +42,7 @@ export default function Layout() {
   const [logOpen, setLogOpen] = useState(false);
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
   const [needGymOpen, setNeedGymOpen] = useState(false);
-  const gymState = useGyms();
+  const gymState = useAllGyms();
   const hasGym = gymState.gyms.length > 0;
   const showOnboarding = !!user && !s.onboardedAt;
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ScrollText, Swords, User, Store, Backpack, Settings, LogOut, Building2 } from "lucide-react";
+import { GameButton } from "@/components/ui/game-button";
 import { useGame } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";

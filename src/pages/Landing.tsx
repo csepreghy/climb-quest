@@ -249,24 +249,23 @@ function CharactersSlide() {
 function ItemsSlide() {
   const all = useAllItems();
   const items: ShopItem[] = useMemo(() => {
-    // Only items with a loaded image (so we never show loaders).
     const withImg = all.filter(i => !!i.emoji && (i.emoji.startsWith("http") || i.emoji.startsWith("data:") || i.emoji.startsWith("/")));
-    if (withImg.length >= 4) {
-      const leg = withImg.filter(i => i.rarity === "legendary").slice(0, 1);
-      const epic = withImg.filter(i => i.rarity === "epic").slice(0, 1);
-      const rare = withImg.filter(i => i.rarity === "rare").slice(0, 2);
-      const picked = [...leg, ...epic, ...rare];
-      const rest = withImg.filter(i => !picked.includes(i));
-      return [...picked, ...rest].slice(0, 4);
-    }
-    // Fallback mock items
-    return [
-      mockItem("Magdust", "legendary", "🪄"),
-      mockItem("Crimp Demigod Fit", "epic", "👑"),
-      mockItem("Board Shoes", "rare", "🥿"),
-      mockItem("Beanie", "common", "🧢"),
-    ];
+    if (withImg.length === 0) return [];
+    const leg = withImg.filter(i => i.rarity === "legendary").slice(0, 1);
+    const epic = withImg.filter(i => i.rarity === "epic").slice(0, 1);
+    const rare = withImg.filter(i => i.rarity === "rare").slice(0, 2);
+    const picked = [...leg, ...epic, ...rare];
+    const rest = withImg.filter(i => !picked.includes(i));
+    return [...picked, ...rest].slice(0, 4);
   }, [all]);
+
+  if (items.length === 0) {
+    return (
+      <div className="text-center text-sm text-muted-foreground py-10">
+        Gear, outfits, brushes & power-ups — earned with chalk.
+      </div>
+    );
+  }
   return (
     <div className="grid grid-cols-2 gap-3">
       {items.map(it => <ItemCard key={it.id} item={it} />)}

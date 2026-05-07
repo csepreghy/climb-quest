@@ -5,6 +5,7 @@ import {
   bindGameRemoteSync,
   getGameStateSnapshot,
   replaceGameState,
+  adminSeedMockData,
   State as GameState,
 } from "./store";
 import {

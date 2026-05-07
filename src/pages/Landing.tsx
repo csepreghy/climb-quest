@@ -393,39 +393,60 @@ function BossCard({
   name,
   attempts,
   pct,
-  ringClass = "ring-[hsl(var(--boss))]/60",
+  rarity = "legendary",
   barColor = "hsl(var(--boss))",
 }: {
   image: string;
   name: string;
   attempts: number;
   pct: number;
-  ringClass?: string;
+  rarity?: ShopItem["rarity"];
   barColor?: string;
 }) {
+  const item: ShopItem = {
+    id: `boss_${name}`,
+    name,
+    group: "gear",
+    category: "Brushes" as any,
+    slot: "accessory",
+    rarity,
+    price: 0,
+    emoji: image,
+    desc: `${attempts} attempts · ${pct}% to send`,
+  };
   return (
-    <div
-      className={cn(
-        "rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden ring-2",
-        "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
-        ringClass,
-      )}
-    >
-      <div className="aspect-square w-full overflow-hidden bg-black/40">
-        <img src={image} alt={name} className="h-full w-full object-cover" />
+    <div className="space-y-2">
+      <ItemCard item={item} />
+      <div className="px-1 flex items-center gap-2">
+        <Swords className="h-3.5 w-3.5 shrink-0" style={{ color: barColor }} />
+        <div className="flex-1"><PixelBar value={pct} max={100} color={barColor} /></div>
+        <span className="text-[10px] tabular-nums text-muted-foreground">{pct}%</span>
       </div>
-      <div className="p-3 space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="font-display font-bold text-sm flex items-center gap-1.5 min-w-0">
-            <Swords className="h-4 w-4 shrink-0" style={{ color: barColor }} /> <span className="truncate">{name}</span>
-          </div>
-          <div className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border shrink-0" style={{ background: `${barColor}33`, color: barColor, borderColor: `${barColor}66` }}>
-            Project
-          </div>
-        </div>
-        <div className="text-[10px] text-muted-foreground">{attempts} attempts · {pct}%</div>
-        <PixelBar value={pct} max={100} color={barColor} />
-      </div>
+    </div>
+  );
+}
+
+function BossSlide() {
+  const [pct, setPct] = useState(15);
+  useEffect(() => {
+    let v = 15;
+    const t = setInterval(() => {
+      v = v >= 80 ? 15 : v + 5;
+      setPct(v);
+    }, 300);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <BossCard image={bossImg} name="The Crux Cave" attempts={12} pct={pct} rarity="epic" />
+      <BossCard
+        image={crystalCaveImg}
+        name="Crystal Cavern"
+        attempts={7}
+        pct={Math.max(10, pct - 25)}
+        rarity="legendary"
+        barColor="hsl(280 70% 60%)"
+      />
     </div>
   );
 }

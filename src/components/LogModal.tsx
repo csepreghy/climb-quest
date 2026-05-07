@@ -510,12 +510,17 @@ function PreviewReward({ preview }: { preview: ReturnType<typeof computeChalk> }
   );
 }
 
-function SimpleCelebrate({ total, label }: { total: number; label: string }) {
+function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: { total: number; label: string; image?: string; alt?: string }) {
   return (
-    <div className="py-12 text-center">
-      <img src={chalkBagImg} alt="Chalk" className="h-20 w-20 mx-auto object-contain animate-bounce drop-shadow-[0_4px_12px_hsl(var(--btn-orange)/0.5)]" />
-      <div className="mt-4 menu-label">{label}</div>
-      <div className="mt-2 text-4xl font-bold gradient-chalk-text animate-pop-in">+{total} Chalk</div>
+    <div className="py-10 text-center">
+      <div className="mx-auto h-40 w-40 rounded-2xl overflow-hidden border-4 border-[hsl(var(--btn-orange))] shadow-[0_0_40px_hsl(var(--btn-orange)/0.55)] animate-banner-pop">
+        <img src={image} alt={alt} className="h-full w-full object-cover" />
+      </div>
+      <div className="mt-5 menu-label">{label}</div>
+      <div className="mt-2 flex items-center justify-center gap-3 animate-pop-in">
+        <img src={goldenChalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--legendary)/0.6)]" />
+        <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{total}</span>
+      </div>
       <Sparkles className="h-6 w-6 mx-auto mt-3 text-chalk-glow animate-pulse" />
     </div>
   );

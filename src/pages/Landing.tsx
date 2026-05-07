@@ -259,19 +259,25 @@ function CharactersSlide() {
 
 function ItemsSlide() {
   const all = useAllItems();
-  // Pick a randomized 6 (prefer rarer items first, then random fill).
-  const picks: ShopItem[] = useMemo(() => {
-    if (all.length === 0) return [];
+  const [shuffleKey, setShuffleKey] = useState(0);
+
+  // Pick 6, randomized — only re-shuffles when shuffleKey changes
+  // (or once items first become available).
+  const [picks, setPicks] = useState<ShopItem[]>([]);
+  useEffect(() => {
+    if (all.length === 0) return;
+    if (picks.length > 0 && shuffleKey === 0) return; // keep first selection stable
     const shuffled = [...all].sort(() => Math.random() - 0.5);
     const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 1);
     const epic = shuffled.filter(i => i.rarity === "epic").slice(0, 2);
     const rare = shuffled.filter(i => i.rarity === "rare").slice(0, 2);
     const picked = [...leg, ...epic, ...rare];
     const rest = shuffled.filter(i => !picked.includes(i));
-    return [...picked, ...rest].slice(0, 6);
-  }, [all]);
+    setPicks([...picked, ...rest].slice(0, 6));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all.length, shuffleKey]);
 
-  // Fetch images for ONLY those ids (small payload, avoids timeout).
+  // Fetch images for ONLY those ids (small payload).
   const [imgs, setImgs] = useState<Record<string, string>>({});
   useEffect(() => {
     if (picks.length === 0) return;
@@ -282,15 +288,16 @@ function ItemsSlide() {
       if (cancelled) return;
       const map: Record<string, string> = {};
       (data ?? []).forEach((r: any) => { if (r.image) map[r.id] = r.image; });
-      setImgs(map);
+      setImgs(prev => ({ ...prev, ...map }));
     })();
     return () => { cancelled = true; };
   }, [picks.map(p => p.id).join(",")]);
 
   const items = picks.map(p => imgs[p.id] ? { ...p, emoji: imgs[p.id] } : p);
 
-  // Animate in one by one, then hold.
+  // Animate in once. Resets when picks identity changes (i.e., user-triggered reshuffle).
   const [shown, setShown] = useState(0);
+  const picksKey = picks.map(p => p.id).join(",");
   useEffect(() => {
     setShown(0);
     if (items.length === 0) return;
@@ -304,7 +311,8 @@ function ItemsSlide() {
     };
     t = setTimeout(tick, 180);
     return () => clearTimeout(t);
-  }, [items.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picksKey]);
 
   if (items.length === 0) {
     return (
@@ -314,7 +322,10 @@ function ItemsSlide() {
     );
   }
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div
+      className="grid grid-cols-2 gap-3"
+      onMouseEnter={() => setShuffleKey(k => k + 1)}
+    >
       {items.map((it, i) => (
         <div
           key={it.id}

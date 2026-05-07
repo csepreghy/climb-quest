@@ -61,25 +61,36 @@ export default function Layout() {
       <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><ArrowUp className="h-5 w-5 text-[hsl(var(--btn-orange))]" /> Level up?</DialogTitle>
+            <DialogTitle>Level up?</DialogTitle>
             <DialogDescription>
               {nxt ? <>Spend <span className="font-bold gradient-chalk-text">{nxt.cost.toLocaleString()} Chalk</span> to advance.</> : "Already at max level."}
             </DialogDescription>
           </DialogHeader>
           {nxt && (
-            <div className="flex items-center justify-center gap-3 py-2">
-              <div className="flex flex-col items-center gap-1.5 flex-1">
-                <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="md" />
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Current</div>
-                <div className="text-sm font-bold">Lv {s.level}</div>
-                <div className="text-xs text-muted-foreground text-center leading-tight">{cur.title}</div>
+            <div
+              className={cn(
+                "rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden",
+                "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
+                "ring-2 ring-[hsl(var(--btn-orange))]/60",
+              )}
+            >
+              <div className="aspect-[2/1] w-full bg-black/40 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-3">
+                <div className="flex flex-col items-center gap-1">
+                  <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="lg" />
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Lv {s.level}</div>
+                </div>
+                <ArrowUp className="h-7 w-7 rotate-90 text-[hsl(var(--btn-orange))] shrink-0" />
+                <div className="flex flex-col items-center gap-1">
+                  <ClimberAvatar level={nxt.level} gender={s.gender} equipped={s.equipped} size="lg" />
+                  <div className="text-[10px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">Lv {nxt.level}</div>
+                </div>
               </div>
-              <ArrowUp className="h-6 w-6 rotate-90 text-[hsl(var(--btn-orange))] shrink-0" />
-              <div className="flex flex-col items-center gap-1.5 flex-1">
-                <ClimberAvatar level={nxt.level} gender={s.gender} equipped={s.equipped} size="md" glow />
-                <div className="text-[10px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">Next</div>
-                <div className="text-sm font-bold">Lv {nxt.level}</div>
-                <div className="text-xs text-muted-foreground text-center leading-tight">{nxt.title}</div>
+              <div className="p-4">
+                <div className="font-display font-bold text-lg flex items-center gap-2">
+                  <ArrowUp className="h-5 w-5 text-[hsl(var(--btn-orange))]" /> {nxt.title}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">{cur.title} → <span className="text-foreground font-medium">{nxt.title}</span></div>
+                <div className="text-xs mt-2">Costs <span className="font-bold gradient-chalk-text tabular-nums">{nxt.cost.toLocaleString()} Chalk</span></div>
               </div>
             </div>
           )}

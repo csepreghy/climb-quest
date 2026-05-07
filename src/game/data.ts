@@ -38,16 +38,16 @@ export interface ClimberLevel {
 }
 
 export const LEVELS: ClimberLevel[] = [
-  { level: 1, title: "Rental Shoe Rookie", cost: 0,     emoji: "🥾", desc: "Oversized rentals, max enthusiasm.",            unlocks: ["Starter avatar", "Rental shoes", "Plain chalk bag", "1 Gear slot"] },
-  { level: 2, title: "Chalk Chaser",       cost: 200,   emoji: "💨", desc: "Obsessed with chalk. Still figuring it out.",   unlocks: ["Chalk bag skin", "Beanie", "First Send badge"] },
-  { level: 3, title: "Footwork Fiend",     cost: 500,   emoji: "👣", desc: "Discovers feet exist. Game-changing.",          unlocks: ["Footwork badge", "Cleaner shoes", "+1 Gear slot"] },
-  { level: 4, title: "Jug Juggler",        cost: 1100,  emoji: "🤹", desc: "Big holds, big confidence, slightly chaotic.",  unlocks: ["Chalk bucket", "Funny socks"] },
-  { level: 5, title: "Cute Crimper",       cost: 2200,  emoji: "🤏", desc: "Tiny holds = personality trait.",               unlocks: ["Magdust", "Wristband", "+1 Gear slot", "+1 Power-up slot"] },
-  { level: 6, title: "Dyno Devourer",      cost: 4200,  emoji: "🦘", desc: "Full commitment. No fear. Only flight.",        unlocks: ["Neon pants", "Neon chalk bag", "No Static badge"] },
-  { level: 7, title: "Board Goblin",       cost: 7800,  emoji: "👺", desc: "Lives on the board. Slightly feral.",           unlocks: ["Board shoes", "Tape pack"] },
-  { level: 8, title: "Beta Breaker",       cost: 14000, emoji: "🧠", desc: "Reads sequences. Solves cruxes. Smug.",         unlocks: ["Beta notebook", "Smart glasses", "+1 Gear slot (max)", "Sequence Master"] },
-  { level: 9, title: "Project Beast",      cost: 24000, emoji: "🦍", desc: "Long-term projects only. Locked in.",           unlocks: ["Project Beast Fit", "Premium brush", "Elite hoodie"] },
-  { level: 10,title: "Crimp Demigod",      cost: 40000, emoji: "👑", desc: "Endgame. Cute. Terrifying. Glowing.",           unlocks: ["Minimal Send Kit", "Golden Crocs", "+1 Power-up slot"] },
+  { level: 1, title: "Rental Shoe Rookie", cost: 0,      emoji: "🥾", desc: "Oversized rentals, max enthusiasm.",            unlocks: ["Starter avatar", "Rental shoes", "Plain chalk bag", "1 Gear slot"] },
+  { level: 2, title: "Chalk Chaser",       cost: 150,    emoji: "💨", desc: "Obsessed with chalk. Still figuring it out.",   unlocks: ["Chalk bag skin", "Beanie", "First Send badge"] },
+  { level: 3, title: "Footwork Fiend",     cost: 400,    emoji: "👣", desc: "Discovers feet exist. Game-changing.",          unlocks: ["Footwork badge", "Cleaner shoes", "+1 Gear slot"] },
+  { level: 4, title: "Jug Juggler",        cost: 1000,   emoji: "🤹", desc: "Big holds, big confidence, slightly chaotic.",  unlocks: ["Chalk bucket", "Funny socks"] },
+  { level: 5, title: "Cute Crimper",       cost: 2500,   emoji: "🤏", desc: "Tiny holds = personality trait.",               unlocks: ["Magdust", "Wristband", "+1 Gear slot", "+1 Power-up slot"] },
+  { level: 6, title: "Dyno Devourer",      cost: 6000,   emoji: "🦘", desc: "Full commitment. No fear. Only flight.",        unlocks: ["Neon pants", "Neon chalk bag", "No Static badge"] },
+  { level: 7, title: "Board Goblin",       cost: 14000,  emoji: "👺", desc: "Lives on the board. Slightly feral.",           unlocks: ["Board shoes", "Tape pack"] },
+  { level: 8, title: "Beta Breaker",       cost: 32000,  emoji: "🧠", desc: "Reads sequences. Solves cruxes. Smug.",         unlocks: ["Beta notebook", "Smart glasses", "+1 Gear slot (max)", "Sequence Master"] },
+  { level: 9, title: "Project Beast",      cost: 70000,  emoji: "🦍", desc: "Long-term projects only. Locked in.",           unlocks: ["Project Beast Fit", "Premium brush", "Elite hoodie"] },
+  { level: 10,title: "Crimp Demigod",      cost: 150000, emoji: "👑", desc: "Endgame. Cute. Terrifying. Glowing.",           unlocks: ["Minimal Send Kit", "Golden Crocs", "+1 Power-up slot"] },
 ];
 
 export interface ShopItem {
@@ -65,6 +65,8 @@ export interface ShopItem {
   /** Consumable: one-time bonus on next log */
   consumableBonus?: number;
   levelReq?: number;
+  /** Multiplier on shop prices when equipped, e.g. 0.9 = 10% off. Defaults to 1. */
+  priceMult?: number;
 }
 
 export const SHOP: ShopItem[] = [];
@@ -110,12 +112,12 @@ export const BOSS_TEMPLATES: BossTemplate[] = [
 
 // Base Chalk per activity (before bonuses)
 export const BASE_CHALK: Record<ActivityType, number> = {
-  warmup_boulder: 30,
-  boulder: 80,
-  hard_boulder: 160,
-  boulder_send: 60,
-  boss_attempt: 50,
-  boss_send: 250,
+  warmup_boulder: 25,
+  boulder: 70,
+  hard_boulder: 150,
+  boulder_send: 50,
+  boss_attempt: 60,
+  boss_send: 400,
 };
 
 export const ACTIVITY_LABELS: Record<ActivityType, string> = {

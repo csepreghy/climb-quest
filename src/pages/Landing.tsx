@@ -108,8 +108,8 @@ export default function Landing() {
           />
           <PickCard
             content={
-              <div className="scale-110">
-                <ClimberAvatar level={10} gender="male" equipped={{} as any} size="xl" glow />
+              <div className="scale-150">
+                <ClimberAvatar level={9} gender="male" equipped={{} as any} size="xl" glow />
               </div>
             }
             title="3. Level up"

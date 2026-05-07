@@ -1,10 +1,27 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { LEVELS, Gender } from "@/game/data";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
-import { Lock, Check } from "lucide-react";
+import { Lock, Check, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GameButton } from "@/components/ui/game-button";
 
-export function LevelsModal({ open, onOpenChange, currentLevel, gender }: { open: boolean; onOpenChange: (v: boolean) => void; currentLevel: number; gender: Gender }) {
+export function LevelsModal({
+  open,
+  onOpenChange,
+  currentLevel,
+  gender,
+  canLevelUp,
+  nextCost,
+  onLevelUpClick,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  currentLevel: number;
+  gender: Gender;
+  canLevelUp?: boolean;
+  nextCost?: number;
+  onLevelUpClick?: () => void;
+}) {
   useLevelOverrides();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -13,6 +30,18 @@ export function LevelsModal({ open, onOpenChange, currentLevel, gender }: { open
           <DialogTitle>Levels</DialogTitle>
           <DialogDescription>Earn Chalk to climb the ranks.</DialogDescription>
         </DialogHeader>
+        {onLevelUpClick && (
+          <GameButton
+            variant={canLevelUp ? "primary" : "ghost"}
+            size="sm"
+            disabled={!canLevelUp}
+            onClick={onLevelUpClick}
+            className="w-full"
+          >
+            <ArrowUp className="h-4 w-4" />
+            {canLevelUp ? `Level Up (${nextCost?.toLocaleString()} Chalk)` : "Need more Chalk to level up"}
+          </GameButton>
+        )}
         <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden max-h-[60vh] overflow-y-auto">
           {LEVELS.map(base => {
             const l = resolvedLevel(base.level, gender);

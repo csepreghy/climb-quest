@@ -70,6 +70,8 @@ export interface State {
   logs: BoulderLog[];
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
   ignoreLevelReq?: boolean;
+  /** ISO timestamp when the user completed first-time onboarding. */
+  onboardedAt?: string | null;
 }
 
 const STORAGE_KEY = "climbquest:v1";
@@ -90,6 +92,7 @@ const initialState = (): State => ({
   logs: [],
   stats: { totalLogs: 0, totalSends: 0, totalFlashes: 0, bossesSent: 0 },
   ignoreLevelReq: false,
+  onboardedAt: null,
 });
 
 function spawnBoss(t: BossTemplate): Boss {

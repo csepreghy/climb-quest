@@ -485,13 +485,21 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
       </div>
 
       <div className="flex justify-end gap-2 pt-3">
-        <GameButton variant="ghost" size="sm" onClick={onBack}>Back</GameButton>
-        <GameButton variant="primary" size="md" onClick={() => setStep("attempts")}>
-          <Swords className="h-4 w-4" /> Attempted
-        </GameButton>
-        <GameButton variant="danger" size="md" onClick={() => commit("defeat")}>
-          <Trophy className="h-4 w-4" /> Defeated Boss
-        </GameButton>
+        <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
+        {editLog ? (
+          <GameButton variant="success" size="md" onClick={() => commit(editLog.attemptType === "send" || editLog.attemptType === "flash" ? "defeat" : "attempt")}>
+            Save changes
+          </GameButton>
+        ) : (
+          <>
+            <GameButton variant="primary" size="md" onClick={() => setStep("attempts")}>
+              <Swords className="h-4 w-4" /> Attempted
+            </GameButton>
+            <GameButton variant="danger" size="md" onClick={() => commit("defeat")}>
+              <Trophy className="h-4 w-4" /> Defeated Boss
+            </GameButton>
+          </>
+        )}
       </div>
     </>
   );

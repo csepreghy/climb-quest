@@ -162,20 +162,52 @@ export function activeBoss(s: State) {
   return s.bosses.find(b => b.active && !b.sent) ?? s.bosses.find(b => !b.sent);
 }
 
+/** Highest difficulty (1–10) of any boss the player has SENT. Default 1. */
+export function playerCeiling(s: State): number {
+  let max = 1;
+  for (const b of s.bosses) if (b.sent && b.difficulty > max) max = b.difficulty;
+  return max;
+}
+
+/** Effective shop price: applies the equipped discount item (no stacking). */
+export function effectivePrice(s: State, listPrice: number): number {
+  let bestMult = 1;
+  for (const slotKey of Object.keys(s.equipped) as (keyof Equipped)[]) {
+    const id = s.equipped[slotKey]; if (!id) continue;
+    const item = getItem(id); if (!item?.priceMult) continue;
+    if (item.priceMult < bestMult) bestMult = item.priceMult;
+  }
+  return Math.max(0, Math.round(listPrice * bestMult));
+}
+
 // ----- Chalk computation -----
 export interface ChalkBreakdown {
   base: number;
   bonuses: { source: string; amount: number }[];
   total: number;
 }
-export function computeChalk(activity: ActivityType, styles: Style[], sent = false, flashed = false): ChalkBreakdown {
-  const base = BASE_CHALK[activity] ?? 50;
+export function computeChalk(
+  activity: ActivityType,
+  styles: Style[],
+  sent = false,
+  flashed = false,
+  difficultyMult = 1,
+): ChalkBreakdown {
+  const baseRaw = BASE_CHALK[activity] ?? 50;
+  const base = Math.max(1, Math.round(baseRaw * difficultyMult));
   const bonuses: { source: string; amount: number }[] = [];
   let running = base;
+  if (difficultyMult !== 1) {
+    const pct = Math.round((difficultyMult - 1) * 100);
+    bonuses.push({
+      source: difficultyMult > 1 ? `Difficulty (+${pct}%)` : `Below your level (${pct}%)`,
+      amount: 0, // already baked into base
+    });
+  }
 
   // Send flat bonus first (additive, not stacked %)
   if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
-    const amt = BASE_CHALK.boulder_send;
+    const amt = Math.round(BASE_CHALK.boulder_send * difficultyMult);
     bonuses.push({ source: "Send", amount: amt });
     running += amt;
   }

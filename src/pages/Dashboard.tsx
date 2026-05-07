@@ -49,17 +49,16 @@ export default function Dashboard() {
             <div className="menu-label">Level {s.level} · {cur.title}</div>
             <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
-            <div className="mt-5 space-y-1.5">
-              <div className="flex items-baseline justify-between text-xs">
-                <span className="text-muted-foreground">
-                  {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
-                </span>
-                <span className="tabular-nums text-muted-foreground">
-                  {next ? <><span className="text-foreground font-medium">{s.chalk.toLocaleString()}</span> / {next.cost.toLocaleString()}</> : `${s.chalk.toLocaleString()}`}
-                </span>
-              </div>
-              <PixelBar value={progress} max={100} color="hsl(var(--accent))" />
+            <div className="mt-4 flex items-baseline justify-between text-xs">
+              <span className="text-muted-foreground">
+                {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
+              </span>
+              <span className="tabular-nums text-muted-foreground">
+                {next ? <><span className="gradient-chalk-text font-bold">{s.chalk.toLocaleString()}</span> / {next.cost.toLocaleString()} chalk</> : `${s.chalk.toLocaleString()} chalk`}
+              </span>
             </div>
+
+            <EquippedStrip equipped={s.equipped} />
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
               <GameButton variant="success" onClick={() => setLogOpen(true)}>
@@ -70,6 +69,12 @@ export default function Dashboard() {
                   <ArrowUp className="h-4 w-4" /> Level Up
                 </GameButton>
               )}
+              <Link to="/inventory">
+                <GameButton variant="ghost"><Backpack className="h-4 w-4" /> Inventory</GameButton>
+              </Link>
+              <Link to="/shop">
+                <GameButton variant="ghost"><ShoppingBag className="h-4 w-4" /> Shop</GameButton>
+              </Link>
             </div>
           </div>
         </div>

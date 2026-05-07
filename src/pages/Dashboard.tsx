@@ -151,6 +151,52 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
+function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }) {
+  const SLOTS: Slot[] = ["outfit", "bottoms", "shoes", "hat", "chalk", "hand", "accessory", "aura"];
+  const equippedItems = SLOTS
+    .map(slot => ({ slot, id: equipped[slot] }))
+    .filter(e => !!e.id)
+    .map(e => ({ slot: e.slot, item: getItem(e.id!) }))
+    .filter(e => !!e.item)
+    .slice(0, 4);
+
+  return (
+    <div className="mt-4">
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Equipped</div>
+        <Link to="/inventory" className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground inline-flex items-center gap-0.5">
+          Manage <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      {equippedItems.length === 0 ? (
+        <Link to="/shop" className="block text-xs text-muted-foreground italic hover:text-foreground">
+          Nothing equipped — visit the shop to gear up.
+        </Link>
+      ) : (
+        <div className="flex gap-2 flex-wrap">
+          {equippedItems.map(({ slot, item }) => (
+            <Link
+              key={slot}
+              to="/inventory"
+              className={cn(
+                "h-14 w-14 rounded-lg bg-background/50 grid place-items-center transition-transform hover:-translate-y-0.5",
+                RARITY_BORDER[item!.rarity],
+              )}
+              title={item!.name}
+            >
+              {isImageEmoji(item!.emoji) ? (
+                <SmartImage src={item!.emoji} alt={item!.name} loaderSize={20} className="h-full w-full object-contain p-1" />
+              ) : (
+                <span className="text-2xl">{item!.emoji}</span>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number }[] }) {
   const data = useMemo(() => {
     const today = new Date();

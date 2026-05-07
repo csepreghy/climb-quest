@@ -122,7 +122,7 @@ function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: 
             <span className="text-muted-foreground text-xs">Starter</span>
           ) : (
             <span className="font-medium tabular-nums inline-flex items-center gap-1">
-              {discounted && <span className="text-[10px] text-muted-foreground line-through mr-1">{item.price}</span>}
+              
               {price}
               <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" />
             </span>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, ScrollText, Swords, User, Store, Backpack, Settings, LogOut, Building2 } from "lucide-react";
+import { Home, ScrollText, User, Store, Backpack, Settings, LogOut, Building2, Plus } from "lucide-react";
 import { GameButton } from "@/components/ui/game-button";
 import { useGame } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
@@ -8,19 +8,18 @@ import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { LevelsModal } from "@/components/LevelsModal";
+import { LogModal } from "@/components/LogModal";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import logoImg from "@/assets/climbquest-logo.png";
 
 const NAV_BASE = [
   { to: "/", label: "Home", icon: Home },
   { to: "/inventory", label: "Inventory", icon: Backpack },
-  { to: "/log", label: "Log Boulder", icon: ScrollText },
-  { to: "/bosses", label: "Boss Projects", icon: Swords },
+  { to: "/shop", label: "Shop", icon: Store },
+  { to: "/log", label: "Boulder Logs", icon: ScrollText },
   { to: "/character", label: "Character", icon: User },
   { to: "/gym", label: "My Gym", icon: Building2 },
-  { to: "/shop", label: "Shop", icon: Store },
 ];
 const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
 

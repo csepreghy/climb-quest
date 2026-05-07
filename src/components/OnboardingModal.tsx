@@ -149,7 +149,15 @@ export function OnboardingModal({ open, onClose }: Props) {
           />
         )}
 
-        <DialogFooter className="mt-2">
+        <DialogFooter className="mt-2 sm:justify-between gap-2">
+          <GameButton
+            variant="secondary"
+            onClick={() => setStep(STEP_ORDER[stepIdx - 1])}
+            disabled={stepIdx === 0}
+            className="w-full sm:w-auto"
+          >
+            Back
+          </GameButton>
           <GameButton
             variant="primary"
             onClick={isLast ? finish : next}

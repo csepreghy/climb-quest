@@ -536,7 +536,6 @@ function LevelEditor({ level, onDone }: { level: number; onDone: () => void; }) 
 }
 
 function PublicGymsAdmin() {
-  function PublicGymsAdminBody() {
   const s = usePublicGyms();
   const [name, setName] = useState("");
   const [loc, setLoc] = useState("");

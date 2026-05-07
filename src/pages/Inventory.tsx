@@ -238,6 +238,12 @@ export default function Inventory() {
                           primed={isPrimed}
                           highlight={isEquipped}
                           onClick={() => setCompareItem(it)}
+                          onRemove={isAdmin ? () => {
+                            if (confirm(`Remove ${it.name} from inventory?`)) {
+                              removeOwnedItem(it.id);
+                              toast.success(`Removed ${it.name}`);
+                            }
+                          } : undefined}
                         />
                       );
                     })}

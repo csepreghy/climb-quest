@@ -53,8 +53,8 @@ export async function uploadShopImage(itemId: string, blob: Blob): Promise<strin
   return `${data.publicUrl}?v=${Date.now()}`;
 }
 
-/** Convenience: take a File, produce 800px webp, upload, return URL. */
+/** Convenience: take a File, produce 360px webp, upload, return URL. */
 export async function processAndUpload(itemId: string, file: File | string): Promise<string> {
-  const blob = await toWebpBlob(file);
+  const blob = await toWebpBlob(file, SHOP_MAX_DIM);
   return uploadShopImage(itemId, blob);
 }

@@ -356,12 +356,28 @@ function mockItem(name: string, rarity: ShopItem["rarity"], emoji: string): Shop
   } as ShopItem;
 }
 
+function logMockItem(opts: { id: string; name: string; image: string; rarity: ShopItem["rarity"]; desc: string }): ShopItem {
+  return {
+    id: opts.id,
+    name: opts.name,
+    group: "gear",
+    category: "Brushes" as any,
+    slot: "accessory",
+    rarity: opts.rarity,
+    price: 0,
+    emoji: opts.image,
+    desc: opts.desc,
+  };
+}
+
 function LogSlide() {
+  const boulder = logMockItem({ id: "log_boulder", name: "Boulder", image: boulderImg, rarity: "rare", desc: "First try, or a few attempts in a session." });
+  const boss = logMockItem({ id: "log_boss", name: "Boss Project", image: bossImg, rarity: "legendary", desc: "Hard. Multi-session grind. Your nemesis." });
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        <PickCard image={boulderImg} title="Boulder" desc="First try, or a few attempts in a session." ring="ring-[hsl(var(--btn-green))]/60" />
-        <PickCard image={bossImg} title="Boss Project" desc="Hard. Multi-session grind. Your nemesis." ring="ring-[hsl(var(--boss))]/70" />
+        <ItemCard item={boulder} />
+        <ItemCard item={boss} />
       </div>
       <div className="text-center">
         <div className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-[hsl(var(--btn-green))]/15 border border-[hsl(var(--btn-green))]/40">

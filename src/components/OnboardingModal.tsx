@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { GameButton } from "@/components/ui/game-button";
@@ -26,6 +26,13 @@ export function OnboardingModal({ open, onClose }: Props) {
 
   const stepIdx = STEP_ORDER.indexOf(step);
   const isLast = step === "gym";
+
+  useEffect(() => {
+    if (open) {
+      setStep("gender");
+      setPicked(null);
+    }
+  }, [open]);
 
   function next() {
     if (step === "gender") {

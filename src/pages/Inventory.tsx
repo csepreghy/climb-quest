@@ -5,12 +5,13 @@ import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity, ShopItem } from "@/game/data";
-import { equipItem, unequipSlot, useGame } from "@/game/store";
+import { equipItem, unequipSlot, removeOwnedItem, useGame } from "@/game/store";
 import { getItem, useCustomItems, isImageEmoji } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 
@@ -46,6 +47,7 @@ function ItemCard({
   onClick,
   primed,
   highlight,
+  onRemove,
 }: {
   item: ShopItem;
   showAction?: boolean;
@@ -54,6 +56,7 @@ function ItemCard({
   onClick?: () => void;
   primed?: boolean;
   highlight?: boolean;
+  onRemove?: () => void;
 }) {
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
@@ -71,6 +74,17 @@ function ItemCard({
         <div className="absolute top-0 right-0 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
           +{showPct}%
         </div>
+      )}
+      {onRemove && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          aria-label="Remove from inventory"
+          title="Remove from inventory (admin)"
+          className="absolute bottom-2 right-2 z-10 h-7 w-7 grid place-items-center rounded-md border border-destructive/40 text-destructive bg-background/70 hover:bg-destructive hover:text-destructive-foreground transition"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
       )}
       <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji) ? (
@@ -118,6 +132,7 @@ function EmptySlotCard({ slot }: { slot: Slot }) {
 
 export default function Inventory() {
   const s = useGame();
+  const { isAdmin } = useAuth();
   useCustomItems();
   const owned = s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[];
   const totalBonusByActivity = gearBonusSummary(s.equipped);
@@ -223,6 +238,12 @@ export default function Inventory() {
                           primed={isPrimed}
                           highlight={isEquipped}
                           onClick={() => setCompareItem(it)}
+                          onRemove={isAdmin ? () => {
+                            if (confirm(`Remove ${it.name} from inventory?`)) {
+                              removeOwnedItem(it.id);
+                              toast.success(`Removed ${it.name}`);
+                            }
+                          } : undefined}
                         />
                       );
                     })}

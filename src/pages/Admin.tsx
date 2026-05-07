@@ -141,6 +141,8 @@ export default function Admin() {
 
       <InventoryAdmin />
 
+      <PublicGymsAdmin />
+
       <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>
         <ThemeStudio />
       </div>

@@ -86,7 +86,7 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 
 // ===================== BOULDER FORM =====================
 
-function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null }) {
+function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () => void; onDone: () => void; onSwitchToBoss?: () => void; editLog?: BoulderLog | null }) {
   const gymState = useGyms();
   const initialGymId = editLog?.gymId
     ?? gymState.lastUsedGymId

@@ -81,9 +81,10 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 
 // ===================== BOULDER FORM =====================
 
-function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null }) {
   const gymState = useGyms();
-  const initialGymId = gymState.lastUsedGymId
+  const initialGymId = editLog?.gymId
+    ?? gymState.lastUsedGymId
     ?? gymState.gyms.find(g => g.primary)?.id
     ?? gymState.gyms[0]?.id
     ?? "";
@@ -101,17 +102,19 @@ function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => voi
   const gs = gymState.gradingSystems.find(g => g.id === gsId);
   const grades = gs ? gradeLabels(gs) : [];
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [holdColorId, setHoldColorId] = useState<string>("");
-  const [grade, setGrade] = useState(grades[0] ?? "V3");
-  const [gradeMax, setGradeMax] = useState<string>("");
-  const [useRange, setUseRange] = useState(false);
+  const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
+  const [holdColorId, setHoldColorId] = useState<string>(editLog?.holdColorId ?? "");
+  const [grade, setGrade] = useState(editLog?.grade ?? grades[0] ?? "V3");
+  const [gradeMax, setGradeMax] = useState<string>(editLog?.gradeMax ?? "");
+  const [useRange, setUseRange] = useState(!!editLog?.gradeMax);
   useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
 
-  const [activity, setActivity] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder">>("boulder");
-  const [attemptType, setAttemptType] = useState<AttemptType>("send");
-  const [styles, setStyles] = useState<Style[]>([]);
-  const [notes, setNotes] = useState("");
+  const [activity, setActivity] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder">>(
+    (editLog?.activity as any) ?? "boulder"
+  );
+  const [attemptType, setAttemptType] = useState<AttemptType>(editLog?.attemptType ?? "send");
+  const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
+  const [notes, setNotes] = useState(editLog?.notes ?? "");
   const [celebrating, setCelebrating] = useState<{ total: number } | null>(null);
 
   const sent = attemptType === "flash" || attemptType === "send";
@@ -130,7 +133,7 @@ function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => voi
     if (gymId) setLastUsedGym(gymId);
     const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
-    const res = logBoulder({
+    const input = {
       activity,
       date: new Date(date).toISOString(),
       location: locationStr || undefined,
@@ -143,7 +146,14 @@ function BoulderForm({ onBack, onDone }: { onBack: () => void; onDone: () => voi
       attemptType,
       holdColorId: holdColorId || undefined,
       gymId: gymId || undefined,
-    });
+    };
+    if (editLog) {
+      updateLog(editLog.id, input);
+      toast.success("Log updated");
+      onDone();
+      return;
+    }
+    const res = logBoulder(input);
     setCelebrating({ total: res.log.chalkTotal });
     toast.success(`+${res.log.chalkTotal} Chalk earned`);
     setTimeout(() => { setCelebrating(null); onDone(); }, 1600);

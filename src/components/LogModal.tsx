@@ -88,9 +88,9 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
 
   const gymGradingSystems = (gym?.gradingSystemIds ?? [])
     .map(id => gymState.gradingSystems.find(g => g.id === id))
-    .filter(Boolean) as ReturnType<typeof gradeLabels> extends infer _ ? NonNullable<ReturnType<typeof gymState.gradingSystems[number]>>[] | any : any;
+    .filter((g): g is NonNullable<typeof g> => !!g);
 
-  const availableSystems = (gym ? gymGradingSystems : gymState.gradingSystems) as { id: string; name: string }[];
+  const availableSystems = gym && gymGradingSystems.length > 0 ? gymGradingSystems : gymState.gradingSystems;
   const defaultGsId = availableSystems[0]?.id ?? "v_grades";
   const [gsId, setGsId] = useState(defaultGsId);
   useEffect(() => { setGsId(availableSystems[0]?.id ?? "v_grades"); }, [gymId]);

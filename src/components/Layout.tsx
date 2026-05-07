@@ -2,14 +2,16 @@ import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ScrollText, User, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { LevelsModal } from "@/components/LevelsModal";
 import { LogModal } from "@/components/LogModal";
 import { useAuth } from "@/hooks/useAuth";
+import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
+import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import logoImg from "@/assets/climbquest-logo.png";
 
@@ -30,10 +32,40 @@ export default function Layout() {
   const NAV = isAdmin ? [...NAV_BASE, NAV_ADMIN] : NAV_BASE;
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [confirmLvOpen, setConfirmLvOpen] = useState(false);
+
+  const cur = currentLevel(s);
+  const nxt = nextLevel(s);
+  const canLevel = !!nxt && s.chalk >= nxt.cost;
+
+  const onConfirmLevelUp = () => {
+    const target = nxt?.title ?? "";
+    const r = levelUp();
+    setConfirmLvOpen(false);
+    if (r.ok) { showLevelUpBanner(target, r.unlocks ?? []); toast.success("Level up!"); }
+    else toast.error(r.reason ?? "Cannot level up");
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <LevelsModal open={levelsOpen} onOpenChange={setLevelsOpen} currentLevel={s.level} gender={s.gender} />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
+      <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><ArrowUp className="h-5 w-5 text-[hsl(var(--btn-orange))]" /> Level up?</DialogTitle>
+            <DialogDescription>
+              {nxt ? <>Spend <span className="font-bold gradient-chalk-text">{nxt.cost.toLocaleString()} Chalk</span> to advance from Lv {s.level} · {cur.title} to <span className="font-semibold text-foreground">Lv {nxt.level} · {nxt.title}</span>.</> : "Already at max level."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GameButton variant="ghost" size="sm" onClick={() => setConfirmLvOpen(false)}>Cancel</GameButton>
+            <GameButton variant="primary" size="sm" onClick={onConfirmLevelUp} disabled={!canLevel}>
+              <ArrowUp className="h-4 w-4" /> Level Up
+            </GameButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
         <div className="container flex items-center justify-between gap-4 py-5">
           <NavLink to="/" className="flex items-center gap-4 group">
@@ -55,25 +87,19 @@ export default function Layout() {
             </GameButton>
             {isAdmin && <ThemeButton />}
             <ChalkChip value={s.chalk} />
-            {(() => {
-              const nxt = nextLevel(s);
-              const canLevel = !!nxt && s.chalk >= nxt.cost;
-              return (
-                <button type="button" onClick={() => setLevelsOpen(true)}
-                  className={cn(
-                    "hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110 transition",
-                    canLevel
-                      ? "bg-[hsl(var(--btn-orange))] text-white animate-pulse"
-                      : "bg-secondary"
-                  )}
-                  title={canLevel ? "Ready to level up!" : undefined}
-                >
-                  <span className={cn("text-[11px] uppercase tracking-wider", canLevel ? "text-white/90" : "text-muted-foreground")}>Lv</span>
-                  <span className={cn("font-bold tabular-nums", canLevel ? "text-white" : "text-[hsl(var(--sky))]")}>{s.level}</span>
-                  {canLevel && <ArrowUp className="h-3.5 w-3.5" />}
-                </button>
-              );
-            })()}
+            <button type="button" onClick={() => canLevel ? setConfirmLvOpen(true) : setLevelsOpen(true)}
+              className={cn(
+                "hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110 transition",
+                canLevel
+                  ? "bg-[hsl(var(--btn-orange))] text-white animate-pulse"
+                  : "bg-secondary"
+              )}
+              title={canLevel ? "Ready to level up!" : undefined}
+            >
+              <span className={cn("text-[11px] uppercase tracking-wider", canLevel ? "text-white/90" : "text-muted-foreground")}>Lv</span>
+              <span className={cn("font-bold tabular-nums", canLevel ? "text-white" : "text-[hsl(var(--sky))]")}>{s.level}</span>
+              {canLevel && <ArrowUp className="h-3.5 w-3.5" />}
+            </button>
             <GameButton variant="danger" size="sm" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out" aria-label="Sign out" className="!px-2.5">
               <LogOut className="h-4 w-4" />
             </GameButton>

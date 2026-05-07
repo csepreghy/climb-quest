@@ -5,7 +5,7 @@ import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RARITY_COLOR, RARITY_BORDER, Slot, ItemGroup, Rarity, ShopItem } from "@/game/data";
-import { equipItem, unequipSlot, removeOwnedItem, useGame } from "@/game/store";
+import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame } from "@/game/store";
 import { getItem, useCustomItems, isImageEmoji } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
@@ -153,7 +153,19 @@ export default function Inventory() {
       <div className="space-y-4">
         <Card className="gradient-card p-5 text-center">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
-          <div className="mt-4 text-xs text-muted-foreground capitalize">{s.gender} preset</div>
+          <div className="mt-4 flex gap-2 justify-center">
+            {(["male","female"] as const).map(g => (
+              <Button
+                key={g}
+                size="sm"
+                variant={s.gender === g ? "default" : "secondary"}
+                onClick={() => setGender(g)}
+                className="capitalize"
+              >
+                {g}
+              </Button>
+            ))}
+          </div>
         </Card>
 
         <Card className="gradient-card p-4">

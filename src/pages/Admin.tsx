@@ -400,6 +400,7 @@ function LevelEditor({ level, onDone }: { level: number; onDone: () => void; }) 
         name: name.trim() || null,
         tagline: tagline.trim() || null,
         chalkReq: chalkReq === "" ? null : Math.max(0, parseInt(chalkReq) || 0),
+        rarity,
         maleImageFile: maleImageFile ?? undefined,
         femaleImageFile: femaleImageFile ?? undefined,
         clearMaleImage: clearMale,

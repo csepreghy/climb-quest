@@ -199,6 +199,11 @@ function CharactersSlide() {
         if (r.image) out.push({ level: lvl, gender: g });
       }
     }
+    // Shuffle (Fisher-Yates) then take 12.
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
     return out.slice(0, 12);
   }, [overrides]);
 

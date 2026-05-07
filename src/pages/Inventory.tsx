@@ -115,11 +115,15 @@ export default function Inventory() {
   const totalBonusByActivity = gearBonusSummary(s.equipped);
 
   const [compareItem, setCompareItem] = useState<ShopItem | null>(null);
+  const [slotPicker, setSlotPicker] = useState<ShopItem | null>(null);
   const equippedItem = compareItem
     ? (compareItem.consumableBonus
         ? (s.pendingConsumable ? getItem(s.pendingConsumable) ?? null : null)
         : (s.equipped[compareItem.slot] ? getItem(s.equipped[compareItem.slot]!) ?? null : null))
     : null;
+  const slotAlternatives = slotPicker
+    ? owned.filter(it => it.slot === slotPicker.slot && it.id !== slotPicker.id)
+    : [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px,1fr] animate-float-up">
@@ -171,7 +175,7 @@ export default function Inventory() {
                     );
                     return (
                       <div key={slot} className="flex flex-col">
-                        <div className="flex-1"><ItemCard item={it} /></div>
+                        <div className="flex-1"><ItemCard item={it} onClick={() => setSlotPicker(it)} /></div>
                         <div className="flex justify-end mt-1.5">
                           <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot(slot)}>Unequip</Button>
                         </div>
@@ -268,6 +272,43 @@ export default function Inventory() {
                     </GameButton>
                   );
                 })()}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* SLOT PICKER MODAL (clicked equipped item) */}
+      <Dialog open={!!slotPicker} onOpenChange={(o) => { if (!o) setSlotPicker(null); }}>
+        <DialogContent className="max-w-3xl">
+          {slotPicker && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Equipped · {SLOT_LABEL[slotPicker.slot]}</DialogTitle>
+              </DialogHeader>
+              <div className="max-w-sm mx-auto w-full">
+                <ItemCard item={slotPicker} />
+              </div>
+              <div className="pt-2">
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
+                  Other {SLOT_LABEL[slotPicker.slot]} you own ({slotAlternatives.length})
+                </div>
+                {slotAlternatives.length === 0 ? (
+                  <p className="text-sm text-muted-foreground italic">No other items for this slot.</p>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {slotAlternatives.map(it => (
+                      <ItemCard
+                        key={it.id}
+                        item={it}
+                        onClick={() => { setSlotPicker(null); setCompareItem(it); }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button variant="ghost" onClick={() => setSlotPicker(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Close</Button>
               </div>
             </>
           )}

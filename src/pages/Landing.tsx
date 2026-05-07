@@ -212,16 +212,19 @@ function CharactersSlide() {
   useEffect(() => {
     setShown(0);
     if (slots.length === 0) return;
-    const t = setInterval(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const tick = () => {
       setShown(s => {
         if (s >= slots.length) {
-          clearInterval(t);
+          // hold the full set for 1s, then no more updates
           return s;
         }
+        t = setTimeout(tick, 180);
         return s + 1;
       });
-    }, 180);
-    return () => clearInterval(t);
+    };
+    t = setTimeout(tick, 180);
+    return () => clearTimeout(t);
   }, [slots.length]);
 
   if (slots.length === 0) {

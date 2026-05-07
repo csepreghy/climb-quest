@@ -3,7 +3,7 @@ import { useGame, currentLevel, nextLevel, levelUp } from "@/game/store";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
-import { useNavigate } from "react-router-dom";
+
 import { BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
 import { getItem } from "@/game/customItems";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ export default function Dashboard() {
   const s = useGame();
   const cur = currentLevel(s);
   const next = nextLevel(s);
-  const nav = useNavigate();
+  
   const [logOpen, setLogOpen] = useState(false);
 
   const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;

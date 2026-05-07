@@ -356,8 +356,8 @@ function LevelUpSlide() {
         gender="male"
         equipped={{}}
         ringClass="ring-[hsl(var(--panel-frame))]/40"
-        badgeLabel="Current"
-        badgeClass="bg-secondary text-foreground/80"
+        badgeLabel=""
+        badgeClass=""
         unlocks={[]}
         unlocksLabel=""
       />
@@ -368,8 +368,8 @@ function LevelUpSlide() {
         gender="male"
         equipped={{}}
         ringClass="ring-[hsl(var(--btn-orange))]/60"
-        badgeLabel="Next"
-        badgeClass="bg-[hsl(var(--btn-orange))] text-white"
+        badgeLabel=""
+        badgeClass=""
         unlocks={nextDef.unlocks}
         unlocksLabel="Unlocks"
         cost={nextDef.cost}

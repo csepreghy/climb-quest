@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ScrollText, Sparkles, ArrowUp, Trophy } from "lucide-react";
+import { ArrowRight, ScrollText, Sparkles, ArrowUp, Swords } from "lucide-react";
 import logoImg from "@/assets/climbquest-logo.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
@@ -85,13 +85,13 @@ export default function Landing() {
       <section id="how" className="relative z-10 container pb-24">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">One app. Every send.</h2>
-          <p className="text-muted-foreground mt-2">From the first slab to your hardest project.</p>
+          <p className="text-muted-foreground mt-2">From the first slab to your hardest overhang.</p>
         </div>
         <div className="grid sm:grid-cols-3 gap-4">
           <PickCard
             image={boulderImg}
             title="1. Log climbs"
-            desc="Every boulder, attempt, and flash counted in seconds."
+            desc="Every boulder, attempt, and flash and grade easily saved."
             ring="ring-[hsl(var(--btn-green))]/60"
           />
           <PickCard
@@ -358,7 +358,7 @@ function BossCard({
       <div className="p-3 space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="font-display font-bold text-sm flex items-center gap-1.5 min-w-0">
-            <Trophy className="h-4 w-4 shrink-0" style={{ color: barColor }} /> <span className="truncate">{name}</span>
+            <Swords className="h-4 w-4 shrink-0" style={{ color: barColor }} /> <span className="truncate">{name}</span>
           </div>
           <div className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border shrink-0" style={{ background: `${barColor}33`, color: barColor, borderColor: `${barColor}66` }}>
             Project

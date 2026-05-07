@@ -36,18 +36,23 @@ export function LevelsModal({
         </DialogHeader>
 
         {onLevelUpClick && (
-          <GameButton
-            variant={canLevelUp ? "primary" : "ghost"}
-            size="md"
-            disabled={!canLevelUp}
-            onClick={onLevelUpClick}
-            className="w-full"
-          >
-            <ArrowUp className="h-4 w-4" />
-            {canLevelUp
-              ? <>Level Up · <span className="inline-flex items-center gap-1">{nextCost?.toLocaleString()} <img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" /></span></>
-              : "Need more Chalk to level up"}
-          </GameButton>
+          <div className="flex justify-end">
+            <GameButton
+              variant={canLevelUp ? "primary" : "ghost"}
+              size="md"
+              disabled={!canLevelUp}
+              onClick={onLevelUpClick}
+            >
+              <ArrowUp className="h-4 w-4" />
+              Level Up
+              {canLevelUp && (
+                <span className="inline-flex items-center gap-1 ml-1 tabular-nums">
+                  · {nextCost?.toLocaleString()}
+                  <img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />
+                </span>
+              )}
+            </GameButton>
+          </div>
         )}
 
         <div className="space-y-3 overflow-y-auto pr-1 -mr-1">

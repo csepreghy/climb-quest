@@ -36,7 +36,7 @@ export default function Character() {
             <div className="text-3xl font-bold gradient-chalk-text">{s.chalk.toLocaleString()}</div>
             {next && (
               <GameButton size="sm" variant="legendary" className="mt-3" disabled={s.chalk < next.cost}
-                onClick={() => { const target = next?.title ?? ""; const r = levelUp(); if (r.ok) { showLevelUpBanner(target, r.unlocks ?? []); toast.success("Level up!"); } else toast.error(r.reason ?? ""); }}>
+                onClick={() => { const target = next?.title ?? ""; const fromLevel = s.level; const fromTitle = cur.title; const toLevel = next?.level; const r = levelUp(); if (r.ok) { showLevelUpBanner(target, r.unlocks ?? [], { fromLevel, toLevel, fromTitle, gender: s.gender }); toast.success("Level up!"); } else toast.error(r.reason ?? ""); }}>
                 <ArrowUp className="h-4 w-4" /> Level Up ({next.cost})
               </GameButton>
             )}

@@ -40,10 +40,15 @@ export default function Layout() {
 
   const onConfirmLevelUp = () => {
     const target = nxt?.title ?? "";
+    const fromLevel = s.level;
+    const fromTitle = cur.title;
+    const toLevel = nxt?.level;
     const r = levelUp();
     setConfirmLvOpen(false);
-    if (r.ok) { showLevelUpBanner(target, r.unlocks ?? []); toast.success("Level up!"); }
-    else toast.error(r.reason ?? "Cannot level up");
+    if (r.ok) {
+      showLevelUpBanner(target, r.unlocks ?? [], { fromLevel, toLevel, fromTitle, gender: s.gender });
+      toast.success("Level up!");
+    } else toast.error(r.reason ?? "Cannot level up");
   };
 
   return (

@@ -10,7 +10,9 @@ import { computeChalk, logBoulder, AttemptType } from "@/game/store";
 import { useGyms, setLastUsedGym, gradeLabels } from "@/game/gyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Mountain, Swords, ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import boulderImg from "@/assets/log-boulder.webp";
+import bossImg from "@/assets/log-boss.webp";
 
 type Mode = "pick" | "form";
 type Kind = "boulder" | "boss";

@@ -103,6 +103,7 @@ export function OnboardingModal({ open, onClose }: Props) {
           <StepCard
             image={boulderImg}
             altImage={bossImg}
+            largeImages
             icon={<ScrollText className="h-5 w-5" />}
             title="Log climbs to earn Chalk"
             body={<>
@@ -121,7 +122,9 @@ export function OnboardingModal({ open, onClose }: Props) {
               Buy items in the <span className="font-semibold">Shop</span> with Chalk and equip them in your <span className="font-semibold">Inventory</span>.
               Equipped items boost the Chalk you earn from each climb.
             </>}
-          />
+          >
+            <ExampleItems />
+          </StepCard>
         )}
 
         {step === "level" && (
@@ -131,7 +134,9 @@ export function OnboardingModal({ open, onClose }: Props) {
             body={<>
               Spend Chalk to climb the ranks. Each level unlocks rarer items, more gear slots, and tougher bosses.
             </>}
-          />
+          >
+            <LevelExamples gender={picked ?? "male"} />
+          </StepCard>
         )}
 
         {step === "gym" && (

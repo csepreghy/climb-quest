@@ -1,15 +1,19 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useGame, currentLevel, nextLevel, levelUp } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
+import { getItem, isImageEmoji } from "@/game/customItems";
+import { RARITY_BORDER, type Slot } from "@/game/data";
+import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
-import { Plus, ArrowUp, Trophy, TrendingUp } from "lucide-react";
+import { Plus, ArrowUp, Trophy, TrendingUp, Backpack, ShoppingBag, ChevronRight } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";

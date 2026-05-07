@@ -210,3 +210,60 @@ export function gradeLabels(g: GradingSystem): string[] {
   if (g.kind === "color") return (g.colors ?? []).map(c => c.name);
   return [];
 }
+
+/** Approximate French→V rank (V index 0 = VB). */
+const FRENCH_TO_V: Record<string, number> = {
+  "3A":0,"3B":0,"3C":0,"4A":1,"4B":1,"4C":1,"5A":1,"5B":1,"5C":1,
+  "6A":2,"6A+":2,"6B":3,"6B+":4,"6C":5,"6C+":5,
+  "7A":6,"7A+":7,"7B":8,"7B+":8,"7C":9,"7C+":10,
+  "8A":11,"8A+":12,"8B":13,"8B+":14,"8C":15,"8C+":16,"9A":17,
+};
+
+/**
+ * Universal grade → V-scale rank (0 = VB, 17 = V16+).
+ * Handles V/French labels regardless of system, with sane fallbacks for
+ * number/color systems and unknown labels.
+ */
+export function gradeToVRank(label: string | undefined, system?: GradingSystem): number {
+  if (!label) return 1;
+  const l = label.toUpperCase();
+  // V-scale direct
+  const vIdx = (V_SCALE as readonly string[]).indexOf(l);
+  if (vIdx >= 0) return vIdx;
+  // French direct
+  if (FRENCH_TO_V[l] !== undefined) return FRENCH_TO_V[l];
+  // System-specific fallbacks
+  if (system) {
+    if (system.kind === "number") {
+      const n = parseInt(l);
+      if (!isNaN(n)) {
+        const min = system.numberMin ?? 1;
+        const max = system.numberMax ?? 10;
+        const span = Math.max(1, max - min);
+        // map [min,max] → [1, 14]
+        return Math.round(1 + ((n - min) / span) * 13);
+      }
+    }
+    if (system.kind === "color" && system.colors) {
+      const idx = system.colors.findIndex(c => c.name.toUpperCase() === l);
+      if (idx >= 0) {
+        const span = Math.max(1, system.colors.length - 1);
+        return Math.round(1 + (idx / span) * 13);
+      }
+    }
+  }
+  return 5; // unknown → mid
+}
+
+/** Difficulty multiplier from climb rank vs player ceiling rank. */
+export function difficultyMultiplier(climbRank: number, ceilingRank: number): number {
+  const ceil = Math.max(1, ceilingRank);
+  const ratio = climbRank / ceil;
+  if (ratio <= 0.3) return 0.25;
+  if (ratio <= 0.6) return 0.55;
+  if (ratio <= 0.85) return 0.85;
+  if (ratio <= 1.0) return 1.0;
+  if (ratio <= 1.15) return 1.25;
+  return 1.5;
+}
+

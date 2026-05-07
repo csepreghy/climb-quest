@@ -302,7 +302,8 @@ export default function Inventory() {
                       variant="primary"
                       disabled={alreadyOn}
                       onClick={() => {
-                        equipItem(compareItem.id);
+                        const r = equipItem(compareItem.id);
+                        if (!r.ok) { toast.error(r.reason ?? "Cannot equip"); return; }
                         toast.success(compareItem.consumableBonus ? `Primed ${compareItem.name}` : `Equipped ${compareItem.name}`);
                         setCompareItem(null);
                       }}

@@ -1,9 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { LEVELS, Gender } from "@/game/data";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
-import { Lock, Check, ArrowUp } from "lucide-react";
+import { Lock, Check, ArrowUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GameButton } from "@/components/ui/game-button";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 export function LevelsModal({
   open,
@@ -25,45 +26,100 @@ export function LevelsModal({
   useLevelOverrides();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Levels</DialogTitle>
-          <DialogDescription>Earn Chalk to climb the ranks.</DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-[hsl(var(--btn-orange))]" />
+            Climber Levels
+          </DialogTitle>
+          <DialogDescription>Earn Chalk by logging climbs to ascend the ranks.</DialogDescription>
         </DialogHeader>
+
         {onLevelUpClick && (
           <GameButton
             variant={canLevelUp ? "primary" : "ghost"}
-            size="sm"
+            size="md"
             disabled={!canLevelUp}
             onClick={onLevelUpClick}
             className="w-full"
           >
             <ArrowUp className="h-4 w-4" />
-            {canLevelUp ? `Level Up (${nextCost?.toLocaleString()} Chalk)` : "Need more Chalk to level up"}
+            {canLevelUp
+              ? <>Level Up · <span className="inline-flex items-center gap-1">{nextCost?.toLocaleString()} <img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" /></span></>
+              : "Need more Chalk to level up"}
           </GameButton>
         )}
-        <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden max-h-[60vh] overflow-y-auto">
+
+        <div className="space-y-3 overflow-y-auto pr-1 -mr-1">
           {LEVELS.map(base => {
             const l = resolvedLevel(base.level, gender);
             const past = l.level < currentLevel;
             const cur = l.level === currentLevel;
             const future = l.level > currentLevel;
             return (
-              <div key={l.level} className={cn("flex items-center gap-3 px-3 py-2.5", cur && "bg-accent/10")}>
-                <div className="text-xl w-8 text-center">
-                  {l.image ? <img src={l.image} alt="" className="h-8 w-8 object-contain rounded" /> : l.emoji}
+              <div
+                key={l.level}
+                className={cn(
+                  "rounded-xl border-2 p-3 sm:p-4 flex gap-3 sm:gap-4 transition",
+                  cur && "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/10 shadow-[0_0_0_1px_hsl(var(--btn-orange)/0.4),0_8px_24px_-12px_hsl(var(--btn-orange)/0.5)]",
+                  past && "border-chalk-glow/30 bg-chalk-glow/5",
+                  future && "border-border bg-secondary/40 opacity-90",
+                )}
+              >
+                <div className={cn(
+                  "shrink-0 h-20 w-20 sm:h-24 sm:w-24 rounded-lg flex items-center justify-center overflow-hidden border-2",
+                  cur ? "border-[hsl(var(--btn-orange))] bg-background/60" : past ? "border-chalk-glow/40 bg-background/40" : "border-border bg-background/30",
+                )}>
+                  {l.image ? (
+                    <img src={l.image} alt={l.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-4xl sm:text-5xl">{l.emoji}</span>
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold flex items-center gap-2">
-                    Lv {l.level} · {l.title}
-                    {cur && <span className="text-[10px] uppercase px-1.5 rounded bg-accent/20 text-accent">Current</span>}
+
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Level {l.level}</div>
+                      <div className="font-display font-bold text-base sm:text-lg leading-tight truncate">{l.title}</div>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-1.5">
+                      {cur && <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[hsl(var(--btn-orange))] text-white">Current</span>}
+                      {past && <Check className="h-4 w-4 text-chalk-glow" />}
+                    </div>
                   </div>
-                  <div className="text-[11px] text-muted-foreground truncate">{l.desc}</div>
-                </div>
-                <div className="text-right text-xs tabular-nums">
-                  {past ? <Check className="h-4 w-4 text-chalk-glow" /> : future ? (
-                    <span className="flex items-center gap-1 text-muted-foreground"><Lock className="h-3 w-3" /> {l.cost.toLocaleString()}</span>
-                  ) : <span className="text-muted-foreground">{l.cost.toLocaleString()}</span>}
+
+                  <p className="text-xs text-muted-foreground italic line-clamp-2">{l.desc}</p>
+
+                  {l.unlocks.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-0.5">
+                      {l.unlocks.map(u => (
+                        <span
+                          key={u}
+                          className={cn(
+                            "text-[10px] px-1.5 py-0.5 rounded border",
+                            past || cur
+                              ? "border-chalk-glow/40 text-chalk-glow bg-chalk-glow/10"
+                              : "border-border text-muted-foreground bg-background/40",
+                          )}
+                        >
+                          {u}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="pt-1 text-xs">
+                    {past ? (
+                      <span className="text-chalk-glow inline-flex items-center gap-1"><Check className="h-3 w-3" /> Unlocked</span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 tabular-nums text-muted-foreground">
+                        {future && <Lock className="h-3 w-3" />}
+                        <span className={cn("font-bold", cur && "text-[hsl(var(--btn-orange))]")}>{l.cost.toLocaleString()}</span>
+                        <img src={chalkBagImg} alt="Chalk" className="h-3.5 w-3.5 object-contain" />
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             );

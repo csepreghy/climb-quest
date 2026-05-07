@@ -187,8 +187,8 @@ function Showcase() {
 }
 
 function CharactersSlide() {
-  useLevelOverrides();
-  // Build up to 15 slots cycling levels & genders, only those with custom images.
+  const overrides = useLevelOverrides();
+  // Build up to 12 slots cycling levels & genders, only those with custom images.
   const slots = useMemo(() => {
     const out: { level: number; gender: "male" | "female" }[] = [];
     for (let lvl = 1; lvl <= 10; lvl++) {
@@ -197,15 +197,21 @@ function CharactersSlide() {
         if (r.image) out.push({ level: lvl, gender: g });
       }
     }
-    return out.slice(0, 15);
-  }, []);
+    return out.slice(0, 12);
+  }, [overrides]);
 
   const [shown, setShown] = useState(0);
   useEffect(() => {
     setShown(0);
     if (slots.length === 0) return;
     const t = setInterval(() => {
-      setShown(s => (s >= slots.length ? 0 : s + 1));
+      setShown(s => {
+        if (s >= slots.length) {
+          clearInterval(t);
+          return s;
+        }
+        return s + 1;
+      });
     }, 180);
     return () => clearInterval(t);
   }, [slots.length]);
@@ -219,17 +225,17 @@ function CharactersSlide() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+    <div className="flex flex-col items-center gap-4">
+      <div className="grid grid-cols-4 gap-4 sm:gap-6">
         {slots.map((s, i) => (
           <div
             key={`${s.level}-${s.gender}-${i}`}
             className={cn(
-              "transition-all duration-300",
-              i < shown ? "opacity-100 scale-100" : "opacity-0 scale-75"
+              "transition-all duration-500",
+              i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-75 translate-y-2"
             )}
           >
-            <div className="scale-[0.55] sm:scale-[0.7] origin-center -m-4">
+            <div className="scale-[0.6] sm:scale-[0.75] origin-center -m-3">
               <ClimberAvatar level={s.level} gender={s.gender} equipped={{} as any} size="lg" />
             </div>
           </div>

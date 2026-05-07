@@ -259,9 +259,9 @@ export function logBoulder(input: LogInput) {
       stats: {
         ...s.stats,
         totalLogs: s.stats.totalLogs + 1,
-        totalSends: s.stats.totalSends + (log.sends ?? 1),
-        totalFlashes: s.stats.totalFlashes,
-        bossesSent: s.stats.bossesSent,
+        totalSends: s.stats.totalSends + (input.sent || input.attemptType === "flash" || input.attemptType === "send" ? 1 : 0),
+        totalFlashes: s.stats.totalFlashes + (input.attemptType === "flash" ? 1 : 0),
+        bossesSent: s.stats.bossesSent + (input.isBoss && (input.attemptType === "flash" || input.attemptType === "send") ? 1 : 0),
       },
     };
   });

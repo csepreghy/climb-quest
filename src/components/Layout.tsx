@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, ScrollText, User, Store, Backpack, Settings, LogOut, Building2, Plus } from "lucide-react";
+import { Home, ScrollText, User, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp } from "lucide-react";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame } from "@/game/store";
+import { useGame, nextLevel } from "@/game/store";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
@@ -55,11 +55,25 @@ export default function Layout() {
             </GameButton>
             {isAdmin && <ThemeButton />}
             <ChalkChip value={s.chalk} />
-            <button type="button" onClick={() => setLevelsOpen(true)}
-              className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110">
-              <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Lv</span>
-              <span className="font-bold tabular-nums text-[hsl(var(--sky))]">{s.level}</span>
-            </button>
+            {(() => {
+              const nxt = nextLevel(s);
+              const canLevel = !!nxt && s.chalk >= nxt.cost;
+              return (
+                <button type="button" onClick={() => setLevelsOpen(true)}
+                  className={cn(
+                    "hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-sm shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08),inset_0_-1px_0_hsl(0_0%_0%/0.5)] hover:brightness-110 transition",
+                    canLevel
+                      ? "bg-[hsl(var(--btn-orange))] text-white animate-pulse"
+                      : "bg-secondary"
+                  )}
+                  title={canLevel ? "Ready to level up!" : undefined}
+                >
+                  <span className={cn("text-[11px] uppercase tracking-wider", canLevel ? "text-white/90" : "text-muted-foreground")}>Lv</span>
+                  <span className={cn("font-bold tabular-nums", canLevel ? "text-white" : "text-[hsl(var(--sky))]")}>{s.level}</span>
+                  {canLevel && <ArrowUp className="h-3.5 w-3.5" />}
+                </button>
+              );
+            })()}
             <GameButton variant="danger" size="sm" onClick={async () => { await signOut(); nav("/auth"); }} title="Sign out" aria-label="Sign out" className="!px-2.5">
               <LogOut className="h-4 w-4" />
             </GameButton>

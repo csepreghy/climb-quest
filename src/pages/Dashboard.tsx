@@ -5,9 +5,9 @@ import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
-import { getItem } from "@/game/customItems";
+
 import { toast } from "sonner";
-import { ScrollText, ArrowUp, Sparkles, Trophy, TrendingUp } from "lucide-react";
+import { Plus, ArrowUp, Trophy, TrendingUp } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
@@ -52,10 +52,10 @@ export default function Dashboard() {
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
               <GameButton variant="success" onClick={() => setLogOpen(true)}>
-                <ScrollText className="h-4 w-4" /> Log Boulder
+                <Plus className="h-4 w-4" /> Log Boulder
               </GameButton>
               {next && s.chalk >= next.cost && (
-                <GameButton variant="legendary" onClick={onLevelUp}>
+                <GameButton variant="primary" onClick={onLevelUp}>
                   <ArrowUp className="h-4 w-4" /> Level Up
                 </GameButton>
               )}
@@ -66,51 +66,24 @@ export default function Dashboard() {
 
       <ChalkOverTimeChart logs={s.logs} />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Equipped */}
-        <GameCard className="p-5">
-          <h3 className="menu-label mb-3 flex items-center gap-1.5"><Sparkles className="h-3 w-3" /> Equipped</h3>
-          <div className="space-y-1 text-sm">
-            {(["shoes","chalk","outfit","bottoms","accessory","aura","title"] as const).map(slot => {
-              const id = s.equipped[slot];
-              const it = id ? getItem(id) : null;
+      {/* Badges */}
+      <GameCard tone="legendary" className="p-5">
+        <h3 className="menu-label mb-3 flex items-center gap-1.5"><Trophy className="h-3 w-3" /> Badges</h3>
+        {s.badges.length === 0 ? (
+          <div className="text-sm text-muted-foreground">No badges yet. Log something — anything!</div>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {s.badges.slice(0, 12).map(id => {
+              const b = BADGE_BY_ID[id]; if (!b) return null;
               return (
-                <div key={slot} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
-                  <span className="text-muted-foreground capitalize text-xs">{slot}</span>
-                  <span className="flex items-center gap-1.5 text-sm">
-                    {it ? <>{it.emoji} <span className="truncate">{it.name}</span></> : <span className="text-muted-foreground/70 italic text-xs">empty</span>}
-                  </span>
+                <div key={id} title={b.desc} className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-secondary/60 border border-border">
+                  <span>{b.emoji}</span><span>{b.name}</span>
                 </div>
               );
             })}
           </div>
-          {s.pendingConsumable && (
-            <div className="mt-3 text-xs px-2.5 py-1.5 rounded-md bg-chalk-glow/10 border border-chalk-glow/30 text-chalk-glow">
-              Next log boosted: {getItem(s.pendingConsumable)?.name}
-            </div>
-          )}
-        </GameCard>
-
-
-        {/* Badges */}
-        <GameCard tone="legendary" className="p-5">
-          <h3 className="menu-label mb-3 flex items-center gap-1.5"><Trophy className="h-3 w-3" /> Badges</h3>
-          {s.badges.length === 0 ? (
-            <div className="text-sm text-muted-foreground">No badges yet. Log something — anything!</div>
-          ) : (
-            <div className="flex flex-wrap gap-1.5">
-              {s.badges.slice(0, 12).map(id => {
-                const b = BADGE_BY_ID[id]; if (!b) return null;
-                return (
-                  <div key={id} title={b.desc} className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-secondary/60 border border-border">
-                    <span>{b.emoji}</span><span>{b.name}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </GameCard>
-      </div>
+        )}
+      </GameCard>
 
       {/* Recent logs */}
       <GameCard className="p-5">

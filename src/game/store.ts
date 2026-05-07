@@ -494,6 +494,23 @@ export function removeOwnedItem(id: string) {
 }
 export function setGender(g: Gender) { set(s => ({ ...s, gender: g })); }
 
+/** Auto-grant & auto-equip every catalog item priced 0. Idempotent. */
+export function grantFreeItems(items: { id: string; price: number; slot: Slot; consumableBonus?: number }[]) {
+  const free = items.filter(i => i.price === 0 && !i.consumableBonus);
+  if (!free.length) return;
+  set(s => {
+    const ownedSet = new Set(s.owned);
+    const equipped = { ...s.equipped };
+    let changed = false;
+    for (const it of free) {
+      if (!ownedSet.has(it.id)) { ownedSet.add(it.id); changed = true; }
+      if (!equipped[it.slot]) { equipped[it.slot] = it.id; changed = true; }
+    }
+    if (!changed) return s;
+    return { ...s, owned: Array.from(ownedSet), equipped };
+  });
+}
+
 // ----- Boss actions -----
 export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], notes?: string) {
   const boss = state.bosses.find(b => b.id === bossId); if (!boss) return null;

@@ -70,14 +70,15 @@ export function getOverride(level: number, gender: Gender): LevelOverride | unde
   return state.map.get(k(level, gender));
 }
 
-/** Returns a level definition merged with any override. Text/chalk are shared across genders; image is per-gender. */
-export function resolvedLevel(level: number, gender: Gender): ClimberLevel & { image?: string | null } {
+/** Returns a level definition merged with any override. Text/chalk/rarity are shared across genders; image is per-gender. */
+export function resolvedLevel(level: number, gender: Gender): ClimberLevel & { image?: string | null; rarity?: Rarity | null } {
   const base = LEVELS.find(l => l.level === level) ?? LEVELS[0];
   const own = state.map.get(k(level, gender));
   const other = state.map.get(k(level, gender === "male" ? "female" : "male"));
   const pickText = (key: "name" | "tagline") =>
     (own?.[key]?.trim() ? own[key] : other?.[key]?.trim() ? other[key] : null) as string | null;
   const sharedChalk = own?.chalkReq != null ? own.chalkReq : other?.chalkReq != null ? other.chalkReq : null;
+  const sharedRarity = own?.rarity ?? other?.rarity ?? null;
   const name = pickText("name");
   const tagline = pickText("tagline");
   return {
@@ -86,6 +87,7 @@ export function resolvedLevel(level: number, gender: Gender): ClimberLevel & { i
     desc: tagline ?? base.desc,
     cost: sharedChalk != null ? sharedChalk : base.cost,
     image: own?.image ?? null,
+    rarity: sharedRarity,
   };
 }
 
@@ -109,6 +111,7 @@ export interface SharedLevelInput {
   name?: string | null;
   tagline?: string | null;
   chalkReq?: number | null;
+  rarity?: Rarity | null;
   /** Per-gender image: undefined = leave alone, null = clear, File = upload. */
   maleImageFile?: File | null;
   femaleImageFile?: File | null;
@@ -116,7 +119,7 @@ export interface SharedLevelInput {
   clearFemaleImage?: boolean;
 }
 
-/** Save level data: text/chalk are mirrored to both gender rows; image is per-gender. */
+/** Save level data: text/chalk/rarity are mirrored to both gender rows; image is per-gender. */
 export async function saveLevel(level: number, input: SharedLevelInput): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   const updatedBy = user?.id ?? null;
@@ -141,6 +144,7 @@ export async function saveLevel(level: number, input: SharedLevelInput): Promise
     name: input.name ?? null,
     tagline: input.tagline ?? null,
     chalk_req: input.chalkReq ?? null,
+    rarity: input.rarity ?? null,
     updated_by: updatedBy,
   };
 

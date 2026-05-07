@@ -31,7 +31,8 @@ const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
 
 export default function Layout() {
   const s = useGame();
-  const { isAdmin, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
+  const activeSlot = useActiveSlot(user?.id ?? null);
   const nav = useNavigate();
   const NAV = isAdmin ? [...NAV_BASE, NAV_ADMIN] : NAV_BASE;
   const [levelsOpen, setLevelsOpen] = useState(false);

@@ -188,6 +188,7 @@ const empty: CustomItemInput = {
   bonusPct: 0,
   imageDataUrl: undefined,
   levelReq: undefined,
+  discountPct: 0,
 };
 
 function InventoryAdmin() {
@@ -236,6 +237,7 @@ function InventoryAdmin() {
       imageDataUrl: isImageEmoji(item.emoji) ? item.emoji : undefined,
       appliesTo: item.bonus?.appliesTo,
       levelReq: item.levelReq,
+      discountPct: item.priceMult ? Math.round((1 - item.priceMult) * 100) : 0,
     });
   }
 
@@ -319,6 +321,18 @@ function InventoryAdmin() {
                 setDraft(d => ({ ...d, levelReq: v === "" ? undefined : Math.max(1, parseInt(v) || 1) }));
               }}
             />
+          </div>
+          <div>
+            <Label className="text-xs">Shop discount %</Label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              placeholder="0"
+              value={draft.discountPct ?? 0}
+              onChange={e => setDraft(d => ({ ...d, discountPct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">Equipped item reduces shop prices. Discounts don't stack — best one wins.</p>
           </div>
         </div>
       </div>

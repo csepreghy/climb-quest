@@ -24,7 +24,7 @@ import { getActiveSlot, useActiveSlot, AccountSlot } from "./adminAccounts";
  * row in `user_game_state`. Non-admins always use "test".
  */
 export function GameSync() {
-  const { user, isAdmin } = useAuth();
+  const { user, hasAdminRole } = useAuth();
   const slot: AccountSlot = useActiveSlot(user?.id ?? null);
   const slotRef = useRef<AccountSlot>(slot);
   const userIdRef = useRef<string | null>(null);
@@ -73,7 +73,7 @@ export function GameSync() {
       }
 
       // Only seed mock data into the admin's TEST slot, never personal.
-      if (isAdmin && slot === "test") {
+      if (hasAdminRole && slot === "test") {
         const snap = getGameStateSnapshot();
         if (!snap.logs || snap.logs.length === 0) {
           adminSeedMockData();
@@ -114,7 +114,7 @@ export function GameSync() {
       bindGameRemoteSync(null);
       bindGymsRemoteSync(null);
     };
-  }, [user?.id, isAdmin, slot]);
+  }, [user?.id, hasAdminRole, slot]);
 
   return null;
 }

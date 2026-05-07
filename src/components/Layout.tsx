@@ -32,7 +32,7 @@ const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
 
 export default function Layout() {
   const s = useGame();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, hasAdminRole, signOut } = useAuth();
   const activeSlot = useActiveSlot(user?.id ?? null);
   const nav = useNavigate();
   const NAV = isAdmin ? [...NAV_BASE, NAV_ADMIN] : NAV_BASE;
@@ -146,7 +146,7 @@ export default function Layout() {
               <Plus className="h-4 w-4" />
             </GameButton>
             {isAdmin && <ThemeButton />}
-            {isAdmin && user && (
+            {hasAdminRole && user && (
               <button
                 type="button"
                 onClick={() => {

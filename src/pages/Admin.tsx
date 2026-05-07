@@ -24,6 +24,7 @@ import {
 import { ItemGroup, Rarity, Slot, ShopItem, LEVELS, Gender } from "@/game/data";
 import { useLevelOverrides, resolvedLevel, saveLevel, clearLevel, hasAnyOverride } from "@/game/levelOverrides";
 import { cn } from "@/lib/utils";
+import { usePublicGyms, addPublicGym, updatePublicGym, deletePublicGym } from "@/game/publicGyms";
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
 const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [

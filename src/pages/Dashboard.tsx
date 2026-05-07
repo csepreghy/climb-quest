@@ -1,23 +1,24 @@
-import { useMemo } from "react";
-import { useGame, currentLevel, nextLevel, levelUp, activeBoss } from "@/game/store";
+import { useMemo, useState } from "react";
+import { useGame, currentLevel, nextLevel, levelUp } from "@/game/store";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
-import { Link, useNavigate } from "react-router-dom";
-import { ITEM_BY_ID, BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
+import { useNavigate } from "react-router-dom";
+import { BADGE_BY_ID, ACTIVITY_LABELS } from "@/game/data";
 import { getItem } from "@/game/customItems";
 import { toast } from "sonner";
-import { ScrollText, Swords, ArrowUp, Sparkles, Trophy, TrendingUp } from "lucide-react";
+import { ScrollText, ArrowUp, Sparkles, Trophy, TrendingUp } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
+import { LogModal } from "@/components/LogModal";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function Dashboard() {
   const s = useGame();
   const cur = currentLevel(s);
   const next = nextLevel(s);
-  const boss = activeBoss(s);
   const nav = useNavigate();
-  
+  const [logOpen, setLogOpen] = useState(false);
+
   const progress = next ? Math.min(100, Math.round((s.chalk / next.cost) * 100)) : 100;
 
   const onLevelUp = () => {

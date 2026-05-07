@@ -18,7 +18,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { if (!loading && user) nav("/", { replace: true }); }, [user, loading, nav]);
+  useEffect(() => { if (!loading && user) nav("/home", { replace: true }); }, [user, loading, nav]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

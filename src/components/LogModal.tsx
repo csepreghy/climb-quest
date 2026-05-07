@@ -14,6 +14,7 @@ import { ArrowLeft, Sparkles, Info, Swords, Trophy } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
 import chalkBagImg from "@/assets/chalk-bag.png";
+import goldenChalkBagImg from "@/assets/golden-chalk-bag.png";
 import bossImg from "@/assets/log-boss.webp";
 import { PickCard } from "@/components/pixel/PickCard";
 
@@ -340,7 +341,7 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
   if (celebrate) {
     return celebrate.defeated
       ? <BossCelebrate total={celebrate.total} />
-      : <SimpleCelebrate total={celebrate.total} label="Logged attempt!" />;
+      : <SimpleCelebrate total={celebrate.total} label="Logged attempt!" image={bossImg} alt="Boss" />;
   }
 
   if (step === "attempts") {
@@ -509,12 +510,17 @@ function PreviewReward({ preview }: { preview: ReturnType<typeof computeChalk> }
   );
 }
 
-function SimpleCelebrate({ total, label }: { total: number; label: string }) {
+function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: { total: number; label: string; image?: string; alt?: string }) {
   return (
-    <div className="py-12 text-center">
-      <img src={chalkBagImg} alt="Chalk" className="h-20 w-20 mx-auto object-contain animate-bounce drop-shadow-[0_4px_12px_hsl(var(--btn-orange)/0.5)]" />
-      <div className="mt-4 menu-label">{label}</div>
-      <div className="mt-2 text-4xl font-bold gradient-chalk-text animate-pop-in">+{total} Chalk</div>
+    <div className="py-10 text-center">
+      <div className="mx-auto h-40 w-40 rounded-2xl overflow-hidden border-4 border-[hsl(var(--btn-orange))] shadow-[0_0_40px_hsl(var(--btn-orange)/0.55)] animate-banner-pop">
+        <img src={image} alt={alt} className="h-full w-full object-cover" />
+      </div>
+      <div className="mt-5 menu-label">{label}</div>
+      <div className="mt-2 flex items-center justify-center gap-3 animate-pop-in">
+        <img src={goldenChalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--legendary)/0.6)]" />
+        <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{total}</span>
+      </div>
       <Sparkles className="h-6 w-6 mx-auto mt-3 text-chalk-glow animate-pulse" />
     </div>
   );
@@ -550,14 +556,17 @@ function BossCelebrate({ total }: { total: number }) {
         );
       })}
       <div className="relative">
-        <div className="mx-auto h-24 w-24 rounded-2xl overflow-hidden border-4 border-[hsl(var(--boss))] shadow-[0_0_40px_hsl(var(--boss)/0.7)] animate-banner-pop">
+        <div className="mx-auto h-56 w-56 rounded-2xl overflow-hidden border-4 border-[hsl(var(--boss))] shadow-[0_0_60px_hsl(var(--boss)/0.75)] animate-banner-pop">
           <img src={bossImg} alt="Boss defeated" className="h-full w-full object-cover" />
         </div>
         <div className="mt-5 font-display font-extrabold text-3xl uppercase tracking-wider animate-banner-pop"
           style={{ color: "hsl(var(--boss))", textShadow: "0 2px 0 hsl(0 0% 0% / 0.5)" }}>
           Boss Defeated!
         </div>
-        <div className="mt-3 text-5xl font-extrabold gradient-chalk-text animate-pop-in tabular-nums">+{total}</div>
+        <div className="mt-3 flex items-center justify-center gap-3 animate-pop-in">
+          <img src={goldenChalkBagImg} alt="Chalk" className="h-14 w-14 object-contain drop-shadow-[0_4px_14px_hsl(var(--legendary)/0.7)]" />
+          <span className="text-5xl font-extrabold gradient-chalk-text tabular-nums">+{total}</span>
+        </div>
         <div className="mt-1 text-sm uppercase tracking-[0.3em] text-muted-foreground">Chalk earned</div>
       </div>
     </div>

@@ -175,7 +175,7 @@ export default function Inventory() {
                     );
                     return (
                       <div key={slot} className="flex flex-col">
-                        <div className="flex-1"><ItemCard item={it} /></div>
+                        <div className="flex-1"><ItemCard item={it} onClick={() => setSlotPicker(it)} /></div>
                         <div className="flex justify-end mt-1.5">
                           <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot(slot)}>Unequip</Button>
                         </div>

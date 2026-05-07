@@ -341,7 +341,7 @@ function BossForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }
   if (celebrate) {
     return celebrate.defeated
       ? <BossCelebrate total={celebrate.total} />
-      : <SimpleCelebrate total={celebrate.total} label="Logged attempt!" />;
+      : <SimpleCelebrate total={celebrate.total} label="Logged attempt!" image={bossImg} alt="Boss" />;
   }
 
   if (step === "attempts") {

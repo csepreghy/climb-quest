@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -64,7 +64,12 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
         ) : kind === "boss" ? (
           <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
         ) : (
-          <BoulderForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
+          <BoulderForm
+            onBack={() => editLog ? onOpenChange(false) : setMode("pick")}
+            onDone={() => onOpenChange(false)}
+            onSwitchToBoss={() => setKind("boss")}
+            editLog={editLog ?? null}
+          />
         )}
       </DialogContent>
     </Dialog>
@@ -81,7 +86,7 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 
 // ===================== BOULDER FORM =====================
 
-function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null }) {
+function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () => void; onDone: () => void; onSwitchToBoss?: () => void; editLog?: BoulderLog | null }) {
   const gymState = useGyms();
   const initialGymId = editLog?.gymId
     ?? gymState.lastUsedGymId
@@ -116,6 +121,7 @@ function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: 
   const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
   const [notes, setNotes] = useState(editLog?.notes ?? "");
   const [celebrating, setCelebrating] = useState<{ total: number } | null>(null);
+  const [projectPromptOpen, setProjectPromptOpen] = useState(false);
 
   const sent = attemptType === "flash" || attemptType === "send";
   const flashed = attemptType === "flash";
@@ -254,7 +260,14 @@ function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: 
               { v: "send", label: "Send 🏆", desc: "Multi-try, 1 sesh" },
               { v: "project", label: "Project 🎯", desc: "Multi-session" },
             ] as { v: AttemptType; label: string; desc: string }[]).map(o => (
-              <button key={o.v} type="button" onClick={() => setAttemptType(o.v)}
+              <button key={o.v} type="button"
+                onClick={() => {
+                  if (o.v === "project" && !editLog && onSwitchToBoss) {
+                    setProjectPromptOpen(true);
+                  } else {
+                    setAttemptType(o.v);
+                  }
+                }}
                 className={cn("rounded-lg p-2.5 text-left border-2 transition",
                   attemptType === o.v
                     ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15"
@@ -292,6 +305,25 @@ function BoulderForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: 
         <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
         <GameButton variant="success" size="md" onClick={submit}>{editLog ? "Save changes" : "Send it"}</GameButton>
       </div>
+
+      <Dialog open={projectPromptOpen} onOpenChange={setProjectPromptOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Log this as a Boss Project?</DialogTitle>
+            <DialogDescription>
+              If this boulder takes you more than one session, log it as a Boss Project instead. You'll get richer tracking and bigger rewards when you finally send it.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <GameButton variant="ghost" size="sm" onClick={() => { setProjectPromptOpen(false); setAttemptType("project"); }}>
+              No, just a boulder
+            </GameButton>
+            <GameButton variant="primary" size="sm" onClick={() => { setProjectPromptOpen(false); onSwitchToBoss?.(); }}>
+              Yes, log as Boss Project
+            </GameButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -45,7 +45,7 @@ export function OnboardingModal({ open, onClose }: Props) {
   return (
     <Dialog open={open} onOpenChange={() => { /* not dismissable */ }}>
       <DialogContent
-        className="max-w-xl"
+        className="max-w-xl [&>button.absolute]:hidden"
         onInteractOutside={e => e.preventDefault()}
         onEscapeKeyDown={e => e.preventDefault()}
       >
@@ -67,7 +67,7 @@ export function OnboardingModal({ open, onClose }: Props) {
         {step === "gender" && (
           <div className="space-y-4 py-2">
             <div className="text-sm text-muted-foreground">
-              Pick your climber. <span className="text-foreground font-semibold">This can't be changed later.</span>
+              Pick your climber. <span className="text-destructive font-semibold">This can't be changed later.</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {(["male", "female"] as Gender[]).map(g => (
@@ -142,7 +142,7 @@ export function OnboardingModal({ open, onClose }: Props) {
             disabled={step === "gender" && !picked}
             className="w-full sm:w-auto"
           >
-            <Building2 className="h-4 w-4" /> Set up my gym
+            {isLast ? <><Building2 className="h-4 w-4" /> Set up my gym</> : <>Next</>}
           </GameButton>
         </DialogFooter>
       </DialogContent>

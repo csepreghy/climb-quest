@@ -5,6 +5,7 @@ import {
   bindGameRemoteSync,
   getGameStateSnapshot,
   replaceGameState,
+  adminSeedMockData,
   State as GameState,
 } from "./store";
 import {
@@ -20,7 +21,7 @@ import {
  * we leave local state alone (localStorage still works as a fallback).
  */
 export function GameSync() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const userIdRef = useRef<string | null>(null);
   const saveTimer = useRef<number | null>(null);
   const pending = useRef<{ game?: GameState; gyms?: GymState }>({});
@@ -59,6 +60,14 @@ export function GameSync() {
         });
       }
 
+      // Auto-seed mock data for admins on first sign-in (when they have no logs yet).
+      if (isAdmin) {
+        const snap = getGameStateSnapshot();
+        if (!snap.logs || snap.logs.length === 0) {
+          adminSeedMockData();
+        }
+      }
+
       if (cancelled) return;
 
       const flush = () => {
@@ -87,7 +96,7 @@ export function GameSync() {
       bindGameRemoteSync(null);
       bindGymsRemoteSync(null);
     };
-  }, [user?.id]);
+  }, [user?.id, isAdmin]);
 
   return null;
 }

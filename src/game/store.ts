@@ -233,10 +233,17 @@ export interface LogInput {
   attemptType?: AttemptType;
   holdColorId?: string;
   gymId?: string;
+  chalkMultiplier?: number;
 }
 
 export function logBoulder(input: LogInput) {
-  const breakdown = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash");
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash");
+  const mult = input.chalkMultiplier ?? 1;
+  const breakdown = mult === 1 ? raw : {
+    base: raw.base,
+    bonuses: raw.bonuses,
+    total: Math.round(raw.total * mult),
+  };
   const log: BoulderLog = {
     id: crypto.randomUUID(),
     date: input.date ?? new Date().toISOString(),

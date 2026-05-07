@@ -24,7 +24,7 @@ import { getActiveSlot, useActiveSlot, AccountSlot } from "./adminAccounts";
  * row in `user_game_state`. Non-admins always use "test".
  */
 export function GameSync() {
-  const { user, isAdmin } = useAuth();
+  const { user, hasAdminRole } = useAuth();
   const slot: AccountSlot = useActiveSlot(user?.id ?? null);
   const slotRef = useRef<AccountSlot>(slot);
   const userIdRef = useRef<string | null>(null);

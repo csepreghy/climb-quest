@@ -1,5 +1,6 @@
 import { LEVELS, Gender } from "@/game/data";
 import { getItem } from "@/game/customItems";
+import { useLevelOverrides, resolvedLevel } from "@/game/levelOverrides";
 import type { Equipped } from "@/game/store";
 import { cn } from "@/lib/utils";
 import { PixelSprite } from "./pixel/PixelSprite";

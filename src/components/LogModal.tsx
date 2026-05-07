@@ -341,6 +341,11 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
   }
 
   function commit(outcome: "attempt" | "defeat", attemptTier?: AttemptTier) {
+    const dateISO = new Date(date).toISOString();
+    if (outcome === "defeat" && !editLog && hasBossSendOnDate(dateISO)) {
+      toast.error("You seem to have defeated more than one boss in a single day, are you sure both were worthy of bosses?");
+      return;
+    }
     if (gymId) setLastUsedGym(gymId);
     const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");

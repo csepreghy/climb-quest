@@ -99,7 +99,7 @@ export default function Landing() {
                 src={chalkBagImg}
                 alt="Chalk bag"
                 loading="lazy"
-                className="h-[70%] w-[70%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.4)]"
+                className="h-[45%] w-[45%] object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.4)]"
               />
             }
             title="2. Earn Chalk"
@@ -108,7 +108,7 @@ export default function Landing() {
           />
           <PickCard
             content={
-              <div className="scale-150">
+              <div className="scale-[2]">
                 <ClimberAvatar level={9} gender="male" equipped={{} as any} size="xl" glow />
               </div>
             }

@@ -117,8 +117,9 @@ function LogForm({ kind, onBack, onDone }: { kind: Kind; onBack: () => void; onD
   const [celebrating, setCelebrating] = useState<{ total: number } | null>(null);
 
   const sent = attemptType === "flash" || attemptType === "send";
+  const flashed = attemptType === "flash";
   const preview = useMemo(
-    () => computeChalk(kind === "boss" ? (sent ? "boss_send" : "boss_attempt") : activity, styles, kind === "boss" ? false : sent),
+    () => computeChalk(kind === "boss" ? (sent ? "boss_send" : "boss_attempt") : activity, styles, kind === "boss" ? false : sent, kind === "boss" ? false : flashed),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activity, attemptType, styles.join(","), kind],
   );

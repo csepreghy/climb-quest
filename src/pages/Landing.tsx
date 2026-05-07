@@ -85,7 +85,7 @@ export default function Landing() {
       <section id="how" className="relative z-10 container pb-24">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">One app. Every send.</h2>
-          <p className="text-muted-foreground mt-2">From the first slab to your hardest project.</p>
+          <p className="text-muted-foreground mt-2">From the first slab to your hardest overhang.</p>
         </div>
         <div className="grid sm:grid-cols-3 gap-4">
           <PickCard

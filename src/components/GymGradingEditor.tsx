@@ -16,7 +16,7 @@ type Source = "local" | "public";
 interface Props {
   gym: Pick<Gym, "id" | "gradingSystemIds" | "gradingSystems">;
   source: Source;
-  onToggleBuiltin: (gsId: "v_grades" | "french_grades") => void;
+  onSelectSystem: (gsId: string) => void;
   onAddCustom: (g: Omit<GradingSystem, "id">) => void;
   onUpdateCustom: (gsId: string, patch: Partial<GradingSystem>) => void;
   onDeleteCustom: (gsId: string) => void;
@@ -24,23 +24,25 @@ interface Props {
 
 export function GymGradingEditor(p: Props) {
   const { gym } = p;
-  const vOn = gym.gradingSystemIds.includes("v_grades");
-  const fOn = gym.gradingSystemIds.includes("french_grades");
+  const selectedId = gym.gradingSystemIds[0];
   const customs = gym.gradingSystems ?? [];
 
   return (
     <section className="space-y-3">
-      <div className="menu-label">Grading systems</div>
+      <div className="menu-label">Grading system</div>
+      <p className="text-[11px] text-muted-foreground -mt-1">Pick one. Custom systems can optionally map to V or French equivalents.</p>
 
       <div className="flex flex-wrap gap-2">
-        <ToggleChip on={vOn} label="V Scale" sub="v" onClick={() => p.onToggleBuiltin("v_grades")} />
-        <ToggleChip on={fOn} label="French (Font)" sub="french" onClick={() => p.onToggleBuiltin("french_grades")} />
+        <ToggleChip on={selectedId === "v_grades"} label="V Scale" sub="v" onClick={() => p.onSelectSystem("v_grades")} />
+        <ToggleChip on={selectedId === "french_grades"} label="French (Font)" sub="french" onClick={() => p.onSelectSystem("french_grades")} />
       </div>
 
       {customs.length > 0 && (
         <div className="space-y-2">
           {customs.map(gs => (
             <CustomGradingCard key={gs.id} gs={gs}
+              selected={selectedId === gs.id}
+              onSelect={() => p.onSelectSystem(gs.id)}
               onUpdate={(patch) => p.onUpdateCustom(gs.id, patch)}
               onDelete={() => p.onDeleteCustom(gs.id)} />
           ))}
@@ -122,8 +124,10 @@ function AddCustomGrading({ onAdd }: { onAdd: (g: Omit<GradingSystem, "id">) => 
   );
 }
 
-function CustomGradingCard({ gs, onUpdate, onDelete }: {
+function CustomGradingCard({ gs, selected, onSelect, onUpdate, onDelete }: {
   gs: GradingSystem;
+  selected: boolean;
+  onSelect: () => void;
   onUpdate: (patch: Partial<GradingSystem>) => void;
   onDelete: () => void;
 }) {
@@ -144,9 +148,17 @@ function CustomGradingCard({ gs, onUpdate, onDelete }: {
   const dirty = JSON.stringify(draft) !== JSON.stringify(gs.equivalents ?? {});
 
   return (
-    <div className="rounded-md border border-border bg-secondary/30 p-3 space-y-3">
+    <div className={cn("rounded-md border-2 p-3 space-y-3",
+      selected ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/10" : "border-border bg-secondary/30")}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
+          <input
+            type="radio"
+            checked={selected}
+            onChange={onSelect}
+            className="h-4 w-4 accent-[hsl(var(--btn-orange))] cursor-pointer"
+            aria-label={`Use ${gs.name}`}
+          />
           <Input value={gs.name} onChange={e => onUpdate({ name: e.target.value })} className="h-8 flex-1 max-w-xs" />
           <span className="text-[10px] uppercase text-muted-foreground">{gs.kind}</span>
         </div>

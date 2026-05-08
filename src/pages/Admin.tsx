@@ -630,8 +630,13 @@ function PublicGymEditor({ gym }: { gym: any }) {
       <GymGradingEditor
         gym={gym}
         source="public"
-        onToggleBuiltin={(gsId) => togglePublicGymGradingSystem(gym.id, gsId).catch((e: any) => toast.error(e?.message ?? "Failed"))}
-        onAddCustom={(gs) => addPublicGymCustomGrading(gym.id, gs).catch((e: any) => toast.error(e?.message ?? "Failed"))}
+        onSelectSystem={(gsId) => updatePublicGym(gym.id, { gradingSystemIds: [gsId] }).catch((e: any) => toast.error(e?.message ?? "Failed"))}
+        onAddCustom={async (gs) => {
+          try {
+            const id = await addPublicGymCustomGrading(gym.id, gs);
+            if (id) await updatePublicGym(gym.id, { gradingSystemIds: [id] });
+          } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+        }}
         onUpdateCustom={(gsId, patch) => updatePublicGymCustomGrading(gym.id, gsId, patch).catch((e: any) => toast.error(e?.message ?? "Failed"))}
         onDeleteCustom={(gsId) => deletePublicGymCustomGrading(gym.id, gsId).catch((e: any) => toast.error(e?.message ?? "Failed"))}
       />

@@ -118,3 +118,35 @@ export async function togglePublicGymGradingSystem(gymId: string, gsId: string) 
       : [...current.gradingSystemIds, gsId],
   });
 }
+
+const newGsId = () => Math.random().toString(36).slice(2, 9);
+
+export async function addPublicGymCustomGrading(gymId: string, g: Omit<GradingSystem, "id">): Promise<string | undefined> {
+  const current = state.gyms.find(gy => gy.id === gymId);
+  if (!current) return;
+  const newId = newGsId();
+  const next: GradingSystem = { ...g, id: newId };
+  await updatePublicGym(gymId, {
+    gradingSystems: [...(current.gradingSystems ?? []), next],
+    gradingSystemIds: [...current.gradingSystemIds, newId],
+  });
+  return newId;
+}
+
+export async function updatePublicGymCustomGrading(gymId: string, gsId: string, patch: Partial<GradingSystem>) {
+  const current = state.gyms.find(gy => gy.id === gymId);
+  if (!current) return;
+  await updatePublicGym(gymId, {
+    gradingSystems: (current.gradingSystems ?? []).map(gs => gs.id === gsId ? { ...gs, ...patch } : gs),
+  });
+}
+
+export async function deletePublicGymCustomGrading(gymId: string, gsId: string) {
+  const current = state.gyms.find(gy => gy.id === gymId);
+  if (!current) return;
+  await updatePublicGym(gymId, {
+    gradingSystems: (current.gradingSystems ?? []).filter(gs => gs.id !== gsId),
+    gradingSystemIds: current.gradingSystemIds.filter(x => x !== gsId),
+  });
+}
+

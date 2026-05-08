@@ -119,6 +119,10 @@ export const BADGES: BadgeDef[] = [
   { id: "got_humbled",       name: "Got Humbled",       emoji: "🥲", desc: "Logged a 'got humbled' result." },
   { id: "zone_reached",      name: "Zone Reached",      emoji: "🎯", desc: "Reached the zone on a boss project." },
   { id: "tiny_crimp",        name: "Tiny Crimp Survivor", emoji: "🤏", desc: "Logged 5 crimp problems." },
+  { id: "first_purchase",    name: "First Purchase",    emoji: "🛍️", desc: "Bought your first shop item." },
+  { id: "first_equip",       name: "Geared Up",         emoji: "🎽", desc: "Equipped your first item." },
+  { id: "five_purchases",    name: "Shopaholic",        emoji: "🧾", desc: "Bought 5 shop items." },
+  { id: "first_rare_purchase", name: "Going Rare",      emoji: "💎", desc: "Bought your first rare-or-better item." },
 ];
 
 export const BADGE_BY_ID: Record<string, BadgeDef> = Object.fromEntries(BADGES.map(b => [b.id, b]));

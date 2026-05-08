@@ -17,8 +17,9 @@ export function effectAllowed(group: ItemGroup, rarity: Rarity, effect: EffectKe
   switch (effect) {
     case "chalk":    return group === "outfit" || group === "power";
     case "discount": return group === "power";
-    case "crit":     return epicPlus;
-    case "boss":     return epicPlus;
+    // Gear is the home of crit/boss at every rarity; other groups only at epic+.
+    case "crit":     return group === "gear" || epicPlus;
+    case "boss":     return group === "gear" || epicPlus;
   }
 }
 

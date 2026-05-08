@@ -1,10 +1,11 @@
 import { useEffect, useSyncExternalStore } from "react";
 import {
-  ACTIVITY_LABELS, ActivityType, BADGES, BASE_CHALK, BOSS_TEMPLATES,
+  ACTIVITY_LABELS, ActivityType, BADGES, BOSS_TEMPLATES,
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
   GEAR_SLOTS, gearSlotsUnlocked, Slot,
 } from "./data";
 import { getItem } from "./customItems";
+import { getActivityReward } from "./activityRewards";
 import { resolvedLevel } from "./levelOverrides";
 
 // ----- Types -----
@@ -207,7 +208,7 @@ export function computeChalk(
   flashed = false,
   difficultyMult = 1,
 ): ChalkBreakdown {
-  const baseRaw = BASE_CHALK[activity] ?? 50;
+  const baseRaw = getActivityReward(activity);
   const base = Math.max(1, Math.round(baseRaw * difficultyMult));
   const bonuses: { source: string; amount: number }[] = [];
   let running = base;
@@ -221,7 +222,7 @@ export function computeChalk(
 
   // Send flat bonus first (additive, not stacked %)
   if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
-    const amt = Math.round(BASE_CHALK.boulder_send * difficultyMult);
+    const amt = Math.round(getActivityReward("boulder_send") * difficultyMult);
     bonuses.push({ source: "Send", amount: amt });
     running += amt;
   }

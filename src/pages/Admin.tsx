@@ -34,6 +34,7 @@ import { COUNTRIES } from "@/game/countries";
 import { AddHoldColor } from "@/components/AddHoldColor";
 import { HoldSwatch } from "@/components/HoldSwatch";
 import { GymGradingEditor } from "@/components/GymGradingEditor";
+import { RebalancePreviewModal } from "@/components/RebalancePreviewModal";
 
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
@@ -150,6 +151,8 @@ export default function Admin() {
 
       <LevelsAdmin />
 
+      <RebalanceCard />
+
       <InventoryAdmin />
 
       <PublicGymsAdmin />
@@ -196,6 +199,20 @@ function BackfillImagesCard() {
           </span>
         )}
       </div>
+    </GameCard>
+  );
+}
+
+function RebalanceCard() {
+  const [open, setOpen] = useState(false);
+  return (
+    <GameCard tone="legendary" className="p-5">
+      <div className="menu-label mb-3">Admin · Rebalance economy</div>
+      <p className="text-sm text-muted-foreground mb-3">
+        Recompute every shop item's price, chalk bonus and discount from rarity + level. Optionally retune activity rewards too. Preview before applying.
+      </p>
+      <Button onClick={() => setOpen(true)}>Preview rebalance</Button>
+      <RebalancePreviewModal open={open} onClose={() => setOpen(false)} />
     </GameCard>
   );
 }

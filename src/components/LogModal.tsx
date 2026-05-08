@@ -498,9 +498,9 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
                 {gym.holdColors.map(c => (
                   <button key={c.id} type="button" onClick={() => setHoldColorId(c.id === holdColorId ? "" : c.id)}
                     title={c.name}
-                    className={cn("h-8 w-8 rounded-md border-2 transition",
+                    className={cn("h-8 w-8 rounded-full border-2 transition",
                       holdColorId === c.id ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40" : "border-[hsl(var(--panel-frame))] hover:border-[hsl(var(--btn-orange))]")}
-                    style={{ background: c.hex }} />
+                    style={{ background: c.hex2 ? `linear-gradient(90deg, ${c.hex} 0 50%, ${c.hex2} 50% 100%)` : c.hex }} />
                 ))}
               </div>
             ) : (

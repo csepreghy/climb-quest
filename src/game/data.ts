@@ -4,6 +4,13 @@ export type Rarity = "common" | "rare" | "epic" | "legendary";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup";
 export type ItemGroup = "outfit" | "gear" | "power";
 
+/** Which effect fields each group is allowed to carry. Single source of truth. */
+export const GROUP_EFFECTS: Record<ItemGroup, { chalk: boolean; crit: boolean; boss: boolean; discount: boolean }> = {
+  outfit: { chalk: true,  crit: false, boss: false, discount: false },
+  gear:   { chalk: false, crit: true,  boss: true,  discount: false },
+  power:  { chalk: true,  crit: false, boss: false, discount: true  },
+};
+
 /** Slots that belong to the "gear" group, in display/unlock order. */
 export const GEAR_SLOTS: Slot[] = ["chalk", "accessory", "study"];
 

@@ -6,7 +6,7 @@
 // Per-item magnitudes are sized so a fully-decked all-legendary loadout
 // approaches the design ceilings below — so adding a 1001st item never
 // inflates effects beyond what the cap allows.
-import { ActivityType, BASE_CHALK, Rarity, ShopItem, Slot } from "./data";
+import { ActivityType, BASE_CHALK, GROUP_EFFECTS, Rarity, ShopItem, Slot } from "./data";
 
 const RARITY_BASE_PRICE: Record<Rarity, number> = {
   common: 80, rare: 700, epic: 7000, legendary: 100000,
@@ -80,6 +80,7 @@ function niceRound(n: number): number {
  * Per-legendary share: ln(1 + ceiling) × share / sumShare.
  */
 export function targetBonusPct(item: ShopItem): number {
+  if (!GROUP_EFFECTS[item.group].chalk) return 0;
   const share = SLOT_SHARE[item.slot] ?? 0.4;
   const factor = RARITY_FACTOR[item.rarity];
   // Power-ups lean into crit/boss — dampen generic bonus.
@@ -94,6 +95,7 @@ export function targetBonusPct(item: ShopItem): number {
 
 /** Shop discount % — non-stacking (best wins), so per-item just maps from rarity. */
 export function targetDiscountPct(item: ShopItem): number {
+  if (!GROUP_EFFECTS[item.group].discount) return 0;
   if (!canDiscount(item.slot)) return 0;
   // Only study + powerup get discounts at low rarity.
   if (!hasBothEffects(item.rarity)) {
@@ -112,6 +114,7 @@ export function targetDiscountPct(item: ShopItem): number {
  * Sized so 1 − Π(1 − p_i) at endgame ≈ ENDGAME_CEILING.crit.
  */
 export function targetCritPct(item: ShopItem): number {
+  if (!GROUP_EFFECTS[item.group].crit) return 0;
   if (!hasBothEffects(item.rarity)) return 0;
   if (!canSpecial(item.slot)) return 0;
   const share = SLOT_SHARE[item.slot] ?? 0;
@@ -130,6 +133,7 @@ export function targetCritPct(item: ShopItem): number {
  * Sized so the sum across an endgame loadout ≈ ENDGAME_CEILING.boss × 100.
  */
 export function targetBossBonusPct(item: ShopItem): number {
+  if (!GROUP_EFFECTS[item.group].boss) return 0;
   if (!hasBothEffects(item.rarity)) return 0;
   if (!canSpecial(item.slot)) return 0;
   const share = SLOT_SHARE[item.slot] ?? 0;

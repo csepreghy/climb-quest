@@ -395,13 +395,12 @@ export function logBoulder(input: LogInput) {
 
   set(s => {
     const newBadges = computeNewBadges(s, log);
-    return {
+    const next: State = {
       ...s,
       chalk: s.chalk + log.chalkTotal,
       totalChalkEarned: s.totalChalkEarned + log.chalkTotal,
       logs: [log, ...s.logs].slice(0, 200),
       pendingConsumable: null,
-      badges: Array.from(new Set([...s.badges, ...newBadges])),
       stats: {
         ...s.stats,
         totalLogs: s.stats.totalLogs + 1,
@@ -410,6 +409,7 @@ export function logBoulder(input: LogInput) {
         bossesSent: s.stats.bossesSent + (input.isBoss && (input.attemptType === "flash" || input.attemptType === "send") ? 1 : 0),
       },
     };
+    return applyBadges(next, newBadges);
   });
   return { log, breakdown, newBadges: computeNewBadgesAfter() };
 }

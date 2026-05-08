@@ -446,7 +446,7 @@ export function deleteLog(id: string) {
 }
 
 export function updateLog(id: string, input: LogInput) {
-  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date);
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date, input.attemptType === "repeat");
   const mult = input.chalkMultiplier ?? 1;
   const breakdown = mult === 1 ? raw : {
     base: raw.base,

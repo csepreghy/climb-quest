@@ -99,7 +99,9 @@ function gearUnlockLevel(slotIndex: number): number {
 
 export default function Inventory() {
   const s = useGame();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
+  const activeSlot = useActiveSlot(user?.id ?? null);
+  const adminTools = isAdmin && activeSlot === "test";
   useCustomItems();
   const owned = (s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[])
     .filter(it => !it.gender || it.gender === "unisex" || it.gender === s.gender);

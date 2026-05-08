@@ -4,7 +4,7 @@ import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, A
 import { useLoadCharacterName } from "@/game/characterName";
 import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
@@ -48,7 +48,13 @@ export default function Layout() {
   const gymState = useAllGyms();
   const hydrated = useRemoteHydrated();
   const showOnboarding = !!user && hydrated && !s.onboardedAt;
+  const [dailyLoginOpen, setDailyLoginOpen] = useState(false);
   useLoadCharacterName(user?.id ?? null);
+
+  useEffect(() => {
+    if (!user || !hydrated || !s.onboardedAt) return;
+    if (claimDailyLoginIfNeeded()) setDailyLoginOpen(true);
+  }, [user, hydrated, s.onboardedAt]);
 
   function tryOpenLog() {
     if (gymState.gyms.length === 0) {

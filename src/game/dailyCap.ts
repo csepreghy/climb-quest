@@ -32,7 +32,9 @@ export interface DailyCapConfig {
 export const DEFAULT_DAILY_CAP_CONFIG: DailyCapConfig = {
   enabled: true,
   base: 100,
-  levelStep: 80,
+  // Percent of next-level cost added to the daily cap. Makes caps grow with the
+  // level-cost curve (exponential), instead of a fixed per-level step.
+  levelStep: 25,
   streakStep: 25,
   streakMaxDays: 30,
   tier1Threshold: 1.0,

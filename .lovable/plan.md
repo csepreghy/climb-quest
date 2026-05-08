@@ -1,46 +1,23 @@
-## Group-restricted item effects
+## Fix mobile header overflow
 
-Lock each effect to a specific item group so the catalog has a clear identity:
+Two coordinated changes so the chalk balance never overflows and the logo only shrinks when it actually has to.
 
-| Group | Allowed effects |
-|---|---|
-| Outfit | Chalk bonus (% + applies-to) |
-| Gear | Crit chance %, Boss bonus % |
-| Power-ups | Discount %, Chalk bonus (% + applies-to) |
+### 1. Compact ChalkChip on mobile
+- Hide the "Chalk" caption below the `sm` breakpoint. The icon + number stay; this saves ~36px.
+- Tighten right padding on mobile (`pr-3` instead of `pr-4`) since the label is gone.
 
-Boss bonus and crit are gear-only. Discount is power-up-only. Chalk bonus is shared by outfit and power-ups.
+### 2. Logo: stay big when there's room, shrink only when needed
+The current setup uses fixed `h-10 sm:h-20` and `shrink-0` on the image, so on phones the logo is always small even when there's free space. New behavior:
 
-### 1. Define the rule in one place
-Add a small helper in `src/game/data.ts`:
-```ts
-export const GROUP_EFFECTS = {
-  outfit: { chalk: true, crit: false, boss: false, discount: false },
-  gear:   { chalk: false, crit: true,  boss: true,  discount: false },
-  power:  { chalk: true,  crit: false, boss: false, discount: true  },
-} as const;
-```
-Used by Admin form, rebalance, and any defensive runtime guards.
+- Wrap the logo in a `flex-1 min-w-0` container so the right-side controls reserve their natural width first.
+- Set the image to `h-auto w-full max-h-20 max-w-[180px] object-contain object-left`. The image grows up to its natural cap (h-20, ~180px wide) when there's space, and scales down proportionally — never squeezed, never cropped — when the right side needs the space.
+- Keep `drop-shadow` and hover rotation.
 
-### 2. Admin form (`src/pages/Admin.tsx`)
-- Hide the Bonus %, Discount %, Crit %, and Boss bonus % inputs based on the active `draft.group` using `GROUP_EFFECTS`.
-- When the group changes, zero the now-disallowed fields in `draft` so they don't leak through `addCustomItem` / `updateCustomItem`.
-- Defensive: in `customItems.ts` `inputToRow`, also zero disallowed fields by group as a backstop.
+This means: at 390px with a 50k chalk balance, the logo settles around h-10–h-12 automatically; at 480px+ phones it reaches its full h-20; on desktop unchanged.
 
-### 3. Rebalance (`src/game/rebalance.ts`)
-Currently `targetBonusPct`, `targetDiscountPct`, `targetCritPct`, `targetBossPct` may suggest values regardless of group. Update each to return `0` for groups where that effect is disallowed, so the rebalance preview never re-introduces stripped effects.
-
-### 4. One-time data migration
-Run an UPDATE on `shop_items` that zeroes invalid effect columns:
-- `group='outfit'` → `crit_chance_pct=0`, `boss_bonus_pct=0`, `price_mult=1`
-- `group='gear'` → `bonus_pct=0`, `applies_to='"all"'`, `price_mult=1`
-- `group='power'` → `crit_chance_pct=0`, `boss_bonus_pct=0`
-
-(Done via the data-update tool, not a schema migration.)
-
-### 5. Shop card display (`src/pages/Shop.tsx`)
-No structural change needed — the card already reads whichever fields are present. After the migration only valid badges will show.
+### Files
+- `src/components/Layout.tsx` — update the `<NavLink to="/home">` block (logo) and the `<ChalkChip>` button markup/classes.
 
 ### Out of scope
-- No schema/column changes.
-- Inventory equip/loadout math (`Inventory.tsx`) keeps working as-is since stripped fields are now `0`/`undefined`.
-- No change to consumables or level-req logic.
+- No change to nav, sign-out, or Lv chip.
+- No change to the chalk number formatting (still uses the existing `formatChalk` thresholds).

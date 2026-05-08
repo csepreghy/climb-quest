@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ThemeStudio } from "@/components/ThemeStudio";
 import { GameCard } from "@/components/ui/game-card";
@@ -894,7 +894,7 @@ function UsersAdmin() {
     if (error) setError(error.message);
     else setRows((data ?? []) as any);
   }
-  useState(() => { load(); return undefined; });
+  useEffect(() => { load(); }, []);
 
   return (
     <GameCard tone="legendary" className="p-5">

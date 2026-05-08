@@ -732,19 +732,19 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
       return { ...b, attempts: [att, ...b.attempts], highPoint, sent: b.sent || sent, sentDate: sent ? att.date : b.sentDate };
     });
     const sentNow = outcome === "send" || outcome === "flash";
-    const badges = new Set(s.badges);
-    if (sentNow) badges.add("crux_breaker");
+    const add: string[] = [];
+    if (sentNow) add.push("crux_breaker");
     const bossesSent = bosses.filter(b => b.sent).length;
-    if (bossesSent >= 3) badges.add("project_slayer");
-    return {
+    if (bossesSent >= 3) add.push("project_slayer");
+    const next: State = {
       ...s,
       chalk: s.chalk + att.chalk,
       totalChalkEarned: s.totalChalkEarned + att.chalk,
       bosses,
-      badges: Array.from(badges),
       pendingConsumable: null,
       stats: { ...s.stats, bossesSent, totalSends: s.stats.totalSends + (sentNow ? 1 : 0), totalFlashes: s.stats.totalFlashes + (outcome === "flash" ? 1 : 0) },
     };
+    return applyBadges(next, add);
   });
   return { attempt: att, breakdown };
 }

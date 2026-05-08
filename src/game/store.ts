@@ -68,6 +68,8 @@ export interface State {
   equipped: Equipped;
   pendingConsumable: string | null; // item id
   badges: string[];       // badge ids
+  /** Badge ids for which the +50 chalk reward has already been granted. */
+  badgeChalkClaimedFor: string[];
   bosses: Boss[];
   logs: BoulderLog[];
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };

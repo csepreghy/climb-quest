@@ -41,10 +41,15 @@ export default function Layout() {
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
+  const [needGymOpen, setNeedGymOpen] = useState(false);
   const gymState = useAllGyms();
   const showOnboarding = !!user && !s.onboardedAt;
 
   function tryOpenLog() {
+    if (gymState.gyms.length === 0) {
+      setNeedGymOpen(true);
+      return;
+    }
     setLogOpen(true);
   }
 
@@ -90,6 +95,22 @@ export default function Layout() {
       />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <OnboardingModal open={showOnboarding} onClose={() => { /* completion handled inside */ }} />
+      <Dialog open={needGymOpen} onOpenChange={setNeedGymOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set up your gym first</DialogTitle>
+            <DialogDescription>
+              Before logging boulders, you'll need to set up your gym so we know which grades and hold colors to use.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GameButton variant="ghost" size="sm" onClick={() => setNeedGymOpen(false)}>Cancel</GameButton>
+            <GameButton variant="primary" size="sm" onClick={() => { setNeedGymOpen(false); nav("/gym"); }}>
+              <Building2 className="h-4 w-4" /> Go to My Gym
+            </GameButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -137,11 +158,11 @@ export default function Layout() {
       </Dialog>
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
         <div className="container flex items-center justify-between gap-4 py-5">
-          <NavLink to="/home" className="flex items-center gap-4 group">
+          <NavLink to="/home" className="flex items-center gap-4 group min-w-0 shrink">
             <img
               src={logoImg}
               alt="ClimbQuest"
-              className="h-16 sm:h-20 w-auto transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
+              className="h-10 sm:h-20 w-auto shrink-0 transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
             />
             <div className="leading-tight hidden sm:block">
               <div className="text-sm text-muted-foreground">Log boulders. Earn Chalk. Send bosses.</div>
@@ -154,7 +175,7 @@ export default function Layout() {
             <GameButton variant="success" size="sm" onClick={tryOpenLog} className="sm:hidden !px-2.5" aria-label="Log Boulder">
               <Plus className="h-4 w-4" />
             </GameButton>
-            {isAdmin && <ThemeButton />}
+            {isAdmin && <div className="hidden sm:contents"><ThemeButton /></div>}
             {hasAdminRole && user && (
               <button
                 type="button"
@@ -265,6 +286,12 @@ export default function Layout() {
   );
 }
 
+function formatChalk(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2).replace(/\.?0+$/, "") + "M";
+  if (n >= 100_000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+  return n.toLocaleString();
+}
+
 function ChalkChip({ value }: { value: number }) {
   const [open, setOpen] = useState(false);
 
@@ -286,7 +313,7 @@ function ChalkChip({ value }: { value: number }) {
         }}
       >
         <img src={chalkBagImg} alt="" className="h-6 w-6 object-contain drop-shadow-[0_1px_0_hsl(0_0%_0%/0.5)]" />
-        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{value.toLocaleString()}</span>
+        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{formatChalk(value)}</span>
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
       </button>
 

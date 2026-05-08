@@ -64,7 +64,7 @@ export default function MyGym() {
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span className="font-semibold">{g.name}</span>
-                {g.location && <span className="text-muted-foreground">· {g.location}</span>}
+                {(g.location || g.country) && <span className="text-muted-foreground">· {[g.location, g.country].filter(Boolean).join(", ")}</span>}
               </button>
             ))}
           </div>

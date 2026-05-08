@@ -103,7 +103,10 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   const defaultGsId = availableSystems[0]?.id ?? "v_grades";
   const [gsId, setGsId] = useState(defaultGsId);
   useEffect(() => { setGsId(availableSystems[0]?.id ?? "v_grades"); }, [gymId]);
-  const gs = availableSystems.find(g => g.id === gsId) ?? gymState.gradingSystems.find(g => g.id === gsId);
+  // Resolve only against this gym's available systems — never fall back to
+  // a system from another gym (e.g. Urban Boulders should never show
+  // Boulderlounge's custom grading).
+  const gs = availableSystems.find(g => g.id === gsId) ?? availableSystems[0];
   const grades = gs ? gradeLabels(gs) : [];
 
   const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));

@@ -74,6 +74,8 @@ export interface State {
   ignoreLevelReq?: boolean;
   /** ISO timestamp when the user completed first-time onboarding. */
   onboardedAt?: string | null;
+  /** ISO date (YYYY-MM-DD) of the most recent daily-login chalk grant. */
+  lastDailyLoginAt?: string | null;
 }
 
 const STORAGE_KEY = "climbquest:v1";
@@ -95,6 +97,7 @@ const initialState = (): State => ({
   stats: { totalLogs: 0, totalSends: 0, totalFlashes: 0, bossesSent: 0 },
   ignoreLevelReq: false,
   onboardedAt: null,
+  lastDailyLoginAt: null,
 });
 
 function spawnBoss(t: BossTemplate): Boss {
@@ -574,6 +577,20 @@ export function completeOnboarding() {
 }
 export function resetOnboarding() {
   set(s => ({ ...s, onboardedAt: null }));
+}
+
+export const DAILY_LOGIN_REWARD = 50;
+/** Grants 50 chalk if user hasn't claimed today. Returns true if granted. */
+export function claimDailyLoginIfNeeded(): boolean {
+  const today = new Date().toISOString().slice(0, 10);
+  if (state.lastDailyLoginAt === today) return false;
+  set(s => ({
+    ...s,
+    chalk: s.chalk + DAILY_LOGIN_REWARD,
+    totalChalkEarned: s.totalChalkEarned + DAILY_LOGIN_REWARD,
+    lastDailyLoginAt: today,
+  }));
+  return true;
 }
 
 /** Auto-grant & auto-equip every catalog item priced 0. Idempotent. */

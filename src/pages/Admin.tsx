@@ -24,7 +24,17 @@ import {
 import { ItemGroup, Rarity, Slot, ShopItem, LEVELS, Gender } from "@/game/data";
 import { useLevelOverrides, resolvedLevel, saveLevel, clearLevel, hasAnyOverride } from "@/game/levelOverrides";
 import { cn } from "@/lib/utils";
-import { usePublicGyms, addPublicGym, updatePublicGym, deletePublicGym } from "@/game/publicGyms";
+import {
+  usePublicGyms,
+  addPublicGym, updatePublicGym, deletePublicGym,
+  addPublicHoldColor, removePublicHoldColor, togglePublicGymGradingSystem,
+  setPublicGymGradingSystems,
+} from "@/game/publicGyms";
+import { COUNTRIES } from "@/game/countries";
+import { AddHoldColor } from "@/components/AddHoldColor";
+import { HoldSwatch } from "@/components/HoldSwatch";
+import { Star } from "lucide-react";
+import type { GradingSystem } from "@/game/gyms";
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
 const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [

@@ -12,18 +12,25 @@ import chalkBagImg from "@/assets/chalk-bag.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
 import { Backpack, Store, ArrowUp, Building2, ScrollText, Sparkles } from "lucide-react";
+import { CharacterNameInput } from "@/components/CharacterNameInput";
+import { setCharacterName, useCharacterName } from "@/game/characterName";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
-type StepKey = "gender" | "log" | "equip" | "level" | "gym";
-const STEP_ORDER: StepKey[] = ["gender", "log", "equip", "level", "gym"];
+type StepKey = "gender" | "name" | "log" | "equip" | "level" | "gym";
+const STEP_ORDER: StepKey[] = ["gender", "name", "log", "equip", "level", "gym"];
 
 export function OnboardingModal({ open, onClose }: Props) {
   const [step, setStep] = useState<StepKey>("gender");
   const [picked, setPicked] = useState<Gender | null>(null);
+  const existingName = useCharacterName();
+  const [name, setName] = useState("");
+  const [nameValid, setNameValid] = useState(false);
+  const [savingName, setSavingName] = useState(false);
   const nav = useNavigate();
 
   const stepIdx = STEP_ORDER.indexOf(step);
@@ -33,13 +40,24 @@ export function OnboardingModal({ open, onClose }: Props) {
     if (open) {
       setStep("gender");
       setPicked(null);
+      setName(existingName ?? "");
     }
-  }, [open]);
+  }, [open, existingName]);
 
-  function next() {
+  async function next() {
     if (step === "gender") {
       if (!picked) return;
       setGender(picked);
+    }
+    if (step === "name") {
+      if (!nameValid) return;
+      // If unchanged from existing, skip the call
+      if (!existingName || existingName.trim().toLowerCase() !== name.trim().toLowerCase()) {
+        setSavingName(true);
+        const r = await setCharacterName(name);
+        setSavingName(false);
+        if (!r.ok) { toast.error(r.error); return; }
+      }
     }
     const nextStep = STEP_ORDER[stepIdx + 1];
     if (nextStep) setStep(nextStep);

@@ -34,6 +34,7 @@ import { COUNTRIES } from "@/game/countries";
 import { AddHoldColor } from "@/components/AddHoldColor";
 import { HoldSwatch } from "@/components/HoldSwatch";
 import { GymGradingEditor } from "@/components/GymGradingEditor";
+import { RebalancePreviewModal } from "@/components/RebalancePreviewModal";
 
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
@@ -149,6 +150,8 @@ export default function Admin() {
       <BackfillImagesCard />
 
       <LevelsAdmin />
+
+      <RebalanceCard />
 
       <InventoryAdmin />
 

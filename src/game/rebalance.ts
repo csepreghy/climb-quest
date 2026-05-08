@@ -121,7 +121,7 @@ export function targetDiscountPct(item: ShopItem): number {
 /** Crit chance %. Epic = only if slot leans crit; Legendary = always. */
 export function targetCritPct(item: ShopItem): number {
   if (!effectAllowed(item.group, item.rarity, "crit")) return 0;
-  if (item.rarity === "epic" && EPIC_LEAN[item.slot] !== "crit") return 0;
+  if (item.rarity !== "legendary" && EPIC_LEAN[item.slot] !== "crit") return 0;
   const base = CRIT_BY_RARITY[item.rarity];
   // Powerups punch a bit harder.
   const slotBoost = item.slot === "powerup" ? 1.4 : 1.0;

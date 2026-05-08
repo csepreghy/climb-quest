@@ -12,18 +12,25 @@ import chalkBagImg from "@/assets/chalk-bag.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
 import { Backpack, Store, ArrowUp, Building2, ScrollText, Sparkles } from "lucide-react";
+import { CharacterNameInput } from "@/components/CharacterNameInput";
+import { setCharacterName, useCharacterName } from "@/game/characterName";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
-type StepKey = "gender" | "log" | "equip" | "level" | "gym";
-const STEP_ORDER: StepKey[] = ["gender", "log", "equip", "level", "gym"];
+type StepKey = "gender" | "name" | "log" | "equip" | "level" | "gym";
+const STEP_ORDER: StepKey[] = ["gender", "name", "log", "equip", "level", "gym"];
 
 export function OnboardingModal({ open, onClose }: Props) {
   const [step, setStep] = useState<StepKey>("gender");
   const [picked, setPicked] = useState<Gender | null>(null);
+  const existingName = useCharacterName();
+  const [name, setName] = useState("");
+  const [nameValid, setNameValid] = useState(false);
+  const [savingName, setSavingName] = useState(false);
   const nav = useNavigate();
 
   const stepIdx = STEP_ORDER.indexOf(step);
@@ -33,13 +40,24 @@ export function OnboardingModal({ open, onClose }: Props) {
     if (open) {
       setStep("gender");
       setPicked(null);
+      setName(existingName ?? "");
     }
-  }, [open]);
+  }, [open, existingName]);
 
-  function next() {
+  async function next() {
     if (step === "gender") {
       if (!picked) return;
       setGender(picked);
+    }
+    if (step === "name") {
+      if (!nameValid) return;
+      // If unchanged from existing, skip the call
+      if (!existingName || existingName.trim().toLowerCase() !== name.trim().toLowerCase()) {
+        setSavingName(true);
+        const r = await setCharacterName(name);
+        setSavingName(false);
+        if (!r.ok) { toast.error((r as any).error); return; }
+      }
     }
     const nextStep = STEP_ORDER[stepIdx + 1];
     if (nextStep) setStep(nextStep);
@@ -96,6 +114,24 @@ export function OnboardingModal({ open, onClose }: Props) {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {step === "name" && (
+          <div className="space-y-4 py-2">
+            <div className="flex items-center justify-center">
+              <ClimberAvatar level={1} gender={picked ?? "male"} equipped={{}} size="lg" />
+            </div>
+            <div className="text-sm text-muted-foreground text-center">
+              Name your climber. <span className="text-foreground font-semibold">Each name is unique</span>, but you can change it later in Inventory.
+            </div>
+            <CharacterNameInput
+              value={name}
+              onChange={setName}
+              onValidityChange={setNameValid}
+              currentName={existingName}
+              autoFocus
+            />
           </div>
         )}
 
@@ -161,7 +197,7 @@ export function OnboardingModal({ open, onClose }: Props) {
           <GameButton
             variant="primary"
             onClick={isLast ? finish : next}
-            disabled={step === "gender" && !picked}
+            disabled={(step === "gender" && !picked) || (step === "name" && (!nameValid || savingName))}
             className="w-full sm:w-auto"
           >
             {isLast ? <><Sparkles className="h-4 w-4" /> Start climbing</> : <>Next</>}

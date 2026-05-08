@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp, FlaskConical, User as UserIcon } from "lucide-react";
+import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp, FlaskConical, User as UserIcon, Trophy } from "lucide-react";
+import { useLoadCharacterName } from "@/game/characterName";
 import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
 import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated } from "@/game/store";
@@ -30,6 +31,7 @@ const NAV_BASE = [
   { to: "/log", label: "Boulder Logs", icon: ScrollText },
   
   { to: "/gym", label: "My Gym", icon: Building2 },
+  { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
 const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
 
@@ -46,6 +48,7 @@ export default function Layout() {
   const gymState = useAllGyms();
   const hydrated = useRemoteHydrated();
   const showOnboarding = !!user && hydrated && !s.onboardedAt;
+  useLoadCharacterName(user?.id ?? null);
 
   function tryOpenLog() {
     if (gymState.gyms.length === 0) {

@@ -11,6 +11,7 @@ import { RARITY_BORDER, type Slot } from "@/game/data";
 import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
+import { useCharacterName } from "@/game/characterName";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
@@ -25,7 +26,7 @@ export default function Dashboard() {
   const { gyms } = useGyms();
   const cur = currentLevel(s);
   const next = nextLevel(s);
-  
+  const characterName = useCharacterName();
   const [logOpen, setLogOpen] = useState(false);
 
   
@@ -42,6 +43,9 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
           <div className="flex-1 min-w-0 text-center sm:text-left">
+            {characterName && (
+              <div className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1">{characterName}</div>
+            )}
             <div className="menu-label">Level {s.level} · {cur.title}</div>
             <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
@@ -72,7 +76,8 @@ export default function Dashboard() {
       </GameCard>
 
       {/* Stats */}
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <StatCard label="All-time chalk" value={s.totalChalkEarned} />
         <StatCard label="Total logs" value={s.stats.totalLogs} />
         <StatCard label="Total sends" value={s.stats.totalSends} />
         <StatCard label="Total flashes" value={s.stats.totalFlashes} />

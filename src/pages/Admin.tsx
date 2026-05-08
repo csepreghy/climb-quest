@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ThemeStudio } from "@/components/ThemeStudio";
 import { GameCard } from "@/components/ui/game-card";
@@ -12,7 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useActiveSlot, snapshotActiveSlot } from "@/game/adminAccounts";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Minus, Upload, Trash2, Pencil, X, FlaskConical, User as UserIcon } from "lucide-react";
+import { Plus, Minus, Upload, Trash2, Pencil, X, FlaskConical, User as UserIcon, Users as UsersIcon, Shield } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { switchToSlot } from "@/game/adminAccounts";
 import {
   useAllItems,
@@ -69,6 +70,7 @@ export default function Admin() {
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="levels">Levels</TabsTrigger>
           <TabsTrigger value="items">Items</TabsTrigger>
           <TabsTrigger value="gyms">Gyms</TabsTrigger>
@@ -191,6 +193,10 @@ export default function Admin() {
               <span>Ignore level requirements (shop)</span>
             </label>
           </GameCard>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6 mt-6">
+          <UsersAdmin />
         </TabsContent>
 
         <TabsContent value="levels" className="space-y-6 mt-6">
@@ -866,3 +872,73 @@ function PublicGymEditor({ gym }: { gym: any }) {
   );
 }
 
+interface AdminUserRow {
+  user_id: string;
+  email: string | null;
+  character_name: string | null;
+  display_name: string | null;
+  is_admin: boolean;
+  level: number;
+  total_chalk_earned: number;
+  total_logs: number;
+  bosses_sent: number;
+  created_at: string;
+}
+
+function UsersAdmin() {
+  const [rows, setRows] = useState<AdminUserRow[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    const { data, error } = await supabase.rpc("get_admin_users");
+    if (error) setError(error.message);
+    else setRows((data ?? []) as any);
+  }
+  useEffect(() => { load(); }, []);
+
+  return (
+    <GameCard tone="legendary" className="p-5">
+      <div className="menu-label mb-3 flex items-center gap-2"><UsersIcon className="h-4 w-4" /> Registered users {rows && `(${rows.length})`}</div>
+      {error && <div className="text-sm text-destructive mb-2">{error}</div>}
+      {!rows && !error && <div className="text-sm text-muted-foreground">Loading…</div>}
+      {rows && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              <tr className="border-b border-border">
+                <th className="text-left py-2 px-2">Climber</th>
+                <th className="text-left py-2 px-2">Email</th>
+                <th className="text-right py-2 px-2">Lv</th>
+                <th className="text-right py-2 px-2">All-time chalk</th>
+                <th className="text-right py-2 px-2">Logs</th>
+                <th className="text-right py-2 px-2">Bosses</th>
+                <th className="text-left py-2 px-2">Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(r => (
+                <tr key={r.user_id} className="border-b border-border/40 hover:bg-secondary/30">
+                  <td className="py-2 px-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">{r.character_name ?? <span className="italic text-muted-foreground">unnamed</span>}</span>
+                      {r.is_admin && <span title="Admin"><Shield className="h-3.5 w-3.5 text-legendary" /></span>}
+                    </div>
+                    {r.display_name && r.display_name !== r.character_name && (
+                      <div className="text-[11px] text-muted-foreground">{r.display_name}</div>
+                    )}
+                  </td>
+                  <td className="py-2 px-2 text-muted-foreground">{r.email}</td>
+                  <td className="py-2 px-2 text-right tabular-nums">{r.level}</td>
+                  <td className="py-2 px-2 text-right tabular-nums gradient-chalk-text font-bold">{r.total_chalk_earned.toLocaleString()}</td>
+                  <td className="py-2 px-2 text-right tabular-nums">{r.total_logs}</td>
+                  <td className="py-2 px-2 text-right tabular-nums">{r.bosses_sent}</td>
+                  <td className="py-2 px-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </GameCard>
+  );
+}

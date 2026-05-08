@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
+import Leaderboard from "./pages/Leaderboard";
 import { GameBackground } from "./components/pixel/GameBackground";
 import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 import { ThemeProvider } from "./theme/ThemeProvider";
@@ -45,6 +46,7 @@ const App = () => (
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/gym" element={<MyGym />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route element={<RequireAdmin />}>
                   <Route path="/admin" element={<Admin />} />
                 </Route>

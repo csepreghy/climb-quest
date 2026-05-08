@@ -166,18 +166,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          character_name: string | null
           created_at: string
           display_name: string | null
           email: string | null
           id: string
         }
         Insert: {
+          character_name?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id: string
         }
         Update: {
+          character_name?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -322,6 +325,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_admin_users: {
+        Args: never
+        Returns: {
+          bosses_sent: number
+          character_name: string
+          created_at: string
+          display_name: string
+          email: string
+          is_admin: boolean
+          level: number
+          total_chalk_earned: number
+          total_logs: number
+          user_id: string
+        }[]
+      }
+      get_leaderboard: {
+        Args: never
+        Returns: {
+          bosses_sent: number
+          character_name: string
+          equipped: Json
+          gender: string
+          level: number
+          owned: Json
+          total_chalk_earned: number
+          total_logs: number
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -329,6 +361,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_character_name_available: {
+        Args: { p_name: string }
+        Returns: boolean
+      }
+      set_character_name: { Args: { p_name: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"

@@ -158,11 +158,11 @@ export default function Layout() {
       </Dialog>
       <header className="sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
         <div className="container flex items-center justify-between gap-4 py-5">
-          <NavLink to="/home" className="flex items-center gap-4 group min-w-0 shrink">
+          <NavLink to="/home" className="flex items-center gap-4 group flex-1 min-w-0">
             <img
               src={logoImg}
               alt="ClimbQuest"
-              className="h-10 sm:h-20 w-auto shrink-0 transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
+              className="h-auto w-full max-h-20 max-w-[180px] object-contain object-left transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
             />
             <div className="leading-tight hidden sm:block">
               <div className="text-sm text-muted-foreground">Log boulders. Earn Chalk. Send bosses.</div>

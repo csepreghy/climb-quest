@@ -16,7 +16,7 @@ type Source = "local" | "public";
 interface Props {
   gym: Pick<Gym, "id" | "gradingSystemIds" | "gradingSystems">;
   source: Source;
-  onToggleBuiltin: (gsId: "v_grades" | "french_grades") => void;
+  onSelectSystem: (gsId: string) => void;
   onAddCustom: (g: Omit<GradingSystem, "id">) => void;
   onUpdateCustom: (gsId: string, patch: Partial<GradingSystem>) => void;
   onDeleteCustom: (gsId: string) => void;
@@ -24,23 +24,25 @@ interface Props {
 
 export function GymGradingEditor(p: Props) {
   const { gym } = p;
-  const vOn = gym.gradingSystemIds.includes("v_grades");
-  const fOn = gym.gradingSystemIds.includes("french_grades");
+  const selectedId = gym.gradingSystemIds[0];
   const customs = gym.gradingSystems ?? [];
 
   return (
     <section className="space-y-3">
-      <div className="menu-label">Grading systems</div>
+      <div className="menu-label">Grading system</div>
+      <p className="text-[11px] text-muted-foreground -mt-1">Pick one. Custom systems can optionally map to V or French equivalents.</p>
 
       <div className="flex flex-wrap gap-2">
-        <ToggleChip on={vOn} label="V Scale" sub="v" onClick={() => p.onToggleBuiltin("v_grades")} />
-        <ToggleChip on={fOn} label="French (Font)" sub="french" onClick={() => p.onToggleBuiltin("french_grades")} />
+        <ToggleChip on={selectedId === "v_grades"} label="V Scale" sub="v" onClick={() => p.onSelectSystem("v_grades")} />
+        <ToggleChip on={selectedId === "french_grades"} label="French (Font)" sub="french" onClick={() => p.onSelectSystem("french_grades")} />
       </div>
 
       {customs.length > 0 && (
         <div className="space-y-2">
           {customs.map(gs => (
             <CustomGradingCard key={gs.id} gs={gs}
+              selected={selectedId === gs.id}
+              onSelect={() => p.onSelectSystem(gs.id)}
               onUpdate={(patch) => p.onUpdateCustom(gs.id, patch)}
               onDelete={() => p.onDeleteCustom(gs.id)} />
           ))}

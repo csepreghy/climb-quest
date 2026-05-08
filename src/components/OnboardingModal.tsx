@@ -117,6 +117,24 @@ export function OnboardingModal({ open, onClose }: Props) {
           </div>
         )}
 
+        {step === "name" && (
+          <div className="space-y-4 py-2">
+            <div className="flex items-center justify-center">
+              <ClimberAvatar level={1} gender={picked ?? "male"} equipped={{}} size="lg" />
+            </div>
+            <div className="text-sm text-muted-foreground text-center">
+              Name your climber. <span className="text-foreground font-semibold">Each name is unique</span>, but you can change it later in Inventory.
+            </div>
+            <CharacterNameInput
+              value={name}
+              onChange={setName}
+              onValidityChange={setNameValid}
+              currentName={existingName}
+              autoFocus
+            />
+          </div>
+        )}
+
         {step === "log" && (
           <StepCard
             image={boulderImg}

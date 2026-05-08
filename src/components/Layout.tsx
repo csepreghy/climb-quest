@@ -314,7 +314,7 @@ function ChalkChip({ value }: { value: number }) {
       >
         <img src={chalkBagImg} alt="" className="h-6 w-6 object-contain drop-shadow-[0_1px_0_hsl(0_0%_0%/0.5)]" />
         <span className="text-sm font-bold tabular-nums gradient-chalk-text">{formatChalk(value)}</span>
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
+        <span className="hidden sm:inline text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>

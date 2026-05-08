@@ -646,7 +646,7 @@ function deservedBadges(s: State): string[] {
   if (s.logs.some(l => l.styles.includes("overhang"))) out.push("overhang_enjoyer");
   if (s.totalChalkEarned >= 1000) out.push("chalk_monster");
   if (s.logs.filter(l => l.styles.includes("crimp")).length >= 5) out.push("tiny_crimp");
-  if (s.logs.some(l => l.activity === "got_humbled")) out.push("got_humbled");
+  // got_humbled badge is awarded inline elsewhere; skip retro detection.
   // Bosses
   if (s.bosses.some(b => b.sent)) out.push("crux_breaker");
   if (s.bosses.filter(b => b.sent).length >= 3) out.push("project_slayer");

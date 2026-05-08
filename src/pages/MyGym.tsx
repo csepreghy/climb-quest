@@ -112,23 +112,14 @@ export default function MyGym() {
             </div>
           </section>
 
-          <section>
-            <div className="menu-label mb-2">Grading systems used</div>
-            <div className="flex flex-wrap gap-2">
-              {s.gradingSystems.map(gs => {
-                const on = g.gradingSystemIds.includes(gs.id);
-                return (
-                  <button key={gs.id} onClick={() => toggleGymGradingSystem(g.id, gs.id)}
-                    className={cn("text-xs px-3 py-1.5 rounded-md border-2 transition",
-                      on
-                        ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
-                        : "border-border bg-secondary/40 text-muted-foreground hover:text-foreground")}>
-                    {gs.name} <span className="text-[10px] opacity-70">({gs.kind})</span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          <GymGradingEditor
+            gym={g}
+            source="local"
+            onToggleBuiltin={(gsId) => toggleGymGradingSystem(g.id, gsId)}
+            onAddCustom={(gs) => addGymCustomGrading(g.id, gs)}
+            onUpdateCustom={(gsId, patch) => updateGymCustomGrading(g.id, gsId, patch)}
+            onDeleteCustom={(gsId) => deleteGymCustomGrading(g.id, gsId)}
+          />
         </GameCard>
       ))}
 
@@ -161,15 +152,6 @@ export default function MyGym() {
           </section>
         </GameCard>
       ))}
-
-      <CreateCustomGradingSystem />
-
-      {/* Custom systems list (built-ins hidden) */}
-      <div className="space-y-3">
-        {s.gradingSystems.filter(gs => gs.id !== "v_grades" && gs.id !== "french_grades").map(gs => (
-          <GradingSystemCard key={gs.id} gs={gs} />
-        ))}
-      </div>
     </div>
   );
 }

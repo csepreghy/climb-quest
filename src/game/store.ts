@@ -257,7 +257,7 @@ export function computeChalk(
   }
 
   // Flash: +50% on the base chalk
-  if (flashed && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
+  if (flashed && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder" || activity === "project_boulder")) {
     const amt = Math.round(base * 0.5);
     bonuses.push({ source: "Flash (+50%)", amount: amt });
     running += amt;

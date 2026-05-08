@@ -1,15 +1,13 @@
 import { GameCard } from "@/components/ui/game-card";
 import { useGame } from "@/game/store";
-import { useDailyCapConfig, computeDailyCap, currentStreak, chalkUsedOnDate } from "@/game/dailyCap";
+import { useDailyCapConfig, computeDailyCap, chalkUsedOnDate } from "@/game/dailyCap";
 import { cn } from "@/lib/utils";
-import { Flame } from "lucide-react";
 
 export function DailyCapBar({ className }: { className?: string }) {
   const s = useGame();
   const cfg = useDailyCapConfig();
   if (!cfg.enabled) return null;
-  const streak = currentStreak(s);
-  const cap = computeDailyCap(s.level, streak, cfg);
+  const cap = computeDailyCap(s.level, cfg);
   const used = chalkUsedOnDate(s, new Date().toISOString());
   const pct = cap > 0 ? used / cap : 0;
   const overTier1 = pct >= cfg.tier1Threshold;

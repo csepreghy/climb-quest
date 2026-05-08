@@ -180,7 +180,7 @@ export default function Layout() {
             <GameButton variant="success" size="sm" onClick={tryOpenLog} className="sm:hidden !px-2.5" aria-label="Log Boulder">
               <Plus className="h-4 w-4" />
             </GameButton>
-            {isAdmin && <div className="hidden xl:contents"><ThemeButton /></div>}
+            {isAdmin && activeSlot === "test" && <div className="hidden xl:contents"><ThemeButton /></div>}
             {hasAdminRole && user && (
               <button
                 type="button"

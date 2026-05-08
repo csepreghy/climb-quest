@@ -44,13 +44,18 @@ export const DEFAULT_DAILY_CAP_CONFIG: DailyCapConfig = {
 };
 
 let config: DailyCapConfig = { ...DEFAULT_DAILY_CAP_CONFIG };
+let overrides: Record<number, number> = {};
 const listeners = new Set<() => void>();
 function emit() { listeners.forEach(l => l()); }
 
 export function getDailyCapConfig(): DailyCapConfig { return config; }
+export function getDailyCapOverrides(): Record<number, number> { return overrides; }
 
 async function refresh() {
-  const { data } = await supabase.from("daily_cap_config" as any).select("*").eq("id", "default").maybeSingle();
+  const [{ data }, { data: ovs }] = await Promise.all([
+    supabase.from("daily_cap_config" as any).select("*").eq("id", "default").maybeSingle(),
+    supabase.from("daily_cap_overrides" as any).select("level,cap"),
+  ]);
   if (data) {
     const r: any = data;
     config = {
@@ -64,8 +69,13 @@ async function refresh() {
       tier2Threshold: Number(r.tier2_threshold),
       tier2Mult: Number(r.tier2_mult),
     };
-    emit();
   }
+  const next: Record<number, number> = {};
+  for (const row of (ovs as any[] | null) ?? []) {
+    next[Number(row.level)] = Number(row.cap);
+  }
+  overrides = next;
+  emit();
 }
 
 let initialized = false;
@@ -75,6 +85,7 @@ function ensureInit() {
   refresh();
   const channel = supabase.channel("daily-cap-sync-" + Math.random().toString(36).slice(2, 8));
   channel.on("postgres_changes", { event: "*", schema: "public", table: "daily_cap_config" }, () => refresh()).subscribe();
+  channel.on("postgres_changes", { event: "*", schema: "public", table: "daily_cap_overrides" }, () => refresh());
 }
 if (typeof window !== "undefined") ensureInit();
 
@@ -84,6 +95,29 @@ export function useDailyCapConfig(): DailyCapConfig {
     () => config,
     () => config,
   );
+}
+
+export function useDailyCapOverrides(): Record<number, number> {
+  return useSyncExternalStore(
+    cb => { ensureInit(); listeners.add(cb); return () => listeners.delete(cb); },
+    () => overrides,
+    () => overrides,
+  );
+}
+
+export async function setDailyCapOverride(level: number, cap: number | null): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (cap === null) {
+    const { error } = await (supabase.from("daily_cap_overrides" as any) as any).delete().eq("level", level);
+    if (error) throw error;
+  } else {
+    const { error } = await (supabase.from("daily_cap_overrides" as any) as any).upsert(
+      { level, cap: Math.max(0, Math.round(cap)), updated_by: user?.id ?? null, updated_at: new Date().toISOString() },
+      { onConflict: "level" },
+    );
+    if (error) throw error;
+  }
+  await refresh();
 }
 
 export async function setDailyCapConfig(values: Partial<DailyCapConfig>): Promise<void> {

@@ -4,6 +4,18 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { State, BoulderLog } from "./store";
+import { LEVELS } from "./data";
+
+/** Cost to reach the next level from the given level (uses last delta for max level). */
+function costToNextLevel(level: number): number {
+  const sorted = [...LEVELS].sort((a, b) => a.level - b.level);
+  const idx = sorted.findIndex(l => l.level === level);
+  if (idx < 0) return 0;
+  if (idx < sorted.length - 1) return Math.max(0, sorted[idx + 1].cost - sorted[idx].cost);
+  // Max level: reuse the previous delta so the cap stays in the same exponential band.
+  if (idx > 0) return Math.max(0, sorted[idx].cost - sorted[idx - 1].cost);
+  return 0;
+}
 
 export interface DailyCapConfig {
   enabled: boolean;
@@ -20,7 +32,9 @@ export interface DailyCapConfig {
 export const DEFAULT_DAILY_CAP_CONFIG: DailyCapConfig = {
   enabled: true,
   base: 100,
-  levelStep: 80,
+  // Percent of next-level cost added to the daily cap. Makes caps grow with the
+  // level-cost curve (exponential), instead of a fixed per-level step.
+  levelStep: 25,
   streakStep: 25,
   streakMaxDays: 30,
   tier1Threshold: 1.0,
@@ -128,7 +142,9 @@ export function currentStreak(s: State): number {
 
 export function computeDailyCap(level: number, streak: number, cfg: DailyCapConfig = config): number {
   const cappedStreak = Math.min(streak, cfg.streakMaxDays);
-  return Math.max(0, cfg.base + cfg.levelStep * level + cfg.streakStep * cappedStreak);
+  // Scale with the chalk cost of the next level so caps grow exponentially with progression.
+  const levelBoost = Math.round(costToNextLevel(level) * (cfg.levelStep / 100));
+  return Math.max(0, cfg.base + levelBoost + cfg.streakStep * cappedStreak);
 }
 
 export interface CapApplication {

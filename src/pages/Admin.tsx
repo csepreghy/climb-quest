@@ -297,7 +297,7 @@ function DailyCapCard() {
     <GameCard tone="legendary" className="p-5">
       <div className="menu-label mb-3">Admin · Daily chalk cap</div>
       <p className="text-sm text-muted-foreground mb-3">
-        Soft cap on chalk per day. Past the cap, chalk earns at reduced rates. Cap scales with player level and current streak.
+        Soft cap on chalk per day. Past the cap, chalk earns at reduced rates. Cap = base + (next-level cost × %) + streak bonus, so it grows exponentially with progression.
       </p>
       <div className="flex items-center gap-2 mb-4">
         <input
@@ -315,7 +315,7 @@ function DailyCapCard() {
           <Input type="number" value={d.base} onChange={e => update("base", Number(e.target.value))} />
         </div>
         <div>
-          <Label className="text-xs">Per-level step</Label>
+          <Label className="text-xs">Next-level cost %</Label>
           <Input type="number" value={d.levelStep} onChange={e => update("levelStep", Number(e.target.value))} />
         </div>
         <div>

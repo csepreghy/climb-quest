@@ -1,0 +1,1 @@
+UPDATE public.daily_cap_config SET level_step = 25 WHERE id = 'default';

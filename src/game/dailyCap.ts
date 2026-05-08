@@ -174,11 +174,16 @@ export function currentStreak(s: State): number {
   return count;
 }
 
-export function computeDailyCap(level: number, streak: number, cfg: DailyCapConfig = config): number {
-  const cappedStreak = Math.min(streak, cfg.streakMaxDays);
-  // Scale with the chalk cost of the next level so caps grow exponentially with progression.
+/** Default (formula) cap for a level, ignoring any admin override. */
+export function defaultDailyCap(level: number, cfg: DailyCapConfig = config): number {
   const levelBoost = Math.round(costToNextLevel(level) * (cfg.levelStep / 100));
-  return Math.max(0, cfg.base + levelBoost + cfg.streakStep * cappedStreak);
+  return Math.max(0, cfg.base + levelBoost);
+}
+
+export function computeDailyCap(level: number, cfg: DailyCapConfig = config, ovs: Record<number, number> = overrides): number {
+  const override = ovs[level];
+  if (typeof override === "number" && override >= 0) return Math.round(override);
+  return defaultDailyCap(level, cfg);
 }
 
 export interface CapApplication {

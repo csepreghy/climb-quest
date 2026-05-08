@@ -41,10 +41,15 @@ export default function Layout() {
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
+  const [needGymOpen, setNeedGymOpen] = useState(false);
   const gymState = useAllGyms();
   const showOnboarding = !!user && !s.onboardedAt;
 
   function tryOpenLog() {
+    if (gymState.gyms.length === 0) {
+      setNeedGymOpen(true);
+      return;
+    }
     setLogOpen(true);
   }
 

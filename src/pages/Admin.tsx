@@ -537,7 +537,7 @@ function InventoryAdmin() {
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-semibold truncate">{item.name}</div>
                           <div className="text-[10px] text-muted-foreground capitalize">
-                            {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}{item.levelReq ? ` · Lv ${item.levelReq}+` : ""}
+                            {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}{item.levelReq ? ` · Lv ${item.levelReq}+` : ""}{(item.category === "Top" || item.category === "Pants") ? ` · ${item.gender ?? "unisex"}` : ""}
                           </div>
                         </div>
                         <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>

@@ -196,6 +196,16 @@ export function proposeRebalance(
       critPct: targetCritPct(item),
       bossPct: targetBossBonusPct(item),
     };
+    // No useless items: if every effect rounded to 0, give the group's
+    // primary effect a minimum value scaled by rarity.
+    if (next.bonusPct === 0 && next.discountPct === 0 && next.critPct === 0 && next.bossPct === 0) {
+      const floor = item.rarity === "legendary" ? 5 : item.rarity === "epic" ? 3 : item.rarity === "rare" ? 2 : 1;
+      const allow = GROUP_EFFECTS[item.group];
+      if (allow.chalk) next.bonusPct = floor;
+      else if (allow.boss) next.bossPct = floor;
+      else if (allow.crit) next.critPct = floor;
+      else if (allow.discount) next.discountPct = floor;
+    }
     const now = { price: item.price, bonusPct: nowBonus, discountPct: nowDisc, critPct: nowCrit, bossPct: nowBoss };
     const changed =
       next.price !== now.price ||

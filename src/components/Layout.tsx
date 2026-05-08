@@ -76,6 +76,23 @@ export default function Layout() {
     window.addEventListener("cq:open-level-up-confirm", h);
     return () => window.removeEventListener("cq:open-level-up-confirm", h);
   }, []);
+
+  // Celebrate newly-awarded badges with a toast + chalk reward callout.
+  useEffect(() => {
+    return onBadgesAwarded(ids => {
+      ids.forEach((id, i) => {
+        const b = BADGE_BY_ID[id];
+        const name = b?.name ?? "New Badge";
+        const emoji = b?.emoji ?? "🏅";
+        setTimeout(() => {
+          toast.success(`${emoji}  Badge unlocked: ${name}`, {
+            description: `+${BADGE_CHALK_REWARD} Chalk awarded — keep climbing!`,
+            duration: 5000,
+          });
+        }, i * 350);
+      });
+    });
+  }, []);
   const cur = currentLevel(s);
   const nxt = nextLevel(s);
   const canLevel = !!nxt && s.chalk >= nxt.cost;

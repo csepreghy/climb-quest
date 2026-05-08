@@ -12,10 +12,12 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowRight, Lock, ShoppingBag } from "lucide-react";
+import { ArrowRight, Lock, ShoppingBag, Pencil, Check, X } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
 import { LevelsModal } from "@/components/LevelsModal";
 import { computeDailyCap, currentStreak, useDailyCapConfig } from "@/game/dailyCap";
+import { useCharacterName, setCharacterName } from "@/game/characterName";
+import { CharacterNameInput } from "@/components/CharacterNameInput";
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",
@@ -136,6 +138,7 @@ export default function Inventory() {
       <div className="space-y-4">
         <Card className="gradient-card p-5 text-center">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
+          <CharacterNameEditor />
           {isAdmin && (
             <div className="mt-4 flex gap-2 justify-center">
               {(["male","female"] as const).map(g => (

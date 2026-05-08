@@ -10,6 +10,7 @@ import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame, currentLev
 import { getItem, useCustomItems } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useActiveSlot } from "@/game/adminAccounts";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowRight, Lock, ShoppingBag, Pencil, Check, X } from "lucide-react";

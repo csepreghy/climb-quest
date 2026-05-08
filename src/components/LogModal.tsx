@@ -141,6 +141,10 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   }
 
   function submit() {
+    if (attemptType === "project" && !editLog) {
+      setProjectPromptOpen(true);
+      return;
+    }
     if (gymId) setLastUsedGym(gymId);
     const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
@@ -266,10 +270,9 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
             ] as { v: AttemptType; label: string; desc: string }[]).map(o => (
               <button key={o.v} type="button"
                 onClick={() => {
+                  setAttemptType(o.v);
                   if (o.v === "project" && !editLog && onSwitchToBoss) {
                     setProjectPromptOpen(true);
-                  } else {
-                    setAttemptType(o.v);
                   }
                 }}
                 className={cn("rounded-lg p-2.5 text-left border-2 transition",
@@ -286,15 +289,18 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
         <div>
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {STYLES.map(st => (
-              <button key={st} type="button" onClick={() => toggleStyle(st)}
-                className={cn("text-xs px-2.5 py-1 rounded-full border capitalize transition",
-                  styles.includes(st)
-                    ? "bg-accent text-accent-foreground border-accent"
-                    : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
-                {st}
-              </button>
-            ))}
+            {STYLES.map(st => {
+              const on = styles.includes(st);
+              return (
+                <button key={st} type="button" onClick={() => toggleStyle(st)}
+                  className={cn("text-xs px-2.5 py-1 rounded-full border-2 capitalize transition",
+                    on
+                      ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
+                      : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
+                  {st}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -313,14 +319,19 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       <Dialog open={projectPromptOpen} onOpenChange={setProjectPromptOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Log this as a Boss Project?</DialogTitle>
-            <DialogDescription>
-              If this boulder takes you more than one session, log it as a Boss Project instead. You'll get richer tracking and bigger rewards when you finally send it.
-            </DialogDescription>
+            <div className="flex items-center gap-3">
+              <HeaderImage src={bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/50" />
+              <div>
+                <DialogTitle>Log this as a Boss Project?</DialogTitle>
+                <DialogDescription className="mt-1">
+                  Multi-session climbs should be logged as Boss Projects — you'll get richer tracking and bigger rewards when you finally send it.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <GameButton variant="ghost" size="sm" onClick={() => { setProjectPromptOpen(false); setAttemptType("project"); }}>
-              No, just a boulder
+            <GameButton variant="ghost" size="sm" onClick={() => { setProjectPromptOpen(false); setAttemptType("send"); }}>
+              No, it's just a boulder
             </GameButton>
             <GameButton variant="primary" size="sm" onClick={() => { setProjectPromptOpen(false); onSwitchToBoss?.(); }}>
               Yes, log as Boss Project

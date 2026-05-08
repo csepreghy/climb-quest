@@ -191,9 +191,12 @@ export default function Admin() {
               <span>Ignore level requirements (shop)</span>
             </label>
           </GameCard>
+        </TabsContent>
 
+        <TabsContent value="levels" className="space-y-6 mt-6">
           <LevelsAdmin />
         </TabsContent>
+
 
         <TabsContent value="items" className="space-y-6 mt-6">
           <InventoryAdmin />

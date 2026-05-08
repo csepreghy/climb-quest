@@ -4,7 +4,7 @@ import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, A
 import { useLoadCharacterName } from "@/game/characterName";
 import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
@@ -48,7 +48,13 @@ export default function Layout() {
   const gymState = useAllGyms();
   const hydrated = useRemoteHydrated();
   const showOnboarding = !!user && hydrated && !s.onboardedAt;
+  const [dailyLoginOpen, setDailyLoginOpen] = useState(false);
   useLoadCharacterName(user?.id ?? null);
+
+  useEffect(() => {
+    if (!user || !hydrated || !s.onboardedAt) return;
+    if (claimDailyLoginIfNeeded()) setDailyLoginOpen(true);
+  }, [user, hydrated, s.onboardedAt]);
 
   function tryOpenLog() {
     if (gymState.gyms.length === 0) {
@@ -100,6 +106,24 @@ export default function Layout() {
       />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <OnboardingModal open={showOnboarding} onClose={() => { /* completion handled inside */ }} />
+      <Dialog open={dailyLoginOpen} onOpenChange={setDailyLoginOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <img src={chalkBagImg} alt="" className="h-7 w-7 object-contain" />
+              Daily login bonus!
+            </DialogTitle>
+            <DialogDescription>
+              Welcome back, climber. You earned <span className="font-bold gradient-chalk-text">+{DAILY_LOGIN_REWARD} Chalk</span> just for showing up today. Come back every day to keep the chalk flowing.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <GameButton variant="primary" size="sm" onClick={() => setDailyLoginOpen(false)}>
+              Start Climbing
+            </GameButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={needGymOpen} onOpenChange={setNeedGymOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>

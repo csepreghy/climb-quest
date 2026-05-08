@@ -11,7 +11,7 @@ import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolv
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Sparkles, Info, Swords, Trophy } from "lucide-react";
+import { ArrowLeft, Info, Swords, Trophy } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
 import chalkBagImg from "@/assets/chalk-bag.png";

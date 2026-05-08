@@ -95,6 +95,22 @@ export default function Layout() {
       />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <OnboardingModal open={showOnboarding} onClose={() => { /* completion handled inside */ }} />
+      <Dialog open={needGymOpen} onOpenChange={setNeedGymOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set up your gym first</DialogTitle>
+            <DialogDescription>
+              Before logging boulders, you'll need to set up your gym so we know which grades and hold colors to use.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GameButton variant="ghost" size="sm" onClick={() => setNeedGymOpen(false)}>Cancel</GameButton>
+            <GameButton variant="primary" size="sm" onClick={() => { setNeedGymOpen(false); nav("/gym"); }}>
+              <Building2 className="h-4 w-4" /> Go to My Gym
+            </GameButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>

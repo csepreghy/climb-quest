@@ -347,7 +347,7 @@ function ChalkChip({ value }: { value: number }) {
 
   // Activity rows sorted ascending by points
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
-    .filter(a => a !== "boulder_send")
+    .filter(a => a !== "boulder_send" && a !== "project_boulder")
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
     .sort((a, b) => a.chalk - b.chalk);
 

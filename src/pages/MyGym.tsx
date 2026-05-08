@@ -78,9 +78,15 @@ export default function MyGym() {
       {s.gyms.map(g => (
         <GameCard key={g.id} className="p-5 space-y-5">
           <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 grid sm:grid-cols-2 gap-2">
+            <div className="flex-1 grid sm:grid-cols-3 gap-2">
               <Input value={g.name} onChange={e => updateGym(g.id, { name: e.target.value })} />
               <Input value={g.location} onChange={e => updateGym(g.id, { location: e.target.value })} placeholder="Location" />
+              <Select value={g.country ?? undefined} onValueChange={v => updateGym(g.id, { country: v })}>
+                <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center gap-1">
               <GameButton size="sm" variant={g.primary ? "legendary" : "ghost"} onClick={() => setPrimaryGym(g.id)} title="Make primary">

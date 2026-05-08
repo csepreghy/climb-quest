@@ -7,6 +7,7 @@ import {
 import { getItem } from "./customItems";
 import { getActivityReward } from "./activityRewards";
 import { resolvedLevel } from "./levelOverrides";
+import { applyDailyCap, chalkUsedOnDate, computeDailyCap, currentStreak, getDailyCapConfig } from "./dailyCap";
 
 // ----- Types -----
 export type AttemptType = "flash" | "send" | "project";
@@ -200,6 +201,7 @@ export interface ChalkBreakdown {
   base: number;
   bonuses: { source: string; amount: number }[];
   total: number;
+  capInfo?: { cap: number; used: number; reduced: boolean };
 }
 export function computeChalk(
   activity: ActivityType,
@@ -207,6 +209,7 @@ export function computeChalk(
   sent = false,
   flashed = false,
   difficultyMult = 1,
+  dateISO?: string,
 ): ChalkBreakdown {
   const baseRaw = getActivityReward(activity);
   const base = Math.max(1, Math.round(baseRaw * difficultyMult));
@@ -291,6 +294,23 @@ export function computeChalk(
     running *= 2;
   }
 
+  // Daily cap — soft, with diminishing returns. Applied last.
+  const dateForCap = dateISO ?? new Date().toISOString();
+  const cfg = getDailyCapConfig();
+  if (cfg.enabled) {
+    const used = chalkUsedOnDate(state, dateForCap);
+    const cap = computeDailyCap(state.level, currentStreak(state), cfg);
+    const cappedAmount = applyDailyCap(running, used, cap, cfg);
+    if (cappedAmount.reduced) {
+      bonuses.push({
+        source: cappedAmount.label ?? `Daily cap`,
+        amount: cappedAmount.granted - running, // negative
+      });
+      running = cappedAmount.granted;
+    }
+    return { base, bonuses, total: running, capInfo: { cap, used, reduced: cappedAmount.reduced } };
+  }
+
   return { base, bonuses, total: running };
 }
 
@@ -318,7 +338,7 @@ export interface LogInput {
 }
 
 export function logBoulder(input: LogInput) {
-  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1);
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date);
   const mult = input.chalkMultiplier ?? 1;
   const breakdown = mult === 1 ? raw : {
     base: raw.base,
@@ -390,7 +410,7 @@ export function deleteLog(id: string) {
 }
 
 export function updateLog(id: string, input: LogInput) {
-  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1);
+  const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date);
   const mult = input.chalkMultiplier ?? 1;
   const breakdown = mult === 1 ? raw : {
     base: raw.base,

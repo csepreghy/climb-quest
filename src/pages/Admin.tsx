@@ -35,6 +35,7 @@ import { AddHoldColor } from "@/components/AddHoldColor";
 import { HoldSwatch } from "@/components/HoldSwatch";
 import { GymGradingEditor } from "@/components/GymGradingEditor";
 import { RebalancePreviewModal } from "@/components/RebalancePreviewModal";
+import { useDailyCapConfig, setDailyCapConfig, computeDailyCap, DailyCapConfig } from "@/game/dailyCap";
 
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
@@ -154,6 +155,8 @@ export default function Admin() {
 
       <RebalanceCard />
 
+      <DailyCapCard />
+
       <InventoryAdmin />
 
       <PublicGymsAdmin />
@@ -214,6 +217,91 @@ function RebalanceCard() {
       </p>
       <Button onClick={() => setOpen(true)}>Preview rebalance</Button>
       <RebalancePreviewModal open={open} onClose={() => setOpen(false)} />
+    </GameCard>
+  );
+}
+
+function DailyCapCard() {
+  const cfg = useDailyCapConfig();
+  const [draft, setDraft] = useState<DailyCapConfig | null>(null);
+  const [busy, setBusy] = useState(false);
+  const d = draft ?? cfg;
+  const dirty = JSON.stringify(d) !== JSON.stringify(cfg);
+  const sample10 = computeDailyCap(10, 30, d);
+  const sample5 = computeDailyCap(5, 7, d);
+  const sample1 = computeDailyCap(1, 0, d);
+
+  function update<K extends keyof DailyCapConfig>(k: K, v: DailyCapConfig[K]) {
+    setDraft(prev => ({ ...(prev ?? cfg), [k]: v }));
+  }
+  async function save() {
+    if (!draft) return;
+    setBusy(true);
+    try {
+      await setDailyCapConfig(draft);
+      toast.success("Daily cap saved");
+      setDraft(null);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Save failed");
+    } finally { setBusy(false); }
+  }
+  return (
+    <GameCard tone="legendary" className="p-5">
+      <div className="menu-label mb-3">Admin · Daily chalk cap</div>
+      <p className="text-sm text-muted-foreground mb-3">
+        Soft cap on chalk per day. Past the cap, chalk earns at reduced rates. Cap scales with player level and current streak.
+      </p>
+      <div className="flex items-center gap-2 mb-4">
+        <input
+          id="daily-cap-enabled"
+          type="checkbox"
+          className="h-4 w-4 accent-[hsl(var(--btn-orange))]"
+          checked={d.enabled}
+          onChange={e => update("enabled", e.target.checked)}
+        />
+        <Label htmlFor="daily-cap-enabled" className="cursor-pointer">Enabled</Label>
+      </div>
+      <div className={cn("grid gap-3 sm:grid-cols-2 lg:grid-cols-4", !d.enabled && "opacity-60")}>
+        <div>
+          <Label className="text-xs">Base</Label>
+          <Input type="number" value={d.base} onChange={e => update("base", Number(e.target.value))} />
+        </div>
+        <div>
+          <Label className="text-xs">Per-level step</Label>
+          <Input type="number" value={d.levelStep} onChange={e => update("levelStep", Number(e.target.value))} />
+        </div>
+        <div>
+          <Label className="text-xs">Per-streak-day step</Label>
+          <Input type="number" value={d.streakStep} onChange={e => update("streakStep", Number(e.target.value))} />
+        </div>
+        <div>
+          <Label className="text-xs">Streak cap (days)</Label>
+          <Input type="number" value={d.streakMaxDays} onChange={e => update("streakMaxDays", Number(e.target.value))} />
+        </div>
+        <div>
+          <Label className="text-xs">Tier 1 threshold (×cap)</Label>
+          <Input type="number" step="0.1" value={d.tier1Threshold} onChange={e => update("tier1Threshold", Number(e.target.value))} />
+        </div>
+        <div>
+          <Label className="text-xs">Tier 1 multiplier</Label>
+          <Input type="number" step="0.05" value={d.tier1Mult} onChange={e => update("tier1Mult", Number(e.target.value))} />
+        </div>
+        <div>
+          <Label className="text-xs">Tier 2 threshold (×cap)</Label>
+          <Input type="number" step="0.1" value={d.tier2Threshold} onChange={e => update("tier2Threshold", Number(e.target.value))} />
+        </div>
+        <div>
+          <Label className="text-xs">Tier 2 multiplier</Label>
+          <Input type="number" step="0.05" value={d.tier2Mult} onChange={e => update("tier2Mult", Number(e.target.value))} />
+        </div>
+      </div>
+      <div className="text-xs text-muted-foreground mt-3 italic">
+        Sample caps · Lv1 (no streak): <b>{sample1.toLocaleString()}</b> · Lv5 (7d): <b>{sample5.toLocaleString()}</b> · Lv10 (30d): <b>{sample10.toLocaleString()}</b>
+      </div>
+      <div className="flex justify-end gap-2 mt-4">
+        <Button variant="ghost" disabled={!dirty || busy} onClick={() => setDraft(null)}>Reset</Button>
+        <Button disabled={!dirty || busy} onClick={save}>{busy ? "Saving…" : "Save"}</Button>
+      </div>
     </GameCard>
   );
 }

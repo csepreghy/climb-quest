@@ -7,6 +7,7 @@ import { GameButton } from "@/components/ui/game-button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LogModal } from "@/components/LogModal";
+import { DailyCapBar } from "@/components/DailyCapBar";
 import { Plus, Swords, Sparkles, Filter, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -84,6 +85,8 @@ export default function BoulderLogs() {
           <Plus className="h-4 w-4" /> Log Boulder
         </GameButton>
       </div>
+
+      <DailyCapBar />
 
       <GameCard className="p-4">
         <div className="flex flex-wrap items-center gap-2">

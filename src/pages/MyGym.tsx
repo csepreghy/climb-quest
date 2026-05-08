@@ -143,7 +143,7 @@ export default function MyGym() {
                 <h3 className="font-semibold">{g.name}</h3>
                 <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Public</span>
               </div>
-              {g.location && <div className="text-xs text-muted-foreground mt-0.5">{g.location}</div>}
+              {(g.location || g.country) && <div className="text-xs text-muted-foreground mt-0.5">{[g.location, g.country].filter(Boolean).join(" · ")}</div>}
               <div className="text-[11px] text-muted-foreground mt-1 italic">Admin-managed — read only.</div>
             </div>
             <GameButton size="sm" variant="ghost" onClick={() => { if (confirm(`Remove ${g.name} from your gyms?`)) removePublicGymFromMine(g.id); }}>

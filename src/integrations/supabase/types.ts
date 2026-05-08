@@ -38,6 +38,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_theme_settings: {
+        Row: {
+          header_opacity: number
+          id: string
+          selections: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          header_opacity?: number
+          id?: string
+          selections?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          header_opacity?: number
+          id?: string
+          selections?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       daily_cap_config: {
         Row: {
           base: number

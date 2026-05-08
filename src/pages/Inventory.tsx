@@ -99,6 +99,7 @@ export default function Inventory() {
   useCustomItems();
   const owned = s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[];
   const totalBonusByActivity = gearBonusSummary(s.equipped);
+  const specialSummary = specialBonusSummary(s.equipped);
 
   const [compareItem, setCompareItem] = useState<ShopItem | null>(null);
   const [slotPicker, setSlotPicker] = useState<ShopItem | null>(null);
@@ -140,21 +141,36 @@ export default function Inventory() {
           )}
         </Card>
 
-        <Card className="gradient-card p-4">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Active bonuses</div>
-          {totalBonusByActivity.length === 0 ? (
-            <div className="text-xs text-muted-foreground italic">No equipped bonuses yet. Hit the shop.</div>
-          ) : (
-            <ul className="space-y-1 text-xs">
-              {totalBonusByActivity.map(b => (
-                <li key={b.label} className="flex justify-between">
-                  <span>{b.label}</span><span className="text-chalk-glow">+{Math.round(b.mult * 100)}%</span>
-                </li>
-              ))}
-            </ul>
+        <Card className="gradient-card p-4 space-y-3">
+          <div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Active bonuses</div>
+            {totalBonusByActivity.length === 0 ? (
+              <div className="text-xs text-muted-foreground italic">No equipped chalk bonuses yet.</div>
+            ) : (
+              <ul className="space-y-1 text-xs">
+                {totalBonusByActivity.map(b => (
+                  <li key={b.label} className="flex justify-between gap-2">
+                    <span className="truncate">{b.label}</span><span className="text-chalk-glow shrink-0">+{Math.round(b.mult * 100)}%</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          {specialSummary.length > 0 && (
+            <div className="pt-2 border-t border-border/50">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Special</div>
+              <ul className="space-y-1 text-xs">
+                {specialSummary.map(b => (
+                  <li key={b.label} className="flex justify-between gap-2">
+                    <span className="truncate">{b.label}</span>
+                    <span className={cn("shrink-0", b.tone)}>{b.value}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
           {s.pendingConsumable && (
-            <div className="mt-3 text-xs px-2 py-1.5 rounded-md bg-chalk-glow/10 border border-chalk-glow/40">
+            <div className="text-xs px-2 py-1.5 rounded-md bg-chalk-glow/10 border border-chalk-glow/40">
               ⚡ Next log boosted by {getItem(s.pendingConsumable)?.name}
             </div>
           )}
@@ -472,5 +488,54 @@ function gearBonusSummary(eq: ReturnType<typeof useGame>["equipped"]) {
     if (it.bonus.styleMatch) label += ` · styles: ${it.bonus.styleMatch.join(", ")}`;
     out.push({ label, mult: it.bonus.mult });
   }
+  return out;
+}
+
+function specialBonusSummary(eq: ReturnType<typeof useGame>["equipped"]) {
+  const equipped: ShopItem[] = Object.values(eq)
+    .map(id => (id ? getItem(id) : null))
+    .filter(Boolean) as ShopItem[];
+
+  const out: { label: string; value: string; tone: string }[] = [];
+
+  // Shop discount — best (lowest) priceMult, non-stacking.
+  let bestMult = 1;
+  for (const it of equipped) {
+    if (it.priceMult && it.priceMult < bestMult) bestMult = it.priceMult;
+  }
+  if (bestMult < 1) {
+    out.push({
+      label: "Shop discount",
+      value: `−${Math.round((1 - bestMult) * 100)}%`,
+      tone: "text-[hsl(var(--btn-orange))]",
+    });
+  }
+
+  // Crit chance — combined via 1 - Π(1 - p).
+  let critProb = 0;
+  for (const it of equipped) {
+    if (it.critChancePct && it.critChancePct > 0) {
+      const p = Math.max(0, Math.min(100, it.critChancePct)) / 100;
+      critProb = 1 - (1 - critProb) * (1 - p);
+    }
+  }
+  if (critProb > 0) {
+    out.push({
+      label: "Crit chance (×2)",
+      value: `${Math.round(critProb * 100)}%`,
+      tone: "text-chalk-glow",
+    });
+  }
+
+  // Boss bonus — sum across items.
+  const bossPct = equipped.reduce((sum, it) => sum + (it.bossBonusPct ?? 0), 0);
+  if (bossPct > 0) {
+    out.push({
+      label: "Boss attempts/sends",
+      value: `+${Math.round(bossPct)}%`,
+      tone: "text-destructive",
+    });
+  }
+
   return out;
 }

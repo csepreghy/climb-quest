@@ -144,8 +144,8 @@ export default function BoulderLogs() {
                       <div
                         title={`${hold.name} hold`}
                         aria-label={`${hold.name} hold`}
-                        className="h-9 w-9 rounded-lg shrink-0 border-2 border-border"
-                        style={{ background: hold.hex }}
+                        className="h-9 w-9 rounded-full shrink-0 border-2 border-border"
+                        style={{ background: hold.hex2 ? `linear-gradient(90deg, ${hold.hex} 0 50%, ${hold.hex2} 50% 100%)` : hold.hex }}
                       />
                     ) : (
                       <div className={cn("h-9 w-9 grid place-items-center rounded-lg shrink-0",

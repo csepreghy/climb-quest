@@ -13,17 +13,20 @@ import {
   GradingSystem, GradingKind, GradeEquivalent, HoldColor,
 } from "@/game/gyms";
 import { usePublicGyms } from "@/game/publicGyms";
+import { COUNTRIES } from "@/game/countries";
 import { Plus, X, Star, Trash2, Lock, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { HoldSwatch } from "@/components/HoldSwatch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AddHoldColor } from "@/components/AddHoldColor";
 
 export default function MyGym() {
   const s = useGyms();
   const pub = usePublicGyms();
   const [newName, setNewName] = useState("");
   const [newLoc, setNewLoc] = useState("");
+  const [newCountry, setNewCountry] = useState<string>("");
 
   const addedPublic = pub.gyms.filter(g => s.addedPublicGymIds.includes(g.id));
   const availablePublic = pub.gyms.filter(g => !s.addedPublicGymIds.includes(g.id));
@@ -32,12 +35,19 @@ export default function MyGym() {
     <div className="space-y-6 animate-float-up max-w-4xl">
       <GameCard tone="accent" className="p-5">
         <div className="menu-label mb-3">Add a gym</div>
-        <div className="grid sm:grid-cols-[1fr,1fr,auto] gap-2">
+        <div className="grid sm:grid-cols-[1fr,1fr,1fr,auto] gap-2">
           <Input placeholder="Gym name" value={newName} onChange={e => setNewName(e.target.value)} />
           <Input placeholder="Location (city)" value={newLoc} onChange={e => setNewLoc(e.target.value)} />
+          <Select value={newCountry || undefined} onValueChange={setNewCountry}>
+            <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
+            <SelectContent>
+              {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
           <GameButton variant="primary" onClick={() => {
             if (!newName.trim()) { toast.error("Name required"); return; }
-            addGym(newName.trim(), newLoc.trim()); setNewName(""); setNewLoc("");
+            addGym(newName.trim(), newLoc.trim(), newCountry || undefined);
+            setNewName(""); setNewLoc(""); setNewCountry("");
           }}><Plus className="h-4 w-4" /> Add</GameButton>
         </div>
       </GameCard>
@@ -55,7 +65,7 @@ export default function MyGym() {
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span className="font-semibold">{g.name}</span>
-                {g.location && <span className="text-muted-foreground">· {g.location}</span>}
+                {(g.location || g.country) && <span className="text-muted-foreground">· {[g.location, g.country].filter(Boolean).join(", ")}</span>}
               </button>
             ))}
           </div>
@@ -69,9 +79,15 @@ export default function MyGym() {
       {s.gyms.map(g => (
         <GameCard key={g.id} className="p-5 space-y-5">
           <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 grid sm:grid-cols-2 gap-2">
+            <div className="flex-1 grid sm:grid-cols-3 gap-2">
               <Input value={g.name} onChange={e => updateGym(g.id, { name: e.target.value })} />
               <Input value={g.location} onChange={e => updateGym(g.id, { location: e.target.value })} placeholder="Location" />
+              <Select value={g.country ?? undefined} onValueChange={v => updateGym(g.id, { country: v })}>
+                <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center gap-1">
               <GameButton size="sm" variant={g.primary ? "legendary" : "ghost"} onClick={() => setPrimaryGym(g.id)} title="Make primary">
@@ -128,7 +144,7 @@ export default function MyGym() {
                 <h3 className="font-semibold">{g.name}</h3>
                 <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Public</span>
               </div>
-              {g.location && <div className="text-xs text-muted-foreground mt-0.5">{g.location}</div>}
+              {(g.location || g.country) && <div className="text-xs text-muted-foreground mt-0.5">{[g.location, g.country].filter(Boolean).join(" · ")}</div>}
               <div className="text-[11px] text-muted-foreground mt-1 italic">Admin-managed — read only.</div>
             </div>
             <GameButton size="sm" variant="ghost" onClick={() => { if (confirm(`Remove ${g.name} from your gyms?`)) removePublicGymFromMine(g.id); }}>
@@ -161,133 +177,7 @@ export default function MyGym() {
   );
 }
 
-const HOLD_COLOR_PRESETS: { name: string; hex: string }[] = [
-  { name: "Red", hex: "#ef4444" },
-  { name: "Orange", hex: "#f97316" },
-  { name: "Yellow", hex: "#eab308" },
-  { name: "Green", hex: "#22c55e" },
-  { name: "Blue", hex: "#3b82f6" },
-  { name: "Purple", hex: "#a855f7" },
-  { name: "Pink", hex: "#ec4899" },
-  { name: "Black", hex: "#0a0a0a" },
-  { name: "White", hex: "#f5f5f5" },
-  { name: "Grey", hex: "#737373" },
-  { name: "Brown", hex: "#92400e" },
-  { name: "Tan", hex: "#d4a373" },
-];
-
-type AddHoldColorPayload = Omit<HoldColor, "id">;
-
-function AddHoldColor({ onAdd }: { onAdd: (c: AddHoldColorPayload) => void }) {
-  const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"presets" | "custom" | "multi">("presets");
-  const [name, setName] = useState("");
-  const [hex, setHex] = useState("#22c55e");
-  const [hex2, setHex2] = useState("#ef4444");
-  const [pick1, setPick1] = useState<{ name: string; hex: string } | null>(null);
-
-  if (!open) return (
-    <button onClick={() => setOpen(true)} className="text-xs px-3 py-1 rounded-md border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-[hsl(var(--btn-orange))]">
-      <Plus className="h-3 w-3 inline" /> Add color
-    </button>
-  );
-
-  const close = () => {
-    setOpen(false); setMode("presets"); setName("");
-    setHex("#22c55e"); setHex2("#ef4444"); setPick1(null);
-  };
-
-  return (
-    <div className="w-full p-3 rounded-md border border-border bg-secondary/40 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="text-xs font-semibold">
-          {mode === "multi"
-            ? (pick1 ? `Pick second color (paired with ${pick1.name})` : "Pick first color")
-            : "Pick a hold color"}
-        </div>
-        <button onClick={close} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
-      </div>
-
-      {mode === "presets" && (
-        <div className="flex flex-wrap gap-2">
-          {HOLD_COLOR_PRESETS.map(p => (
-            <button
-              key={p.hex}
-              onClick={() => { onAdd({ name: p.name, hex: p.hex }); close(); }}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-border bg-background/50 hover:border-[hsl(var(--btn-orange))] text-xs"
-            >
-              <span className="h-4 w-4 rounded-full border border-[hsl(var(--panel-frame))]" style={{ background: p.hex }} />
-              {p.name}
-            </button>
-          ))}
-          <button
-            onClick={() => setMode("multi")}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-dashed border-border bg-background/50 hover:border-[hsl(var(--btn-orange))] text-xs"
-          >
-            <span className="h-4 w-4 rounded-full border border-[hsl(var(--panel-frame))]"
-              style={{ background: "linear-gradient(90deg, #ef4444 0 50%, #3b82f6 50% 100%)" }} />
-            Multicolor (2)
-          </button>
-          <button
-            onClick={() => setMode("custom")}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-dashed border-border bg-background/50 hover:border-[hsl(var(--btn-orange))] text-xs"
-          >
-            <span className="h-4 w-4 rounded-full border border-[hsl(var(--panel-frame))]"
-              style={{ background: "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)" }} />
-            Custom
-          </button>
-        </div>
-      )}
-
-      {mode === "custom" && (
-        <div className="flex flex-wrap items-center gap-2">
-          <input type="color" value={hex} onChange={e => setHex(e.target.value)} className="h-8 w-8 cursor-pointer rounded" />
-          <Input value={name} onChange={e => setName(e.target.value)} placeholder="Name" className="h-8 w-32" />
-          <GameButton size="sm" variant="primary" onClick={() => { if (!name.trim()) return; onAdd({ name: name.trim(), hex }); close(); }}>Add</GameButton>
-          <button onClick={() => setMode("presets")} className="text-xs text-muted-foreground hover:text-foreground">Back</button>
-        </div>
-      )}
-
-      {mode === "multi" && (
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {HOLD_COLOR_PRESETS.map(p => {
-              const isFirst = pick1?.hex === p.hex;
-              return (
-                <button
-                  key={p.hex}
-                  onClick={() => {
-                    if (!pick1) { setPick1(p); return; }
-                    if (p.hex === pick1.hex) { setPick1(null); return; }
-                    onAdd({ name: `${pick1.name}/${p.name}`, hex: pick1.hex, hex2: p.hex });
-                    close();
-                  }}
-                  className={cn("flex items-center gap-1.5 px-2 py-1 rounded-md border bg-background/50 hover:border-[hsl(var(--btn-orange))] text-xs",
-                    isFirst ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/30" : "border-border")}
-                >
-                  <span className="h-4 w-4 rounded-full border border-[hsl(var(--panel-frame))]" style={{ background: p.hex }} />
-                  {p.name}
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Custom hex:</span>
-            <input type="color" value={hex} onChange={e => setHex(e.target.value)} className="h-8 w-8 cursor-pointer rounded" />
-            <input type="color" value={hex2} onChange={e => setHex2(e.target.value)} className="h-8 w-8 cursor-pointer rounded" />
-            <Input value={name} onChange={e => setName(e.target.value)} placeholder="Name (e.g. Red/Blue)" className="h-8 w-40" />
-            <GameButton size="sm" variant="primary" onClick={() => {
-              if (!name.trim()) return;
-              onAdd({ name: name.trim(), hex, hex2 });
-              close();
-            }}>Add custom</GameButton>
-            <button onClick={() => { setMode("presets"); setPick1(null); }} className="text-xs text-muted-foreground hover:text-foreground">Back</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+// AddHoldColor moved to src/components/AddHoldColor.tsx
 
 function CreateCustomGradingSystem() {
   const [name, setName] = useState("");

@@ -186,6 +186,11 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       </DialogHeader>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+        {gymState.gyms.length === 0 && (
+          <div className="text-xs rounded-md border border-border bg-secondary/40 px-3 py-2 text-muted-foreground">
+            No gyms set up yet — you can still log this climb. <a href="/gym" className="font-semibold text-foreground underline underline-offset-2">Add a gym</a> to track hold colors and your gym's grading.
+          </div>
+        )}
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Date">
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} />

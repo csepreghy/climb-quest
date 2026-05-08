@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
-import { Backpack, Store, ArrowUp, Building2, ScrollText } from "lucide-react";
+import { Backpack, Store, ArrowUp, Building2, ScrollText, Sparkles } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -48,7 +48,7 @@ export function OnboardingModal({ open, onClose }: Props) {
   function finish() {
     completeOnboarding();
     onClose();
-    nav("/gym");
+    nav("/");
   }
 
   return (
@@ -144,7 +144,7 @@ export function OnboardingModal({ open, onClose }: Props) {
             icon={<Building2 className="h-5 w-5" />}
             title="Set up your climbing gym"
             body={<>
-              Add the gyms you climb at, their grading systems, and hold colors. You'll need at least one gym before you can log a climb.
+              Add the gyms you climb at, their grading systems, and hold colors. You can do this any time from My Gym.
             </>}
           />
         )}
@@ -164,7 +164,7 @@ export function OnboardingModal({ open, onClose }: Props) {
             disabled={step === "gender" && !picked}
             className="w-full sm:w-auto"
           >
-            {isLast ? <><Building2 className="h-4 w-4" /> Set up my gym</> : <>Next</>}
+            {isLast ? <><Sparkles className="h-4 w-4" /> Start climbing</> : <>Next</>}
           </GameButton>
         </DialogFooter>
       </DialogContent>

@@ -1,97 +1,61 @@
-## Goal
+## Goals
 
-Rebalance level thresholds, item prices, and item bonuses so early progression feels fast, late progression is a grind, and L10 takes ~6 months at 2–3 sessions/week (~3 months at 4/week). L10 cost = **1,000,000 chalk**. Chalk-reward scaling stays as previously implemented; this plan focuses on *thresholds, prices, bonuses, and discount items*.
+1. Admins can fully edit public gyms they created (not just delete).
+2. Add a Country dropdown to gym forms — all of Europe + US.
+3. Stop forcing users to set up a gym before logging climbs.
+4. Rename onboarding's final button from "Set up my gym" to "Start climbing" and route to home.
+5. Answer: do daily chalk / boss limits exist?
 
-## 1. Level thresholds (`src/game/data.ts` → `LEVELS`)
+## Answer to question 4
 
-Replace `cost` values with a steep curve. Cumulative ≈ 1.27M.
+No daily caps exist today. `src/game/store.ts` has only one related guard: `hasBossSendOnDate(dateISO)` (line 525), which reports whether a boss was already sent on a given date — but it's just a query helper. It is not enforced anywhere as a hard limit. There are no daily chalk maximums, no per-day boulder caps, and no per-day boss-attempt caps. If we want them, that's a separate follow-up.
 
-| Lv | Cost to reach | Cumulative |
-|----|--------------:|-----------:|
-| 1  | 0             | 0          |
-| 2  | 100           | 100        |
-| 3  | 300           | 400        |
-| 4  | 800           | 1,200      |
-| 5  | 2,000         | 3,200      |
-| 6  | 5,000         | 8,200      |
-| 7  | 15,000        | 23,200     |
-| 8  | 50,000        | 73,200     |
-| 9  | 200,000       | 273,200    |
-| 10 | **1,000,000** | 1,273,200  |
+## Changes
 
-Pacing math: ~65 sessions in 6 months at 2.5/wk; with stacked bonuses + at-limit difficulty multiplier, late-game sessions earn 10k–20k chalk, making the L10 jump intentionally heavy but achievable.
+### 1. Admins can edit their public gyms
+File: `src/pages/Admin.tsx` (the `PublicGymsAdmin` section)
 
-## 2. Item bonuses (overwrite `bonus_pct` in `shop_items`)
+Today admins can only add/delete public gyms and change name/location inline. Extend it so admins can edit a public gym in place with the same controls users get for their own gyms:
+- Name, location, country
+- Hold colors (add / remove, including the new multicolor option)
+- Grading systems assigned to the gym
+- Custom grading systems attached to the public gym (separate from the user's local custom systems)
 
-New tiering (all values are `bonus_pct`, applied as `+%` chalk):
+Reuse the existing components from `src/pages/MyGym.tsx` by extracting the gym editor body and the `AddHoldColor` / grading-system editors into a shared component that accepts a `source: "local" | "public"` prop. The component dispatches to either the local `gyms.ts` mutators or the `publicGyms.ts` mutators (`updatePublicGym`, `setPublicGymGradingSystems`).
 
-- Common: **2%**
-- Rare: **6%**
-- Epic: **15%**
-- Legendary: **35%**
+### 2. Country dropdown
+- Add `country?: string` to the `Gym` interface in `src/game/gyms.ts` (and matching field in `addPublicGym` / `addGym`).
+- New file `src/game/countries.ts` exporting an ordered list of geographic Europe + US (United States first, then alphabetical European countries: Albania, Andorra, Austria, Belarus, Belgium, Bosnia and Herzegovina, Bulgaria, Croatia, Cyprus, Czechia, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Kosovo, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Moldova, Monaco, Montenegro, Netherlands, North Macedonia, Norway, Poland, Portugal, Romania, San Marino, Serbia, Slovakia, Slovenia, Spain, Sweden, Switzerland, Türkiye, Ukraine, United Kingdom, Vatican City).
+- Add a `<Select>` Country field next to Name/Location in:
+  - `src/pages/MyGym.tsx` add-gym form and per-gym editor
+  - `src/pages/Admin.tsx` public gyms add + editor
+- Country shows under the gym name where location is currently shown (as `Location · Country`).
 
-Applied to every existing item by rarity (specific overwrites listed in section 5).
+### 3. Don't force users to set up a gym before logging
+File: `src/components/Layout.tsx`
+- Remove the `needGymOpen` modal and the `tryOpenLog` gating; "Log Boulder" buttons open the log modal directly.
+- File: `src/components/LogModal.tsx` — when the user has no gyms, show an inline empty-state inside the modal: short message + a "Set up a gym" button that links to /my-gym, and the form fields that depend on a gym (gym selector, hold color, grading system) gracefully fall back to the built-in V scale with no hold color, so a user can still log a climb without a gym.
 
-## 3. Item prices (overwrite `price` in `shop_items`)
+### 4. Onboarding final step → "Start climbing"
+File: `src/components/OnboardingModal.tsx`
+- Change last-step button label from "Set up my gym" to "Start climbing" (keep the icon or swap to a Play/Sparkles icon).
+- On click, mark onboarding complete and `navigate("/")` instead of `/my-gym`.
+- The "gym" onboarding step copy stays (still teaches gym setup) but the CTA no longer forces them there.
 
-Tier price bands (rounded per slot importance):
+## Technical details
 
-- Common: 50–150
-- Rare: 400–1,500
-- Epic: 5,000–15,000
-- Legendary: 60,000–180,000
+- `Gym.country` is optional so existing saved gyms don't break. Display falls back to just `location` when missing.
+- The shared gym editor component lives at `src/components/GymEditor.tsx`. Props:
+  ```ts
+  { gym: Gym; gradingSystems: GradingSystem[]; source: "local" | "public" }
+  ```
+  Internally it picks the right mutator set. Both `MyGym.tsx` and `Admin.tsx` render it.
+- `publicGyms.ts` already has `updatePublicGym` and `setPublicGymGradingSystems`; we'll add `addPublicHoldColor`, `removePublicHoldColor`, `togglePublicGymGradingSystem` as thin helpers that call `updatePublicGym` with the patched gym.
+- For public-gym custom grading systems we manage them inside the `grading_systems` jsonb column via `setPublicGymGradingSystems`.
+- No DB migration needed — `country` lives inside the existing `data` jsonb on `public_gyms` and inside the local `gyms` json blob.
 
-## 4. Shop-discount items (single source, no stacking)
+## Out of scope
 
-Per your call, **only the `study` slot** provides shop discounts. Their `bonus_pct` becomes 0 and `price_mult` carries the discount. Only the lowest equipped `priceMult` applies (already implemented).
-
-| Item                  | Rarity     | Lv req | Price   | priceMult | Discount |
-|-----------------------|------------|-------:|--------:|----------:|---------:|
-| Beta Book             | rare       | 2      | 600     | 0.95      | 5% off   |
-| Beta Breaker Book     | epic       | 4      | 6,000   | 0.85      | 15% off  |
-| **Sponsor Deal** (new)| legendary  | 8      | 80,000  | 0.70      | 30% off  |
-
-The new legendary study item will be inserted via migration. (If you'd rather rename one of the existing legendaries instead of adding, say so.)
-
-## 5. Concrete per-item overwrites (UPDATE migration)
-
-All current rows updated to:
-
-| Item                       | Rarity    | New price | New bonus% | priceMult |
-|----------------------------|-----------|----------:|-----------:|----------:|
-| Reliable Powder            | common    | 50        | 2          | 1         |
-| Liquid Chalk               | rare      | 500       | 6          | 1         |
-| Sticky                     | rare      | 1,200     | 6          | 1         |
-| Magdust                    | epic      | 8,000     | 15         | 1         |
-| Cosmic Magdust             | legendary | 120,000   | 35         | 1         |
-| Toe Hook Master            | rare      | 800       | 6          | 1         |
-| Comfy Beginner Shoes       | rare      | 600       | 6          | 1         |
-| Comp                       | epic      | 7,000     | 15         | 1         |
-| Golden Crocs               | legendary | 150,000   | 35         | 1         |
-| Shorts                     | common    | 100       | 2          | 1         |
-| Pants                      | rare      | 700       | 6          | 1         |
-| Rental                     | common    | 50        | 2          | 1         |
-| Climbing Tape              | common    | 80        | 2          | 1         |
-| Crack Climbing Gloves      | epic      | 5,000     | 15         | 1         |
-| Bear Paw Glove             | legendary | 90,000    | 35         | 1         |
-| Infinity Climbing          | legendary | 100,000   | 35         | 1         |
-| No Hats                    | common    | 0         | 0          | 1         |
-| Bare Bones                 | common    | 0         | 0          | 1         |
-| Baseball Cap               | rare      | 500       | 6          | 1         |
-| Cool Beanie                | epic      | 6,000     | 15         | 1         |
-| Sender Hoodie              | epic      | 9,000     | 15         | 1         |
-| Shirtless                  | legendary | 80,000    | 35         | 1         |
-| Beta Book                  | rare      | 600       | **0**      | **0.95**  |
-| Beta Breaker Book          | epic      | 6,000     | **0**      | **0.85**  |
-| Sponsor Deal *(insert)*    | legendary | 80,000    | 0          | 0.70      |
-
-## 6. Files / migrations
-
-- **Migration**: `UPDATE shop_items SET ...` per row above; `INSERT` Sponsor Deal row.
-- **`src/game/data.ts`**: rewrite `LEVELS` cost values.
-- No code logic changes needed — discount + bonus systems already wired.
-
-## Open questions
-
-- Insert a new legendary study item ("Sponsor Deal") or repurpose an existing legendary into the discount role? Default: insert new.
-- Keep current chalk reward base values (unchanged from last pass)? Default: yes.
+- Adding actual daily caps for chalk or boss attempts (only flagged the absence).
+- Country flags/icons in the dropdown.
+- Searchable/typeahead country picker (plain Select is fine for ~46 entries).

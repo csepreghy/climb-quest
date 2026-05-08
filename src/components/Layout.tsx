@@ -41,13 +41,10 @@ export default function Layout() {
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
-  const [needGymOpen, setNeedGymOpen] = useState(false);
   const gymState = useAllGyms();
-  const hasGym = gymState.gyms.length > 0;
   const showOnboarding = !!user && !s.onboardedAt;
 
   function tryOpenLog() {
-    if (!hasGym) { setNeedGymOpen(true); return; }
     setLogOpen(true);
   }
 
@@ -93,21 +90,6 @@ export default function Layout() {
       />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <OnboardingModal open={showOnboarding} onClose={() => { /* completion handled inside */ }} />
-      <Dialog open={needGymOpen} onOpenChange={setNeedGymOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Set up your gym first</DialogTitle>
-            <DialogDescription>
-              You need at least one climbing gym before you can log climbs. Add a gym, its grading systems, and hold colors in My Gym.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <GameButton variant="primary" onClick={() => { setNeedGymOpen(false); nav("/gym"); }}>
-              <Building2 className="h-4 w-4" /> Set up my gym
-            </GameButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       <Dialog open={confirmLvOpen} onOpenChange={setConfirmLvOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>

@@ -203,6 +203,20 @@ function BackfillImagesCard() {
   );
 }
 
+function RebalanceCard() {
+  const [open, setOpen] = useState(false);
+  return (
+    <GameCard tone="legendary" className="p-5">
+      <div className="menu-label mb-3">Admin · Rebalance economy</div>
+      <p className="text-sm text-muted-foreground mb-3">
+        Recompute every shop item's price, chalk bonus and discount from rarity + level. Optionally retune activity rewards too. Preview before applying.
+      </p>
+      <Button onClick={() => setOpen(true)}>Preview rebalance</Button>
+      <RebalancePreviewModal open={open} onClose={() => setOpen(false)} />
+    </GameCard>
+  );
+}
+
 const empty: CustomItemInput = {
   name: "",
   group: "outfit",

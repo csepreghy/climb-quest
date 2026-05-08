@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp, FlaskConical, User as UserIcon } from "lucide-react";
 import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
@@ -44,7 +44,8 @@ export default function Layout() {
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
   const [needGymOpen, setNeedGymOpen] = useState(false);
   const gymState = useAllGyms();
-  const showOnboarding = !!user && !s.onboardedAt;
+  const hydrated = useRemoteHydrated();
+  const showOnboarding = !!user && hydrated && !s.onboardedAt;
 
   function tryOpenLog() {
     if (gymState.gyms.length === 0) {

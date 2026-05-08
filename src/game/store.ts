@@ -137,12 +137,32 @@ function set(updater: (s: State) => State) {
 let remoteSave: ((s: State) => void) | null = null;
 export function bindGameRemoteSync(saver: ((s: State) => void) | null) {
   remoteSave = saver;
+  if (!saver) {
+    // Unbinding (e.g. sign-out): reset hydration so we don't flash onboarding
+    // for the next session before its data loads.
+    remoteHydrated = false;
+    hydrationListeners.forEach(l => l());
+  }
 }
 export function getGameStateSnapshot(): State { return state; }
 export function replaceGameState(next: State) {
   state = { ...initialState(), ...next };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
   listeners.forEach(l => l());
+  if (!remoteHydrated) {
+    remoteHydrated = true;
+    hydrationListeners.forEach(l => l());
+  }
+}
+
+let remoteHydrated = false;
+const hydrationListeners = new Set<() => void>();
+export function useRemoteHydrated(): boolean {
+  return useSyncExternalStore(
+    (cb) => { hydrationListeners.add(cb); return () => hydrationListeners.delete(cb); },
+    () => remoteHydrated,
+    () => false,
+  );
 }
 
 export function useGame(): State {

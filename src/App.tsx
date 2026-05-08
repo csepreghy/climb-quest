@@ -17,6 +17,7 @@ import Landing from "./pages/Landing";
 import Leaderboard from "./pages/Leaderboard";
 import { GameBackground } from "./components/pixel/GameBackground";
 import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
+import { BadgeUnlockBanner } from "./components/pixel/BadgeUnlockBanner";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { AuthProvider } from "./hooks/useAuth";
 import { RequireAuth, RequireAdmin } from "./components/RequireAuth";
@@ -30,6 +31,7 @@ const App = () => (
     <TooltipProvider>
       <GameBackground />
       <LevelUpBanner />
+      <BadgeUnlockBanner />
       <Toaster />
       <Sonner />
       <BrowserRouter>

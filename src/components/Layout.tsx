@@ -18,6 +18,7 @@ import { OnboardingModal } from "@/components/OnboardingModal";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
+import { showBadgeUnlock } from "@/components/pixel/BadgeUnlockBanner";
 import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import logoImg from "@/assets/climbquest-logo.png";
@@ -77,7 +78,7 @@ export default function Layout() {
     return () => window.removeEventListener("cq:open-level-up-confirm", h);
   }, []);
 
-  // Celebrate newly-awarded badges with a toast + chalk reward callout.
+  // Celebrate newly-awarded badges with a full-screen modal banner.
   useEffect(() => {
     return onBadgesAwarded(ids => {
       ids.forEach((id, i) => {
@@ -85,11 +86,8 @@ export default function Layout() {
         const name = b?.name ?? "New Badge";
         const emoji = b?.emoji ?? "🏅";
         setTimeout(() => {
-          toast.success(`${emoji}  Badge unlocked: ${name}`, {
-            description: `+${BADGE_CHALK_REWARD} Chalk awarded — keep climbing!`,
-            duration: 5000,
-          });
-        }, i * 350);
+          showBadgeUnlock(name, emoji, BADGE_CHALK_REWARD);
+        }, i * 200);
       });
     });
   }, []);

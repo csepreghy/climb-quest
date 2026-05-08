@@ -1,7 +1,7 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
 export type Rarity = "common" | "rare" | "epic" | "legendary";
-export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title";
+export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup";
 export type ItemGroup = "outfit" | "gear" | "power";
 
 /** Slots that belong to the "gear" group, in display/unlock order. */
@@ -54,7 +54,7 @@ export interface ShopItem {
   id: string;
   name: string;
   group: ItemGroup;          // outfit | gear | power
-  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Study" | "Accessories" | "Auras" | "Titles" | "Consumables";
+  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Study" | "Power-up" | "Accessories" | "Auras" | "Titles" | "Consumables";
   slot: Slot;
   rarity: Rarity;
   price: number;
@@ -64,6 +64,10 @@ export interface ShopItem {
   bonus?: { mult: number; appliesTo?: ActivityType[] | "all"; styleMatch?: Style[] };
   /** Consumable: one-time bonus on next log */
   consumableBonus?: number;
+  /** % chance an entire log's chalk gets doubled (0-100). Stacks across items via 1 - Π(1 - p). */
+  critChancePct?: number;
+  /** Extra % chalk on boss_attempt and boss_send activities (separate from `bonus`). */
+  bossBonusPct?: number;
   levelReq?: number;
   /** Multiplier on shop prices when equipped, e.g. 0.9 = 10% off. Defaults to 1. */
   priceMult?: number;

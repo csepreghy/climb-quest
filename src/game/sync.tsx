@@ -81,6 +81,9 @@ export function GameSync() {
         }
       }
 
+      // Retroactively grant any deserved badges + back-pay +50 chalk per badge.
+      runRetroBadgeAudit();
+
       if (cancelled) return;
 
       const flush = () => {

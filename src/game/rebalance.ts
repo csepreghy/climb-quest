@@ -137,17 +137,55 @@ export function targetBossBonusPct(item: ShopItem): number {
   return Math.max(0, Math.round(base * slotBoost));
 }
 
-export function targetPrice(item: ShopItem): number {
+/** Lowest level at which an item of this rarity may unlock. */
+const MIN_LEVEL_BY_RARITY: Record<Rarity, number> = {
+  common: 1, rare: 2, epic: 4, legendary: 6,
+};
+const MAX_LEVEL = 10;
+
+/** Raw value used to rank items within a rarity (cheaper items unlock first). */
+function rawValue(item: ShopItem): number {
   const base = RARITY_BASE_PRICE[item.rarity] ?? 100;
-  const lvl = Math.max(1, item.levelReq ?? 1);
+  const bonusPct = targetBonusPct(item);
+  const discountPct = targetDiscountPct(item);
+  const critPct = targetCritPct(item);
+  const bossPct = targetBossBonusPct(item);
+  const valueMult = 1 + (bonusPct + discountPct + critPct * 1.5 + bossPct) * 0.005;
+  return base * valueMult;
+}
+
+export function targetPrice(item: ShopItem, levelReq: number): number {
+  const base = RARITY_BASE_PRICE[item.rarity] ?? 100;
+  const lvl = Math.max(1, levelReq);
   const lvlMult = Math.pow(1.18, lvl - 1);
   const bonusPct = targetBonusPct(item);
   const discountPct = targetDiscountPct(item);
   const critPct = targetCritPct(item);
   const bossPct = targetBossBonusPct(item);
-  // Crit weighted ×1.5 because it doubles all chalk; others ×1.
   const valueMult = 1 + (bonusPct + discountPct + critPct * 1.5 + bossPct) * 0.005;
   return niceRound(base * lvlMult * valueMult);
+}
+
+/** Assign a level requirement per item: cheaper-first within rarity, respecting the rarity floor. */
+function computeLevelReqs(items: ShopItem[]): Map<string, number> {
+  const out = new Map<string, number>();
+  const groups: Record<Rarity, ShopItem[]> = { common: [], rare: [], epic: [], legendary: [] };
+  for (const it of items) groups[it.rarity].push(it);
+  (Object.keys(groups) as Rarity[]).forEach(r => {
+    const list = groups[r].slice().sort((a, b) => {
+      const av = rawValue(a), bv = rawValue(b);
+      if (av !== bv) return av - bv;
+      return a.id.localeCompare(b.id); // stable tie-break
+    });
+    const min = MIN_LEVEL_BY_RARITY[r];
+    const span = Math.max(0, MAX_LEVEL - min);
+    const n = list.length;
+    list.forEach((it, i) => {
+      const lvl = n <= 1 ? min : min + Math.round((i * span) / (n - 1));
+      out.set(it.id, Math.min(MAX_LEVEL, Math.max(min, lvl)));
+    });
+  });
+  return out;
 }
 
 const TARGET_ACTIVITY: Record<ActivityType, number> = {
@@ -161,8 +199,8 @@ const TARGET_ACTIVITY: Record<ActivityType, number> = {
 
 export interface ItemDiff {
   item: ShopItem;
-  now: { price: number; bonusPct: number; discountPct: number; critPct: number; bossPct: number };
-  next: { price: number; bonusPct: number; discountPct: number; critPct: number; bossPct: number };
+  now: { price: number; bonusPct: number; discountPct: number; critPct: number; bossPct: number; levelReq: number };
+  next: { price: number; bonusPct: number; discountPct: number; critPct: number; bossPct: number; levelReq: number };
   changed: boolean;
 }
 
@@ -177,17 +215,21 @@ export function proposeRebalance(
   items: ShopItem[],
   currentRewards: Record<ActivityType, number>,
 ): { items: ItemDiff[]; activities: ActivityDiff[] } {
+  const levelReqs = computeLevelReqs(items);
   const itemDiffs: ItemDiff[] = items.map(item => {
     const nowBonus = item.bonus ? Math.round(item.bonus.mult * 100) : 0;
     const nowDisc = item.priceMult ? Math.round((1 - item.priceMult) * 100) : 0;
     const nowCrit = item.critChancePct ?? 0;
     const nowBoss = item.bossBonusPct ?? 0;
+    const nowLvl = item.levelReq ?? 1;
+    const nextLvl = levelReqs.get(item.id) ?? MIN_LEVEL_BY_RARITY[item.rarity];
     const next = {
-      price: targetPrice(item),
+      price: targetPrice(item, nextLvl),
       bonusPct: targetBonusPct(item),
       discountPct: targetDiscountPct(item),
       critPct: targetCritPct(item),
       bossPct: targetBossBonusPct(item),
+      levelReq: nextLvl,
     };
     // No useless items: if every effect rounded to 0, give a small chalk/boss/crit floor.
     if (next.bonusPct === 0 && next.discountPct === 0 && next.critPct === 0 && next.bossPct === 0) {
@@ -198,13 +240,14 @@ export function proposeRebalance(
       else if (effectAllowed(item.group, item.rarity, "discount")) next.discountPct = floor;
       else next.bonusPct = floor; // last-ditch: low rarity gear has no allowed effect — give it chalk anyway
     }
-    const now = { price: item.price, bonusPct: nowBonus, discountPct: nowDisc, critPct: nowCrit, bossPct: nowBoss };
+    const now = { price: item.price, bonusPct: nowBonus, discountPct: nowDisc, critPct: nowCrit, bossPct: nowBoss, levelReq: nowLvl };
     const changed =
       next.price !== now.price ||
       next.bonusPct !== now.bonusPct ||
       next.discountPct !== now.discountPct ||
       next.critPct !== now.critPct ||
-      next.bossPct !== now.bossPct;
+      next.bossPct !== now.bossPct ||
+      next.levelReq !== now.levelReq;
     return { item, now, next, changed };
   });
 

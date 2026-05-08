@@ -124,7 +124,7 @@ export default function Dashboard() {
                       title={`${hold.name} hold`}
                       aria-label={`${hold.name} hold`}
                       className="h-3 w-3 rounded-full border border-border shrink-0"
-                      style={{ background: hold.hex }}
+                      style={{ background: hold.hex2 ? `linear-gradient(90deg, ${hold.hex} 0 50%, ${hold.hex2} 50% 100%)` : hold.hex }}
                     />
                   )}
                   <div className="min-w-0">

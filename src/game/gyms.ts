@@ -46,6 +46,8 @@ export interface HoldColor {
   id: string;
   name: string;
   hex: string;
+  /** Optional second color — when set, the hold renders as a split circle (multicolor). */
+  hex2?: string;
 }
 
 export interface Gym {
@@ -61,6 +63,8 @@ export interface GymState {
   gyms: Gym[];
   gradingSystems: GradingSystem[];
   lastUsedGymId: string | null;
+  /** Ids of admin-created public gyms the user has added to their list. */
+  addedPublicGymIds: string[];
 }
 
 const KEY = "climbquest:gym:v1";
@@ -80,7 +84,7 @@ const DEFAULT_HOLD_COLORS: HoldColor[] = [
 ];
 
 function initial(): GymState {
-  return { gyms: [], gradingSystems: [V_GRADES, FRENCH_GRADES], lastUsedGymId: null };
+  return { gyms: [], gradingSystems: [V_GRADES, FRENCH_GRADES], lastUsedGymId: null, addedPublicGymIds: [] };
 }
 
 let state: GymState = load();
@@ -150,6 +154,12 @@ export function setPrimaryGym(gymId: string) {
 }
 export function setLastUsedGym(gymId: string) {
   set(s => ({ ...s, lastUsedGymId: gymId }));
+}
+export function addPublicGymToMine(gymId: string) {
+  set(s => s.addedPublicGymIds.includes(gymId) ? s : { ...s, addedPublicGymIds: [...s.addedPublicGymIds, gymId] });
+}
+export function removePublicGymFromMine(gymId: string) {
+  set(s => ({ ...s, addedPublicGymIds: s.addedPublicGymIds.filter(id => id !== gymId), lastUsedGymId: s.lastUsedGymId === gymId ? null : s.lastUsedGymId }));
 }
 
 export function addHoldColor(gymId: string, c: Omit<HoldColor, "id">) {

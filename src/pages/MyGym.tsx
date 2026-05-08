@@ -8,12 +8,15 @@ import {
   addHoldColor, removeHoldColor,
   addGradingSystem, updateGradingSystem, deleteGradingSystem, toggleGymGradingSystem,
   setEquivalent, gradeLabels,
+  addPublicGymToMine, removePublicGymFromMine,
   V_SCALE, FRENCH_SCALE,
-  GradingSystem, GradingKind, GradeEquivalent,
+  GradingSystem, GradingKind, GradeEquivalent, HoldColor,
 } from "@/game/gyms";
-import { Plus, X, Star, Trash2 } from "lucide-react";
+import { usePublicGyms } from "@/game/publicGyms";
+import { Plus, X, Star, Trash2, Lock, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { HoldSwatch } from "@/components/HoldSwatch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MyGym() {

@@ -250,7 +250,6 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
                 <SelectItem value="warmup_boulder">Warm-up · +{BASE_CHALK.warmup_boulder}</SelectItem>
                 <SelectItem value="boulder">Regular · +{BASE_CHALK.boulder}</SelectItem>
                 <SelectItem value="hard_boulder">Hard · +{BASE_CHALK.hard_boulder}</SelectItem>
-                <SelectItem value="project_boulder">Project · +{BASE_CHALK.project_boulder}</SelectItem>
               </SelectContent>
             </Select>
           </Field>

@@ -2,7 +2,7 @@
 // Custom items + hidden built-in ids live in two backend tables and are
 // synced realtime to every user's client.
 import { useSyncExternalStore, useEffect } from "react";
-import { ShopItem, SHOP, ITEM_BY_ID, Rarity, ItemGroup, Slot, ActivityType, GROUP_EFFECTS } from "./data";
+import { ShopItem, SHOP, ITEM_BY_ID, Rarity, ItemGroup, Slot, ActivityType, effectAllowed } from "./data";
 import { supabase } from "@/integrations/supabase/client";
 import { processAndUpload } from "@/lib/imageUpload";
 

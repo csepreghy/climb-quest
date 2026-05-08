@@ -10,7 +10,7 @@ import { resolvedLevel } from "./levelOverrides";
 import { applyDailyCap, chalkUsedOnDate, computeDailyCap, currentStreak, getDailyCapConfig } from "./dailyCap";
 
 // ----- Types -----
-export type AttemptType = "flash" | "send" | "project";
+export type AttemptType = "flash" | "send" | "project" | "repeat";
 
 export interface BoulderLog {
   id: string;

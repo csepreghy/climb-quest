@@ -24,6 +24,7 @@ export default function MyGym() {
   const pub = usePublicGyms();
   const [newName, setNewName] = useState("");
   const [newLoc, setNewLoc] = useState("");
+  const [newCountry, setNewCountry] = useState<string>("");
 
   const addedPublic = pub.gyms.filter(g => s.addedPublicGymIds.includes(g.id));
   const availablePublic = pub.gyms.filter(g => !s.addedPublicGymIds.includes(g.id));
@@ -32,12 +33,19 @@ export default function MyGym() {
     <div className="space-y-6 animate-float-up max-w-4xl">
       <GameCard tone="accent" className="p-5">
         <div className="menu-label mb-3">Add a gym</div>
-        <div className="grid sm:grid-cols-[1fr,1fr,auto] gap-2">
+        <div className="grid sm:grid-cols-[1fr,1fr,1fr,auto] gap-2">
           <Input placeholder="Gym name" value={newName} onChange={e => setNewName(e.target.value)} />
           <Input placeholder="Location (city)" value={newLoc} onChange={e => setNewLoc(e.target.value)} />
+          <Select value={newCountry || undefined} onValueChange={setNewCountry}>
+            <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
+            <SelectContent>
+              {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
           <GameButton variant="primary" onClick={() => {
             if (!newName.trim()) { toast.error("Name required"); return; }
-            addGym(newName.trim(), newLoc.trim()); setNewName(""); setNewLoc("");
+            addGym(newName.trim(), newLoc.trim(), newCountry || undefined);
+            setNewName(""); setNewLoc(""); setNewCountry("");
           }}><Plus className="h-4 w-4" /> Add</GameButton>
         </div>
       </GameCard>

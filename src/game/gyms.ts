@@ -57,7 +57,10 @@ export interface Gym {
   country?: string;
   primary: boolean;
   holdColors: HoldColor[];
+  /** IDs of built-in systems enabled for this gym (e.g. "v_grades", "french_grades"). */
   gradingSystemIds: string[];
+  /** Custom grading systems defined on this gym. */
+  gradingSystems?: GradingSystem[];
 }
 
 export interface GymState {

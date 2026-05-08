@@ -189,15 +189,14 @@ export function proposeRebalance(
       critPct: targetCritPct(item),
       bossPct: targetBossBonusPct(item),
     };
-    // No useless items: if every effect rounded to 0, give the group's
-    // primary effect a minimum value scaled by rarity.
+    // No useless items: if every effect rounded to 0, give a small chalk/boss/crit floor.
     if (next.bonusPct === 0 && next.discountPct === 0 && next.critPct === 0 && next.bossPct === 0) {
       const floor = item.rarity === "legendary" ? 5 : item.rarity === "epic" ? 3 : item.rarity === "rare" ? 2 : 1;
-      const allow = GROUP_EFFECTS[item.group];
-      if (allow.chalk) next.bonusPct = floor;
-      else if (allow.boss) next.bossPct = floor;
-      else if (allow.crit) next.critPct = floor;
-      else if (allow.discount) next.discountPct = floor;
+      if (effectAllowed(item.group, item.rarity, "chalk")) next.bonusPct = floor;
+      else if (effectAllowed(item.group, item.rarity, "boss")) next.bossPct = floor;
+      else if (effectAllowed(item.group, item.rarity, "crit")) next.critPct = floor;
+      else if (effectAllowed(item.group, item.rarity, "discount")) next.discountPct = floor;
+      else next.bonusPct = floor; // last-ditch: low rarity gear has no allowed effect — give it chalk anyway
     }
     const now = { price: item.price, bonusPct: nowBonus, discountPct: nowDisc, critPct: nowCrit, bossPct: nowBoss };
     const changed =

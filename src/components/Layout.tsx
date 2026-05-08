@@ -380,7 +380,7 @@ function ChalkChip({ value }: { value: number }) {
               <div className="rounded-lg border border-border overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-2 text-sm">
                   <span className="text-foreground/90">
-                    {showCap ? <>Today's cap{streak > 0 ? ` · ${streak}d streak` : ""}</> : "No daily cap"}
+                    {showCap ? "Today's cap" : "No daily cap"}
                   </span>
                   <span className="tabular-nums font-bold gradient-chalk-text">
                     {showCap ? `${dailyCap.toLocaleString()} chalk` : "Unlimited"}
@@ -389,7 +389,7 @@ function ChalkChip({ value }: { value: number }) {
               </div>
               <p className="text-[11px] text-muted-foreground mt-1.5">
                 {showCap
-                  ? "Soft cap — keep logging daily to grow your streak and raise tomorrow's limit."
+                  ? "Soft cap — past the cap, chalk earns at reduced rates."
                   : "Earn as much chalk as you want — no diminishing returns today."}
               </p>
             </div>

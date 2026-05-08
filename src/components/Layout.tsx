@@ -44,7 +44,8 @@ export default function Layout() {
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
   const [needGymOpen, setNeedGymOpen] = useState(false);
   const gymState = useAllGyms();
-  const showOnboarding = !!user && !s.onboardedAt;
+  const hydrated = useRemoteHydrated();
+  const showOnboarding = !!user && hydrated && !s.onboardedAt;
 
   function tryOpenLog() {
     if (gymState.gyms.length === 0) {

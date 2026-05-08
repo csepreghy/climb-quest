@@ -5,18 +5,35 @@ const SHOP_MAX_DIM = 360;
 const DEFAULT_MAX_DIM = 800;
 const QUALITY = 0.85;
 
-/** Resize an image source (File or data URL) to <=maxDim and return a webp Blob. */
-export async function toWebpBlob(src: File | string, maxDim: number = DEFAULT_MAX_DIM): Promise<Blob> {
+/**
+ * Resize an image source (File or data URL) to a webp Blob.
+ * If `square` is true and the source is larger than maxDim in either dimension,
+ * output is exactly maxDim x maxDim using a center cover-crop. Smaller sources
+ * are left at their original size.
+ * Otherwise, output fits within maxDim while preserving aspect ratio.
+ */
+export async function toWebpBlob(src: File | string, maxDim: number = DEFAULT_MAX_DIM, square = false): Promise<Blob> {
   const url = typeof src === "string" ? src : URL.createObjectURL(src);
   try {
     const img = await loadImage(url);
-    const { width, height } = fit(img.naturalWidth, img.naturalHeight, maxDim);
+    const sw = img.naturalWidth, sh = img.naturalHeight;
     const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("no 2d context");
-    ctx.drawImage(img, 0, 0, width, height);
+    if (square && (sw > maxDim || sh > maxDim)) {
+      // Center cover-crop to maxDim x maxDim.
+      canvas.width = maxDim;
+      canvas.height = maxDim;
+      const scale = Math.max(maxDim / sw, maxDim / sh);
+      const dw = sw * scale, dh = sh * scale;
+      const dx = (maxDim - dw) / 2, dy = (maxDim - dh) / 2;
+      ctx.drawImage(img, dx, dy, dw, dh);
+    } else {
+      const { width, height } = fit(sw, sh, maxDim);
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+    }
     const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/webp", QUALITY));
     if (!blob) throw new Error("encode failed");
     return blob;

@@ -70,12 +70,12 @@ const EPIC_LEAN: Record<Slot, "crit" | "boss"> = {
 
 /** Per-rarity crit chance contributed by one item. */
 const CRIT_BY_RARITY: Record<Rarity, number> = {
-  common: 0, rare: 0, epic: 5, legendary: 10,
+  common: 1, rare: 3, epic: 5, legendary: 10,
 };
 
 /** Per-rarity boss bonus contributed by one item. */
 const BOSS_BY_RARITY: Record<Rarity, number> = {
-  common: 0, rare: 0, epic: 8, legendary: 15,
+  common: 2, rare: 5, epic: 8, legendary: 15,
 };
 
 /** Slots that can roll discount (study-leaning + powerups). */

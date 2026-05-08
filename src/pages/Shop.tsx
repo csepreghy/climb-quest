@@ -26,7 +26,11 @@ export default function Shop() {
 
   const activeGroup = GROUPS.find(g => g.key === group)!;
   const items = useMemo(() => {
-    const inGroup = all.filter(i => i.group === group && i.price > 0);
+    const inGroup = all.filter(i =>
+      i.group === group &&
+      i.price > 0 &&
+      (!i.gender || i.gender === "unisex" || i.gender === s.gender)
+    );
     const filtered = activeGroup.categories.length === 0 || cat === "All"
       ? inGroup
       : inGroup.filter(i => i.category === cat);
@@ -34,7 +38,7 @@ export default function Shop() {
     return [...filtered].sort((a, b) =>
       (rarityOrder[a.rarity] ?? 99) - (rarityOrder[b.rarity] ?? 99) || a.price - b.price
     );
-  }, [group, cat, all, activeGroup]);
+  }, [group, cat, all, activeGroup, s.gender]);
 
   return (
     <div className="space-y-5 animate-float-up">

@@ -508,19 +508,17 @@ export function levelUp(): { ok: boolean; reason?: string; unlocks?: string[] } 
   const next = nextLevel(state);
   if (!next) return { ok: false, reason: "Already max level" };
   if (state.chalk < next.cost) return { ok: false, reason: "Not enough Chalk" };
-  set(s => ({
-    ...s,
-    chalk: s.chalk - next.cost,
-    level: next.level,
-    badges: addLevelBadges(s.badges, next.level),
-  }));
+  set(s => {
+    const lifted: State = { ...s, chalk: s.chalk - next.cost, level: next.level };
+    return applyBadges(lifted, levelBadges(next.level));
+  });
   return { ok: true, unlocks: next.unlocks };
 }
-function addLevelBadges(b: string[], lvl: number): string[] {
-  const set = new Set(b);
-  if (lvl >= 6) set.add("dyno_unlocked");
-  if (lvl >= 10) set.add("demigod_unlocked");
-  return Array.from(set);
+function levelBadges(lvl: number): string[] {
+  const out: string[] = [];
+  if (lvl >= 6) out.push("dyno_unlocked");
+  if (lvl >= 10) out.push("demigod_unlocked");
+  return out;
 }
 
 export function buyItem(id: string): { ok: boolean; reason?: string } {

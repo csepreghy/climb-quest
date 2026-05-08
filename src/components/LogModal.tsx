@@ -134,6 +134,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
 
   const sent = attemptType === "flash" || attemptType === "send";
   const flashed = attemptType === "flash";
+  const repeat = attemptType === "repeat";
   const gameState = useGame();
   const ceiling = playerCeiling(gameState);
   const diffMult = useMemo(
@@ -141,7 +142,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
     [grade, gs, ceiling],
   );
   const preview = useMemo(
-    () => computeChalk(activity, styles, sent, flashed, diffMult),
+    () => computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activity, attemptType, styles.join(","), diffMult],
   );

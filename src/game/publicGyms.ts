@@ -29,9 +29,14 @@ export async function loadPublicGyms() {
   const gsMap = new Map<string, GradingSystem>();
   for (const row of data ?? []) {
     const g = row.data as unknown as Gym;
-    gyms.push({ ...g, id: row.id });
-    const list = (row.grading_systems as unknown as GradingSystem[]) ?? [];
-    for (const gs of list) gsMap.set(gs.id, gs);
+    const colList = (row.grading_systems as unknown as GradingSystem[]) ?? [];
+    for (const gs of colList) gsMap.set(gs.id, gs);
+    // Merge column-level grading systems into gym.gradingSystems so editors/loggers see them.
+    const embedded = g.gradingSystems ?? [];
+    const merged = [...embedded];
+    const seen = new Set(embedded.map(x => x.id));
+    for (const gs of colList) if (!seen.has(gs.id)) merged.push(gs);
+    gyms.push({ ...g, id: row.id, gradingSystems: merged });
   }
   set({ gyms, gradingSystems: [...gsMap.values()], loaded: true });
 }

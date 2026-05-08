@@ -1,8 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   BOX_THEMES, BG_THEMES, HEADER_THEMES, STAGE_THEMES, GLOW_THEMES, ELEVATION_THEMES,
   DEFAULTS, type ThemeOption,
 } from "./themes";
+import { supabase } from "@/integrations/supabase/client";
 
 export type ThemeAxis = "box" | "bg" | "header" | "stage" | "glow" | "elevation";
 
@@ -15,7 +16,9 @@ const REGISTRY: Record<ThemeAxis, ThemeOption[]> = {
   elevation: ELEVATION_THEMES,
 };
 
-const STORAGE_KEY = "cq.theme.v4";
+// Local cache so the page boots with the last-known theme before the
+// network round-trip resolves. The DB row is the source of truth.
+const CACHE_KEY = "cq.theme.cache.v1";
 
 type State = {
   selections: Record<ThemeAxis, string>;
@@ -38,10 +41,10 @@ type Ctx = {
 
 const ThemeCtx = createContext<Ctx | null>(null);
 
-function load(): State {
+function loadCache(): State {
   if (typeof window === "undefined") return DEFAULT_STATE;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(CACHE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
@@ -59,7 +62,9 @@ function applyVars(opt: ThemeOption) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<State>(load);
+  const [state, setState] = useState<State>(loadCache);
+  // Avoid echoing our own writes back into state via realtime.
+  const writingRef = useRef(false);
 
   const current = useMemo(() => ({
     box:       REGISTRY.box.find(t => t.id === state.selections.box) ?? REGISTRY.box[0],
@@ -70,6 +75,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     elevation: REGISTRY.elevation.find(t => t.id === state.selections.elevation) ?? REGISTRY.elevation[0],
   }), [state.selections]);
 
+  // Apply CSS vars + cache locally whenever state changes.
   useEffect(() => {
     applyVars(current.box);
     applyVars(current.bg);
@@ -78,14 +84,84 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyVars(current.glow);
     applyVars(current.elevation);
     document.documentElement.style.setProperty("--topbar-opacity", String(state.headerOpacity));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(state)); } catch {}
   }, [current, state]);
 
-  const set = useCallback((axis: ThemeAxis, id: string) =>
-    setState(s => ({ ...s, selections: { ...s.selections, [axis]: id } })), []);
+  // Initial fetch from DB + realtime subscription.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("app_theme_settings")
+        .select("selections, header_opacity")
+        .eq("id", "global")
+        .maybeSingle();
+      if (cancelled || !data) return;
+      setState({
+        selections: { ...DEFAULTS, ...((data.selections as Record<string, string>) ?? {}) },
+        headerOpacity: typeof data.header_opacity === "number"
+          ? data.header_opacity
+          : Number(data.header_opacity ?? DEFAULT_STATE.headerOpacity),
+      });
+    })();
 
-  const setHeaderOpacity = useCallback((v: number) =>
-    setState(s => ({ ...s, headerOpacity: v })), []);
+    const channel = supabase
+      .channel("app_theme_settings")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "app_theme_settings", filter: "id=eq.global" },
+        (payload) => {
+          if (writingRef.current) return;
+          const row: any = payload.new ?? payload.old;
+          if (!row) return;
+          setState({
+            selections: { ...DEFAULTS, ...((row.selections as Record<string, string>) ?? {}) },
+            headerOpacity: Number(row.header_opacity ?? DEFAULT_STATE.headerOpacity),
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Persist any local change back to the DB. Non-admins will get an RLS
+  // failure which we silently swallow (no-op locally).
+  const persist = useCallback(async (next: State) => {
+    writingRef.current = true;
+    try {
+      await supabase
+        .from("app_theme_settings")
+        .update({
+          selections: next.selections,
+          header_opacity: next.headerOpacity,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", "global");
+    } finally {
+      // Allow realtime echoes to flow again shortly after our write.
+      setTimeout(() => { writingRef.current = false; }, 250);
+    }
+  }, []);
+
+  const set = useCallback((axis: ThemeAxis, id: string) => {
+    setState(s => {
+      const next = { ...s, selections: { ...s.selections, [axis]: id } };
+      void persist(next);
+      return next;
+    });
+  }, [persist]);
+
+  const setHeaderOpacity = useCallback((v: number) => {
+    setState(s => {
+      const next = { ...s, headerOpacity: v };
+      void persist(next);
+      return next;
+    });
+  }, [persist]);
 
   return (
     <ThemeCtx.Provider value={{

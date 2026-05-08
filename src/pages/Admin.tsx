@@ -11,7 +11,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useActiveSlot, snapshotActiveSlot } from "@/game/adminAccounts";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Minus, Upload, Trash2, Pencil, X } from "lucide-react";
+import { Plus, Minus, Upload, Trash2, Pencil, X, FlaskConical, User as UserIcon } from "lucide-react";
+import { switchToSlot } from "@/game/adminAccounts";
 import {
   useAllItems,
   addCustomItem,
@@ -63,6 +64,29 @@ export default function Admin() {
   const [amount, setAmount] = useState(100);
   return (
     <div className="space-y-6 animate-float-up max-w-5xl">
+      {user && (
+        <GameCard tone="legendary" className="p-5">
+          <div className="menu-label mb-3">Admin · Active Account</div>
+          <p className="text-sm text-muted-foreground mb-3">
+            Switch between your personal and test account. Test data stays isolated from your real progress.
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={slot === "personal" ? "default" : "secondary"}
+              onClick={() => { switchToSlot(user.id, "personal"); toast.success("Switched to personal account"); }}
+            >
+              <UserIcon className="h-4 w-4" /> Personal
+            </Button>
+            <Button
+              variant={slot === "test" ? "default" : "secondary"}
+              onClick={() => { switchToSlot(user.id, "test"); toast.success("Switched to test account"); }}
+            >
+              <FlaskConical className="h-4 w-4" /> Test
+            </Button>
+            <span className="text-xs text-muted-foreground ml-2">Active: <span className="font-semibold">{slot}</span></span>
+          </div>
+        </GameCard>
+      )}
       {slot === "test" && (
         <GameCard tone="legendary" className="p-5">
           <div className="menu-label mb-3">Admin · Reset Test Account</div>

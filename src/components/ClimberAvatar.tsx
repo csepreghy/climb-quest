@@ -13,12 +13,13 @@ interface Props {
   equipped?: Equipped;
   size?: "sm" | "md" | "lg" | "xl";
   glow?: boolean;
+  hideLevel?: boolean;
 }
 
 const PIXEL_SIZE = { sm: 4, md: 6, lg: 9, xl: 12 };
 const FRAME_SIZE = { sm: "h-20 w-20", md: "h-28 w-28", lg: "h-40 w-40", xl: "h-48 w-48" };
 
-export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Props) {
+export function ClimberAvatar({ level, gender, equipped, size = "md", glow, hideLevel }: Props) {
   useLevelOverrides(); // re-render when overrides change
   const lvl = resolvedLevel(level, gender);
   const auraId = equipped?.aura;
@@ -73,9 +74,11 @@ export function ClimberAvatar({ level, gender, equipped, size = "md", glow }: Pr
         <PixelSprite sprite={sprite} pixel={PIXEL_SIZE[size]} aura={auraColor} className="relative z-10" />
       )}
 
-      <div className="absolute top-1.5 left-1.5 z-20 text-[11px] font-medium bg-background/85 border border-border rounded px-1.5 py-0.5 text-muted-foreground">
-        Lv <span className="text-foreground">{level}</span>
-      </div>
+      {!hideLevel && (
+        <div className="absolute top-1.5 left-1.5 z-20 text-[11px] font-medium bg-background/85 border border-border rounded px-1.5 py-0.5 text-muted-foreground">
+          Lv <span className="text-foreground">{level}</span>
+        </div>
+      )}
       <span className="sr-only">{lvl.title}</span>
     </div>
   );

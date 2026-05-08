@@ -549,23 +549,33 @@ function PublicGymsAdmin() {
   const s = usePublicGyms();
   const [name, setName] = useState("");
   const [loc, setLoc] = useState("");
+  const [country, setCountry] = useState<string>("");
 
   return (
     <GameCard tone="accent" className="p-5 space-y-4">
       <div>
         <div className="menu-label mb-1">Admin · Public Gyms</div>
         <p className="text-xs text-muted-foreground">
-          Gyms created here are visible to all users. Edit details inline. Custom grading systems for public gyms are seeded — extend later if needed.
+          Gyms created here are visible to all users and can be added to their own list. Hold colors and grading systems edited here apply for everyone.
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-[1fr,1fr,auto] gap-2">
+      <div className="grid sm:grid-cols-[1fr,1fr,1fr,auto] gap-2">
         <Input placeholder="Gym name" value={name} onChange={e => setName(e.target.value)} />
         <Input placeholder="Location (city)" value={loc} onChange={e => setLoc(e.target.value)} />
+        <Select value={country || undefined} onValueChange={setCountry}>
+          <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
+          <SelectContent>
+            {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+          </SelectContent>
+        </Select>
         <GameButton variant="primary" onClick={async () => {
           if (!name.trim()) { toast.error("Name required"); return; }
-          try { await addPublicGym(name.trim(), loc.trim()); setName(""); setLoc(""); toast.success("Public gym added"); }
-          catch (e: any) { toast.error(e?.message ?? "Failed"); }
+          try {
+            await addPublicGym(name.trim(), loc.trim(), country || undefined);
+            setName(""); setLoc(""); setCountry("");
+            toast.success("Public gym added");
+          } catch (e: any) { toast.error(e?.message ?? "Failed"); }
         }}><Plus className="h-4 w-4" /> Add</GameButton>
       </div>
 
@@ -573,19 +583,79 @@ function PublicGymsAdmin() {
         <p className="text-sm text-muted-foreground italic">No public gyms yet.</p>
       )}
 
-      <div className="space-y-2">
-        {s.gyms.map((g: any) => (
-          <div key={g.id} className="grid sm:grid-cols-[1fr,1fr,auto] gap-2 items-center p-3 rounded-md border border-border bg-secondary/30">
-            <Input value={g.name} onChange={e => updatePublicGym(g.id, { name: e.target.value })} />
-            <Input value={g.location} onChange={e => updatePublicGym(g.id, { location: e.target.value })} placeholder="Location" />
-            <Button variant="ghost" size="sm" onClick={async () => {
-              if (!confirm(`Delete public gym "${g.name}"? This affects all users.`)) return;
-              try { await deletePublicGym(g.id); toast.success("Deleted"); }
-              catch (e: any) { toast.error(e?.message ?? "Failed"); }
-            }}><Trash2 className="h-4 w-4" /></Button>
-          </div>
+      <div className="space-y-3">
+        {s.gyms.map(g => (
+          <PublicGymEditor key={g.id} gym={g} systems={s.gradingSystems} />
         ))}
       </div>
     </GameCard>
+  );
+}
+
+const BUILTIN_SYSTEMS: GradingSystem[] = [
+  { id: "v_grades", name: "V Scale", kind: "v" },
+  { id: "french_grades", name: "French (Font)", kind: "french" },
+];
+
+function PublicGymEditor({ gym, systems }: { gym: any; systems: GradingSystem[] }) {
+  const allSystems: GradingSystem[] = [
+    ...BUILTIN_SYSTEMS,
+    ...systems.filter(s => s.id !== "v_grades" && s.id !== "french_grades"),
+  ];
+  return (
+    <div className="p-4 rounded-md border border-border bg-secondary/30 space-y-4">
+      <div className="grid sm:grid-cols-[1fr,1fr,1fr,auto] gap-2 items-center">
+        <Input value={gym.name} onChange={e => updatePublicGym(gym.id, { name: e.target.value })} />
+        <Input value={gym.location} onChange={e => updatePublicGym(gym.id, { location: e.target.value })} placeholder="Location" />
+        <Select value={gym.country ?? undefined} onValueChange={v => updatePublicGym(gym.id, { country: v })}>
+          <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
+          <SelectContent>
+            {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Button variant="ghost" size="sm" onClick={async () => {
+          if (!confirm(`Delete public gym "${gym.name}"? This affects all users.`)) return;
+          try { await deletePublicGym(gym.id); toast.success("Deleted"); }
+          catch (e: any) { toast.error(e?.message ?? "Failed"); }
+        }}><Trash2 className="h-4 w-4" /></Button>
+      </div>
+
+      <section>
+        <div className="menu-label mb-2">Hold colors</div>
+        <div className="flex flex-wrap gap-2">
+          {(gym.holdColors ?? []).map((c: any) => (
+            <div key={c.id} className="flex items-center gap-2 px-2 py-1 rounded-md border border-border bg-background/50">
+              <HoldSwatch hex={c.hex} hex2={c.hex2} className="h-5 w-5" />
+              <span className="text-xs">{c.name}</span>
+              <button onClick={() => removePublicHoldColor(gym.id, c.id)} className="text-muted-foreground hover:text-destructive">
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          <AddHoldColor onAdd={(c) => addPublicHoldColor(gym.id, c)} />
+        </div>
+      </section>
+
+      <section>
+        <div className="menu-label mb-2">Grading systems used</div>
+        <div className="flex flex-wrap gap-2">
+          {allSystems.map(gs => {
+            const on = (gym.gradingSystemIds ?? []).includes(gs.id);
+            return (
+              <button key={gs.id} onClick={() => togglePublicGymGradingSystem(gym.id, gs.id)}
+                className={cn("text-xs px-3 py-1.5 rounded-md border-2 transition",
+                  on
+                    ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
+                    : "border-border bg-secondary/40 text-muted-foreground hover:text-foreground")}>
+                {gs.name} <span className="text-[10px] opacity-70">({gs.kind})</span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-2 italic">
+          Custom grading systems for public gyms can be seeded via direct DB edits for now.
+        </p>
+      </section>
+    </div>
   );
 }

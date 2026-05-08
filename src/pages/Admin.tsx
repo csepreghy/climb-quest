@@ -435,6 +435,19 @@ function InventoryAdmin() {
               </Select>
             </div>
           )}
+          {(draft.category === "Top" || draft.category === "Pants") && (
+            <div>
+              <Label className="text-xs">Gender</Label>
+              <Select value={draft.gender ?? "unisex"} onValueChange={v => setDraft(d => ({ ...d, gender: v as "male" | "female" | "unisex" }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unisex">Unisex (everyone)</SelectItem>
+                  <SelectItem value="male">Male only</SelectItem>
+                  <SelectItem value="female">Female only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div>
             <Label className="text-xs">Price (Chalk)</Label>
             <Input type="number" min={0} value={draft.price} onChange={e => setDraft(d => ({ ...d, price: parseInt(e.target.value) || 0 }))} />

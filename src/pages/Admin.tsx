@@ -416,7 +416,17 @@ function InventoryAdmin() {
             <Select value={draft.group} onValueChange={v => {
               const g = v as ItemGroup;
               const cat = CATEGORIES_BY_GROUP[g][0];
-              setDraft(d => ({ ...d, group: g, category: cat, slot: CATEGORY_TO_SLOT[cat] }));
+              const allow = GROUP_EFFECTS[g];
+              setDraft(d => ({
+                ...d,
+                group: g,
+                category: cat,
+                slot: CATEGORY_TO_SLOT[cat],
+                bonusPct: allow.chalk ? d.bonusPct : 0,
+                discountPct: allow.discount ? d.discountPct : 0,
+                critChancePct: allow.crit ? d.critChancePct : 0,
+                bossBonusPct: allow.boss ? d.bossBonusPct : 0,
+              }));
             }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -452,10 +462,12 @@ function InventoryAdmin() {
             <Label className="text-xs">Price (Chalk)</Label>
             <Input type="number" min={0} value={draft.price} onChange={e => setDraft(d => ({ ...d, price: parseInt(e.target.value) || 0 }))} />
           </div>
-          <div>
-            <Label className="text-xs">Chalk bonus %</Label>
-            <Input type="number" min={0} value={draft.bonusPct} onChange={e => setDraft(d => ({ ...d, bonusPct: parseInt(e.target.value) || 0 }))} />
-          </div>
+          {GROUP_EFFECTS[draft.group].chalk && (
+            <div>
+              <Label className="text-xs">Chalk bonus %</Label>
+              <Input type="number" min={0} value={draft.bonusPct} onChange={e => setDraft(d => ({ ...d, bonusPct: parseInt(e.target.value) || 0 }))} />
+            </div>
+          )}
           <div>
             <Label className="text-xs">Level requirement</Label>
             <Input
@@ -470,39 +482,45 @@ function InventoryAdmin() {
               }}
             />
           </div>
-          <div>
-            <Label className="text-xs">Shop discount %</Label>
-            <Input
-              type="number"
-              min={0}
-              max={100}
-              placeholder="0"
-              value={draft.discountPct ?? 0}
-              onChange={e => setDraft(d => ({ ...d, discountPct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
-            />
-            <p className="text-[10px] text-muted-foreground mt-1">Equipped item reduces shop prices. Discounts don't stack — best one wins.</p>
-          </div>
-          <div>
-            <Label className="text-xs">Crit chance %</Label>
-            <Input
-              type="number"
-              min={0}
-              max={100}
-              value={draft.critChancePct ?? 0}
-              onChange={e => setDraft(d => ({ ...d, critChancePct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
-            />
-            <p className="text-[10px] text-muted-foreground mt-1">Chance every log's chalk doubles. Stacks across equipped items.</p>
-          </div>
-          <div>
-            <Label className="text-xs">Boss bonus %</Label>
-            <Input
-              type="number"
-              min={0}
-              value={draft.bossBonusPct ?? 0}
-              onChange={e => setDraft(d => ({ ...d, bossBonusPct: Math.max(0, parseInt(e.target.value) || 0) }))}
-            />
-            <p className="text-[10px] text-muted-foreground mt-1">Extra % chalk on boss attempts and sends. Sums across equipped items.</p>
-          </div>
+          {GROUP_EFFECTS[draft.group].discount && (
+            <div>
+              <Label className="text-xs">Shop discount %</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                placeholder="0"
+                value={draft.discountPct ?? 0}
+                onChange={e => setDraft(d => ({ ...d, discountPct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">Equipped item reduces shop prices. Discounts don't stack — best one wins.</p>
+            </div>
+          )}
+          {GROUP_EFFECTS[draft.group].crit && (
+            <div>
+              <Label className="text-xs">Crit chance %</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={draft.critChancePct ?? 0}
+                onChange={e => setDraft(d => ({ ...d, critChancePct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">Chance every log's chalk doubles. Stacks across equipped items.</p>
+            </div>
+          )}
+          {GROUP_EFFECTS[draft.group].boss && (
+            <div>
+              <Label className="text-xs">Boss bonus %</Label>
+              <Input
+                type="number"
+                min={0}
+                value={draft.bossBonusPct ?? 0}
+                onChange={e => setDraft(d => ({ ...d, bossBonusPct: Math.max(0, parseInt(e.target.value) || 0) }))}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">Extra % chalk on boss attempts and sends. Sums across equipped items.</p>
+            </div>
+          )}
         </div>
       </div>
 

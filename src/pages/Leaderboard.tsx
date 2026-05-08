@@ -7,7 +7,7 @@ import { RARITY_BORDER, Rarity, ShopItem, Gender } from "@/game/data";
 import type { Equipped } from "@/game/store";
 import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
-import { Trophy, Crown, Medal, Award, ScrollText, Skull } from "lucide-react";
+import { Trophy, ScrollText, Skull } from "lucide-react";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 interface Row {
@@ -30,6 +30,12 @@ function rarestItems(ownedIds: string[], lookup: Map<string, ShopItem>): ShopIte
     .sort((a, b) => (RARITY_ORDER[b.rarity] - RARITY_ORDER[a.rarity]) || (b.price - a.price))
     .slice(0, 2);
 }
+
+const TROPHY_COLOR: Record<number, string> = {
+  1: "text-legendary drop-shadow-[0_0_6px_hsl(var(--legendary)/0.6)]",
+  2: "text-[hsl(0_0%_82%)] drop-shadow-[0_0_4px_hsl(0_0%_80%/0.5)]",
+  3: "text-[hsl(28_70%_55%)] drop-shadow-[0_0_4px_hsl(28_70%_55%/0.5)]",
+};
 
 export default function Leaderboard() {
   const [rows, setRows] = useState<Row[] | null>(null);
@@ -66,86 +72,45 @@ export default function Leaderboard() {
       )}
       {rows && rows.length === 0 && (
         <GameCard className="p-8 text-center text-sm text-muted-foreground">
-          No named climbers yet. Be the first!
+          No climbers yet. Be the first!
         </GameCard>
       )}
 
       {rows && rows.length > 0 && (
-        <>
-          {/* Podium for top 3 */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[1, 0, 2].map(podiumIdx => {
-              const row = rows[podiumIdx];
-              if (!row) return <div key={podiumIdx} />;
-              return <PodiumCard key={row.user_id} row={row} rank={podiumIdx + 1} lookup={lookup} className={podiumIdx === 0 ? "sm:order-2" : podiumIdx === 1 ? "sm:order-1" : "sm:order-3"} />;
-            })}
+        <GameCard className="p-2 sm:p-3">
+          <div className="divide-y divide-border/40">
+            {rows.map((row, i) => (
+              <RankRow key={row.user_id} row={row} rank={i + 1} lookup={lookup} />
+            ))}
           </div>
-
-          {/* Rest */}
-          {rows.length > 3 && (
-            <GameCard className="p-3 sm:p-4">
-              <div className="divide-y divide-border/40">
-                {rows.slice(3).map((row, i) => (
-                  <RankRow key={row.user_id} row={row} rank={i + 4} lookup={lookup} />
-                ))}
-              </div>
-            </GameCard>
-          )}
-        </>
+        </GameCard>
       )}
     </div>
   );
 }
 
-function PodiumCard({ row, rank, lookup, className }: { row: Row; rank: number; lookup: Map<string, ShopItem>; className?: string }) {
-  const top = rarestItems(row.owned, lookup);
-  const colors = {
-    1: { ring: "ring-legendary shadow-[0_0_40px_hsl(var(--legendary)/0.4)]", bg: "from-legendary/20 to-transparent", icon: Crown, iconColor: "text-legendary", label: "1st" },
-    2: { ring: "ring-[hsl(0_0%_75%)]/80", bg: "from-[hsl(0_0%_75%)]/15 to-transparent", icon: Medal, iconColor: "text-[hsl(0_0%_85%)]", label: "2nd" },
-    3: { ring: "ring-[hsl(28_60%_55%)]/80", bg: "from-[hsl(28_60%_55%)]/15 to-transparent", icon: Award, iconColor: "text-[hsl(28_70%_60%)]", label: "3rd" },
-  }[rank as 1 | 2 | 3]!;
-  const Icon = colors.icon;
-  const heightClass = rank === 1 ? "sm:pt-0" : "sm:pt-8";
+function RankBadge({ rank }: { rank: number }) {
+  if (rank <= 3) {
+    return (
+      <div className="w-10 shrink-0 flex flex-col items-center">
+        <Trophy className={cn("h-6 w-6", TROPHY_COLOR[rank])} fill="currentColor" />
+        <div className="text-[10px] font-bold tabular-nums text-muted-foreground mt-0.5">#{rank}</div>
+      </div>
+    );
+  }
   return (
-    <GameCard tone={rank === 1 ? "legendary" : rank === 2 ? "accent" : undefined} className={cn("relative p-5 text-center bg-gradient-to-b", colors.bg, heightClass, className)}>
-      <div className={cn("absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider bg-background border-2 border-[hsl(var(--panel-frame))] flex items-center gap-1.5", colors.iconColor)}>
-        <Icon className="h-4 w-4" /> {colors.label}
-      </div>
-      <div className={cn("inline-flex rounded-2xl ring-4 ring-offset-2 ring-offset-background", colors.ring)}>
-        <ClimberAvatar level={row.level} gender={row.gender} equipped={row.equipped} size={rank === 1 ? "xl" : "lg"} glow={rank === 1} />
-      </div>
-      <div className="mt-3 text-lg font-bold truncate">{row.character_name}</div>
-      <div className="text-xs text-muted-foreground">Lv {row.level}</div>
-      <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-background/40 border border-border">
-        <img src={chalkBagImg} alt="" className="h-4 w-4" />
-        <span className="font-bold tabular-nums gradient-chalk-text">{row.total_chalk_earned.toLocaleString()}</span>
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
-        <div className="flex items-center justify-center gap-1"><ScrollText className="h-3 w-3" />{row.total_logs} logs</div>
-        <div className="flex items-center justify-center gap-1"><Skull className="h-3 w-3" />{row.bosses_sent} bosses</div>
-      </div>
-      {top.length > 0 && (
-        <div className="mt-3 flex justify-center gap-2">
-          {top.map(item => (
-            <div key={item.id} className={cn("h-12 w-12 rounded-lg bg-background/50 grid place-items-center", RARITY_BORDER[item.rarity])} title={`${item.name} (${item.rarity})`}>
-              {isImageEmoji(item.emoji) ? (
-                <SmartImage src={item.emoji} alt={item.name} loaderSize={18} className="h-full w-full object-contain p-1" />
-              ) : (
-                <span className="text-xl">{item.emoji}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </GameCard>
+    <div className="w-10 shrink-0 text-center text-sm font-bold text-muted-foreground tabular-nums">#{rank}</div>
   );
 }
 
 function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<string, ShopItem> }) {
   const top = rarestItems(row.owned, lookup);
   return (
-    <div className="flex items-center gap-3 sm:gap-4 py-3">
-      <div className="w-8 text-center text-sm font-bold text-muted-foreground tabular-nums">#{rank}</div>
+    <div className={cn(
+      "flex items-center gap-3 sm:gap-4 py-3 px-2 rounded-md",
+      rank === 1 && "bg-legendary/5",
+    )}>
+      <RankBadge rank={rank} />
       <ClimberAvatar level={row.level} gender={row.gender} equipped={row.equipped} size="sm" />
       <div className="min-w-0 flex-1">
         <div className="font-semibold truncate">{row.character_name}</div>
@@ -168,7 +133,7 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0 min-w-[90px] justify-end">
         <img src={chalkBagImg} alt="" className="h-4 w-4" />
         <span className="text-sm font-bold tabular-nums gradient-chalk-text">{row.total_chalk_earned.toLocaleString()}</span>
       </div>

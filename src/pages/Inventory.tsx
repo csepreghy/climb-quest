@@ -554,3 +554,44 @@ function specialBonusSummary(eq: ReturnType<typeof useGame>["equipped"]) {
 
   return out;
 }
+
+function CharacterNameEditor() {
+  const name = useCharacterName();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [valid, setValid] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  function start() { setDraft(name ?? ""); setEditing(true); }
+  async function save() {
+    if (!valid) return;
+    setBusy(true);
+    const r = await setCharacterName(draft);
+    setBusy(false);
+    if (!r.ok) { toast.error((r as any).error); return; }
+    toast.success("Name updated");
+    setEditing(false);
+  }
+
+  if (editing) {
+    return (
+      <div className="mt-4 space-y-2 text-left">
+        <CharacterNameInput value={draft} onChange={setDraft} onValidityChange={setValid} currentName={name} autoFocus />
+        <div className="flex gap-2 justify-end">
+          <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={busy}><X className="h-4 w-4" /> Cancel</Button>
+          <Button size="sm" onClick={save} disabled={!valid || busy}><Check className="h-4 w-4" /> Save</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 flex items-center justify-center gap-2">
+      <div className="text-base font-bold">{name ?? <span className="text-muted-foreground italic">Unnamed climber</span>}</div>
+      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={start} aria-label="Edit name">
+        <Pencil className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+}
+

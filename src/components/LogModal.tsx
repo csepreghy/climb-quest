@@ -134,6 +134,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
 
   const sent = attemptType === "flash" || attemptType === "send";
   const flashed = attemptType === "flash";
+  const repeat = attemptType === "repeat";
   const gameState = useGame();
   const ceiling = playerCeiling(gameState);
   const diffMult = useMemo(
@@ -141,7 +142,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
     [grade, gs, ceiling],
   );
   const preview = useMemo(
-    () => computeChalk(activity, styles, sent, flashed, diffMult),
+    () => computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activity, attemptType, styles.join(","), diffMult],
   );
@@ -272,10 +273,11 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
 
         <div>
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Attempt</Label>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
             {([
               { v: "flash", label: "Flash ⚡", desc: "First try" },
               { v: "send", label: "Send 🏆", desc: "Multi-try, 1 sesh" },
+              { v: "repeat", label: "Repeat 🔁", desc: "Done it before" },
               { v: "project", label: "Project 🎯", desc: "Multi-session" },
             ] as { v: AttemptType; label: string; desc: string }[]).map(o => (
               <button key={o.v} type="button"

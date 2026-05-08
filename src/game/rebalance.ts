@@ -6,7 +6,7 @@
 // Per-item magnitudes are sized so a fully-decked all-legendary loadout
 // approaches the design ceilings below — so adding a 1001st item never
 // inflates effects beyond what the cap allows.
-import { ActivityType, BASE_CHALK, GROUP_EFFECTS, Rarity, ShopItem, Slot } from "./data";
+import { ActivityType, BASE_CHALK, effectAllowed, Rarity, ShopItem, Slot } from "./data";
 
 const RARITY_BASE_PRICE: Record<Rarity, number> = {
   common: 80, rare: 700, epic: 7000, legendary: 100000,

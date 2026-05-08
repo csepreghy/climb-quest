@@ -262,9 +262,10 @@ export function resolveGymGradingSystems(
     const legacy = extraGlobals.find(g => g.id === id);
     if (legacy) { out.push(legacy); seen.add(id); }
   }
-  for (const gs of gym.gradingSystems ?? []) {
-    if (!seen.has(gs.id)) { out.push(gs); seen.add(gs.id); }
-  }
+  // NOTE: do NOT fall back to including every system stored on the gym —
+  // a gym's `gradingSystems` may contain definitions that are no longer
+  // enabled (or that belong to another gym's history). Only systems
+  // explicitly listed in `gradingSystemIds` are available for logging.
   return out;
 }
 

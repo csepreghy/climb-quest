@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  const isAdmin = hasAdminRole && slot !== "personal";
+  const isAdmin = hasAdminRole && (session?.user?.email ?? "").toLowerCase() === "andrew.chepreghy@gmail.com";
 
   return (
     <Ctx.Provider value={{ user: session?.user ?? null, session, isAdmin, hasAdminRole, loading, signOut: async () => { await supabase.auth.signOut(); } }}>

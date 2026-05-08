@@ -33,7 +33,6 @@ import {
 import { COUNTRIES } from "@/game/countries";
 import { AddHoldColor } from "@/components/AddHoldColor";
 import { HoldSwatch } from "@/components/HoldSwatch";
-import { Star } from "lucide-react";
 import type { GradingSystem } from "@/game/gyms";
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
 import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate } from "@/game/store";
-import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier } from "@/game/gyms";
+import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolveGymGradingSystems } from "@/game/gyms";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -97,15 +97,13 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   const [gymId, setGymId] = useState(initialGymId);
   const gym = gymState.gyms.find(g => g.id === gymId) ?? null;
 
-  const gymGradingSystems = (gym?.gradingSystemIds ?? [])
-    .map(id => gymState.gradingSystems.find(g => g.id === id))
-    .filter((g): g is NonNullable<typeof g> => !!g);
-
-  const availableSystems = gym && gymGradingSystems.length > 0 ? gymGradingSystems : gymState.gradingSystems;
+  const availableSystems = gym
+    ? resolveGymGradingSystems(gym, gymState.gradingSystems)
+    : gymState.gradingSystems;
   const defaultGsId = availableSystems[0]?.id ?? "v_grades";
   const [gsId, setGsId] = useState(defaultGsId);
   useEffect(() => { setGsId(availableSystems[0]?.id ?? "v_grades"); }, [gymId]);
-  const gs = gymState.gradingSystems.find(g => g.id === gsId);
+  const gs = availableSystems.find(g => g.id === gsId) ?? gymState.gradingSystems.find(g => g.id === gsId);
   const grades = gs ? gradeLabels(gs) : [];
 
   const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
@@ -355,13 +353,12 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
   const [gymId, setGymId] = useState(initialGymId);
   const gym = gymState.gyms.find(g => g.id === gymId) ?? null;
 
-  const gymGradingSystems = (gym?.gradingSystemIds ?? [])
-    .map(id => gymState.gradingSystems.find(g => g.id === id))
-    .filter((g): g is NonNullable<typeof g> => !!g);
-  const availableSystems = gym && gymGradingSystems.length > 0 ? gymGradingSystems : gymState.gradingSystems;
+  const availableSystems = gym
+    ? resolveGymGradingSystems(gym, gymState.gradingSystems)
+    : gymState.gradingSystems;
   const [gsId, setGsId] = useState(availableSystems[0]?.id ?? "v_grades");
   useEffect(() => { setGsId(availableSystems[0]?.id ?? "v_grades"); }, [gymId]);
-  const gs = gymState.gradingSystems.find(g => g.id === gsId);
+  const gs = availableSystems.find(g => g.id === gsId) ?? gymState.gradingSystems.find(g => g.id === gsId);
   const grades = gs ? gradeLabels(gs) : [];
 
   const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));

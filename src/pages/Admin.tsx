@@ -28,11 +28,13 @@ import {
   usePublicGyms,
   addPublicGym, updatePublicGym, deletePublicGym,
   addPublicHoldColor, removePublicHoldColor, togglePublicGymGradingSystem,
+  addPublicGymCustomGrading, updatePublicGymCustomGrading, deletePublicGymCustomGrading,
 } from "@/game/publicGyms";
 import { COUNTRIES } from "@/game/countries";
 import { AddHoldColor } from "@/components/AddHoldColor";
 import { HoldSwatch } from "@/components/HoldSwatch";
-import type { GradingSystem } from "@/game/gyms";
+import { GymGradingEditor } from "@/components/GymGradingEditor";
+
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
 const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [
@@ -583,23 +585,14 @@ function PublicGymsAdmin() {
 
       <div className="space-y-3">
         {s.gyms.map(g => (
-          <PublicGymEditor key={g.id} gym={g} systems={s.gradingSystems} />
+          <PublicGymEditor key={g.id} gym={g} />
         ))}
       </div>
     </GameCard>
   );
 }
 
-const BUILTIN_SYSTEMS: GradingSystem[] = [
-  { id: "v_grades", name: "V Scale", kind: "v" },
-  { id: "french_grades", name: "French (Font)", kind: "french" },
-];
-
-function PublicGymEditor({ gym, systems }: { gym: any; systems: GradingSystem[] }) {
-  const allSystems: GradingSystem[] = [
-    ...BUILTIN_SYSTEMS,
-    ...systems.filter(s => s.id !== "v_grades" && s.id !== "french_grades"),
-  ];
+function PublicGymEditor({ gym }: { gym: any }) {
   return (
     <div className="p-4 rounded-md border border-border bg-secondary/30 space-y-4">
       <div className="grid sm:grid-cols-[1fr,1fr,1fr,auto] gap-2 items-center">
@@ -634,26 +627,15 @@ function PublicGymEditor({ gym, systems }: { gym: any; systems: GradingSystem[] 
         </div>
       </section>
 
-      <section>
-        <div className="menu-label mb-2">Grading systems used</div>
-        <div className="flex flex-wrap gap-2">
-          {allSystems.map(gs => {
-            const on = (gym.gradingSystemIds ?? []).includes(gs.id);
-            return (
-              <button key={gs.id} onClick={() => togglePublicGymGradingSystem(gym.id, gs.id)}
-                className={cn("text-xs px-3 py-1.5 rounded-md border-2 transition",
-                  on
-                    ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
-                    : "border-border bg-secondary/40 text-muted-foreground hover:text-foreground")}>
-                {gs.name} <span className="text-[10px] opacity-70">({gs.kind})</span>
-              </button>
-            );
-          })}
-        </div>
-        <p className="text-[11px] text-muted-foreground mt-2 italic">
-          Custom grading systems for public gyms can be seeded via direct DB edits for now.
-        </p>
-      </section>
+      <GymGradingEditor
+        gym={gym}
+        source="public"
+        onToggleBuiltin={(gsId) => togglePublicGymGradingSystem(gym.id, gsId).catch((e: any) => toast.error(e?.message ?? "Failed"))}
+        onAddCustom={(gs) => addPublicGymCustomGrading(gym.id, gs).catch((e: any) => toast.error(e?.message ?? "Failed"))}
+        onUpdateCustom={(gsId, patch) => updatePublicGymCustomGrading(gym.id, gsId, patch).catch((e: any) => toast.error(e?.message ?? "Failed"))}
+        onDeleteCustom={(gsId) => deletePublicGymCustomGrading(gym.id, gsId).catch((e: any) => toast.error(e?.message ?? "Failed"))}
+      />
     </div>
   );
 }
+

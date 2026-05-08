@@ -57,7 +57,10 @@ export interface Gym {
   country?: string;
   primary: boolean;
   holdColors: HoldColor[];
+  /** IDs of built-in systems enabled for this gym (e.g. "v_grades", "french_grades"). */
   gradingSystemIds: string[];
+  /** Custom grading systems defined on this gym. */
+  gradingSystems?: GradingSystem[];
 }
 
 export interface GymState {
@@ -196,6 +199,36 @@ export function toggleGymGradingSystem(gymId: string, gsId: string) {
     }),
   }));
 }
+
+// ============== Per-gym custom grading systems ==============
+
+export function addGymCustomGrading(gymId: string, g: Omit<GradingSystem, "id">): string {
+  const newId = id();
+  set(s => ({
+    ...s,
+    gyms: s.gyms.map(gm => gm.id === gymId
+      ? { ...gm, gradingSystems: [...(gm.gradingSystems ?? []), { ...g, id: newId }], gradingSystemIds: [...gm.gradingSystemIds, newId] }
+      : gm),
+  }));
+  return newId;
+}
+export function updateGymCustomGrading(gymId: string, gsId: string, patch: Partial<GradingSystem>) {
+  set(s => ({
+    ...s,
+    gyms: s.gyms.map(gm => gm.id === gymId
+      ? { ...gm, gradingSystems: (gm.gradingSystems ?? []).map(gs => gs.id === gsId ? { ...gs, ...patch } : gs) }
+      : gm),
+  }));
+}
+export function deleteGymCustomGrading(gymId: string, gsId: string) {
+  set(s => ({
+    ...s,
+    gyms: s.gyms.map(gm => gm.id === gymId
+      ? { ...gm, gradingSystems: (gm.gradingSystems ?? []).filter(gs => gs.id !== gsId), gradingSystemIds: gm.gradingSystemIds.filter(x => x !== gsId) }
+      : gm),
+  }));
+}
+
 export function setEquivalent(gsId: string, gradeLabel: string, eq: GradeEquivalent) {
   set(s => ({
     ...s,
@@ -205,6 +238,34 @@ export function setEquivalent(gsId: string, gradeLabel: string, eq: GradeEquival
       return { ...g, equivalents };
     }),
   }));
+}
+
+const BUILTIN_GS: Record<string, GradingSystem> = {
+  v_grades: V_GRADES,
+  french_grades: FRENCH_GRADES,
+};
+
+/** Resolve effective grading systems for a gym (built-ins + custom).
+ *  Pass extraGlobals for backward-compat lookup of legacy global custom systems. */
+export function resolveGymGradingSystems(
+  gym: Pick<Gym, "gradingSystemIds" | "gradingSystems">,
+  extraGlobals: GradingSystem[] = [],
+): GradingSystem[] {
+  const out: GradingSystem[] = [];
+  const seen = new Set<string>();
+  for (const id of gym.gradingSystemIds ?? []) {
+    if (seen.has(id)) continue;
+    const builtin = BUILTIN_GS[id];
+    if (builtin) { out.push(builtin); seen.add(id); continue; }
+    const fromGym = (gym.gradingSystems ?? []).find(g => g.id === id);
+    if (fromGym) { out.push(fromGym); seen.add(id); continue; }
+    const legacy = extraGlobals.find(g => g.id === id);
+    if (legacy) { out.push(legacy); seen.add(id); }
+  }
+  for (const gs of gym.gradingSystems ?? []) {
+    if (!seen.has(gs.id)) { out.push(gs); seen.add(gs.id); }
+  }
+  return out;
 }
 
 /** Enumerate grade labels for a system */

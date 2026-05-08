@@ -131,7 +131,7 @@ export function targetCritPct(item: ShopItem): number {
 /** Boss bonus % (additive). Epic = only if slot leans boss; Legendary = always. */
 export function targetBossBonusPct(item: ShopItem): number {
   if (!effectAllowed(item.group, item.rarity, "boss")) return 0;
-  if (item.rarity === "epic" && EPIC_LEAN[item.slot] !== "boss") return 0;
+  if (item.rarity !== "legendary" && EPIC_LEAN[item.slot] !== "boss") return 0;
   const base = BOSS_BY_RARITY[item.rarity];
   const slotBoost = item.slot === "powerup" ? 1.5 : 1.0;
   return Math.max(0, Math.round(base * slotBoost));

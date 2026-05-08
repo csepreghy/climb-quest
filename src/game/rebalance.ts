@@ -12,8 +12,13 @@ const SLOT_PRICE_WEIGHT: Partial<Record<Slot, number>> = {
   shoes: 1.1, study: 1.2, chalk: 1.0, aura: 1.15, accessory: 1.05,
 };
 const SLOT_BONUS_ADJ: Partial<Record<Slot, number>> = {
-  aura: 5, study: -999, // study uses discount, not chalk bonus
+  aura: 5,
 };
+
+/** Rarities that get BOTH a chalk bonus AND a shop discount. */
+function hasBothEffects(r: Rarity): boolean {
+  return r === "epic" || r === "legendary";
+}
 
 function niceRound(n: number): number {
   if (n <= 0) return 0;
@@ -24,29 +29,42 @@ function niceRound(n: number): number {
   return Math.round(n / 5000) * 5000;
 }
 
+export function targetBonusPct(item: ShopItem): number {
+  const base = RARITY_BONUS[item.rarity] ?? 0;
+  const slotAdj = SLOT_BONUS_ADJ[item.slot] ?? 0;
+  // Low-rarity study items are discount-only (legacy behaviour).
+  if (item.slot === "study" && !hasBothEffects(item.rarity)) return 0;
+  // Epic/legendary study items still earn a bonus, but dampened (their main role is discount).
+  if (item.slot === "study" && hasBothEffects(item.rarity)) {
+    return Math.max(0, Math.round(base * 0.5));
+  }
+  return Math.max(0, base + slotAdj);
+}
+
+export function targetDiscountPct(item: ShopItem): number {
+  // Low-rarity: only Study items get a discount, common gets none.
+  if (!hasBothEffects(item.rarity)) {
+    if (item.slot !== "study") return 0;
+    return item.rarity === "rare" ? 5 : 0;
+  }
+  // Epic/legendary: every item gets a discount. Study slot gets the strongest one.
+  if (item.slot === "study") {
+    return item.rarity === "epic" ? 15 : 30;
+  }
+  return item.rarity === "epic" ? 10 : 20;
+}
+
 export function targetPrice(item: ShopItem): number {
   const base = RARITY_BASE_PRICE[item.rarity] ?? 100;
   const lvl = Math.max(1, item.levelReq ?? 1);
   const lvlMult = Math.pow(1.18, lvl - 1);
   const slotMult = SLOT_PRICE_WEIGHT[item.slot] ?? 1.0;
-  return niceRound(base * lvlMult * slotMult);
-}
-
-export function targetBonusPct(item: ShopItem): number {
-  const adj = SLOT_BONUS_ADJ[item.slot];
-  if (adj === -999) return 0;
-  const base = RARITY_BONUS[item.rarity] ?? 0;
-  return Math.max(0, base + (adj ?? 0));
-}
-
-export function targetDiscountPct(item: ShopItem): number {
-  if (item.slot !== "study") return 0;
-  switch (item.rarity) {
-    case "rare": return 5;
-    case "epic": return 15;
-    case "legendary": return 30;
-    default: return 0;
-  }
+  // Items that grant value (bonus + discount) should cost more, roughly proportional
+  // to total economic upside they unlock. ~0.5% extra price per percentage point.
+  const bonusPct = targetBonusPct(item);
+  const discountPct = targetDiscountPct(item);
+  const valueMult = 1 + (bonusPct + discountPct) * 0.005;
+  return niceRound(base * lvlMult * slotMult * valueMult);
 }
 
 const TARGET_ACTIVITY: Record<ActivityType, number> = {

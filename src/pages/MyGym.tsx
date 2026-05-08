@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { HoldSwatch } from "@/components/HoldSwatch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AddHoldColor } from "@/components/AddHoldColor";
 
 export default function MyGym() {
   const s = useGyms();

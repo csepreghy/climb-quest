@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import chalkBagImg from "@/assets/chalk-bag.webp";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 interface BadgeData {
   name: string;

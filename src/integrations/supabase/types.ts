@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_rewards: {
+        Row: {
+          activity: string
+          created_at: string
+          updated_at: string
+          updated_by: string | null
+          value: number
+        }
+        Insert: {
+          activity: string
+          created_at?: string
+          updated_at?: string
+          updated_by?: string | null
+          value: number
+        }
+        Update: {
+          activity?: string
+          created_at?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
       hidden_builtin_items: {
         Row: {
           hidden_at: string

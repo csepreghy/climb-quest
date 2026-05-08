@@ -188,7 +188,7 @@ function BackfillImagesCard() {
     <GameCard tone="accent" className="p-5">
       <div className="menu-label mb-3">Admin · Image Backfill</div>
       <p className="text-sm text-muted-foreground mb-3">
-        Convert legacy base64 item images to 800px webp in cloud storage. One-off operation; safe to re-run.
+        Convert legacy base64 item images to 360px webp in cloud storage. One-off operation; safe to re-run.
       </p>
       <div className="flex items-center gap-3">
         <Button onClick={run} disabled={busy}>{busy ? "Working…" : "Run backfill"}</Button>
@@ -331,7 +331,7 @@ function InventoryAdmin() {
 
   async function pickImage(file: File) {
     if (file.size > 20 * 1024 * 1024) { toast.error("Image too large (max 20 MB)"); return; }
-    // Show local preview immediately; actual upload happens in save() (resized to 800px webp).
+    // Show local preview immediately; actual upload happens in save() (resized to 360px webp).
     const previewUrl = URL.createObjectURL(file);
     setDraft(d => ({ ...d, imageDataUrl: previewUrl, imageFile: file }));
   }

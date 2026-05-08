@@ -198,6 +198,8 @@ export async function updateCustomItem(itemId: string, patch: Partial<CustomItem
     const d = Math.max(0, Math.min(100, patch.discountPct));
     row.price_mult = 1 - d / 100;
   }
+  if (patch.critChancePct !== undefined) row.crit_chance_pct = Math.max(0, Math.min(100, patch.critChancePct));
+  if (patch.bossBonusPct !== undefined) row.boss_bonus_pct = Math.max(0, patch.bossBonusPct);
   const { error } = await (supabase.from("shop_items") as any).update(row).eq("id", itemId);
   if (error) throw error;
   await refresh();

@@ -179,7 +179,7 @@ export function OnboardingModal({ open, onClose }: Props) {
           <GameButton
             variant="primary"
             onClick={isLast ? finish : next}
-            disabled={step === "gender" && !picked}
+            disabled={(step === "gender" && !picked) || (step === "name" && (!nameValid || savingName))}
             className="w-full sm:w-auto"
           >
             {isLast ? <><Sparkles className="h-4 w-4" /> Start climbing</> : <>Next</>}

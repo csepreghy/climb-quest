@@ -1,10 +1,11 @@
 import { useEffect, useSyncExternalStore } from "react";
 import {
-  ACTIVITY_LABELS, ActivityType, BADGES, BASE_CHALK, BOSS_TEMPLATES,
+  ACTIVITY_LABELS, ActivityType, BADGES, BOSS_TEMPLATES,
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
   GEAR_SLOTS, gearSlotsUnlocked, Slot,
 } from "./data";
 import { getItem } from "./customItems";
+import { getActivityReward } from "./activityRewards";
 import { resolvedLevel } from "./levelOverrides";
 
 // ----- Types -----

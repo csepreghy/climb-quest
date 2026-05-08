@@ -682,7 +682,9 @@ function deservedBadges(s: State): string[] {
  * multiple times — `badgeChalkClaimedFor` makes it idempotent.
  */
 export function runRetroBadgeAudit() {
-  set(s => applyBadges(s, deservedBadges(s)));
+  // Silent: back-pay chalk + grant deserved badges, but never replay the
+  // celebratory animation for badges the user already has or for retro grants.
+  set(s => applyBadges(s, deservedBadges(s), true));
 }
 export function grantFreeItems(items: { id: string; price: number; slot: Slot; consumableBonus?: number }[]) {
   const free = items.filter(i => i.price === 0 && !i.consumableBonus);

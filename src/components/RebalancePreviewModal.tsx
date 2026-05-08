@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAllItems, updateCustomItem } from "@/game/customItems";
 import { useActivityRewards, setActivityRewards } from "@/game/activityRewards";
-import { proposeRebalance, ItemDiff, ActivityDiff } from "@/game/rebalance";
+import { proposeRebalance, ItemDiff, ActivityDiff, ENDGAME_CEILING } from "@/game/rebalance";
 import { ACTIVITY_LABELS, ActivityType } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -64,7 +64,10 @@ export function RebalancePreviewModal({ open, onClose }: { open: boolean; onClos
             <TabsTrigger value="activities">Activity rewards ({activityChanges} change{activityChanges === 1 ? "" : "s"})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="items" className="flex-1 overflow-auto mt-2">
+          <TabsContent value="items" className="flex-1 overflow-auto mt-2 space-y-2">
+            <div className="text-[11px] text-muted-foreground italic px-1">
+              Endgame loadout ceilings (10-item all-legendary) — Bonus +{Math.round(ENDGAME_CEILING.bonus * 100)}%, Discount −{Math.round(ENDGAME_CEILING.discount * 100)}%, Crit {Math.round(ENDGAME_CEILING.crit * 100)}%, Boss +{Math.round(ENDGAME_CEILING.boss * 100)}%.
+            </div>
             <ItemsTable diffs={proposal.items} />
           </TabsContent>
 

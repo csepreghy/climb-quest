@@ -7,7 +7,7 @@ import { RARITY_BORDER, Rarity, ShopItem, Gender } from "@/game/data";
 import type { Equipped } from "@/game/store";
 import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
-import { Trophy, ScrollText, Skull } from "lucide-react";
+import { Trophy, ScrollText, Swords } from "lucide-react";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 interface Row {
@@ -111,7 +111,7 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
       rank === 1 && "bg-legendary/5",
     )}>
       <RankBadge rank={rank} />
-      <ClimberAvatar level={row.level} gender={row.gender} equipped={row.equipped} size="sm" />
+      <ClimberAvatar level={row.level} gender={row.gender} equipped={row.equipped} size="sm" hideLevel />
       <div className="min-w-0 flex-1">
         <div className="font-semibold truncate">{row.character_name}</div>
         <div className="text-[11px] text-muted-foreground flex items-center gap-2 flex-wrap">
@@ -119,7 +119,7 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
           <span className="opacity-50">·</span>
           <span className="flex items-center gap-1"><ScrollText className="h-3 w-3" />{row.total_logs}</span>
           <span className="opacity-50">·</span>
-          <span className="flex items-center gap-1"><Skull className="h-3 w-3" />{row.bosses_sent}</span>
+          <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
         </div>
       </div>
       <div className="hidden sm:flex gap-1.5">
@@ -133,9 +133,12 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-1.5 shrink-0 min-w-[90px] justify-end">
-        <img src={chalkBagImg} alt="" className="h-4 w-4" />
-        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{row.total_chalk_earned.toLocaleString()}</span>
+      <div className="flex flex-col items-end gap-0.5 shrink-0 min-w-[100px]">
+        <div className="flex items-center gap-1.5">
+          <img src={chalkBagImg} alt="" className="h-4 w-4" />
+          <span className="text-sm font-bold tabular-nums gradient-chalk-text">{row.total_chalk_earned.toLocaleString()}</span>
+        </div>
+        <span className="text-[9px] uppercase tracking-wider text-muted-foreground">All time</span>
       </div>
     </div>
   );

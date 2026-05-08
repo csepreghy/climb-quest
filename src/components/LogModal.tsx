@@ -57,7 +57,14 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
                 image={bossImg}
                 title="Boss Project"
                 desc="Hard. Multi-session grind. Your nemesis."
-                onClick={() => { setKind("boss"); setMode("form"); }}
+                onClick={() => {
+                  if (hasBossSendOnDate(new Date().toISOString())) {
+                    toast.error("You seem to have defeated more than one boss in a single day, are you sure both were worthy of bosses?");
+                    setKind("boulder"); setMode("form");
+                    return;
+                  }
+                  setKind("boss"); setMode("form");
+                }}
                 ring="ring-[hsl(var(--boss))]/70"
               />
             </div>

@@ -32,6 +32,7 @@ export function RebalancePreviewModal({ open, onClose }: { open: boolean; onClos
           discountPct: d.next.discountPct,
           critChancePct: d.next.critPct,
           bossBonusPct: d.next.bossPct,
+          levelReq: d.next.levelReq,
         });
       }
       if (includeActivities && activityChanges > 0) {
@@ -116,6 +117,7 @@ function ItemsTable({ diffs }: { diffs: ItemDiff[] }) {
         <TableRow>
           <TableHead>Item</TableHead>
           <TableHead>Rarity</TableHead>
+          <TableHead>Lv</TableHead>
           <TableHead>Price</TableHead>
           <TableHead>Bonus %</TableHead>
           <TableHead>Discount %</TableHead>
@@ -128,6 +130,7 @@ function ItemsTable({ diffs }: { diffs: ItemDiff[] }) {
           <TableRow key={d.item.id} className={cn(!d.changed && "opacity-50")}>
             <TableCell className="py-2">{d.item.name}</TableCell>
             <TableCell className="py-2 capitalize">{d.item.rarity}</TableCell>
+            <TableCell className="py-2"><Cell now={d.now.levelReq} next={d.next.levelReq} /></TableCell>
             <TableCell className="py-2"><Cell now={d.now.price} next={d.next.price} /></TableCell>
             <TableCell className="py-2"><Cell now={d.now.bonusPct} next={d.next.bonusPct} /></TableCell>
             <TableCell className="py-2"><Cell now={d.now.discountPct} next={d.next.discountPct} /></TableCell>
@@ -136,7 +139,7 @@ function ItemsTable({ diffs }: { diffs: ItemDiff[] }) {
           </TableRow>
         ))}
         {diffs.length === 0 && (
-          <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-6">No items.</TableCell></TableRow>
+          <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-6">No items.</TableCell></TableRow>
         )}
       </TableBody>
     </Table>

@@ -286,15 +286,18 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
         <div>
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {STYLES.map(st => (
-              <button key={st} type="button" onClick={() => toggleStyle(st)}
-                className={cn("text-xs px-2.5 py-1 rounded-full border capitalize transition",
-                  styles.includes(st)
-                    ? "bg-accent text-accent-foreground border-accent"
-                    : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
-                {st}
-              </button>
-            ))}
+            {STYLES.map(st => {
+              const on = styles.includes(st);
+              return (
+                <button key={st} type="button" onClick={() => toggleStyle(st)}
+                  className={cn("text-xs px-2.5 py-1 rounded-full border-2 capitalize transition",
+                    on
+                      ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
+                      : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
+                  {st}
+                </button>
+              );
+            })}
           </div>
         </div>
 

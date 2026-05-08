@@ -38,7 +38,7 @@ import { AddHoldColor } from "@/components/AddHoldColor";
 import { HoldSwatch } from "@/components/HoldSwatch";
 import { GymGradingEditor } from "@/components/GymGradingEditor";
 import { RebalancePreviewModal } from "@/components/RebalancePreviewModal";
-import { useDailyCapConfig, setDailyCapConfig, computeDailyCap, DailyCapConfig } from "@/game/dailyCap";
+import { useDailyCapConfig, setDailyCapConfig, computeDailyCap, defaultDailyCap, DailyCapConfig, useDailyCapOverrides, setDailyCapOverride } from "@/game/dailyCap";
 
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];

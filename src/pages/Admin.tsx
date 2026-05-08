@@ -404,7 +404,17 @@ function InventoryAdmin() {
           </div>
           <div>
             <Label className="text-xs">Rarity</Label>
-            <Select value={draft.rarity} onValueChange={v => setDraft(d => ({ ...d, rarity: v as Rarity }))}>
+            <Select value={draft.rarity} onValueChange={v => {
+              const r = v as Rarity;
+              setDraft(d => ({
+                ...d,
+                rarity: r,
+                bonusPct: effectAllowed(d.group, r, "chalk") ? d.bonusPct : 0,
+                discountPct: effectAllowed(d.group, r, "discount") ? d.discountPct : 0,
+                critChancePct: effectAllowed(d.group, r, "crit") ? d.critChancePct : 0,
+                bossBonusPct: effectAllowed(d.group, r, "boss") ? d.bossBonusPct : 0,
+              }));
+            }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {RARITIES.map(r => <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>)}
@@ -416,16 +426,15 @@ function InventoryAdmin() {
             <Select value={draft.group} onValueChange={v => {
               const g = v as ItemGroup;
               const cat = CATEGORIES_BY_GROUP[g][0];
-              const allow = GROUP_EFFECTS[g];
               setDraft(d => ({
                 ...d,
                 group: g,
                 category: cat,
                 slot: CATEGORY_TO_SLOT[cat],
-                bonusPct: allow.chalk ? d.bonusPct : 0,
-                discountPct: allow.discount ? d.discountPct : 0,
-                critChancePct: allow.crit ? d.critChancePct : 0,
-                bossBonusPct: allow.boss ? d.bossBonusPct : 0,
+                bonusPct: effectAllowed(g, d.rarity, "chalk") ? d.bonusPct : 0,
+                discountPct: effectAllowed(g, d.rarity, "discount") ? d.discountPct : 0,
+                critChancePct: effectAllowed(g, d.rarity, "crit") ? d.critChancePct : 0,
+                bossBonusPct: effectAllowed(g, d.rarity, "boss") ? d.bossBonusPct : 0,
               }));
             }}>
               <SelectTrigger><SelectValue /></SelectTrigger>

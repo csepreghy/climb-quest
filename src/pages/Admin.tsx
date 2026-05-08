@@ -65,130 +65,149 @@ export default function Admin() {
   const [amount, setAmount] = useState(100);
   return (
     <div className="space-y-6 animate-float-up max-w-5xl">
-      {user && (
-        <GameCard tone="legendary" className="p-5">
-          <div className="menu-label mb-3">Admin · Active Account</div>
-          <p className="text-sm text-muted-foreground mb-3">
-            Switch between your personal and test account. Test data stays isolated from your real progress.
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant={slot === "personal" ? "default" : "secondary"}
-              onClick={() => { switchToSlot(user.id, "personal"); toast.success("Switched to personal account"); }}
-            >
-              <UserIcon className="h-4 w-4" /> Personal
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="flex flex-wrap h-auto">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="items">Items</TabsTrigger>
+          <TabsTrigger value="gyms">Gyms</TabsTrigger>
+          <TabsTrigger value="theme">Theme</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="space-y-6 mt-6">
+          <GameCard tone="legendary" className="p-5">
+            <div className="menu-label mb-3">Admin · Onboarding</div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Reset the first-time onboarding flow on this account so you can watch it again.
+            </p>
+            <Button variant="secondary" onClick={() => { resetOnboarding(); toast.success("Onboarding reset — reload to see it"); }}>
+              Replay onboarding
             </Button>
-            <Button
-              variant={slot === "test" ? "default" : "secondary"}
-              onClick={() => { switchToSlot(user.id, "test"); toast.success("Switched to test account"); }}
-            >
-              <FlaskConical className="h-4 w-4" /> Test
+          </GameCard>
+
+          <GameCard tone="accent" className="p-5">
+            <div className="menu-label mb-3">Admin · Mock Data</div>
+            <p className="text-sm text-muted-foreground mb-3">Add sample boulder logs and bosses for testing UI states.</p>
+            <Button onClick={() => { adminSeedMockData(); toast.success("Mock data added"); }}>
+              <Plus className="h-4 w-4" /> Seed mock boulders & bosses
             </Button>
-            <span className="text-xs text-muted-foreground ml-2">Active: <span className="font-semibold">{slot}</span></span>
-          </div>
-        </GameCard>
-      )}
-      {slot === "test" && (
-        <GameCard tone="legendary" className="p-5">
-          <div className="menu-label mb-3">Admin · Reset Test Account</div>
-          <p className="text-sm text-muted-foreground mb-3">
-            Wipe all chalk, logs, levels, inventory, and bosses on your test account. Your personal account is unaffected.
-          </p>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive"><Trash2 className="h-4 w-4" /> Reset test account to 0</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reset test account?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This clears chalk, logs, level, inventory, and bosses on the active test account. This cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    resetGame();
-                    if (user) snapshotActiveSlot(user.id);
-                    toast.success("Test account reset");
-                  }}
+          </GameCard>
+
+          <BackfillImagesCard />
+          <RebalanceCard />
+          <DailyCapCard />
+        </TabsContent>
+
+        <TabsContent value="account" className="space-y-6 mt-6">
+          {user && (
+            <GameCard tone="legendary" className="p-5">
+              <div className="menu-label mb-3">Admin · Active Account</div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Switch between your personal and test account. Test data stays isolated from your real progress.
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={slot === "personal" ? "default" : "secondary"}
+                  onClick={() => { switchToSlot(user.id, "personal"); toast.success("Switched to personal account"); }}
                 >
-                  Reset
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </GameCard>
-      )}
-      <GameCard tone="legendary" className="p-5">
-        <div className="menu-label mb-3">Admin · Onboarding</div>
-        <p className="text-sm text-muted-foreground mb-3">
-          Reset the first-time onboarding flow on this account so you can watch it again.
-        </p>
-        <Button variant="secondary" onClick={() => { resetOnboarding(); toast.success("Onboarding reset — reload to see it"); }}>
-          Replay onboarding
-        </Button>
-      </GameCard>
-      <GameCard tone="legendary" className="p-5">
-        <div className="menu-label mb-3">Admin · Chalk Controls</div>
-        <div className="text-sm text-muted-foreground mb-3">Current balance: <span className="gradient-chalk-text font-bold tabular-nums">{s.chalk.toLocaleString()}</span></div>
-        <div className="flex gap-2">
-          <Input type="number" value={amount} min={1} onChange={e => setAmount(parseInt(e.target.value) || 0)} className="max-w-32" />
-          <Button variant="default" onClick={() => { adminAdjustChalk(amount); toast.success(`+${amount} Chalk`); }}>
-            <Plus className="h-4 w-4" /> Add
-          </Button>
-          <Button variant="secondary" onClick={() => { adminAdjustChalk(-amount); toast.info(`-${amount} Chalk`); }}>
-            <Minus className="h-4 w-4" /> Subtract
-          </Button>
-        </div>
-      </GameCard>
+                  <UserIcon className="h-4 w-4" /> Personal
+                </Button>
+                <Button
+                  variant={slot === "test" ? "default" : "secondary"}
+                  onClick={() => { switchToSlot(user.id, "test"); toast.success("Switched to test account"); }}
+                >
+                  <FlaskConical className="h-4 w-4" /> Test
+                </Button>
+                <span className="text-xs text-muted-foreground ml-2">Active: <span className="font-semibold">{slot}</span></span>
+              </div>
+            </GameCard>
+          )}
+          {slot === "test" && (
+            <GameCard tone="legendary" className="p-5">
+              <div className="menu-label mb-3">Admin · Reset Test Account</div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Wipe all chalk, logs, levels, inventory, and bosses on your test account. Your personal account is unaffected.
+              </p>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive"><Trash2 className="h-4 w-4" /> Reset test account to 0</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset test account?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This clears chalk, logs, level, inventory, and bosses on the active test account. This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        resetGame();
+                        if (user) snapshotActiveSlot(user.id);
+                        toast.success("Test account reset");
+                      }}
+                    >
+                      Reset
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </GameCard>
+          )}
+          <GameCard tone="legendary" className="p-5">
+            <div className="menu-label mb-3">Admin · Chalk Controls</div>
+            <div className="text-sm text-muted-foreground mb-3">Current balance: <span className="gradient-chalk-text font-bold tabular-nums">{s.chalk.toLocaleString()}</span></div>
+            <div className="flex gap-2">
+              <Input type="number" value={amount} min={1} onChange={e => setAmount(parseInt(e.target.value) || 0)} className="max-w-32" />
+              <Button variant="default" onClick={() => { adminAdjustChalk(amount); toast.success(`+${amount} Chalk`); }}>
+                <Plus className="h-4 w-4" /> Add
+              </Button>
+              <Button variant="secondary" onClick={() => { adminAdjustChalk(-amount); toast.info(`-${amount} Chalk`); }}>
+                <Minus className="h-4 w-4" /> Subtract
+              </Button>
+            </div>
+          </GameCard>
 
-      <GameCard tone="accent" className="p-5">
-        <div className="menu-label mb-3">Admin · Level Controls</div>
-        <div className="text-sm text-muted-foreground mb-3">Current level: <span className="font-bold tabular-nums">{s.level}</span></div>
-        <div className="flex gap-2">
-          <Button variant="default" onClick={() => { adminSetLevel(1); toast.success("Level +1"); }}>
-            <Plus className="h-4 w-4" /> Level Up
-          </Button>
-          <Button variant="secondary" onClick={() => { adminSetLevel(-1); toast.info("Level -1"); }}>
-            <Minus className="h-4 w-4" /> Level Down
-          </Button>
-        </div>
-        <label className="flex items-center gap-2 mt-4 text-sm cursor-pointer select-none">
-          <input
-            type="checkbox"
-            className="h-4 w-4 accent-[hsl(var(--btn-orange))]"
-            checked={!!s.ignoreLevelReq}
-            onChange={e => { adminSetIgnoreLevelReq(e.target.checked); toast.info(e.target.checked ? "Level requirements disabled" : "Level requirements enabled"); }}
-          />
-          <span>Ignore level requirements (shop)</span>
-        </label>
-      </GameCard>
+          <GameCard tone="accent" className="p-5">
+            <div className="menu-label mb-3">Admin · Level Controls</div>
+            <div className="text-sm text-muted-foreground mb-3">Current level: <span className="font-bold tabular-nums">{s.level}</span></div>
+            <div className="flex gap-2">
+              <Button variant="default" onClick={() => { adminSetLevel(1); toast.success("Level +1"); }}>
+                <Plus className="h-4 w-4" /> Level Up
+              </Button>
+              <Button variant="secondary" onClick={() => { adminSetLevel(-1); toast.info("Level -1"); }}>
+                <Minus className="h-4 w-4" /> Level Down
+              </Button>
+            </div>
+            <label className="flex items-center gap-2 mt-4 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-[hsl(var(--btn-orange))]"
+                checked={!!s.ignoreLevelReq}
+                onChange={e => { adminSetIgnoreLevelReq(e.target.checked); toast.info(e.target.checked ? "Level requirements disabled" : "Level requirements enabled"); }}
+              />
+              <span>Ignore level requirements (shop)</span>
+            </label>
+          </GameCard>
 
-      <GameCard tone="accent" className="p-5">
-        <div className="menu-label mb-3">Admin · Mock Data</div>
-        <p className="text-sm text-muted-foreground mb-3">Add sample boulder logs and bosses for testing UI states.</p>
-        <Button onClick={() => { adminSeedMockData(); toast.success("Mock data added"); }}>
-          <Plus className="h-4 w-4" /> Seed mock boulders & bosses
-        </Button>
-      </GameCard>
+          <LevelsAdmin />
+        </TabsContent>
 
-      <BackfillImagesCard />
+        <TabsContent value="items" className="space-y-6 mt-6">
+          <InventoryAdmin />
+        </TabsContent>
 
-      <LevelsAdmin />
+        <TabsContent value="gyms" className="space-y-6 mt-6">
+          <PublicGymsAdmin />
+        </TabsContent>
 
-      <RebalanceCard />
-
-      <DailyCapCard />
-
-      <InventoryAdmin />
-
-      <PublicGymsAdmin />
-
-      <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>
-        <ThemeStudio />
-      </div>
+        <TabsContent value="theme" className="mt-6">
+          <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>
+            <ThemeStudio />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

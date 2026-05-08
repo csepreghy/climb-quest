@@ -7,6 +7,7 @@ import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems } from "@/gam
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
+import { useDailyCapConfig, computeDailyCap, currentStreak } from "@/game/dailyCap";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -294,6 +295,11 @@ function formatChalk(n: number): string {
 
 function ChalkChip({ value }: { value: number }) {
   const [open, setOpen] = useState(false);
+  const s = useGame();
+  const dailyCapCfg = useDailyCapConfig();
+  const streak = currentStreak(s);
+  const dailyCap = computeDailyCap(s.level, streak, dailyCapCfg);
+  const showCap = dailyCapCfg.enabled && dailyCap > 0;
 
   // Activity rows sorted ascending by points
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
@@ -341,6 +347,25 @@ function ChalkChip({ value }: { value: number }) {
                 ))}
               </div>
             </div>
+
+            {showCap && (
+              <div>
+                <div className="menu-label mb-2">Daily limit</div>
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="text-foreground/90">
+                      Today's cap{streak > 0 ? ` · ${streak}d streak` : ""}
+                    </span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">
+                      {dailyCap.toLocaleString()} chalk
+                    </span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Soft cap — keep logging daily to grow your streak and raise tomorrow's limit.
+                </p>
+              </div>
+            )}
 
             <p className="text-xs text-muted-foreground">
               Equipped gear, auras, and consumables apply additional % bonuses on top of the base.

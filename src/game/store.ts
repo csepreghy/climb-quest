@@ -622,7 +622,7 @@ function emitBadges(ids: string[]) {
  * has not yet been rewarded (tracked in `badgeChalkClaimedFor`). Fires the
  * badge-awarded event for any newly-awarded badges (not for chalk-only catch-up).
  */
-function applyBadges(s: State, addIds: string[]): State {
+function applyBadges(s: State, addIds: string[], silent = false): State {
   const haveBadges = new Set(s.badges);
   const fresh = addIds.filter(id => !haveBadges.has(id));
   const nextBadges = fresh.length ? [...s.badges, ...fresh] : s.badges;
@@ -632,7 +632,7 @@ function applyBadges(s: State, addIds: string[]): State {
   const reward = toReward.length * BADGE_CHALK_REWARD;
   const nextClaimed = toReward.length ? [...(s.badgeChalkClaimedFor ?? []), ...toReward] : (s.badgeChalkClaimedFor ?? []);
 
-  if (fresh.length) emitBadges(fresh);
+  if (!silent && fresh.length) emitBadges(fresh);
 
   return {
     ...s,

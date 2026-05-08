@@ -325,8 +325,7 @@ function ChalkChip({ value }: { value: number }) {
   const [open, setOpen] = useState(false);
   const s = useGame();
   const dailyCapCfg = useDailyCapConfig();
-  const streak = currentStreak(s);
-  const dailyCap = computeDailyCap(s.level, streak, dailyCapCfg);
+  const dailyCap = computeDailyCap(s.level, dailyCapCfg);
   const showCap = dailyCapCfg.enabled && dailyCap > 0;
 
   // Activity rows sorted ascending by points

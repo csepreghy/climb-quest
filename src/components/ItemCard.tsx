@@ -36,8 +36,8 @@ export function ItemCard({
   const badges: { text: string; cls: string }[] = [];
   if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40" });
   if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] border-[hsl(var(--btn-orange))]/40" });
-  if (critPct > 0) badges.push({ text: `${critPct}% crit`, cls: "bg-legendary/15 text-legendary border-legendary/40" });
-  if (bossPct > 0) badges.push({ text: `+${bossPct}% boss`, cls: "bg-destructive/15 text-destructive border-destructive/40" });
+  if (critPct > 0) badges.push({ text: `${critPct}% crit`, cls: "bg-[hsl(var(--epic))]/15 text-[hsl(var(--epic))] border-[hsl(var(--epic))]/50" });
+  if (bossPct > 0) badges.push({ text: `+${bossPct}% boss`, cls: "bg-legendary/15 text-legendary border-legendary/40" });
   return (
     <GameCard
       tone={tone as "default"}
@@ -46,15 +46,6 @@ export function ItemCard({
       className={cn("p-4 flex flex-col gap-3 relative", onClick && "cursor-pointer", highlight && "ring-2 ring-[hsl(var(--btn-orange))]/60")}
       onClick={onClick}
     >
-      {badges.length > 0 && (
-        <div className="absolute top-0 right-0 z-10 flex flex-col items-end gap-0.5">
-          {badges.map((b, i) => (
-            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border", b.cls)}>
-              {b.text}
-            </div>
-          ))}
-        </div>
-      )}
       {onRemove && (
         <button
           type="button"
@@ -76,7 +67,7 @@ export function ItemCard({
             <ChalkBagLoader size={36} />
           </div>
         )}
-        <div className="min-w-0 flex-1 pr-12">
+        <div className="min-w-0 flex-1">
           <div className="text-sm font-medium leading-snug">{item.name}</div>
           <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
             {item.rarity}
@@ -84,6 +75,15 @@ export function ItemCard({
           {primed && <div className="mt-1 text-[10px] uppercase tracking-wider text-chalk-glow">Primed</div>}
         </div>
       </div>
+      {badges.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {badges.map((b, i) => (
+            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border", b.cls)}>
+              {b.text}
+            </div>
+          ))}
+        </div>
+      )}
       {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
       {showAction && (
         <div className="flex items-center justify-end pt-2 border-t border-border/50">

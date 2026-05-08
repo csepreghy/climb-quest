@@ -98,20 +98,19 @@ function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: 
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
 
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
-  const discountPct = item.priceMult ? Math.round((1 - item.priceMult) * 100) : 0;
+  const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
+  const chalkPct = bonusPct || consumablePct;
+  const discountPct = item.priceMult && item.priceMult < 1 ? Math.round((1 - item.priceMult) * 100) : 0;
+  const critPct = item.critChancePct ? Math.round(item.critChancePct) : 0;
+  const bossPct = item.bossBonusPct ? Math.round(item.bossBonusPct) : 0;
+  const badges: { text: string; cls: string }[] = [];
+  if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40" });
+  if (discountPct > 0) badges.push({ text: `−${discountPct}% shop`, cls: "bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] border-[hsl(var(--btn-orange))]/40" });
+  if (critPct > 0) badges.push({ text: `${critPct}% crit`, cls: "bg-[hsl(var(--epic))]/15 text-[hsl(var(--epic))] border-[hsl(var(--epic))]/50" });
+  if (bossPct > 0) badges.push({ text: `+${bossPct}% boss`, cls: "bg-legendary/15 text-legendary border-legendary/40" });
 
   return (
     <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3 relative">
-      {bonusPct > 0 && (
-        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
-          +{bonusPct}%
-        </div>
-      )}
-      {discountPct > 0 && bonusPct === 0 && (
-        <div className="absolute top-2 right-2 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">
-          −{discountPct}% shop
-        </div>
-      )}
       <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji) ? (
           <SmartImage src={item.emoji} alt={item.name} loaderSize={36} wrapperClassName={cn("h-20 w-20 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
@@ -122,13 +121,22 @@ function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: 
             <ChalkBagLoader size={36} />
           </div>
         )}
-        <div className="min-w-0 flex-1 pr-12">
+        <div className="min-w-0 flex-1">
           <div className="text-sm font-medium leading-snug">{item.name}</div>
           <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
             {item.rarity}
           </div>
         </div>
       </div>
+      {badges.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {badges.map((b, i) => (
+            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border", b.cls)}>
+              {b.text}
+            </div>
+          ))}
+        </div>
+      )}
       {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
         <div className="text-sm">

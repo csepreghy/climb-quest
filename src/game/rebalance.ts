@@ -231,6 +231,22 @@ export function proposeRebalance(
       bossPct: targetBossBonusPct(item),
       levelReq: nextLvl,
     };
+    // Cap at 3 effects per item: if all four would roll, drop the smallest
+    // and redistribute its weight by bumping the remaining three by ~33%.
+    {
+      const effects: Array<"bonusPct" | "discountPct" | "critPct" | "bossPct"> =
+        ["bonusPct", "discountPct", "critPct", "bossPct"];
+      const active = effects.filter(k => next[k] > 0);
+      if (active.length >= 4) {
+        // "weight" — discount and chalk are direct %; crit gets a 1.5× weight
+        // (matches valueMult above) so it isn't unfairly dropped.
+        const weight = (k: typeof effects[number]) => next[k] * (k === "critPct" ? 1.5 : 1);
+        const drop = active.slice().sort((a, b) => weight(a) - weight(b))[0];
+        next[drop] = 0;
+        const keep = active.filter(k => k !== drop);
+        for (const k of keep) next[k] = Math.max(1, Math.round(next[k] * (4 / 3)));
+      }
+    }
     // No useless items: if every effect rounded to 0, give a small chalk/boss/crit floor.
     if (next.bonusPct === 0 && next.discountPct === 0 && next.critPct === 0 && next.bossPct === 0) {
       const floor = item.rarity === "legendary" ? 5 : item.rarity === "epic" ? 3 : item.rarity === "rare" ? 2 : 1;

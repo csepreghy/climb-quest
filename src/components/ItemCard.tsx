@@ -46,6 +46,15 @@ export function ItemCard({
       className={cn("p-4 flex flex-col gap-3 relative", onClick && "cursor-pointer", highlight && "ring-2 ring-[hsl(var(--btn-orange))]/60")}
       onClick={onClick}
     >
+      {badges.length > 0 && (
+        <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-0.5">
+          {badges.map((b, i) => (
+            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border whitespace-nowrap", b.cls)}>
+              {b.text}
+            </div>
+          ))}
+        </div>
+      )}
       {onRemove && (
         <button
           type="button"
@@ -57,7 +66,7 @@ export function ItemCard({
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       )}
-      <div className="flex items-start gap-3">
+      <div className={cn("flex items-start gap-3", badges.length > 0 && "pr-[92px]")}>
         {isImageEmoji(item.emoji) ? (
           <SmartImage src={item.emoji} alt={item.name} loaderSize={36} wrapperClassName={cn("h-20 w-20 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
         ) : item.emoji ? (
@@ -75,15 +84,6 @@ export function ItemCard({
           {primed && <div className="mt-1 text-[10px] uppercase tracking-wider text-chalk-glow">Primed</div>}
         </div>
       </div>
-      {badges.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {badges.map((b, i) => (
-            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border", b.cls)}>
-              {b.text}
-            </div>
-          ))}
-        </div>
-      )}
       {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
       {showAction && (
         <div className="flex items-center justify-end pt-2 border-t border-border/50">

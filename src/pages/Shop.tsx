@@ -111,7 +111,16 @@ function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: 
 
   return (
     <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3 relative">
-      <div className="flex items-start gap-3">
+      {badges.length > 0 && (
+        <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-0.5">
+          {badges.map((b, i) => (
+            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border whitespace-nowrap", b.cls)}>
+              {b.text}
+            </div>
+          ))}
+        </div>
+      )}
+      <div className={cn("flex items-start gap-3", badges.length > 0 && "pr-[92px]")}>
         {isImageEmoji(item.emoji) ? (
           <SmartImage src={item.emoji} alt={item.name} loaderSize={36} wrapperClassName={cn("h-20 w-20 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
         ) : item.emoji ? (
@@ -128,15 +137,6 @@ function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: 
           </div>
         </div>
       </div>
-      {badges.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {badges.map((b, i) => (
-            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border", b.cls)}>
-              {b.text}
-            </div>
-          ))}
-        </div>
-      )}
       {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
         <div className="text-sm">

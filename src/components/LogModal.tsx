@@ -273,10 +273,11 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
 
         <div>
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Attempt</Label>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
             {([
               { v: "flash", label: "Flash ⚡", desc: "First try" },
               { v: "send", label: "Send 🏆", desc: "Multi-try, 1 sesh" },
+              { v: "repeat", label: "Repeat 🔁", desc: "Done it before" },
               { v: "project", label: "Project 🎯", desc: "Multi-session" },
             ] as { v: AttemptType; label: string; desc: string }[]).map(o => (
               <button key={o.v} type="button"

@@ -192,6 +192,7 @@ const TARGET_ACTIVITY: Record<ActivityType, number> = {
   warmup_boulder: 20,
   boulder: 60,
   hard_boulder: 140,
+  project_boulder: 230,
   boulder_send: 45,
   boss_attempt: 55,
   boss_send: 350,

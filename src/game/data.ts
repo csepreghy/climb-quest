@@ -39,6 +39,7 @@ export type ActivityType =
   | "warmup_boulder"
   | "boulder"
   | "hard_boulder"
+  | "project_boulder"
   | "boulder_send"
   | "boss_attempt"
   | "boss_send";
@@ -144,6 +145,7 @@ export const BASE_CHALK: Record<ActivityType, number> = {
   warmup_boulder: 25,
   boulder: 70,
   hard_boulder: 150,
+  project_boulder: 250,
   boulder_send: 50,
   boss_attempt: 60,
   boss_send: 400,
@@ -153,6 +155,7 @@ export const ACTIVITY_LABELS: Record<ActivityType, string> = {
   warmup_boulder: "Warm-up Boulder",
   boulder: "Regular Boulder",
   hard_boulder: "Hard Boulder",
+  project_boulder: "Project Boulder",
   boulder_send: "Boulder Send",
   boss_attempt: "Boss Project Attempt",
   boss_send: "Boss Project Send",

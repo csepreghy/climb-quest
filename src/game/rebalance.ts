@@ -114,6 +114,7 @@ export function targetDiscountPct(item: ShopItem): number {
  * Sized so 1 − Π(1 − p_i) at endgame ≈ ENDGAME_CEILING.crit.
  */
 export function targetCritPct(item: ShopItem): number {
+  if (!GROUP_EFFECTS[item.group].crit) return 0;
   if (!hasBothEffects(item.rarity)) return 0;
   if (!canSpecial(item.slot)) return 0;
   const share = SLOT_SHARE[item.slot] ?? 0;

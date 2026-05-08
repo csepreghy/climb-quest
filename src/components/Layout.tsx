@@ -372,21 +372,21 @@ function ChalkChip({ value }: { value: number }) {
               <div className="menu-label mb-2">Bonuses from equipped gear</div>
               <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden text-sm">
                 <div className="px-3 py-2">
-                  <div className="font-semibold text-foreground/90">💥 Crit</div>
+                  <div className="font-semibold text-[hsl(var(--epic))]">💥 Crit</div>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Each item with a crit chance rolls when you log. On a hit, the run's chalk is doubled (×2).
                     Multiple crit items combine — odds stack so more gear means a bigger chance, capped at 100%.
                   </p>
                 </div>
                 <div className="px-3 py-2">
-                  <div className="font-semibold text-foreground/90">👹 Boss bonus</div>
+                  <div className="font-semibold text-legendary">👹 Boss bonus</div>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Only applies to boss attempts and sends. Boss-bonus % from every equipped item is added together,
                     then granted as extra chalk on top of the base reward.
                   </p>
                 </div>
                 <div className="px-3 py-2">
-                  <div className="font-semibold text-foreground/90">🛍️ Shop discount</div>
+                  <div className="font-semibold text-[hsl(var(--btn-orange))]">🛍️ Shop discount</div>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Lowers prices in the Shop. Discounts don't stack — only your strongest equipped discount item is
                     applied to each item's price.

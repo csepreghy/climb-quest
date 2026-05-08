@@ -91,6 +91,9 @@ export const BG_THEMES: ThemeOption[] = [
   bgSolid("d-teal",     "Dark Teal",      "#0f1f23", "188 35% 10%"),
   bgSolid("d-plum",     "Dark Plum",      "#181321", "265 25% 10%"),
   bgSolid("d-charcoal", "Dark Charcoal",  "#1c1c1c", "0 0% 11%"),
+  bgSolid("d-gunmetal", "Gunmetal",       "#2e2e2e", "0 0% 18%"),
+  bgSolid("d-ash",      "Ash",            "#454545", "0 0% 27%"),
+  bgSolid("d-pewter",   "Pewter",         "#5e5e5e", "0 0% 37%"),
   // 10 medium / muted backgrounds
   bgSolid("m-grey",     "Medium Grey",    "#7a7d82", "215 4% 50%"),
   bgSolid("m-stone",    "Stone",          "#8a8378", "30 8% 51%"),

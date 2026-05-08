@@ -471,7 +471,7 @@ function InventoryAdmin() {
             <Label className="text-xs">Price (Chalk)</Label>
             <Input type="number" min={0} value={draft.price} onChange={e => setDraft(d => ({ ...d, price: parseInt(e.target.value) || 0 }))} />
           </div>
-          {GROUP_EFFECTS[draft.group].chalk && (
+          {effectAllowed(draft.group, draft.rarity, "chalk") && (
             <div>
               <Label className="text-xs">Chalk bonus %</Label>
               <Input type="number" min={0} value={draft.bonusPct} onChange={e => setDraft(d => ({ ...d, bonusPct: parseInt(e.target.value) || 0 }))} />
@@ -491,7 +491,7 @@ function InventoryAdmin() {
               }}
             />
           </div>
-          {GROUP_EFFECTS[draft.group].discount && (
+          {effectAllowed(draft.group, draft.rarity, "discount") && (
             <div>
               <Label className="text-xs">Shop discount %</Label>
               <Input
@@ -505,7 +505,7 @@ function InventoryAdmin() {
               <p className="text-[10px] text-muted-foreground mt-1">Equipped item reduces shop prices. Discounts don't stack — best one wins.</p>
             </div>
           )}
-          {GROUP_EFFECTS[draft.group].crit && (
+          {effectAllowed(draft.group, draft.rarity, "crit") && (
             <div>
               <Label className="text-xs">Crit chance %</Label>
               <Input
@@ -518,7 +518,7 @@ function InventoryAdmin() {
               <p className="text-[10px] text-muted-foreground mt-1">Chance every log's chalk doubles. Stacks across equipped items.</p>
             </div>
           )}
-          {GROUP_EFFECTS[draft.group].boss && (
+          {effectAllowed(draft.group, draft.rarity, "boss") && (
             <div>
               <Label className="text-xs">Boss bonus %</Label>
               <Input

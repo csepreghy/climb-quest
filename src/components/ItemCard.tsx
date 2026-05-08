@@ -29,7 +29,15 @@ export function ItemCard({
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
   const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
-  const showPct = bonusPct || consumablePct;
+  const chalkPct = bonusPct || consumablePct;
+  const discountPct = item.priceMult && item.priceMult < 1 ? Math.round((1 - item.priceMult) * 100) : 0;
+  const critPct = item.critChancePct ? Math.round(item.critChancePct) : 0;
+  const bossPct = item.bossBonusPct ? Math.round(item.bossBonusPct) : 0;
+  const badges: { text: string; cls: string }[] = [];
+  if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40" });
+  if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] border-[hsl(var(--btn-orange))]/40" });
+  if (critPct > 0) badges.push({ text: `${critPct}% crit`, cls: "bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40" });
+  if (bossPct > 0) badges.push({ text: `+${bossPct}% boss`, cls: "bg-destructive/15 text-destructive border-destructive/40" });
   return (
     <GameCard
       tone={tone as "default"}
@@ -38,9 +46,13 @@ export function ItemCard({
       className={cn("p-4 flex flex-col gap-3 relative", onClick && "cursor-pointer", highlight && "ring-2 ring-[hsl(var(--btn-orange))]/60")}
       onClick={onClick}
     >
-      {showPct > 0 && (
-        <div className="absolute top-0 right-0 z-10 text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md bg-chalk-glow/15 text-chalk-glow border border-chalk-glow/40">
-          +{showPct}%
+      {badges.length > 0 && (
+        <div className="absolute top-0 right-0 z-10 flex flex-col items-end gap-0.5">
+          {badges.map((b, i) => (
+            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border", b.cls)}>
+              {b.text}
+            </div>
+          ))}
         </div>
       )}
       {onRemove && (

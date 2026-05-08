@@ -21,7 +21,7 @@ import {
   backfillShopImages,
   CustomItemInput,
 } from "@/game/customItems";
-import { ItemGroup, Rarity, Slot, ShopItem, LEVELS, Gender, GROUP_EFFECTS } from "@/game/data";
+import { ItemGroup, Rarity, Slot, ShopItem, LEVELS, Gender, effectAllowed } from "@/game/data";
 import { useLevelOverrides, resolvedLevel, saveLevel, clearLevel, hasAnyOverride } from "@/game/levelOverrides";
 import { cn } from "@/lib/utils";
 import {

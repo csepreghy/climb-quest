@@ -54,6 +54,7 @@ export interface Gym {
   id: string;
   name: string;
   location: string;
+  country?: string;
   primary: boolean;
   holdColors: HoldColor[];
   gradingSystemIds: string[];

@@ -28,11 +28,13 @@ import {
   usePublicGyms,
   addPublicGym, updatePublicGym, deletePublicGym,
   addPublicHoldColor, removePublicHoldColor, togglePublicGymGradingSystem,
+  addPublicGymCustomGrading, updatePublicGymCustomGrading, deletePublicGymCustomGrading,
 } from "@/game/publicGyms";
 import { COUNTRIES } from "@/game/countries";
 import { AddHoldColor } from "@/components/AddHoldColor";
 import { HoldSwatch } from "@/components/HoldSwatch";
-import type { GradingSystem } from "@/game/gyms";
+import { GymGradingEditor } from "@/components/GymGradingEditor";
+
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
 const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [

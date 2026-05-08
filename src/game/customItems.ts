@@ -18,13 +18,14 @@ function emit() { listeners.forEach(l => l()); }
 function setState(u: (s: State) => State) { state = u(state); emit(); }
 
 // Lightweight columns — excludes `image` so the initial payload is tiny.
-const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,price_mult,crit_chance_pct,boss_bonus_pct,created_at";
+const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,price_mult,crit_chance_pct,boss_bonus_pct,gender,created_at";
 
 function rowToItem(r: any, image?: string | null): ShopItem {
   const bonusPct = Number(r.bonus_pct ?? 0);
   const priceMult = r.price_mult !== undefined && r.price_mult !== null ? Number(r.price_mult) : 1;
   const critPct = Number(r.crit_chance_pct ?? 0);
   const bossPct = Number(r.boss_bonus_pct ?? 0);
+  const gender = (r.gender as "male" | "female" | "unisex" | null) ?? "unisex";
   return {
     id: r.id,
     name: r.name,
@@ -39,6 +40,7 @@ function rowToItem(r: any, image?: string | null): ShopItem {
     priceMult: priceMult !== 1 ? priceMult : undefined,
     critChancePct: critPct > 0 ? critPct : undefined,
     bossBonusPct: bossPct > 0 ? bossPct : undefined,
+    gender: gender !== "unisex" ? gender : undefined,
     bonus: bonusPct > 0
       ? { mult: bonusPct / 100, appliesTo: (r.applies_to ?? "all") as ActivityType[] | "all" }
       : undefined,

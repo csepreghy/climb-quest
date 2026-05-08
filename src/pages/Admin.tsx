@@ -315,7 +315,7 @@ function DailyCapCard() {
           <Input type="number" value={d.base} onChange={e => update("base", Number(e.target.value))} />
         </div>
         <div>
-          <Label className="text-xs">Per-level step</Label>
+          <Label className="text-xs">Next-level cost %</Label>
           <Input type="number" value={d.levelStep} onChange={e => update("levelStep", Number(e.target.value))} />
         </div>
         <div>

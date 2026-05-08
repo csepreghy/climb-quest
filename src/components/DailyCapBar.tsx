@@ -1,15 +1,13 @@
 import { GameCard } from "@/components/ui/game-card";
 import { useGame } from "@/game/store";
-import { useDailyCapConfig, computeDailyCap, currentStreak, chalkUsedOnDate } from "@/game/dailyCap";
+import { useDailyCapConfig, computeDailyCap, chalkUsedOnDate } from "@/game/dailyCap";
 import { cn } from "@/lib/utils";
-import { Flame } from "lucide-react";
 
 export function DailyCapBar({ className }: { className?: string }) {
   const s = useGame();
   const cfg = useDailyCapConfig();
   if (!cfg.enabled) return null;
-  const streak = currentStreak(s);
-  const cap = computeDailyCap(s.level, streak, cfg);
+  const cap = computeDailyCap(s.level, cfg);
   const used = chalkUsedOnDate(s, new Date().toISOString());
   const pct = cap > 0 ? used / cap : 0;
   const overTier1 = pct >= cfg.tier1Threshold;
@@ -34,11 +32,6 @@ export function DailyCapBar({ className }: { className?: string }) {
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <span className={cn(overTier1 ? "text-[hsl(var(--btn-orange))]" : "text-chalk-glow")}>{stateLabel}</span>
-          {streak > 0 && (
-            <span className="flex items-center gap-1 text-[hsl(var(--btn-orange))]">
-              <Flame className="h-3 w-3" />{streak}d
-            </span>
-          )}
         </div>
       </div>
       <div className="h-2 rounded-full bg-secondary overflow-hidden relative">

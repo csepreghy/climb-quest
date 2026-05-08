@@ -107,6 +107,27 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_cap_overrides: {
+        Row: {
+          cap: number
+          level: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          cap: number
+          level: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          cap?: number
+          level?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       hidden_builtin_items: {
         Row: {
           hidden_at: string

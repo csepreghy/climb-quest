@@ -38,7 +38,7 @@ import { AddHoldColor } from "@/components/AddHoldColor";
 import { HoldSwatch } from "@/components/HoldSwatch";
 import { GymGradingEditor } from "@/components/GymGradingEditor";
 import { RebalancePreviewModal } from "@/components/RebalancePreviewModal";
-import { useDailyCapConfig, setDailyCapConfig, computeDailyCap, DailyCapConfig } from "@/game/dailyCap";
+import { useDailyCapConfig, setDailyCapConfig, computeDailyCap, defaultDailyCap, DailyCapConfig, useDailyCapOverrides, setDailyCapOverride } from "@/game/dailyCap";
 
 
 const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
@@ -277,13 +277,14 @@ function RebalanceCard() {
 
 function DailyCapCard() {
   const cfg = useDailyCapConfig();
+  const overrides = useDailyCapOverrides();
   const [draft, setDraft] = useState<DailyCapConfig | null>(null);
   const [busy, setBusy] = useState(false);
+  const [overrideDrafts, setOverrideDrafts] = useState<Record<number, string>>({});
   const d = draft ?? cfg;
   const dirty = JSON.stringify(d) !== JSON.stringify(cfg);
-  const sample10 = computeDailyCap(10, 30, d);
-  const sample5 = computeDailyCap(5, 7, d);
-  const sample1 = computeDailyCap(1, 0, d);
+
+  const sortedLevels = [...LEVELS].sort((a, b) => a.level - b.level).slice(0, 10);
 
   function update<K extends keyof DailyCapConfig>(k: K, v: DailyCapConfig[K]) {
     setDraft(prev => ({ ...(prev ?? cfg), [k]: v }));
@@ -299,11 +300,33 @@ function DailyCapCard() {
       toast.error(e?.message ?? "Save failed");
     } finally { setBusy(false); }
   }
+
+  async function saveOverride(level: number) {
+    const raw = overrideDrafts[level];
+    if (raw === undefined) return;
+    const trimmed = raw.trim();
+    setBusy(true);
+    try {
+      if (trimmed === "") {
+        await setDailyCapOverride(level, null);
+        toast.success(`Lv${level} override cleared`);
+      } else {
+        const num = Number(trimmed);
+        if (!Number.isFinite(num) || num < 0) throw new Error("Cap must be a positive number");
+        await setDailyCapOverride(level, num);
+        toast.success(`Lv${level} cap saved`);
+      }
+      setOverrideDrafts(prev => { const n = { ...prev }; delete n[level]; return n; });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Save failed");
+    } finally { setBusy(false); }
+  }
+
   return (
     <GameCard tone="legendary" className="p-5">
       <div className="menu-label mb-3">Admin · Daily chalk cap</div>
       <p className="text-sm text-muted-foreground mb-3">
-        Soft cap on chalk per day. Past the cap, chalk earns at reduced rates. Cap = base + (next-level cost × %) + streak bonus, so it grows exponentially with progression.
+        Soft cap on chalk per day. Past the cap, chalk earns at reduced rates. Default cap = base + (next-level cost × %), so it grows exponentially with progression. You can override the cap for any level below.
       </p>
       <div className="flex items-center gap-2 mb-4">
         <input
@@ -315,7 +338,7 @@ function DailyCapCard() {
         />
         <Label htmlFor="daily-cap-enabled" className="cursor-pointer">Enabled</Label>
       </div>
-      <div className={cn("grid gap-3 sm:grid-cols-2 lg:grid-cols-4", !d.enabled && "opacity-60")}>
+      <div className={cn("grid gap-3 sm:grid-cols-2 lg:grid-cols-3", !d.enabled && "opacity-60")}>
         <div>
           <Label className="text-xs">Base</Label>
           <Input type="number" value={d.base} onChange={e => update("base", Number(e.target.value))} />
@@ -323,14 +346,6 @@ function DailyCapCard() {
         <div>
           <Label className="text-xs">Next-level cost %</Label>
           <Input type="number" value={d.levelStep} onChange={e => update("levelStep", Number(e.target.value))} />
-        </div>
-        <div>
-          <Label className="text-xs">Per-streak-day step</Label>
-          <Input type="number" value={d.streakStep} onChange={e => update("streakStep", Number(e.target.value))} />
-        </div>
-        <div>
-          <Label className="text-xs">Streak cap (days)</Label>
-          <Input type="number" value={d.streakMaxDays} onChange={e => update("streakMaxDays", Number(e.target.value))} />
         </div>
         <div>
           <Label className="text-xs">Tier 1 threshold (×cap)</Label>
@@ -349,12 +364,63 @@ function DailyCapCard() {
           <Input type="number" step="0.05" value={d.tier2Mult} onChange={e => update("tier2Mult", Number(e.target.value))} />
         </div>
       </div>
-      <div className="text-xs text-muted-foreground mt-3 italic">
-        Sample caps · Lv1 (no streak): <b>{sample1.toLocaleString()}</b> · Lv5 (7d): <b>{sample5.toLocaleString()}</b> · Lv10 (30d): <b>{sample10.toLocaleString()}</b>
-      </div>
       <div className="flex justify-end gap-2 mt-4">
         <Button variant="ghost" disabled={!dirty || busy} onClick={() => setDraft(null)}>Reset</Button>
         <Button disabled={!dirty || busy} onClick={save}>{busy ? "Saving…" : "Save"}</Button>
+      </div>
+
+      <div className="mt-6">
+        <div className="menu-label mb-2">Per-level caps</div>
+        <p className="text-xs text-muted-foreground mb-3">
+          Leave blank to use the formula default. Enter a number to override that level's cap.
+        </p>
+        <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+          <div className="grid grid-cols-[60px_1fr_120px_160px_90px] items-center px-3 py-2 text-[11px] uppercase tracking-wider text-muted-foreground bg-secondary/40">
+            <span>Level</span>
+            <span>Title</span>
+            <span className="text-right">Default cap</span>
+            <span className="text-right">Override</span>
+            <span></span>
+          </div>
+          {sortedLevels.map(lv => {
+            const def = defaultDailyCap(lv.level, d);
+            const ov = overrides[lv.level];
+            const draftVal = overrideDrafts[lv.level];
+            const currentVal = draftVal !== undefined ? draftVal : (ov !== undefined ? String(ov) : "");
+            const rowDirty = draftVal !== undefined && draftVal !== (ov !== undefined ? String(ov) : "");
+            const effective = computeDailyCap(lv.level, d, overrides);
+            return (
+              <div key={lv.level} className="grid grid-cols-[60px_1fr_120px_160px_90px] items-center px-3 py-2 text-sm gap-2">
+                <span className="font-bold tabular-nums">Lv{lv.level}</span>
+                <span className="truncate text-foreground/90">{lv.title}</span>
+                <span className="text-right tabular-nums text-muted-foreground">{def.toLocaleString()}</span>
+                <Input
+                  type="number"
+                  placeholder={`${def.toLocaleString()}`}
+                  value={currentVal}
+                  onChange={e => setOverrideDrafts(prev => ({ ...prev, [lv.level]: e.target.value }))}
+                  className="h-8 text-right tabular-nums"
+                />
+                <div className="flex items-center justify-end gap-1">
+                  {ov !== undefined && (
+                    <span className="text-[10px] uppercase tracking-wider text-[hsl(var(--btn-orange))]" title={`Effective: ${effective.toLocaleString()}`}>
+                      Set
+                    </span>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2"
+                    disabled={!rowDirty || busy}
+                    onClick={() => saveOverride(lv.level)}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </GameCard>
   );

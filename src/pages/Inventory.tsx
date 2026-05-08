@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { ArrowRight, Lock, ShoppingBag, Pencil, Check, X } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
 import { LevelsModal } from "@/components/LevelsModal";
-import { computeDailyCap, currentStreak, useDailyCapConfig } from "@/game/dailyCap";
+import { computeDailyCap, useDailyCapConfig } from "@/game/dailyCap";
 import { useCharacterName, setCharacterName } from "@/game/characterName";
 import { CharacterNameInput } from "@/components/CharacterNameInput";
 
@@ -108,11 +108,10 @@ export default function Inventory() {
   const totalBonusByActivity = gearBonusSummary(s.equipped);
   const specialSummary = specialBonusSummary(s.equipped);
   const dailyCapCfg = useDailyCapConfig();
-  const dailyStreak = currentStreak(s);
-  const dailyCap = computeDailyCap(s.level, dailyStreak, dailyCapCfg);
+  const dailyCap = computeDailyCap(s.level, dailyCapCfg);
   if (dailyCapCfg.enabled && dailyCap > 0) {
     specialSummary.push({
-      label: `Daily cap${dailyStreak > 0 ? ` · ${dailyStreak}d streak` : ""}`,
+      label: "Daily cap",
       value: `${dailyCap.toLocaleString()} chalk`,
       tone: "text-foreground",
     });

@@ -322,7 +322,7 @@ export function computeChalk(
   const cfg = getDailyCapConfig();
   if (cfg.enabled) {
     const used = chalkUsedOnDate(state, dateForCap);
-    const cap = computeDailyCap(state.level, currentStreak(state), cfg);
+    const cap = computeDailyCap(state.level, cfg);
     const cappedAmount = applyDailyCap(running, used, cap, cfg);
     if (cappedAmount.reduced) {
       bonuses.push({

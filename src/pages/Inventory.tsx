@@ -208,7 +208,7 @@ export default function Inventory() {
                     <span>{GROUP_LABEL[group]}</span>
                     <span className="text-muted-foreground/70">· {equippedGear.length}/{max} used</span>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     {equippedGear.map(({ slot, id }) => {
                       const it = getItem(id)!;
                       return (
@@ -243,7 +243,7 @@ export default function Inventory() {
             return (
               <div key={group} className="space-y-2">
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">{GROUP_LABEL[group]}</div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   {slots.map(slot => {
                     const id = s.equipped[slot];
                     const it = id ? getItem(id) : null;
@@ -292,7 +292,7 @@ export default function Inventory() {
                   <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">
                     {GROUP_LABEL[group]} ({groupItems.length})
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     {groupItems.map(it => {
                       const isEquipped = !it.consumableBonus && s.equipped[it.slot] === it.id;
                       const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
@@ -402,7 +402,7 @@ export default function Inventory() {
                 {slotAlternatives.length === 0 ? (
                   <p className="text-sm text-muted-foreground italic">No other items for this slot.</p>
                 ) : (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     {slotAlternatives.map(it => (
                       <ItemCard
                         key={it.id}
@@ -436,7 +436,7 @@ export default function Inventory() {
               </Link>
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {availableGear.map(it => (
                 <ItemCard
                   key={it.id}

@@ -56,7 +56,7 @@ export function OnboardingModal({ open, onClose }: Props) {
         setSavingName(true);
         const r = await setCharacterName(name);
         setSavingName(false);
-        if (!r.ok) { toast.error(r.error); return; }
+        if (!r.ok) { toast.error((r as any).error); return; }
       }
     }
     const nextStep = STEP_ORDER[stepIdx + 1];

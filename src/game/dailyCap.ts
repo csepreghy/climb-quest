@@ -84,8 +84,10 @@ function ensureInit() {
   initialized = true;
   refresh();
   const channel = supabase.channel("daily-cap-sync-" + Math.random().toString(36).slice(2, 8));
-  channel.on("postgres_changes", { event: "*", schema: "public", table: "daily_cap_config" }, () => refresh()).subscribe();
-  channel.on("postgres_changes", { event: "*", schema: "public", table: "daily_cap_overrides" }, () => refresh());
+  channel
+    .on("postgres_changes", { event: "*", schema: "public", table: "daily_cap_config" }, () => refresh())
+    .on("postgres_changes", { event: "*", schema: "public", table: "daily_cap_overrides" }, () => refresh())
+    .subscribe();
 }
 if (typeof window !== "undefined") ensureInit();
 

@@ -560,7 +560,10 @@ export function equipItem(id: string): { ok: boolean; reason?: string } {
       return { ok: false, reason: `No free gear slot — unlock more by leveling up (max ${max} at Lv ${state.level})` };
     }
   }
-  set(s => ({ ...s, equipped: { ...s.equipped, [item.slot]: id } }));
+  set(s => {
+    const next: State = { ...s, equipped: { ...s.equipped, [item.slot]: id } };
+    return applyBadges(next, ["first_equip"]);
+  });
   return { ok: true };
 }
 export function unequipSlot(slot: keyof Equipped) {

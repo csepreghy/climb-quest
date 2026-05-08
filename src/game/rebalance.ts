@@ -133,6 +133,7 @@ export function targetCritPct(item: ShopItem): number {
  * Sized so the sum across an endgame loadout ≈ ENDGAME_CEILING.boss × 100.
  */
 export function targetBossBonusPct(item: ShopItem): number {
+  if (!GROUP_EFFECTS[item.group].boss) return 0;
   if (!hasBothEffects(item.rarity)) return 0;
   if (!canSpecial(item.slot)) return 0;
   const share = SLOT_SHARE[item.slot] ?? 0;

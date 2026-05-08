@@ -48,7 +48,7 @@ export function OnboardingModal({ open, onClose }: Props) {
   function finish() {
     completeOnboarding();
     onClose();
-    nav("/gym");
+    nav("/");
   }
 
   return (

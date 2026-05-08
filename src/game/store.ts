@@ -56,7 +56,7 @@ export interface Boss {
   active?: boolean;
 }
 
-export type Equipped = Partial<Record<"shoes"|"chalk"|"outfit"|"bottoms"|"hat"|"hand"|"accessory"|"study"|"aura"|"title", string>>;
+export type Equipped = Partial<Record<"shoes"|"chalk"|"outfit"|"bottoms"|"hat"|"hand"|"accessory"|"study"|"aura"|"title"|"powerup", string>>;
 
 export interface State {
   level: number;
@@ -250,7 +250,23 @@ export function computeChalk(
       running += amt;
     }
   }
-  // Consumable — stacked last
+
+  // Boss bonus — extra % on boss attempts/sends, summed across equipped items
+  if (activity === "boss_attempt" || activity === "boss_send") {
+    let bossPct = 0;
+    for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
+      const id = eq[slotKey]; if (!id) continue;
+      const item = getItem(id);
+      if (item?.bossBonusPct) bossPct += item.bossBonusPct;
+    }
+    if (bossPct > 0) {
+      const amt = Math.round(running * (bossPct / 100));
+      bonuses.push({ source: `Boss bonus (+${bossPct}%)`, amount: amt });
+      running += amt;
+    }
+  }
+
+  // Consumable — stacked next
   if (state.pendingConsumable) {
     const item = getItem(state.pendingConsumable);
     if (item?.consumableBonus) {
@@ -259,6 +275,22 @@ export function computeChalk(
       running += amt;
     }
   }
+
+  // Crit — final stage. Combine probabilities across equipped items: 1 - Π(1-p).
+  let critProb = 0;
+  for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
+    const id = eq[slotKey]; if (!id) continue;
+    const item = getItem(id);
+    if (item?.critChancePct) {
+      const p = Math.max(0, Math.min(100, item.critChancePct)) / 100;
+      critProb = 1 - (1 - critProb) * (1 - p);
+    }
+  }
+  if (critProb > 0 && Math.random() < critProb) {
+    bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
+    running *= 2;
+  }
+
   return { base, bonuses, total: running };
 }
 

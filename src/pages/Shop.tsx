@@ -14,7 +14,7 @@ import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
   { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk", "Study"] },
-  { key: "power",  label: "Power-ups", categories: ["All", "Accessories", "Auras", "Titles", "Consumables"] },
+  { key: "power",  label: "Power-ups", categories: [] },
 ];
 
 export default function Shop() {
@@ -27,12 +27,14 @@ export default function Shop() {
   const activeGroup = GROUPS.find(g => g.key === group)!;
   const items = useMemo(() => {
     const inGroup = all.filter(i => i.group === group && i.price > 0);
-    const filtered = cat === "All" ? inGroup : inGroup.filter(i => i.category === cat);
+    const filtered = activeGroup.categories.length === 0 || cat === "All"
+      ? inGroup
+      : inGroup.filter(i => i.category === cat);
     const rarityOrder: Record<string, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
     return [...filtered].sort((a, b) =>
       (rarityOrder[a.rarity] ?? 99) - (rarityOrder[b.rarity] ?? 99) || a.price - b.price
     );
-  }, [group, cat, all]);
+  }, [group, cat, all, activeGroup]);
 
   return (
     <div className="space-y-5 animate-float-up">
@@ -48,15 +50,17 @@ export default function Shop() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        {activeGroup.categories.map(c => (
-          <button key={c} onClick={() => setCat(c)}
-            className={cn("text-xs px-3 py-1.5 rounded-md border transition-colors",
-              cat === c ? "bg-secondary text-foreground border-border" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>
-            {c}
-          </button>
-        ))}
-      </div>
+      {activeGroup.categories.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {activeGroup.categories.map(c => (
+            <button key={c} onClick={() => setCat(c)}
+              className={cn("text-xs px-3 py-1.5 rounded-md border transition-colors",
+                cat === c ? "bg-secondary text-foreground border-border" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
 
       {!loaded && all.length === 0 ? (
         <div className="flex justify-center py-16">

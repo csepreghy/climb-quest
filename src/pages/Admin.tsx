@@ -46,12 +46,13 @@ const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [
 const CATEGORIES_BY_GROUP: Record<ItemGroup, ShopItem["category"][]> = {
   outfit: ["Top", "Pants", "Shoes", "Hat", "Hand"],
   gear: ["Brushes", "Chalk", "Study"],
-  power: ["Accessories", "Auras", "Titles", "Consumables"],
+  power: ["Power-up"],
 };
 const CATEGORY_TO_SLOT: Record<string, Slot> = {
   Top: "outfit", Pants: "bottoms", Shoes: "shoes", Hat: "hat", Hand: "hand",
   Brushes: "accessory", Chalk: "chalk", Study: "study",
-  Accessories: "accessory", Auras: "aura", Titles: "title", Consumables: "accessory",
+  "Power-up": "powerup",
+  Accessories: "powerup", Auras: "powerup", Titles: "powerup", Consumables: "powerup",
 };
 
 export default function Admin() {
@@ -228,6 +229,8 @@ const empty: CustomItemInput = {
   imageDataUrl: undefined,
   levelReq: undefined,
   discountPct: 0,
+  critChancePct: 0,
+  bossBonusPct: 0,
 };
 
 function InventoryAdmin() {
@@ -277,6 +280,8 @@ function InventoryAdmin() {
       appliesTo: item.bonus?.appliesTo,
       levelReq: item.levelReq,
       discountPct: item.priceMult ? Math.round((1 - item.priceMult) * 100) : 0,
+      critChancePct: item.critChancePct ?? 0,
+      bossBonusPct: item.bossBonusPct ?? 0,
     });
   }
 
@@ -330,15 +335,17 @@ function InventoryAdmin() {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label className="text-xs">Category</Label>
-            <Select value={draft.category} onValueChange={v => setDraft(d => ({ ...d, category: v as ShopItem["category"], slot: CATEGORY_TO_SLOT[v] ?? d.slot }))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {CATEGORIES_BY_GROUP[draft.group].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+          {draft.group !== "power" && (
+            <div>
+              <Label className="text-xs">Category</Label>
+              <Select value={draft.category} onValueChange={v => setDraft(d => ({ ...d, category: v as ShopItem["category"], slot: CATEGORY_TO_SLOT[v] ?? d.slot }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES_BY_GROUP[draft.group].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div>
             <Label className="text-xs">Price (Chalk)</Label>
             <Input type="number" min={0} value={draft.price} onChange={e => setDraft(d => ({ ...d, price: parseInt(e.target.value) || 0 }))} />
@@ -372,6 +379,27 @@ function InventoryAdmin() {
               onChange={e => setDraft(d => ({ ...d, discountPct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
             />
             <p className="text-[10px] text-muted-foreground mt-1">Equipped item reduces shop prices. Discounts don't stack — best one wins.</p>
+          </div>
+          <div>
+            <Label className="text-xs">Crit chance %</Label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={draft.critChancePct ?? 0}
+              onChange={e => setDraft(d => ({ ...d, critChancePct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">Chance every log's chalk doubles. Stacks across equipped items.</p>
+          </div>
+          <div>
+            <Label className="text-xs">Boss bonus %</Label>
+            <Input
+              type="number"
+              min={0}
+              value={draft.bossBonusPct ?? 0}
+              onChange={e => setDraft(d => ({ ...d, bossBonusPct: Math.max(0, parseInt(e.target.value) || 0) }))}
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">Extra % chalk on boss attempts and sends. Sums across equipped items.</p>
           </div>
         </div>
       </div>

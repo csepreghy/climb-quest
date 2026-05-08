@@ -30,6 +30,8 @@ export function RebalancePreviewModal({ open, onClose }: { open: boolean; onClos
           price: d.next.price,
           bonusPct: d.next.bonusPct,
           discountPct: d.next.discountPct,
+          critChancePct: d.next.critPct,
+          bossBonusPct: d.next.bossPct,
         });
       }
       if (includeActivities && activityChanges > 0) {
@@ -114,6 +116,8 @@ function ItemsTable({ diffs }: { diffs: ItemDiff[] }) {
           <TableHead>Price</TableHead>
           <TableHead>Bonus %</TableHead>
           <TableHead>Discount %</TableHead>
+          <TableHead>Crit %</TableHead>
+          <TableHead>Boss %</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -124,10 +128,12 @@ function ItemsTable({ diffs }: { diffs: ItemDiff[] }) {
             <TableCell className="py-2"><Cell now={d.now.price} next={d.next.price} /></TableCell>
             <TableCell className="py-2"><Cell now={d.now.bonusPct} next={d.next.bonusPct} /></TableCell>
             <TableCell className="py-2"><Cell now={d.now.discountPct} next={d.next.discountPct} /></TableCell>
+            <TableCell className="py-2"><Cell now={d.now.critPct} next={d.next.critPct} /></TableCell>
+            <TableCell className="py-2"><Cell now={d.now.bossPct} next={d.next.bossPct} /></TableCell>
           </TableRow>
         ))}
         {diffs.length === 0 && (
-          <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-6">No items.</TableCell></TableRow>
+          <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-6">No items.</TableCell></TableRow>
         )}
       </TableBody>
     </Table>

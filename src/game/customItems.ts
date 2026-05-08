@@ -18,11 +18,13 @@ function emit() { listeners.forEach(l => l()); }
 function setState(u: (s: State) => State) { state = u(state); emit(); }
 
 // Lightweight columns — excludes `image` so the initial payload is tiny.
-const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,price_mult,created_at";
+const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,price_mult,crit_chance_pct,boss_bonus_pct,created_at";
 
 function rowToItem(r: any, image?: string | null): ShopItem {
   const bonusPct = Number(r.bonus_pct ?? 0);
   const priceMult = r.price_mult !== undefined && r.price_mult !== null ? Number(r.price_mult) : 1;
+  const critPct = Number(r.crit_chance_pct ?? 0);
+  const bossPct = Number(r.boss_bonus_pct ?? 0);
   return {
     id: r.id,
     name: r.name,
@@ -35,6 +37,8 @@ function rowToItem(r: any, image?: string | null): ShopItem {
     desc: "",
     levelReq: r.level_req ?? undefined,
     priceMult: priceMult !== 1 ? priceMult : undefined,
+    critChancePct: critPct > 0 ? critPct : undefined,
+    bossBonusPct: bossPct > 0 ? bossPct : undefined,
     bonus: bonusPct > 0
       ? { mult: bonusPct / 100, appliesTo: (r.applies_to ?? "all") as ActivityType[] | "all" }
       : undefined,
@@ -130,6 +134,10 @@ export interface CustomItemInput {
   levelReq?: number;
   /** Shop discount as a percentage off (0–100). 0 means no discount. */
   discountPct?: number;
+  /** % chance log chalk doubles. */
+  critChancePct?: number;
+  /** Extra % chalk on boss attempts/sends. */
+  bossBonusPct?: number;
 }
 
 function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null) {
@@ -147,6 +155,8 @@ function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null
     applies_to: (input.appliesTo ?? "all") as any,
     level_req: input.levelReq ?? null,
     price_mult: 1 - discount / 100,
+    crit_chance_pct: Math.max(0, Math.min(100, input.critChancePct ?? 0)),
+    boss_bonus_pct: Math.max(0, input.bossBonusPct ?? 0),
   };
 }
 
@@ -188,6 +198,8 @@ export async function updateCustomItem(itemId: string, patch: Partial<CustomItem
     const d = Math.max(0, Math.min(100, patch.discountPct));
     row.price_mult = 1 - d / 100;
   }
+  if (patch.critChancePct !== undefined) row.crit_chance_pct = Math.max(0, Math.min(100, patch.critChancePct));
+  if (patch.bossBonusPct !== undefined) row.boss_bonus_pct = Math.max(0, patch.bossBonusPct);
   const { error } = await (supabase.from("shop_items") as any).update(row).eq("id", itemId);
   if (error) throw error;
   await refresh();

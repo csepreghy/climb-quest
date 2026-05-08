@@ -308,6 +308,13 @@ export function computeChalk(
     }
   }
 
+  // Repeat — done it before, half the chalk.
+  if (repeat) {
+    const reduced = Math.round(running * 0.5);
+    bonuses.push({ source: "Repeat (−50%)", amount: reduced - running });
+    running = reduced;
+  }
+
   // Crit — final stage. Combine probabilities across equipped items: 1 - Π(1-p).
   let critProb = 0;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {

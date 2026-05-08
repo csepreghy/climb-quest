@@ -320,14 +320,19 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       <Dialog open={projectPromptOpen} onOpenChange={setProjectPromptOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Log this as a Boss Project?</DialogTitle>
-            <DialogDescription>
-              If this boulder takes you more than one session, log it as a Boss Project instead. You'll get richer tracking and bigger rewards when you finally send it.
-            </DialogDescription>
+            <div className="flex items-center gap-3">
+              <HeaderImage src={bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/50" />
+              <div>
+                <DialogTitle>Log this as a Boss Project?</DialogTitle>
+                <DialogDescription className="mt-1">
+                  Multi-session climbs should be logged as Boss Projects — you'll get richer tracking and bigger rewards when you finally send it.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <GameButton variant="ghost" size="sm" onClick={() => { setProjectPromptOpen(false); setAttemptType("project"); }}>
-              No, just a boulder
+            <GameButton variant="ghost" size="sm" onClick={() => { setProjectPromptOpen(false); setAttemptType("send"); }}>
+              No, it's just a boulder
             </GameButton>
             <GameButton variant="primary" size="sm" onClick={() => { setProjectPromptOpen(false); onSwitchToBoss?.(); }}>
               Yes, log as Boss Project

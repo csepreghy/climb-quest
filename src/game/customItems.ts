@@ -145,7 +145,8 @@ export interface CustomItemInput {
 }
 
 function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null) {
-  const discount = Math.max(0, Math.min(100, input.discountPct ?? 0));
+  const allow = GROUP_EFFECTS[input.group];
+  const discount = allow.discount ? Math.max(0, Math.min(100, input.discountPct ?? 0)) : 0;
   return {
     id,
     name: input.name,
@@ -155,12 +156,12 @@ function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null
     rarity: input.rarity,
     price: input.price,
     image: imageUrl ?? input.imageDataUrl ?? null,
-    bonus_pct: input.bonusPct,
+    bonus_pct: allow.chalk ? input.bonusPct : 0,
     applies_to: (input.appliesTo ?? "all") as any,
     level_req: input.levelReq ?? null,
     price_mult: 1 - discount / 100,
-    crit_chance_pct: Math.max(0, Math.min(100, input.critChancePct ?? 0)),
-    boss_bonus_pct: Math.max(0, input.bossBonusPct ?? 0),
+    crit_chance_pct: allow.crit ? Math.max(0, Math.min(100, input.critChancePct ?? 0)) : 0,
+    boss_bonus_pct: allow.boss ? Math.max(0, input.bossBonusPct ?? 0) : 0,
     gender: input.gender ?? "unisex",
   };
 }

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
-import { Backpack, Store, ArrowUp, Building2, ScrollText } from "lucide-react";
+import { Backpack, Store, ArrowUp, Building2, ScrollText, Sparkles } from "lucide-react";
 
 interface Props {
   open: boolean;

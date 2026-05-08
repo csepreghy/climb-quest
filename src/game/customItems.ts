@@ -140,6 +140,8 @@ export interface CustomItemInput {
   critChancePct?: number;
   /** Extra % chalk on boss attempts/sends. */
   bossBonusPct?: number;
+  /** Gender restriction for Tops/Pants. */
+  gender?: "male" | "female" | "unisex";
 }
 
 function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null) {
@@ -159,6 +161,7 @@ function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null
     price_mult: 1 - discount / 100,
     crit_chance_pct: Math.max(0, Math.min(100, input.critChancePct ?? 0)),
     boss_bonus_pct: Math.max(0, input.bossBonusPct ?? 0),
+    gender: input.gender ?? "unisex",
   };
 }
 

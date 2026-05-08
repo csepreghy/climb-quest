@@ -4,12 +4,24 @@ export type Rarity = "common" | "rare" | "epic" | "legendary";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup";
 export type ItemGroup = "outfit" | "gear" | "power";
 
-/** Which effect fields each group is allowed to carry. Single source of truth. */
-export const GROUP_EFFECTS: Record<ItemGroup, { chalk: boolean; crit: boolean; boss: boolean; discount: boolean }> = {
-  outfit: { chalk: true,  crit: false, boss: false, discount: false },
-  gear:   { chalk: false, crit: true,  boss: true,  discount: false },
-  power:  { chalk: true,  crit: false, boss: false, discount: true  },
-};
+export type EffectKey = "chalk" | "crit" | "boss" | "discount";
+
+/** Single source of truth for which effects an item may carry, by group + rarity.
+ *  - chalk    → outfit & power-ups (any rarity)
+ *  - discount → power-ups (any rarity)
+ *  - crit     → any group, epic+ only (deterministic crit-vs-boss split per slot at epic; both at legendary)
+ *  - boss     → any group, epic+ only
+ */
+export function effectAllowed(group: ItemGroup, rarity: Rarity, effect: EffectKey): boolean {
+  const epicPlus = rarity === "epic" || rarity === "legendary";
+  switch (effect) {
+    case "chalk":    return group === "outfit" || group === "power";
+    case "discount": return group === "power";
+    // Gear is the home of crit/boss at every rarity; other groups only at epic+.
+    case "crit":     return group === "gear" || epicPlus;
+    case "boss":     return group === "gear" || epicPlus;
+  }
+}
 
 /** Slots that belong to the "gear" group, in display/unlock order. */
 export const GEAR_SLOTS: Slot[] = ["chalk", "accessory", "study"];

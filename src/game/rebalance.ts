@@ -6,7 +6,7 @@
 // Per-item magnitudes are sized so a fully-decked all-legendary loadout
 // approaches the design ceilings below — so adding a 1001st item never
 // inflates effects beyond what the cap allows.
-import { ActivityType, BASE_CHALK, GROUP_EFFECTS, Rarity, ShopItem, Slot } from "./data";
+import { ActivityType, BASE_CHALK, effectAllowed, Rarity, ShopItem, Slot } from "./data";
 
 const RARITY_BASE_PRICE: Record<Rarity, number> = {
   common: 80, rare: 700, epic: 7000, legendary: 100000,
@@ -50,15 +50,37 @@ const DISCOUNT_BY_RARITY: Record<Rarity, number> = {
   common: 0, rare: 5, epic: 15, legendary: 30,
 };
 
+/** Outfit chalk bonus magnitudes — generous so high-rarity outfits feel meaningful. */
+const CHALK_BONUS_OUTFIT: Record<Rarity, number> = {
+  common: 3, rare: 10, epic: 22, legendary: 40,
+};
+
+/** Power-up chalk bonus magnitudes — smaller (only 1 slot, so per-item can't dominate). */
+const CHALK_BONUS_POWER: Record<Rarity, number> = {
+  common: 1, rare: 4, epic: 9, legendary: 16,
+};
+
+/** At epic rarity each item leans into either crit or boss. Legendary gets both. */
+const EPIC_LEAN: Record<Slot, "crit" | "boss"> = {
+  // crit-leaning (precision / focus / chalk-mgmt slots)
+  chalk: "crit", study: "crit", accessory: "crit", hat: "crit", hand: "crit", aura: "crit",
+  // boss-leaning (big-effort / power slots)
+  powerup: "boss", outfit: "boss", bottoms: "boss", shoes: "boss", title: "boss",
+};
+
+/** Per-rarity crit chance contributed by one item. */
+const CRIT_BY_RARITY: Record<Rarity, number> = {
+  common: 1, rare: 3, epic: 5, legendary: 10,
+};
+
+/** Per-rarity boss bonus contributed by one item. */
+const BOSS_BY_RARITY: Record<Rarity, number> = {
+  common: 2, rare: 5, epic: 8, legendary: 15,
+};
+
 /** Slots that can roll discount (study-leaning + powerups). */
 function canDiscount(slot: Slot): boolean {
   return slot === "study" || slot === "powerup" || slot === "accessory";
-}
-
-/** Slots that can roll crit / boss bonuses. */
-function canSpecial(slot: Slot): boolean {
-  // Only epic/legendary special items, and only on gear or powerup slots.
-  return slot === "powerup" || slot === "chalk" || slot === "accessory" || slot === "study";
 }
 
 function hasBothEffects(r: Rarity): boolean {
@@ -74,74 +96,45 @@ function niceRound(n: number): number {
   return Math.round(n / 5000) * 5000;
 }
 
-/**
- * Generic chalk bonus %.
- * Sized so Π(1 + p_i) across an all-legendary endgame loadout ≈ 1 + ENDGAME_CEILING.bonus.
- * Per-legendary share: ln(1 + ceiling) × share / sumShare.
- */
+/** Generic chalk bonus % — table-driven per group. */
 export function targetBonusPct(item: ShopItem): number {
-  if (!GROUP_EFFECTS[item.group].chalk) return 0;
-  const share = SLOT_SHARE[item.slot] ?? 0.4;
-  const factor = RARITY_FACTOR[item.rarity];
-  // Power-ups lean into crit/boss — dampen generic bonus.
-  const slotDampen = item.slot === "powerup" ? 0.4 : 1.0;
-  // Study slot is discount-leaning at low rarity; small bonus only at epic+.
-  if (item.slot === "study" && !hasBothEffects(item.rarity)) return 0;
-  const studyDampen = item.slot === "study" ? 0.5 : 1.0;
-  const budget = Math.log(1 + ENDGAME_CEILING.bonus); // ≈ 0.916
-  const pct = (budget * share / ENDGAME_SHARE_SUM) * factor * slotDampen * studyDampen * 100;
-  return Math.max(0, Math.round(pct));
+  if (!effectAllowed(item.group, item.rarity, "chalk")) return 0;
+  if (item.group === "outfit") return CHALK_BONUS_OUTFIT[item.rarity];
+  if (item.group === "power")  return CHALK_BONUS_POWER[item.rarity];
+  return 0;
 }
 
-/** Shop discount % — non-stacking (best wins), so per-item just maps from rarity. */
+/** Shop discount % — non-stacking (best wins). Power-ups only, epic+. */
 export function targetDiscountPct(item: ShopItem): number {
-  if (!GROUP_EFFECTS[item.group].discount) return 0;
+  if (!effectAllowed(item.group, item.rarity, "discount")) return 0;
   if (!canDiscount(item.slot)) return 0;
-  // Only study + powerup get discounts at low rarity.
   if (!hasBothEffects(item.rarity)) {
     if (item.slot === "study") return DISCOUNT_BY_RARITY[item.rarity];
     return 0;
   }
-  // Epic/legendary: study slot gets the strongest, others get a smaller cut.
   const base = DISCOUNT_BY_RARITY[item.rarity];
   if (item.slot === "study") return base;
   if (item.slot === "powerup") return Math.round(base * 0.4);
   return Math.round(base * 0.5);
 }
 
-/**
- * Crit chance %. Only epic/legendary on special-eligible slots.
- * Sized so 1 − Π(1 − p_i) at endgame ≈ ENDGAME_CEILING.crit.
- */
+/** Crit chance %. Epic = only if slot leans crit; Legendary = always. */
 export function targetCritPct(item: ShopItem): number {
-  if (!GROUP_EFFECTS[item.group].crit) return 0;
-  if (!hasBothEffects(item.rarity)) return 0;
-  if (!canSpecial(item.slot)) return 0;
-  const share = SLOT_SHARE[item.slot] ?? 0;
-  const factor = RARITY_FACTOR[item.rarity];
-  const budget = -Math.log(1 - ENDGAME_CEILING.crit); // ≈ 0.431
-  // Crit-eligible slots are gear (3×1.0) + powerup (2.0) = 5.0 share
-  const critShareSum = 5.0;
-  // Powerup leans heavier into crit.
+  if (!effectAllowed(item.group, item.rarity, "crit")) return 0;
+  if (item.rarity !== "legendary" && EPIC_LEAN[item.slot] !== "crit") return 0;
+  const base = CRIT_BY_RARITY[item.rarity];
+  // Powerups punch a bit harder.
   const slotBoost = item.slot === "powerup" ? 1.4 : 1.0;
-  const pct = (budget * share / critShareSum) * factor * slotBoost * 100;
-  return Math.max(0, Math.round(pct));
+  return Math.max(0, Math.round(base * slotBoost));
 }
 
-/**
- * Boss bonus % (additive). Only epic/legendary on special-eligible slots.
- * Sized so the sum across an endgame loadout ≈ ENDGAME_CEILING.boss × 100.
- */
+/** Boss bonus % (additive). Epic = only if slot leans boss; Legendary = always. */
 export function targetBossBonusPct(item: ShopItem): number {
-  if (!GROUP_EFFECTS[item.group].boss) return 0;
-  if (!hasBothEffects(item.rarity)) return 0;
-  if (!canSpecial(item.slot)) return 0;
-  const share = SLOT_SHARE[item.slot] ?? 0;
-  const factor = RARITY_FACTOR[item.rarity];
-  const bossShareSum = 5.0;
+  if (!effectAllowed(item.group, item.rarity, "boss")) return 0;
+  if (item.rarity !== "legendary" && EPIC_LEAN[item.slot] !== "boss") return 0;
+  const base = BOSS_BY_RARITY[item.rarity];
   const slotBoost = item.slot === "powerup" ? 1.5 : 1.0;
-  const pct = (ENDGAME_CEILING.boss * 100 * share / bossShareSum) * factor * slotBoost;
-  return Math.max(0, Math.round(pct));
+  return Math.max(0, Math.round(base * slotBoost));
 }
 
 export function targetPrice(item: ShopItem): number {
@@ -196,15 +189,14 @@ export function proposeRebalance(
       critPct: targetCritPct(item),
       bossPct: targetBossBonusPct(item),
     };
-    // No useless items: if every effect rounded to 0, give the group's
-    // primary effect a minimum value scaled by rarity.
+    // No useless items: if every effect rounded to 0, give a small chalk/boss/crit floor.
     if (next.bonusPct === 0 && next.discountPct === 0 && next.critPct === 0 && next.bossPct === 0) {
       const floor = item.rarity === "legendary" ? 5 : item.rarity === "epic" ? 3 : item.rarity === "rare" ? 2 : 1;
-      const allow = GROUP_EFFECTS[item.group];
-      if (allow.chalk) next.bonusPct = floor;
-      else if (allow.boss) next.bossPct = floor;
-      else if (allow.crit) next.critPct = floor;
-      else if (allow.discount) next.discountPct = floor;
+      if (effectAllowed(item.group, item.rarity, "chalk")) next.bonusPct = floor;
+      else if (effectAllowed(item.group, item.rarity, "boss")) next.bossPct = floor;
+      else if (effectAllowed(item.group, item.rarity, "crit")) next.critPct = floor;
+      else if (effectAllowed(item.group, item.rarity, "discount")) next.discountPct = floor;
+      else next.bonusPct = floor; // last-ditch: low rarity gear has no allowed effect — give it chalk anyway
     }
     const now = { price: item.price, bonusPct: nowBonus, discountPct: nowDisc, critPct: nowCrit, bossPct: nowBoss };
     const changed =

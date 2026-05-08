@@ -115,8 +115,11 @@ export default function MyGym() {
           <GymGradingEditor
             gym={g}
             source="local"
-            onToggleBuiltin={(gsId) => toggleGymGradingSystem(g.id, gsId)}
-            onAddCustom={(gs) => addGymCustomGrading(g.id, gs)}
+            onSelectSystem={(gsId) => updateGym(g.id, { gradingSystemIds: [gsId] })}
+            onAddCustom={(gs) => {
+              const id = addGymCustomGrading(g.id, gs);
+              updateGym(g.id, { gradingSystemIds: [id] });
+            }}
             onUpdateCustom={(gsId, patch) => updateGymCustomGrading(g.id, gsId, patch)}
             onDeleteCustom={(gsId) => deleteGymCustomGrading(g.id, gsId)}
           />

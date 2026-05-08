@@ -4,6 +4,18 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { State, BoulderLog } from "./store";
+import { LEVELS } from "./data";
+
+/** Cost to reach the next level from the given level (uses last delta for max level). */
+function costToNextLevel(level: number): number {
+  const sorted = [...LEVELS].sort((a, b) => a.level - b.level);
+  const idx = sorted.findIndex(l => l.level === level);
+  if (idx < 0) return 0;
+  if (idx < sorted.length - 1) return Math.max(0, sorted[idx + 1].cost - sorted[idx].cost);
+  // Max level: reuse the previous delta so the cap stays in the same exponential band.
+  if (idx > 0) return Math.max(0, sorted[idx].cost - sorted[idx - 1].cost);
+  return 0;
+}
 
 export interface DailyCapConfig {
   enabled: boolean;

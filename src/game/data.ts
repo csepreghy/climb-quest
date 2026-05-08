@@ -39,6 +39,7 @@ export type ActivityType =
   | "warmup_boulder"
   | "boulder"
   | "hard_boulder"
+  | "project_boulder"
   | "boulder_send"
   | "boss_attempt"
   | "boss_send";

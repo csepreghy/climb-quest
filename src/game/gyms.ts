@@ -155,6 +155,12 @@ export function setPrimaryGym(gymId: string) {
 export function setLastUsedGym(gymId: string) {
   set(s => ({ ...s, lastUsedGymId: gymId }));
 }
+export function addPublicGymToMine(gymId: string) {
+  set(s => s.addedPublicGymIds.includes(gymId) ? s : { ...s, addedPublicGymIds: [...s.addedPublicGymIds, gymId] });
+}
+export function removePublicGymFromMine(gymId: string) {
+  set(s => ({ ...s, addedPublicGymIds: s.addedPublicGymIds.filter(id => id !== gymId), lastUsedGymId: s.lastUsedGymId === gymId ? null : s.lastUsedGymId }));
+}
 
 export function addHoldColor(gymId: string, c: Omit<HoldColor, "id">) {
   set(s => ({ ...s, gyms: s.gyms.map(g => g.id === gymId ? { ...g, holdColors: [...g.holdColors, { ...c, id: id() }] } : g) }));

@@ -46,6 +46,8 @@ export interface HoldColor {
   id: string;
   name: string;
   hex: string;
+  /** Optional second color — when set, the hold renders as a split circle (multicolor). */
+  hex2?: string;
 }
 
 export interface Gym {

@@ -80,6 +80,7 @@ function niceRound(n: number): number {
  * Per-legendary share: ln(1 + ceiling) × share / sumShare.
  */
 export function targetBonusPct(item: ShopItem): number {
+  if (!GROUP_EFFECTS[item.group].chalk) return 0;
   const share = SLOT_SHARE[item.slot] ?? 0.4;
   const factor = RARITY_FACTOR[item.rarity];
   // Power-ups lean into crit/boss — dampen generic bonus.

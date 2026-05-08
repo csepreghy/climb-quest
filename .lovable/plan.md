@@ -1,39 +1,44 @@
-# Rebalance economy (admin tool)
+# Flatten Power-ups + add two new economy mechanics
 
-The previous plan was approved but the code was never written — that's why no button appears on `/admin`. Here is the plan to implement now.
+## Part 1 — Power-ups: one flat slot
 
-## UI
+- In `src/game/data.ts`, add `Slot = "powerup"` and remove `aura` / `title` from the practical UX (keep the type values for back-compat reads, but admin form no longer offers them).
+- `CATEGORIES_BY_GROUP.power` becomes a single placeholder; admin form **hides the Category dropdown** entirely when `group === "power"` and forces `slot = "powerup"`.
+- `CATEGORY_TO_SLOT` updated: any power-group item → `"powerup"`.
+- `Shop.tsx`: remove the Accessories/Auras/Titles/Consumables tab list — Power-ups becomes a single flat list (still split visually into "Equippable" vs "Consumables" since consumables behave differently).
+- `Inventory.tsx`: collapse `power` group into one section labelled "Power-ups". Drop the per-slot subheaders for `aura` / `title`.
+- One-time **back-fill migration** in `customItems.ts` startup (or a one-off SQL data update via the insert tool): every existing item with `group='power'` gets `slot='powerup'` and `category='Power-up'`. Auras & titles already equipped on users keep working because the equip lookup still resolves by item id.
 
-Add a new `GameCard` to `src/pages/Admin.tsx` (above `InventoryAdmin`) titled **"Admin · Rebalance economy"** with a single **"Preview rebalance"** button.
+## Part 2 — Two new economy mechanics
 
-Clicking it opens a `Dialog` (`src/components/RebalancePreviewModal.tsx`) containing:
+Add to `ShopItem` (and `shop_items` table):
 
-1. **Shop items table** — every item with `Now` vs `New` columns for `price`, `bonus %`, `discount %`. Changed cells highlighted, unchanged dimmed.
-2. **Activity rewards table** — the 6 `BASE_CHALK` activities with current vs proposed values, gated by a checkbox at the top: **"Also rebalance activity rewards"** (default off). When unchecked, activity rows are dimmed and skipped on apply.
+1. **`critChancePct`** — % chance that a single log's total Chalk is doubled. Roll once per log inside `computeChalk`, after all bonuses. Add a "Crit! ×2" line to the breakdown when it fires. Stack across equipped items by taking `1 - Π(1 - p_i)`.
+2. **`bossBonusPct`** — extra % Chalk on `boss_attempt` and `boss_send` activities. Implemented as a normal equipped bonus, but stored as a dedicated column so rebalance can tune it independently from generic chalk bonus.
 
-Footer: live count of items + activities that will change, **Cancel** and **Apply rebalance** buttons.
+DB migration adds two nullable numeric columns: `crit_chance_pct`, `boss_bonus_pct` (default 0). `customItems.ts` reads/writes them. Admin form gets two new number inputs.
 
-## Rebalance formula (`src/game/rebalance.ts`)
+## Part 3 — Rebalance auto-tunes everything
 
-- **Price**: `rarityBase = { common: 80, rare: 700, epic: 7000, legendary: 100000 }`, scaled by `~+18%` per level over 1, slot weight (`shoes 1.1`, `study 1.2`, etc.), rounded nicely.
-- **Chalk bonus %**: `rarityBonus = { common: 2, rare: 6, epic: 15, legendary: 35 }`, with slot adjustments (`aura +5`, `study 0`).
-- **Discount %**: only Study items (rare 5, epic 15, legendary 30).
-- **Activity rewards**: `warmup_boulder 20`, `boulder 60`, `hard_boulder 140`, `boulder_send 45`, `boss_attempt 55`, `boss_send 350`.
+Extend `src/game/rebalance.ts`:
 
-Pure function `proposeRebalance()` returns `{ items: ItemDiff[], activities: ActivityDiff[] }`.
+- `targetCritPct(item)`: only epic/legendary; epic = 5, legendary = 12. Other rarities = 0.
+- `targetBossBonusPct(item)`: only epic/legendary; epic = 8, legendary = 20. Other rarities = 0.
+- Slot adjustments so a single item doesn't get every effect at full strength:
+  - **`powerup` slot** → leans into crit + boss bonus (full values), dampened generic bonus & discount (×0.5).
+  - **`study` slot** → keeps current (discount-heavy, half bonus, no crit/boss).
+  - All other slots → small share of crit/boss for epic/legendary (×0.5).
+- `targetPrice` value-mult formula updated to include the new effects, weighted similarly: `1 + (bonusPct + discountPct + critPct*1.5 + bossBonusPct) * 0.005`. Crit weighted ×1.5 because doubling all chalk is roughly twice as juicy as +1% bonus.
 
-## Apply
-
-- Calls `updateCustomItem` for each shop item with a diff.
-- If checkbox is on, writes new `BASE_CHALK` values to a new `activity_rewards` table (admin-only RLS, mirrors `level_overrides`) and reloads into memory via `src/game/activityRewards.ts`.
-- Toast: `Rebalanced N items + activity rewards`.
-
-## Files
-
-- **New**: `src/game/rebalance.ts`, `src/components/RebalancePreviewModal.tsx`, `src/game/activityRewards.ts`.
-- **Edited**: `src/pages/Admin.tsx` (add `RebalanceCard`), `src/game/store.ts` (read `getActivityRewards()` instead of `BASE_CHALK` directly), `src/game/data.ts` (keep `BASE_CHALK` as defaults, export `ActivityRewards` alias).
-- **Migration**: new `activity_rewards` table with admin-only RLS.
+Preview modal gains two extra columns ("Crit %", "Boss %") in the items table.
 
 ## Out of scope
 
-Per-item manual editing in preview, undo/history, level chalk costs, boss reward multipliers, `appliesTo` / `styleMatch` / `levelReq` adjustments.
+- Migrating already-equipped `aura` / `title` items in saved game state (they keep working; just no longer discoverable as separate slots in the UI).
+- Boss high-point boost, streak bonus, level-up cost discount (rejected this round).
+- Per-style or per-activity tuning of crit / boss bonus.
+
+## Files
+
+- **Edited**: `src/game/data.ts`, `src/game/customItems.ts`, `src/game/store.ts` (computeChalk crit roll, breakdown), `src/game/rebalance.ts`, `src/components/RebalancePreviewModal.tsx`, `src/pages/Admin.tsx` (form fields + hide Category for power), `src/pages/Shop.tsx`, `src/pages/Inventory.tsx`, `src/components/ItemCard.tsx` (show crit / boss badges).
+- **Migration**: add `crit_chance_pct`, `boss_bonus_pct` columns to `shop_items`; data update to set `slot='powerup'`, `category='Power-up'` on existing power items.

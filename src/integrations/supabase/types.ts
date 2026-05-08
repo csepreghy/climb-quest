@@ -147,8 +147,10 @@ export type Database = {
         Row: {
           applies_to: Json
           bonus_pct: number
+          boss_bonus_pct: number
           category: string
           created_at: string
+          crit_chance_pct: number
           group: string
           id: string
           image: string | null
@@ -163,8 +165,10 @@ export type Database = {
         Insert: {
           applies_to?: Json
           bonus_pct?: number
+          boss_bonus_pct?: number
           category: string
           created_at?: string
+          crit_chance_pct?: number
           group: string
           id: string
           image?: string | null
@@ -179,8 +183,10 @@ export type Database = {
         Update: {
           applies_to?: Json
           bonus_pct?: number
+          boss_bonus_pct?: number
           category?: string
           created_at?: string
+          crit_chance_pct?: number
           group?: string
           id?: string
           image?: string | null

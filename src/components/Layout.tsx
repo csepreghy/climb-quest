@@ -164,7 +164,7 @@ export default function Layout() {
               alt="ClimbQuest"
               className="h-auto w-full max-h-20 max-w-[180px] object-contain object-left transition-transform group-hover:rotate-[-4deg] drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]"
             />
-            <div className="leading-tight hidden sm:block">
+            <div className="leading-tight hidden xl:block">
               <div className="text-sm text-muted-foreground">Log boulders. Earn Chalk. Send bosses.</div>
             </div>
           </NavLink>
@@ -175,7 +175,7 @@ export default function Layout() {
             <GameButton variant="success" size="sm" onClick={tryOpenLog} className="sm:hidden !px-2.5" aria-label="Log Boulder">
               <Plus className="h-4 w-4" />
             </GameButton>
-            {isAdmin && <div className="hidden sm:contents"><ThemeButton /></div>}
+            {isAdmin && <div className="hidden xl:contents"><ThemeButton /></div>}
             {hasAdminRole && user && (
               <button
                 type="button"
@@ -186,7 +186,7 @@ export default function Layout() {
                 }}
                 title={`Active: ${activeSlot} account — click to switch`}
                 className={cn(
-                  "hidden sm:inline-flex items-center gap-1.5 px-2.5 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-xs font-semibold uppercase tracking-wider transition hover:brightness-110",
+                  "hidden xl:inline-flex items-center gap-1.5 px-2.5 h-9 rounded-full border-2 border-[hsl(var(--panel-frame))] text-xs font-semibold uppercase tracking-wider transition hover:brightness-110",
                   activeSlot === "test"
                     ? "bg-[hsl(var(--btn-orange))] text-white"
                     : "bg-secondary text-foreground/90"

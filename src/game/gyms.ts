@@ -133,11 +133,11 @@ export function useGyms(): GymState {
 
 const id = () => Math.random().toString(36).slice(2, 9);
 
-export function addGym(name: string, location: string) {
+export function addGym(name: string, location: string, country?: string) {
   set(s => ({
     ...s,
     gyms: [...s.gyms, {
-      id: id(), name, location,
+      id: id(), name, location, country,
       primary: s.gyms.length === 0,
       holdColors: DEFAULT_HOLD_COLORS,
       gradingSystemIds: ["v_grades"],

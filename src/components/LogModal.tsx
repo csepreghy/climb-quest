@@ -372,7 +372,7 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
     : gymState.gradingSystems;
   const [gsId, setGsId] = useState(availableSystems[0]?.id ?? "v_grades");
   useEffect(() => { setGsId(availableSystems[0]?.id ?? "v_grades"); }, [gymId]);
-  const gs = availableSystems.find(g => g.id === gsId) ?? gymState.gradingSystems.find(g => g.id === gsId);
+  const gs = availableSystems.find(g => g.id === gsId) ?? availableSystems[0];
   const grades = gs ? gradeLabels(gs) : [];
 
   const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));

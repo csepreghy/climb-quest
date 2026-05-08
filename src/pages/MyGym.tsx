@@ -21,8 +21,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function MyGym() {
   const s = useGyms();
+  const pub = usePublicGyms();
   const [newName, setNewName] = useState("");
   const [newLoc, setNewLoc] = useState("");
+
+  const addedPublic = pub.gyms.filter(g => s.addedPublicGymIds.includes(g.id));
+  const availablePublic = pub.gyms.filter(g => !s.addedPublicGymIds.includes(g.id));
 
   return (
     <div className="space-y-6 animate-float-up max-w-4xl">
@@ -38,7 +42,27 @@ export default function MyGym() {
         </div>
       </GameCard>
 
-      {s.gyms.length === 0 && (
+      {availablePublic.length > 0 && (
+        <GameCard className="p-5 space-y-3">
+          <div className="menu-label flex items-center gap-1.5"><Globe className="h-3.5 w-3.5" /> Add a public gym</div>
+          <p className="text-xs text-muted-foreground">Gyms curated by admins. Add to your list to log climbs there.</p>
+          <div className="flex flex-wrap gap-2">
+            {availablePublic.map(g => (
+              <button
+                key={g.id}
+                onClick={() => { addPublicGymToMine(g.id); toast.success(`${g.name} added to your gyms`); }}
+                className="flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-secondary/40 hover:border-[hsl(var(--btn-orange))] text-xs"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span className="font-semibold">{g.name}</span>
+                {g.location && <span className="text-muted-foreground">· {g.location}</span>}
+              </button>
+            ))}
+          </div>
+        </GameCard>
+      )}
+
+      {s.gyms.length === 0 && addedPublic.length === 0 && (
         <p className="text-sm text-muted-foreground italic">No gyms yet. Add your home crag above.</p>
       )}
 
@@ -64,14 +88,14 @@ export default function MyGym() {
             <div className="flex flex-wrap gap-2">
               {g.holdColors.map(c => (
                 <div key={c.id} className="flex items-center gap-2 px-2 py-1 rounded-md border border-border bg-secondary/40">
-                  <span className="h-5 w-5 rounded border border-[hsl(var(--panel-frame))]" style={{ background: c.hex }} />
+                  <HoldSwatch hex={c.hex} hex2={c.hex2} className="h-5 w-5" />
                   <span className="text-xs">{c.name}</span>
                   <button onClick={() => removeHoldColor(g.id, c.id)} className="text-muted-foreground hover:text-destructive">
                     <X className="h-3 w-3" />
                   </button>
                 </div>
               ))}
-              <AddHoldColor onAdd={(name, hex) => addHoldColor(g.id, { name, hex })} />
+              <AddHoldColor onAdd={(c) => addHoldColor(g.id, c)} />
             </div>
           </section>
 
@@ -90,6 +114,36 @@ export default function MyGym() {
                   </button>
                 );
               })}
+            </div>
+          </section>
+        </GameCard>
+      ))}
+
+      {addedPublic.map(g => (
+        <GameCard key={g.id} className="p-5 space-y-4 opacity-95">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                <h3 className="font-semibold">{g.name}</h3>
+                <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Public</span>
+              </div>
+              {g.location && <div className="text-xs text-muted-foreground mt-0.5">{g.location}</div>}
+              <div className="text-[11px] text-muted-foreground mt-1 italic">Admin-managed — read only.</div>
+            </div>
+            <GameButton size="sm" variant="ghost" onClick={() => { if (confirm(`Remove ${g.name} from your gyms?`)) removePublicGymFromMine(g.id); }}>
+              <Trash2 className="h-4 w-4" /> Remove
+            </GameButton>
+          </div>
+          <section>
+            <div className="menu-label mb-2">Hold colors</div>
+            <div className="flex flex-wrap gap-2">
+              {g.holdColors.map(c => (
+                <div key={c.id} className="flex items-center gap-2 px-2 py-1 rounded-md border border-border bg-secondary/40">
+                  <HoldSwatch hex={c.hex} hex2={c.hex2} className="h-5 w-5" />
+                  <span className="text-xs">{c.name}</span>
+                </div>
+              ))}
             </div>
           </section>
         </GameCard>

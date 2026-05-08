@@ -69,6 +69,7 @@ export default function Admin() {
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="levels">Levels</TabsTrigger>
           <TabsTrigger value="items">Items</TabsTrigger>
           <TabsTrigger value="gyms">Gyms</TabsTrigger>
           <TabsTrigger value="theme">Theme</TabsTrigger>

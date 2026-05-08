@@ -141,6 +141,10 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   }
 
   function submit() {
+    if (attemptType === "project" && !editLog) {
+      setProjectPromptOpen(true);
+      return;
+    }
     if (gymId) setLastUsedGym(gymId);
     const holdColor = gym?.holdColors.find(c => c.id === holdColorId);
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");

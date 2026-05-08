@@ -69,6 +69,7 @@ export default function Admin() {
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="levels">Levels</TabsTrigger>
           <TabsTrigger value="items">Items</TabsTrigger>
           <TabsTrigger value="gyms">Gyms</TabsTrigger>
           <TabsTrigger value="theme">Theme</TabsTrigger>
@@ -190,9 +191,12 @@ export default function Admin() {
               <span>Ignore level requirements (shop)</span>
             </label>
           </GameCard>
+        </TabsContent>
 
+        <TabsContent value="levels" className="space-y-6 mt-6">
           <LevelsAdmin />
         </TabsContent>
+
 
         <TabsContent value="items" className="space-y-6 mt-6">
           <InventoryAdmin />

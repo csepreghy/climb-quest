@@ -1,25 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   useGyms, addGym, updateGym, deleteGym, setPrimaryGym,
   addHoldColor, removeHoldColor,
-  addGradingSystem, updateGradingSystem, deleteGradingSystem, toggleGymGradingSystem,
-  setEquivalent, gradeLabels,
+  toggleGymGradingSystem,
+  addGymCustomGrading, updateGymCustomGrading, deleteGymCustomGrading,
   addPublicGymToMine, removePublicGymFromMine,
-  V_SCALE, FRENCH_SCALE,
-  GradingSystem, GradingKind, GradeEquivalent, HoldColor,
 } from "@/game/gyms";
 import { usePublicGyms } from "@/game/publicGyms";
 import { COUNTRIES } from "@/game/countries";
 import { Plus, X, Star, Trash2, Lock, Globe } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { HoldSwatch } from "@/components/HoldSwatch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddHoldColor } from "@/components/AddHoldColor";
+import { GymGradingEditor } from "@/components/GymGradingEditor";
 
 export default function MyGym() {
   const s = useGyms();

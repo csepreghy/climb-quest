@@ -236,6 +236,7 @@ export function computeChalk(
   flashed = false,
   difficultyMult = 1,
   dateISO?: string,
+  repeat = false,
 ): ChalkBreakdown {
   const baseRaw = getActivityReward(activity);
   const base = Math.max(1, Math.round(baseRaw * difficultyMult));
@@ -249,8 +250,10 @@ export function computeChalk(
     });
   }
 
+  const sentLike = sent || repeat;
+
   // Send flat bonus first (additive, not stacked %)
-  if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder" || activity === "project_boulder")) {
+  if (sentLike && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder" || activity === "project_boulder")) {
     const amt = Math.round(getActivityReward("boulder_send") * difficultyMult);
     bonuses.push({ source: "Send", amount: amt });
     running += amt;

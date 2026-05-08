@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { ArrowRight, Lock, ShoppingBag, Pencil, Check, X } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
 import { LevelsModal } from "@/components/LevelsModal";
-import { computeDailyCap, currentStreak, useDailyCapConfig } from "@/game/dailyCap";
+import { computeDailyCap, useDailyCapConfig } from "@/game/dailyCap";
 import { useCharacterName, setCharacterName } from "@/game/characterName";
 import { CharacterNameInput } from "@/components/CharacterNameInput";
 

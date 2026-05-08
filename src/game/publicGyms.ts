@@ -92,3 +92,29 @@ export async function setPublicGymGradingSystems(gymId: string, list: GradingSys
   if (error) throw error;
   await loadPublicGyms();
 }
+
+const newId = () => Math.random().toString(36).slice(2, 9);
+
+export async function addPublicHoldColor(gymId: string, c: { name: string; hex: string; hex2?: string }) {
+  const current = state.gyms.find(g => g.id === gymId);
+  if (!current) return;
+  const next = { ...current, holdColors: [...current.holdColors, { ...c, id: newId() }] };
+  await updatePublicGym(gymId, { holdColors: next.holdColors });
+}
+
+export async function removePublicHoldColor(gymId: string, colorId: string) {
+  const current = state.gyms.find(g => g.id === gymId);
+  if (!current) return;
+  await updatePublicGym(gymId, { holdColors: current.holdColors.filter(c => c.id !== colorId) });
+}
+
+export async function togglePublicGymGradingSystem(gymId: string, gsId: string) {
+  const current = state.gyms.find(g => g.id === gymId);
+  if (!current) return;
+  const has = current.gradingSystemIds.includes(gsId);
+  await updatePublicGym(gymId, {
+    gradingSystemIds: has
+      ? current.gradingSystemIds.filter(x => x !== gsId)
+      : [...current.gradingSystemIds, gsId],
+  });
+}

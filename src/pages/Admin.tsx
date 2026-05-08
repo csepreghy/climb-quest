@@ -28,7 +28,6 @@ import {
   usePublicGyms,
   addPublicGym, updatePublicGym, deletePublicGym,
   addPublicHoldColor, removePublicHoldColor, togglePublicGymGradingSystem,
-  setPublicGymGradingSystems,
 } from "@/game/publicGyms";
 import { COUNTRIES } from "@/game/countries";
 import { AddHoldColor } from "@/components/AddHoldColor";

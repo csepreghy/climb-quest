@@ -188,7 +188,7 @@ function BackfillImagesCard() {
     <GameCard tone="accent" className="p-5">
       <div className="menu-label mb-3">Admin · Image Backfill</div>
       <p className="text-sm text-muted-foreground mb-3">
-        Convert legacy base64 item images to 800px webp in cloud storage. One-off operation; safe to re-run.
+        Convert legacy base64 item images to 360px webp in cloud storage. One-off operation; safe to re-run.
       </p>
       <div className="flex items-center gap-3">
         <Button onClick={run} disabled={busy}>{busy ? "Working…" : "Run backfill"}</Button>

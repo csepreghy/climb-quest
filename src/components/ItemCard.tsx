@@ -36,7 +36,7 @@ export function ItemCard({
   const badges: { text: string; cls: string }[] = [];
   if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40" });
   if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] border-[hsl(var(--btn-orange))]/40" });
-  if (critPct > 0) badges.push({ text: `${critPct}% crit`, cls: "bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40" });
+  if (critPct > 0) badges.push({ text: `${critPct}% crit`, cls: "bg-legendary/15 text-legendary border-legendary/40" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}% boss`, cls: "bg-destructive/15 text-destructive border-destructive/40" });
   return (
     <GameCard

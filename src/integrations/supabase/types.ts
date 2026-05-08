@@ -38,6 +38,51 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_cap_config: {
+        Row: {
+          base: number
+          enabled: boolean
+          id: string
+          level_step: number
+          streak_max_days: number
+          streak_step: number
+          tier1_mult: number
+          tier1_threshold: number
+          tier2_mult: number
+          tier2_threshold: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          base?: number
+          enabled?: boolean
+          id?: string
+          level_step?: number
+          streak_max_days?: number
+          streak_step?: number
+          tier1_mult?: number
+          tier1_threshold?: number
+          tier2_mult?: number
+          tier2_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          base?: number
+          enabled?: boolean
+          id?: string
+          level_step?: number
+          streak_max_days?: number
+          streak_step?: number
+          tier1_mult?: number
+          tier1_threshold?: number
+          tier2_mult?: number
+          tier2_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       hidden_builtin_items: {
         Row: {
           hidden_at: string

@@ -626,7 +626,6 @@ function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: 
         <img src={chalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--chalk-glow)/0.6)]" />
         <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{total}</span>
       </div>
-      <Sparkles className="h-6 w-6 mx-auto mt-3 text-chalk-glow animate-pulse" />
     </div>
   );
 }

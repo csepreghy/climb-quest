@@ -91,6 +91,7 @@ const initialState = (): State => ({
   equipped: {},
   pendingConsumable: null,
   badges: [],
+  badgeChalkClaimedFor: [],
   bosses: [
     { ...spawnBoss(BOSS_TEMPLATES[0]), active: true },
     spawnBoss(BOSS_TEMPLATES[1]),

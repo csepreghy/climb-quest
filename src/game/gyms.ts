@@ -63,6 +63,8 @@ export interface GymState {
   gyms: Gym[];
   gradingSystems: GradingSystem[];
   lastUsedGymId: string | null;
+  /** Ids of admin-created public gyms the user has added to their list. */
+  addedPublicGymIds: string[];
 }
 
 const KEY = "climbquest:gym:v1";
@@ -82,7 +84,7 @@ const DEFAULT_HOLD_COLORS: HoldColor[] = [
 ];
 
 function initial(): GymState {
-  return { gyms: [], gradingSystems: [V_GRADES, FRENCH_GRADES], lastUsedGymId: null };
+  return { gyms: [], gradingSystems: [V_GRADES, FRENCH_GRADES], lastUsedGymId: null, addedPublicGymIds: [] };
 }
 
 let state: GymState = load();

@@ -11,7 +11,7 @@ import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolv
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Sparkles, Info, Swords, Trophy } from "lucide-react";
+import { ArrowLeft, Info, Swords, Trophy } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
 import chalkBagImg from "@/assets/chalk-bag.png";
@@ -626,7 +626,6 @@ function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: 
         <img src={chalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--chalk-glow)/0.6)]" />
         <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{total}</span>
       </div>
-      <Sparkles className="h-6 w-6 mx-auto mt-3 text-chalk-glow animate-pulse" />
     </div>
   );
 }

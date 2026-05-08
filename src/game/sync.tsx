@@ -6,6 +6,7 @@ import {
   getGameStateSnapshot,
   replaceGameState,
   adminSeedMockData,
+  runRetroBadgeAudit,
   State as GameState,
 } from "./store";
 import {
@@ -79,6 +80,9 @@ export function GameSync() {
           adminSeedMockData();
         }
       }
+
+      // Retroactively grant any deserved badges + back-pay +50 chalk per badge.
+      runRetroBadgeAudit();
 
       if (cancelled) return;
 

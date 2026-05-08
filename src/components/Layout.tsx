@@ -4,10 +4,10 @@ import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, A
 import { useLoadCharacterName } from "@/game/characterName";
 import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD, onBadgesAwarded, BADGE_CHALK_REWARD } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
-import { BASE_CHALK, ACTIVITY_LABELS, ActivityType } from "@/game/data";
+import { BASE_CHALK, ACTIVITY_LABELS, ActivityType, BADGE_BY_ID } from "@/game/data";
 import { useDailyCapConfig, computeDailyCap } from "@/game/dailyCap";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
@@ -75,6 +75,23 @@ export default function Layout() {
     const h = () => setConfirmLvOpen(true);
     window.addEventListener("cq:open-level-up-confirm", h);
     return () => window.removeEventListener("cq:open-level-up-confirm", h);
+  }, []);
+
+  // Celebrate newly-awarded badges with a toast + chalk reward callout.
+  useEffect(() => {
+    return onBadgesAwarded(ids => {
+      ids.forEach((id, i) => {
+        const b = BADGE_BY_ID[id];
+        const name = b?.name ?? "New Badge";
+        const emoji = b?.emoji ?? "🏅";
+        setTimeout(() => {
+          toast.success(`${emoji}  Badge unlocked: ${name}`, {
+            description: `+${BADGE_CHALK_REWARD} Chalk awarded — keep climbing!`,
+            duration: 5000,
+          });
+        }, i * 350);
+      });
+    });
   }, []);
   const cur = currentLevel(s);
   const nxt = nextLevel(s);

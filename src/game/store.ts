@@ -68,6 +68,8 @@ export interface State {
   equipped: Equipped;
   pendingConsumable: string | null; // item id
   badges: string[];       // badge ids
+  /** Badge ids for which the +50 chalk reward has already been granted. */
+  badgeChalkClaimedFor: string[];
   bosses: Boss[];
   logs: BoulderLog[];
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
@@ -89,6 +91,7 @@ const initialState = (): State => ({
   equipped: {},
   pendingConsumable: null,
   badges: [],
+  badgeChalkClaimedFor: [],
   bosses: [
     { ...spawnBoss(BOSS_TEMPLATES[0]), active: true },
     spawnBoss(BOSS_TEMPLATES[1]),
@@ -392,13 +395,12 @@ export function logBoulder(input: LogInput) {
 
   set(s => {
     const newBadges = computeNewBadges(s, log);
-    return {
+    const next: State = {
       ...s,
       chalk: s.chalk + log.chalkTotal,
       totalChalkEarned: s.totalChalkEarned + log.chalkTotal,
       logs: [log, ...s.logs].slice(0, 200),
       pendingConsumable: null,
-      badges: Array.from(new Set([...s.badges, ...newBadges])),
       stats: {
         ...s.stats,
         totalLogs: s.stats.totalLogs + 1,
@@ -407,6 +409,7 @@ export function logBoulder(input: LogInput) {
         bossesSent: s.stats.bossesSent + (input.isBoss && (input.attemptType === "flash" || input.attemptType === "send") ? 1 : 0),
       },
     };
+    return applyBadges(next, newBadges);
   });
   return { log, breakdown, newBadges: computeNewBadgesAfter() };
 }
@@ -505,19 +508,17 @@ export function levelUp(): { ok: boolean; reason?: string; unlocks?: string[] } 
   const next = nextLevel(state);
   if (!next) return { ok: false, reason: "Already max level" };
   if (state.chalk < next.cost) return { ok: false, reason: "Not enough Chalk" };
-  set(s => ({
-    ...s,
-    chalk: s.chalk - next.cost,
-    level: next.level,
-    badges: addLevelBadges(s.badges, next.level),
-  }));
+  set(s => {
+    const lifted: State = { ...s, chalk: s.chalk - next.cost, level: next.level };
+    return applyBadges(lifted, levelBadges(next.level));
+  });
   return { ok: true, unlocks: next.unlocks };
 }
-function addLevelBadges(b: string[], lvl: number): string[] {
-  const set = new Set(b);
-  if (lvl >= 6) set.add("dyno_unlocked");
-  if (lvl >= 10) set.add("demigod_unlocked");
-  return Array.from(set);
+function levelBadges(lvl: number): string[] {
+  const out: string[] = [];
+  if (lvl >= 6) out.push("dyno_unlocked");
+  if (lvl >= 10) out.push("demigod_unlocked");
+  return out;
 }
 
 export function buyItem(id: string): { ok: boolean; reason?: string } {
@@ -529,11 +530,17 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
   if (state.chalk < price) return { ok: false, reason: "Not enough Chalk" };
   set(s => {
     const owned = item.consumableBonus ? s.owned : [...s.owned, id];
-    const badges = new Set(s.badges);
-    if (id === "crocs") badges.add("crocs_equipped");
-    if (id === "golden_crocs") badges.add("golden_crocs");
-    if (id === "minimal_kit") { badges.add("minimal_kit"); badges.add("shirtless_form"); }
-    return { ...s, chalk: s.chalk - price, owned, badges: Array.from(badges) };
+    const add: string[] = [];
+    if (id === "crocs") add.push("crocs_equipped");
+    if (id === "golden_crocs") add.push("golden_crocs");
+    if (id === "minimal_kit") { add.push("minimal_kit"); add.push("shirtless_form"); }
+    if (!item.consumableBonus) {
+      if (owned.length >= 1) add.push("first_purchase");
+      if (owned.length >= 5) add.push("five_purchases");
+      if (item.rarity && item.rarity !== "common") add.push("first_rare_purchase");
+    }
+    const next: State = { ...s, chalk: s.chalk - price, owned };
+    return applyBadges(next, add);
   });
   return { ok: true };
 }
@@ -553,7 +560,10 @@ export function equipItem(id: string): { ok: boolean; reason?: string } {
       return { ok: false, reason: `No free gear slot — unlock more by leveling up (max ${max} at Lv ${state.level})` };
     }
   }
-  set(s => ({ ...s, equipped: { ...s.equipped, [item.slot]: id } }));
+  set(s => {
+    const next: State = { ...s, equipped: { ...s.equipped, [item.slot]: id } };
+    return applyBadges(next, ["first_equip"]);
+  });
   return { ok: true };
 }
 export function unequipSlot(slot: keyof Equipped) {
@@ -593,7 +603,87 @@ export function claimDailyLoginIfNeeded(): boolean {
   return true;
 }
 
-/** Auto-grant & auto-equip every catalog item priced 0. Idempotent. */
+// ===== Badge rewards =====
+export const BADGE_CHALK_REWARD = 50;
+
+const badgeListeners = new Set<(ids: string[]) => void>();
+export function onBadgesAwarded(cb: (ids: string[]) => void): () => void {
+  badgeListeners.add(cb);
+  return () => { badgeListeners.delete(cb); };
+}
+function emitBadges(ids: string[]) {
+  if (!ids.length) return;
+  // Defer to next tick so React state updates flush before toasts fire.
+  setTimeout(() => badgeListeners.forEach(l => { try { l(ids); } catch {} }), 0);
+}
+
+/**
+ * Merge `addIds` into `s.badges`, granting +50 chalk for each badge id that
+ * has not yet been rewarded (tracked in `badgeChalkClaimedFor`). Fires the
+ * badge-awarded event for any newly-awarded badges (not for chalk-only catch-up).
+ */
+function applyBadges(s: State, addIds: string[]): State {
+  const haveBadges = new Set(s.badges);
+  const fresh = addIds.filter(id => !haveBadges.has(id));
+  const nextBadges = fresh.length ? [...s.badges, ...fresh] : s.badges;
+
+  const claimed = new Set(s.badgeChalkClaimedFor ?? []);
+  const toReward = nextBadges.filter(id => !claimed.has(id));
+  const reward = toReward.length * BADGE_CHALK_REWARD;
+  const nextClaimed = toReward.length ? [...(s.badgeChalkClaimedFor ?? []), ...toReward] : (s.badgeChalkClaimedFor ?? []);
+
+  if (fresh.length) emitBadges(fresh);
+
+  return {
+    ...s,
+    badges: nextBadges,
+    badgeChalkClaimedFor: nextClaimed,
+    chalk: s.chalk + reward,
+    totalChalkEarned: s.totalChalkEarned + reward,
+  };
+}
+
+/** Compute every badge id the player currently deserves based on their state. */
+function deservedBadges(s: State): string[] {
+  const out: string[] = [];
+  // From logs
+  if (s.logs.length > 0 || s.stats.totalLogs > 0) out.push("first_send");
+  if (s.logs.some(l => l.attemptType === "flash")) out.push("first_flash");
+  if (s.logs.some(l => l.styles.includes("slab"))) out.push("slab_survivor");
+  if (s.logs.some(l => l.styles.includes("overhang"))) out.push("overhang_enjoyer");
+  if (s.totalChalkEarned >= 1000) out.push("chalk_monster");
+  if (s.logs.filter(l => l.styles.includes("crimp")).length >= 5) out.push("tiny_crimp");
+  // got_humbled badge is awarded inline elsewhere; skip retro detection.
+  // Bosses
+  if (s.bosses.some(b => b.sent)) out.push("crux_breaker");
+  if (s.bosses.filter(b => b.sent).length >= 3) out.push("project_slayer");
+  // Levels
+  if (s.level >= 6) out.push("dyno_unlocked");
+  if (s.level >= 10) out.push("demigod_unlocked");
+  // Items
+  if (s.owned.includes("crocs")) out.push("crocs_equipped");
+  if (s.owned.includes("golden_crocs")) out.push("golden_crocs");
+  if (s.owned.includes("minimal_kit")) { out.push("minimal_kit"); out.push("shirtless_form"); }
+  // Shop activity
+  const purchased = s.owned.length;
+  if (purchased >= 1) out.push("first_purchase");
+  if (purchased >= 5) out.push("five_purchases");
+  if (s.owned.some(id => {
+    const it = getItem(id);
+    return it && it.rarity && it.rarity !== "common";
+  })) out.push("first_rare_purchase");
+  if (Object.values(s.equipped).some(Boolean)) out.push("first_equip");
+  return out;
+}
+
+/**
+ * Retroactively award any deserved badges and back-pay the +50 chalk for every
+ * badge the user already has but hasn't been rewarded for yet. Safe to call
+ * multiple times — `badgeChalkClaimedFor` makes it idempotent.
+ */
+export function runRetroBadgeAudit() {
+  set(s => applyBadges(s, deservedBadges(s)));
+}
 export function grantFreeItems(items: { id: string; price: number; slot: Slot; consumableBonus?: number }[]) {
   const free = items.filter(i => i.price === 0 && !i.consumableBonus);
   if (!free.length) return;
@@ -642,19 +732,19 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
       return { ...b, attempts: [att, ...b.attempts], highPoint, sent: b.sent || sent, sentDate: sent ? att.date : b.sentDate };
     });
     const sentNow = outcome === "send" || outcome === "flash";
-    const badges = new Set(s.badges);
-    if (sentNow) badges.add("crux_breaker");
+    const add: string[] = [];
+    if (sentNow) add.push("crux_breaker");
     const bossesSent = bosses.filter(b => b.sent).length;
-    if (bossesSent >= 3) badges.add("project_slayer");
-    return {
+    if (bossesSent >= 3) add.push("project_slayer");
+    const next: State = {
       ...s,
       chalk: s.chalk + att.chalk,
       totalChalkEarned: s.totalChalkEarned + att.chalk,
       bosses,
-      badges: Array.from(badges),
       pendingConsumable: null,
       stats: { ...s.stats, bossesSent, totalSends: s.stats.totalSends + (sentNow ? 1 : 0), totalFlashes: s.stats.totalFlashes + (outcome === "flash" ? 1 : 0) },
     };
+    return applyBadges(next, add);
   });
   return { attempt: att, breakdown };
 }

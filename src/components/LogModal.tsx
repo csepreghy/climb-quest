@@ -319,21 +319,21 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       <Dialog open={projectPromptOpen} onOpenChange={setProjectPromptOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <div className="flex items-center gap-3">
-              <HeaderImage src={bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/50" />
-              <div>
-                <DialogTitle>Log this as a Boss Project?</DialogTitle>
-                <DialogDescription className="mt-1">
-                  Multi-session climbs should be logged as Boss Projects — you'll get richer tracking and bigger rewards when you finally send it.
-                </DialogDescription>
-              </div>
-            </div>
+            <DialogTitle className="text-center">Log this as a Boss Project?</DialogTitle>
           </DialogHeader>
-          <DialogFooter className="gap-2">
-            <GameButton variant="ghost" size="sm" onClick={() => { setProjectPromptOpen(false); setAttemptType("send"); }}>
+          <div className="flex flex-col items-center gap-3 pt-1">
+            <div className="h-32 w-32 rounded-2xl overflow-hidden border-4 border-[hsl(var(--boss))] shadow-[0_0_28px_hsl(var(--boss)/0.5)]">
+              <img src={bossImg} alt="Boss" className="h-full w-full object-cover" />
+            </div>
+            <DialogDescription className="text-center px-2">
+              Multi-session climbs should be logged as Boss Projects — you'll get richer tracking and bigger rewards when you finally send it.
+            </DialogDescription>
+          </div>
+          <DialogFooter className="gap-2 flex-col sm:flex-row">
+            <GameButton variant="ghost" size="sm" className="w-full sm:w-auto" onClick={() => { setProjectPromptOpen(false); setAttemptType("send"); }}>
               No, it's just a boulder
             </GameButton>
-            <GameButton variant="primary" size="sm" onClick={() => { setProjectPromptOpen(false); onSwitchToBoss?.(); }}>
+            <GameButton variant="primary" size="sm" className="w-full sm:w-auto" onClick={() => { setProjectPromptOpen(false); onSwitchToBoss?.(); }}>
               Yes, log as Boss Project
             </GameButton>
           </DialogFooter>

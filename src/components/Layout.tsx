@@ -307,7 +307,7 @@ function ChalkChip({ value }: { value: number }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="View chalk earning guide"
-        className="flex items-center gap-2.5 pl-3 pr-4 h-10 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary transition-transform hover:brightness-110 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+        className="flex items-center gap-2.5 pl-3 pr-3 sm:pr-4 h-10 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary transition-transform hover:brightness-110 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         style={{
           boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.06), inset 0 -1px 0 hsl(0 0% 0% / 0.55)",
         }}

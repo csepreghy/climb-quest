@@ -11,7 +11,9 @@ import chalkBagImg from "@/assets/chalk-bag.png";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 
-const GROUPS: { key: ItemGroup; label: string; categories: string[] }[] = [
+type GroupKey = ItemGroup | "all";
+const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [
+  { key: "all",    label: "All",       categories: [] },
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
   { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk", "Study"] },
   { key: "power",  label: "Power-ups", categories: [] },
@@ -21,13 +23,13 @@ export default function Shop() {
   const s = useGame();
   const all = useAllItems();
   const loaded = useCatalogLoaded();
-  const [group, setGroup] = useState<ItemGroup>("outfit");
+  const [group, setGroup] = useState<GroupKey>("all");
   const [cat, setCat] = useState<string>("All");
 
   const activeGroup = GROUPS.find(g => g.key === group)!;
   const items = useMemo(() => {
     const inGroup = all.filter(i =>
-      i.group === group &&
+      (group === "all" || i.group === group) &&
       i.price > 0 &&
       (!i.gender || i.gender === "unisex" || i.gender === s.gender)
     );

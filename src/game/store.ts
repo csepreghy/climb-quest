@@ -250,7 +250,7 @@ export function computeChalk(
   }
 
   // Send flat bonus first (additive, not stacked %)
-  if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder")) {
+  if (sent && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder" || activity === "project_boulder")) {
     const amt = Math.round(getActivityReward("boulder_send") * difficultyMult);
     bonuses.push({ source: "Send", amount: amt });
     running += amt;

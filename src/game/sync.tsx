@@ -6,6 +6,7 @@ import {
   getGameStateSnapshot,
   replaceGameState,
   adminSeedMockData,
+  runRetroBadgeAudit,
   State as GameState,
 } from "./store";
 import {

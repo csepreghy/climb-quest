@@ -71,6 +71,8 @@ export interface ShopItem {
   levelReq?: number;
   /** Multiplier on shop prices when equipped, e.g. 0.9 = 10% off. Defaults to 1. */
   priceMult?: number;
+  /** Gender restriction for Tops/Pants. 'unisex' (or undefined) shows for everyone. */
+  gender?: "male" | "female" | "unisex";
 }
 
 export const SHOP: ShopItem[] = [];

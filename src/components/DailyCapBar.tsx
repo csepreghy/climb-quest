@@ -32,11 +32,6 @@ export function DailyCapBar({ className }: { className?: string }) {
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <span className={cn(overTier1 ? "text-[hsl(var(--btn-orange))]" : "text-chalk-glow")}>{stateLabel}</span>
-          {streak > 0 && (
-            <span className="flex items-center gap-1 text-[hsl(var(--btn-orange))]">
-              <Flame className="h-3 w-3" />{streak}d
-            </span>
-          )}
         </div>
       </div>
       <div className="h-2 rounded-full bg-secondary overflow-hidden relative">

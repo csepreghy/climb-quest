@@ -98,7 +98,8 @@ export default function Inventory() {
   const s = useGame();
   const { isAdmin } = useAuth();
   useCustomItems();
-  const owned = s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[];
+  const owned = (s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[])
+    .filter(it => !it.gender || it.gender === "unisex" || it.gender === s.gender);
   const totalBonusByActivity = gearBonusSummary(s.equipped);
   const specialSummary = specialBonusSummary(s.equipped);
   const dailyCapCfg = useDailyCapConfig();

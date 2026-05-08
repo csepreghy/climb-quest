@@ -196,6 +196,7 @@ export type Database = {
           category: string
           created_at: string
           crit_chance_pct: number
+          gender: string
           group: string
           id: string
           image: string | null
@@ -214,6 +215,7 @@ export type Database = {
           category: string
           created_at?: string
           crit_chance_pct?: number
+          gender?: string
           group: string
           id: string
           image?: string | null
@@ -232,6 +234,7 @@ export type Database = {
           category?: string
           created_at?: string
           crit_chance_pct?: number
+          gender?: string
           group?: string
           id?: string
           image?: string | null

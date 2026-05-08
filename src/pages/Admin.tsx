@@ -370,6 +370,7 @@ function InventoryAdmin() {
       discountPct: item.priceMult ? Math.round((1 - item.priceMult) * 100) : 0,
       critChancePct: item.critChancePct ?? 0,
       bossBonusPct: item.bossBonusPct ?? 0,
+      gender: item.gender ?? "unisex",
     });
   }
 
@@ -430,6 +431,19 @@ function InventoryAdmin() {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {CATEGORIES_BY_GROUP[draft.group].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {(draft.category === "Top" || draft.category === "Pants") && (
+            <div>
+              <Label className="text-xs">Gender</Label>
+              <Select value={draft.gender ?? "unisex"} onValueChange={v => setDraft(d => ({ ...d, gender: v as "male" | "female" | "unisex" }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unisex">Unisex (everyone)</SelectItem>
+                  <SelectItem value="male">Male only</SelectItem>
+                  <SelectItem value="female">Female only</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -47,10 +47,10 @@ export function usePublicGyms(): PublicGymsState {
 
 const id = () => Math.random().toString(36).slice(2, 9);
 
-export async function addPublicGym(name: string, location: string) {
+export async function addPublicGym(name: string, location: string, country?: string) {
   const gym: Gym = {
     id: id(),
-    name, location,
+    name, location, country,
     primary: false,
     holdColors: [
       { id: "white", name: "White", hex: "#f5f5f5" },

@@ -108,11 +108,10 @@ export default function Inventory() {
   const totalBonusByActivity = gearBonusSummary(s.equipped);
   const specialSummary = specialBonusSummary(s.equipped);
   const dailyCapCfg = useDailyCapConfig();
-  const dailyStreak = currentStreak(s);
-  const dailyCap = computeDailyCap(s.level, dailyStreak, dailyCapCfg);
+  const dailyCap = computeDailyCap(s.level, dailyCapCfg);
   if (dailyCapCfg.enabled && dailyCap > 0) {
     specialSummary.push({
-      label: `Daily cap${dailyStreak > 0 ? ` · ${dailyStreak}d streak` : ""}`,
+      label: "Daily cap",
       value: `${dailyCap.toLocaleString()} chalk`,
       tone: "text-foreground",
     });

@@ -95,6 +95,7 @@ export function targetBonusPct(item: ShopItem): number {
 
 /** Shop discount % — non-stacking (best wins), so per-item just maps from rarity. */
 export function targetDiscountPct(item: ShopItem): number {
+  if (!GROUP_EFFECTS[item.group].discount) return 0;
   if (!canDiscount(item.slot)) return 0;
   // Only study + powerup get discounts at low rarity.
   if (!hasBothEffects(item.rarity)) {

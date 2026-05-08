@@ -144,7 +144,7 @@ export function OnboardingModal({ open, onClose }: Props) {
             icon={<Building2 className="h-5 w-5" />}
             title="Set up your climbing gym"
             body={<>
-              Add the gyms you climb at, their grading systems, and hold colors. You'll need at least one gym before you can log a climb.
+              Add the gyms you climb at, their grading systems, and hold colors. You can do this any time from My Gym.
             </>}
           />
         )}

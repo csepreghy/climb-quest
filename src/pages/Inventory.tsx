@@ -142,7 +142,7 @@ export default function Inventory() {
         <Card className="gradient-card p-5 text-center">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
           <CharacterNameEditor />
-          {isAdmin && (
+          {adminTools && (
             <div className="mt-4 flex gap-2 justify-center">
               {(["male","female"] as const).map(g => (
                 <Button
@@ -309,7 +309,7 @@ export default function Inventory() {
                           primed={isPrimed}
                           highlight={isEquipped}
                           onClick={() => setCompareItem(it)}
-                          onRemove={isAdmin ? () => {
+                          onRemove={adminTools ? () => {
                             if (confirm(`Remove ${it.name} from inventory?`)) {
                               removeOwnedItem(it.id);
                               toast.success(`Removed ${it.name}`);

@@ -316,7 +316,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
         <GameButton variant="success" size="md" onClick={submit}>{editLog ? "Save changes" : "Send it"}</GameButton>
       </div>
 
-      <Dialog open={projectPromptOpen} onOpenChange={setProjectPromptOpen}>
+      <Dialog open={projectPromptOpen} onOpenChange={(o) => { setProjectPromptOpen(o); if (!o) setAttemptType("send"); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center">Log this as a Boss Project?</DialogTitle>

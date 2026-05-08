@@ -13,6 +13,7 @@ import {
   GradingSystem, GradingKind, GradeEquivalent, HoldColor,
 } from "@/game/gyms";
 import { usePublicGyms } from "@/game/publicGyms";
+import { COUNTRIES } from "@/game/countries";
 import { Plus, X, Star, Trash2, Lock, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

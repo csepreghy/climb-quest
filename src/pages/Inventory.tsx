@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { ArrowRight, Lock, ShoppingBag } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
 import { LevelsModal } from "@/components/LevelsModal";
+import { computeDailyCap, currentStreak, useDailyCapConfig } from "@/game/dailyCap";
 
 const SLOT_LABEL: Record<Slot, string> = {
   outfit: "Top",
@@ -100,6 +101,16 @@ export default function Inventory() {
   const owned = s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[];
   const totalBonusByActivity = gearBonusSummary(s.equipped);
   const specialSummary = specialBonusSummary(s.equipped);
+  const dailyCapCfg = useDailyCapConfig();
+  const dailyStreak = currentStreak(s);
+  const dailyCap = computeDailyCap(s.level, dailyStreak, dailyCapCfg);
+  if (dailyCapCfg.enabled && dailyCap > 0) {
+    specialSummary.push({
+      label: `Daily cap${dailyStreak > 0 ? ` · ${dailyStreak}d streak` : ""}`,
+      value: `${dailyCap.toLocaleString()} chalk`,
+      tone: "text-foreground",
+    });
+  }
 
   const [compareItem, setCompareItem] = useState<ShopItem | null>(null);
   const [slotPicker, setSlotPicker] = useState<ShopItem | null>(null);

@@ -124,8 +124,10 @@ function AddCustomGrading({ onAdd }: { onAdd: (g: Omit<GradingSystem, "id">) => 
   );
 }
 
-function CustomGradingCard({ gs, onUpdate, onDelete }: {
+function CustomGradingCard({ gs, selected, onSelect, onUpdate, onDelete }: {
   gs: GradingSystem;
+  selected: boolean;
+  onSelect: () => void;
   onUpdate: (patch: Partial<GradingSystem>) => void;
   onDelete: () => void;
 }) {
@@ -146,9 +148,17 @@ function CustomGradingCard({ gs, onUpdate, onDelete }: {
   const dirty = JSON.stringify(draft) !== JSON.stringify(gs.equivalents ?? {});
 
   return (
-    <div className="rounded-md border border-border bg-secondary/30 p-3 space-y-3">
+    <div className={cn("rounded-md border-2 p-3 space-y-3",
+      selected ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/10" : "border-border bg-secondary/30")}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
+          <input
+            type="radio"
+            checked={selected}
+            onChange={onSelect}
+            className="h-4 w-4 accent-[hsl(var(--btn-orange))] cursor-pointer"
+            aria-label={`Use ${gs.name}`}
+          />
           <Input value={gs.name} onChange={e => onUpdate({ name: e.target.value })} className="h-8 flex-1 max-w-xs" />
           <span className="text-[10px] uppercase text-muted-foreground">{gs.kind}</span>
         </div>

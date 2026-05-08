@@ -530,11 +530,17 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
   if (state.chalk < price) return { ok: false, reason: "Not enough Chalk" };
   set(s => {
     const owned = item.consumableBonus ? s.owned : [...s.owned, id];
-    const badges = new Set(s.badges);
-    if (id === "crocs") badges.add("crocs_equipped");
-    if (id === "golden_crocs") badges.add("golden_crocs");
-    if (id === "minimal_kit") { badges.add("minimal_kit"); badges.add("shirtless_form"); }
-    return { ...s, chalk: s.chalk - price, owned, badges: Array.from(badges) };
+    const add: string[] = [];
+    if (id === "crocs") add.push("crocs_equipped");
+    if (id === "golden_crocs") add.push("golden_crocs");
+    if (id === "minimal_kit") { add.push("minimal_kit"); add.push("shirtless_form"); }
+    if (!item.consumableBonus) {
+      if (owned.length >= 1) add.push("first_purchase");
+      if (owned.length >= 5) add.push("five_purchases");
+      if (item.rarity && item.rarity !== "common") add.push("first_rare_purchase");
+    }
+    const next: State = { ...s, chalk: s.chalk - price, owned };
+    return applyBadges(next, add);
   });
   return { ok: true };
 }

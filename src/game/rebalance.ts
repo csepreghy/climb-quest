@@ -139,7 +139,7 @@ export function targetBossBonusPct(item: ShopItem): number {
 
 /** Lowest level at which an item of this rarity may unlock. */
 const MIN_LEVEL_BY_RARITY: Record<Rarity, number> = {
-  common: 1, rare: 2, epic: 4, legendary: 6,
+  common: 1, uncommon: 1, rare: 2, epic: 4, legendary: 6,
 };
 const MAX_LEVEL = 10;
 

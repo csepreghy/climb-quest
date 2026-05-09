@@ -1000,18 +1000,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                 );
               })}
             </div>
-            {!lockEdit && (
+            {!lockEdit && (canBoss || isFirstTime) && (
               <div className="mt-2 flex flex-wrap justify-center gap-2">
-                {!isFirstTime && unlockedMax > 1 && (
-                  <GameButton variant="ghost" size="sm" onClick={levelDown}>
-                    <ChevronDown className="h-4 w-4" /> Level down to L{unlockedMax - 1}
-                  </GameButton>
-                )}
-                {(canBoss || isFirstTime) && (
-                  <GameButton variant="danger" size="sm" onClick={() => startBoss(nextBoss)}>
-                    <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({strengthBossTargetReps(nextBoss)} reps)
-                  </GameButton>
-                )}
+                <GameButton variant="danger" size="sm" onClick={startBoss}>
+                  <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({STRENGTH_BOSS_TARGET} reps total)
+                </GameButton>
               </div>
             )}
           </div>

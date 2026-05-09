@@ -245,11 +245,11 @@ function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: st
     currentMonday.setDate(today.getDate() - dayIdx);
 
     const WEEKS = 13; // ~3 months
-    const buckets = new Map<string, { ts: number; chalk: number; gradeRank: number | null }>();
+    const buckets = new Map<string, { ts: number; chalk: number; strength: number; gradeRank: number | null }>();
     for (let i = WEEKS - 1; i >= 0; i--) {
       const m = new Date(currentMonday);
       m.setDate(currentMonday.getDate() - i * 7);
-      buckets.set(m.toISOString().slice(0, 10), { ts: m.getTime(), chalk: 0, gradeRank: null });
+      buckets.set(m.toISOString().slice(0, 10), { ts: m.getTime(), chalk: 0, strength: 0, gradeRank: null });
     }
     const earliest = Array.from(buckets.values())[0]?.ts ?? 0;
 

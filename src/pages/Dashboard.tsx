@@ -206,7 +206,7 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
   );
 }
 
-function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number }[] }) {
+function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string }[] }) {
   const data = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -215,11 +215,11 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
     currentMonday.setDate(today.getDate() - dayIdx);
 
     const WEEKS = 13; // ~3 months
-    const buckets = new Map<string, { ts: number; chalk: number }>();
+    const buckets = new Map<string, { ts: number; chalk: number; gradeRank: number | null }>();
     for (let i = WEEKS - 1; i >= 0; i--) {
       const m = new Date(currentMonday);
       m.setDate(currentMonday.getDate() - i * 7);
-      buckets.set(m.toISOString().slice(0, 10), { ts: m.getTime(), chalk: 0 });
+      buckets.set(m.toISOString().slice(0, 10), { ts: m.getTime(), chalk: 0, gradeRank: null });
     }
     const earliest = Array.from(buckets.values())[0]?.ts ?? 0;
 
@@ -232,7 +232,15 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
       if (monday.getTime() < earliest || monday.getTime() > currentMonday.getTime()) continue;
       const key = monday.toISOString().slice(0, 10);
       const existing = buckets.get(key);
-      if (existing) existing.chalk += l.chalkTotal;
+      if (!existing) continue;
+      existing.chalk += l.chalkTotal;
+      const gLabel = l.gradeMax || l.grade;
+      if (gLabel) {
+        const rank = gradeToVRank(gLabel);
+        if (existing.gradeRank === null || rank > existing.gradeRank) {
+          existing.gradeRank = rank;
+        }
+      }
     }
     return Array.from(buckets.values())
       .sort((a, b) => a.ts - b.ts)
@@ -245,7 +253,7 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <TrendingUp className="h-3 w-3" /> Chalk per Week
+        <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade per Week
       </h3>
       {data.length === 0 ? (
         <div className="text-sm text-muted-foreground py-8 text-center">
@@ -254,7 +262,7 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
       ) : (
         <div className="h-56 -ml-2">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="chalkGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(var(--btn-orange))" stopOpacity={0.5} />
@@ -263,7 +271,19 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
               <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={36} />
+              <YAxis yAxisId="chalk" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={36} />
+              <YAxis
+                yAxisId="grade"
+                orientation="right"
+                stroke="hsl(270 80% 65%)"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+                width={36}
+                domain={[0, V_SCALE.length - 1]}
+                allowDecimals={false}
+                tickFormatter={(v: number) => V_SCALE[Math.round(v)] ?? ""}
+              />
               <Tooltip
                 contentStyle={{
                   background: "hsl(var(--popover))",
@@ -272,10 +292,14 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
                   fontSize: 12,
                 }}
                 labelStyle={{ color: "hsl(var(--foreground))" }}
-                formatter={(v: number) => [`${v.toLocaleString()} chalk`, "Earned"]}
+                formatter={(v: number, name: string) => {
+                  if (name === "Top grade") return [v == null ? "—" : (V_SCALE[Math.round(v)] ?? String(v)), name];
+                  return [`${v.toLocaleString()} chalk`, "Earned"];
+                }}
               />
-              <Area type="monotone" dataKey="chalk" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
-            </AreaChart>
+              <Area yAxisId="chalk" type="monotone" dataKey="chalk" name="Earned" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
+              <Line yAxisId="grade" type="monotone" dataKey="gradeRank" name="Top grade" stroke="hsl(270 80% 65%)" strokeWidth={2} dot={{ r: 3, fill: "hsl(270 80% 65%)" }} connectNulls />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       )}

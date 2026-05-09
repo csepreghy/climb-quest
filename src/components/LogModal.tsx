@@ -1132,6 +1132,53 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     );
   }
 
+  if (step === "first-pick") {
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep("workout")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <DialogTitle>Pick your {WORKOUT_META[workout].title.toLowerCase()} level</DialogTitle>
+          </div>
+        </DialogHeader>
+        <DialogDescription className="px-1">
+          You only choose this once. We'll remember it for next time and you can upgrade as you get stronger.
+        </DialogDescription>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3 max-h-[60vh] overflow-y-auto pr-1">
+          {[1, 2, 3, 4, 5].map(lv => {
+            const img = workoutLevelImage(workout, lv);
+            const name = workoutLevelName(workout, lv);
+            return (
+              <button
+                key={lv}
+                type="button"
+                onClick={() => confirmFirstPick(lv)}
+                className={cn(
+                  "rounded-lg border-2 overflow-hidden text-center transition active:translate-y-[1px]",
+                  "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
+                )}
+              >
+                {img ? (
+                  <div className="aspect-square w-full overflow-hidden bg-black/40">
+                    <img src={img} alt={name} className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="aspect-square w-full grid place-items-center bg-secondary/40 text-muted-foreground">
+                    <Dumbbell className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="p-2">
+                  <div className="text-xs text-muted-foreground">L{lv}</div>
+                  <div className="text-sm font-display font-bold leading-tight">{name}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </>
+    );
+  }
+
 
   if (step === "rest-pick") {
     return (

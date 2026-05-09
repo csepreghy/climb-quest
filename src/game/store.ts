@@ -531,6 +531,11 @@ export function setStrengthLevel(workout: StrengthWorkout, level: number) {
   set(s => ({ ...s, strengthLevels: { ...(s.strengthLevels ?? {}), [workout]: Math.max(1, level) } }));
 }
 
+/** Reset strength-level selections so the first-time picker shows again. */
+export function resetStrengthLevels() {
+  set(s => ({ ...s, strengthLevels: {} }));
+}
+
 export function updateLog(id: string, input: LogInput) {
   const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date, input.attemptType === "repeat");
   const mult = input.chalkMultiplier ?? 1;

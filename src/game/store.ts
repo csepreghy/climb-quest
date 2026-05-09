@@ -112,6 +112,8 @@ const initialState = (): State => ({
     spawnBoss(BOSS_TEMPLATES[1]),
   ],
   logs: [],
+  strengthSessions: [],
+  strengthLevels: {},
   stats: { totalLogs: 0, totalSends: 0, totalFlashes: 0, bossesSent: 0 },
   ignoreLevelReq: false,
   onboardedAt: null,

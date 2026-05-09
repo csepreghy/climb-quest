@@ -59,6 +59,17 @@ export interface Boss {
 
 export type Equipped = Partial<Record<Slot, string>>;
 
+export type StrengthWorkout = "core" | "pullup";
+export interface StrengthSet { reps: number; restSeconds?: number }
+export interface StrengthSession {
+  id: string;
+  date: string;
+  workout: StrengthWorkout;
+  level: number;
+  sets: StrengthSet[];
+  totalReps: number;
+}
+
 export interface State {
   level: number;
   chalk: number;
@@ -72,6 +83,10 @@ export interface State {
   badgeChalkClaimedFor: string[];
   bosses: Boss[];
   logs: BoulderLog[];
+  /** Strength training sessions (separate from boulder logs). */
+  strengthSessions: StrengthSession[];
+  /** Per-workout chosen difficulty level (set first time the user logs that workout). */
+  strengthLevels: Partial<Record<StrengthWorkout, number>>;
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
   ignoreLevelReq?: boolean;
   /** ISO timestamp when the user completed first-time onboarding. */

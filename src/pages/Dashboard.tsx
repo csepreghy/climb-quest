@@ -85,7 +85,7 @@ export default function Dashboard() {
         <StatCard label="Bosses defeated" value={s.stats.bossesSent} />
       </div>
 
-      <ChalkOverTimeChart logs={s.logs} />
+      <ChalkOverTimeChart logs={s.logs} gyms={gyms} />
 
       {/* All Badges */}
       <GameCard tone="legendary" className="p-5">

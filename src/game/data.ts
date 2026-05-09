@@ -16,9 +16,9 @@ export type EffectKey = "chalk" | "crit" | "boss" | "discount";
  *  - boss     → any group, epic+ only
  */
 export function effectAllowed(group: ItemGroup, rarity: Rarity, effect: EffectKey): boolean {
-  // Climbing buddies don't carry chalk/discount/crit/boss yet — perks land in a follow-up step.
-  if (group === "buddy") return false;
+  // Climbing buddies carry a chalk bonus (default 50%, admin-editable). Other perks land later.
   const epicPlus = rarity === "epic" || rarity === "legendary";
+  if (group === "buddy") return effect === "chalk";
   switch (effect) {
     case "chalk":    return group === "outfit" || group === "power";
     case "discount": return group === "power";

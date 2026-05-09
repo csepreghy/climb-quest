@@ -865,7 +865,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
 
   function logRepsAnd(action: "rest" | "finish") {
     const cleanReps = Math.max(1, Math.min(50, Math.round(reps)));
-    const newSets = [...sets, { reps: cleanReps }];
+    const newSets = [...sets, { reps: cleanReps, level }];
     setSets(newSets);
     setReps(cleanReps);
     if (action === "finish") {
@@ -957,7 +957,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const choices = Array.from({ length: Math.max(1, unlockedMax) }, (_, i) => i + 1);
     const canBoss = unlockedMax < MAX_STRENGTH_LEVEL;
     const nextBoss = Math.min(MAX_STRENGTH_LEVEL, unlockedMax + 1);
-    const lockEdit = sets.length > 0;
+    const lockEdit = false;
     const levelName = workoutLevelName(workout, level);
     return (
       <>
@@ -1014,8 +1014,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                 );
               })}
             </div>
-            {!lockEdit && canBoss && (
-              <div className="mt-2 flex flex-wrap justify-center gap-2">
+            {canBoss && (
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <GameButton variant="danger" size="sm" onClick={startBoss}>
                   <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({STRENGTH_BOSS_TARGET} reps total)
                 </GameButton>
@@ -1027,19 +1027,23 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             <div className="rounded-lg border border-border bg-secondary/40 p-3">
               <div className="menu-label mb-2">This session</div>
               <ul className="divide-y divide-border/50">
-                {sets.map((st, i) => (
-                  <li key={i} className="flex items-center justify-between gap-3 py-1.5 text-sm">
-                    <span className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground w-12">Set {i + 1}</span>
-                      <span className="font-bold tabular-nums">{st.reps} reps</span>
-                    </span>
-                    {st.restSeconds ? (
-                      <span className="text-xs text-muted-foreground tabular-nums">
-                        {Math.round(st.restSeconds / 60)}m rest
+                {sets.map((st, i) => {
+                  const lv = st.level ?? level;
+                  return (
+                    <li key={i} className="flex items-center justify-between gap-3 py-1.5 text-sm">
+                      <span className="flex items-center gap-2 min-w-0">
+                        <span className="text-xs text-muted-foreground w-10 shrink-0">Set {i + 1}</span>
+                        <span className="font-bold tabular-nums">L{lv} · {st.reps} reps</span>
+                        <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv)}</span>
                       </span>
-                    ) : null}
-                  </li>
-                ))}
+                      {st.restSeconds ? (
+                        <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                          {Math.round(st.restSeconds / 60)}m rest
+                        </span>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
               <div className="mt-2 text-xs text-muted-foreground">
                 Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span>

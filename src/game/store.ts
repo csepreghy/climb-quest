@@ -60,7 +60,7 @@ export interface Boss {
 export type Equipped = Partial<Record<Slot, string>>;
 
 export type StrengthWorkout = "core" | "pullup";
-export interface StrengthSet { reps: number; restSeconds?: number }
+export interface StrengthSet { reps: number; restSeconds?: number; level?: number }
 export interface StrengthSession {
   id: string;
   date: string;
@@ -504,8 +504,12 @@ export interface StrengthInput {
 export function logStrength(input: StrengthInput): { session: StrengthSession; chalk: number; breakdown: ChalkBreakdown } {
   const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
   const maxUnlocked = state.strengthLevels?.[input.workout] ?? 0;
-  const perRep = strengthRepChalk(input.level, maxUnlocked);
-  const base = Math.max(1, Math.round(totalReps * perRep));
+  const base = Math.max(1, Math.round(
+    input.sets.reduce((sum, st) => {
+      const lv = st.level ?? input.level;
+      return sum + (st.reps || 0) * strengthRepChalk(lv, maxUnlocked);
+    }, 0)
+  ));
   const dateISO = input.date ?? new Date().toISOString();
 
   // ----- Apply equipped bonuses (mirrors computeChalk for boulders) -----

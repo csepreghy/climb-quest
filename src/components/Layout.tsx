@@ -4,7 +4,7 @@ import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, A
 import { useLoadCharacterName } from "@/game/characterName";
 import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD, onBadgesAwarded, BADGE_CHALK_REWARD } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD, onBadgesAwarded, BADGE_CHALK_REWARD, strengthRepChalk, type StrengthWorkout } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType, BADGE_BY_ID } from "@/game/data";

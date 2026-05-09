@@ -54,7 +54,7 @@ export function BuddyCard({
         </button>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex gap-5">
         {/* Image — pushed to the left, slightly smaller than before */}
         <div className={cn("h-32 w-32 sm:h-36 sm:w-36 shrink-0 rounded-xl bg-background/40 overflow-hidden", RARITY_BORDER[item.rarity])}>
           {isImageEmoji(item.emoji) ? (
@@ -76,9 +76,9 @@ export function BuddyCard({
 
         {/* Details — right side */}
         <div className="min-w-0 flex-1 flex flex-col gap-1.5">
-          <div className="flex items-baseline justify-between gap-2 pr-8">
+          <div className="pr-8">
             <div className="text-base font-semibold leading-snug truncate">{item.name}</div>
-            <div className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0", RARITY_COLOR[item.rarity])}>
+            <div className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border inline-block mt-1", RARITY_COLOR[item.rarity])}>
               {item.rarity}
             </div>
           </div>

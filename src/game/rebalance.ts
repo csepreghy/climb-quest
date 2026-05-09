@@ -200,6 +200,8 @@ const TARGET_ACTIVITY: Record<ActivityType, number> = {
   boulder_send: 45,
   boss_attempt: 55,
   boss_send: 350,
+  strength_rep: 5,
+  strength_boss_send: 300,
 };
 
 export interface ItemDiff {

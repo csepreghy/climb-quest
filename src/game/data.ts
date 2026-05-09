@@ -47,7 +47,9 @@ export type ActivityType =
   | "project_boulder"
   | "boulder_send"
   | "boss_attempt"
-  | "boss_send";
+  | "boss_send"
+  | "strength_rep"
+  | "strength_boss_send";
 
 export type Style =
   | "slab" | "vertical" | "overhang" | "cave" | "compression"
@@ -154,6 +156,8 @@ export const BASE_CHALK: Record<ActivityType, number> = {
   boulder_send: 50,
   boss_attempt: 60,
   boss_send: 400,
+  strength_rep: 5,
+  strength_boss_send: 300,
 };
 
 export const ACTIVITY_LABELS: Record<ActivityType, string> = {
@@ -164,6 +168,8 @@ export const ACTIVITY_LABELS: Record<ActivityType, string> = {
   boulder_send: "Boulder Send",
   boss_attempt: "Boss Project Attempt",
   boss_send: "Boss Project Send",
+  strength_rep: "Strength · per rep",
+  strength_boss_send: "Strength Boss Defeated",
 };
 
 export const STYLES: Style[] = ["slab","vertical","overhang","cave","compression","coordination","dyno","mantle","crimp","sloper"];

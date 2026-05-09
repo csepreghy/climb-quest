@@ -263,12 +263,14 @@ export default function BoulderLogs() {
               {strengthSessions.map(ss => (
                 <div key={ss.id} className="px-4 py-3 flex items-center justify-between gap-3">
                   <div className="min-w-0 flex items-center gap-3">
-                    <div className="h-9 w-9 grid place-items-center rounded-lg shrink-0 bg-secondary text-foreground/70">
-                      <Dumbbell className="h-4 w-4" />
+                    <div className={cn("h-9 w-9 grid place-items-center rounded-lg shrink-0",
+                      ss.bossSend ? "bg-boss/20 text-boss" : "bg-secondary text-foreground/70")}>
+                      {ss.bossSend ? <Swords className="h-4 w-4" /> : <Dumbbell className="h-4 w-4" />}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-medium truncate capitalize">
+                      <div className="text-sm font-medium truncate capitalize flex items-center gap-2">
                         {ss.workout === "pullup" ? "Pull-up" : "Core"} · Level {ss.level}
+                        {ss.bossSend && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-boss/20 text-boss border border-boss/40">Boss</span>}
                       </div>
                       <div className="text-xs text-muted-foreground truncate">
                         {new Date(ss.date).toLocaleDateString()} · {ss.sets.length} set{ss.sets.length === 1 ? "" : "s"} · {ss.totalReps} reps
@@ -277,13 +279,18 @@ export default function BoulderLogs() {
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setDeleteStrengthId(ss.id)}
-                    aria-label="Delete session"
-                    className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {ss.chalkTotal ? (
+                      <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{ss.chalkTotal}</div>
+                    ) : null}
+                    <button
+                      onClick={() => setDeleteStrengthId(ss.id)}
+                      aria-label="Delete session"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

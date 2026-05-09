@@ -39,6 +39,8 @@ import { HoldSwatch } from "@/components/HoldSwatch";
 import { GymGradingEditor } from "@/components/GymGradingEditor";
 import { RebalancePreviewModal } from "@/components/RebalancePreviewModal";
 import { useDailyCapConfig, setDailyCapConfig, computeDailyCap, defaultDailyCap, DailyCapConfig, useDailyCapOverrides, setDailyCapOverride } from "@/game/dailyCap";
+import { useActivityRewards, setActivityRewards } from "@/game/activityRewards";
+import { Dumbbell } from "lucide-react";
 
 
 const RARITIES: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"];
@@ -102,6 +104,7 @@ export default function Admin() {
           <BackfillImagesCard />
           <RebalanceCard />
           <DailyCapCard />
+          <StrengthRewardsCard />
         </TabsContent>
 
         <TabsContent value="account" className="space-y-6 mt-6">
@@ -259,6 +262,64 @@ function BackfillImagesCard() {
             ✓ {result.converted} converted · {result.skipped} skipped · {result.failed} failed
           </span>
         )}
+      </div>
+    </GameCard>
+  );
+}
+
+function StrengthRewardsCard() {
+  const rewards = useActivityRewards();
+  const [perRep, setPerRep] = useState<string>("");
+  const [bossBonus, setBossBonus] = useState<string>("");
+  const [busy, setBusy] = useState(false);
+  const curRep = rewards.strength_rep ?? 5;
+  const curBoss = rewards.strength_boss_send ?? 300;
+  const draftRep = perRep === "" ? curRep : Math.max(0, Math.round(Number(perRep) || 0));
+  const draftBoss = bossBonus === "" ? curBoss : Math.max(0, Math.round(Number(bossBonus) || 0));
+  const dirty = draftRep !== curRep || draftBoss !== curBoss;
+
+  async function save() {
+    setBusy(true);
+    try {
+      await setActivityRewards({ strength_rep: draftRep, strength_boss_send: draftBoss });
+      toast.success("Strength rewards saved");
+      setPerRep(""); setBossBonus("");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Save failed");
+    } finally { setBusy(false); }
+  }
+
+  return (
+    <GameCard tone="accent" className="p-5">
+      <div className="menu-label mb-3 flex items-center gap-2"><Dumbbell className="h-4 w-4" /> Admin · Strength rewards</div>
+      <p className="text-sm text-muted-foreground mb-3">
+        Chalk per rep and bonus chalk for defeating a strength boss. Per-rep chalk is multiplied by the user's strength level (L1 ×1, L2 ×1.5, L3 ×2, L4 ×2.5, L5 ×3).
+      </p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Chalk per rep</Label>
+          <Input
+            type="number" min={0}
+            value={perRep === "" ? curRep : perRep}
+            onChange={e => setPerRep(e.target.value)}
+            className="mt-1"
+          />
+          <div className="text-xs text-muted-foreground mt-1">Example L3, 10 reps: <span className="font-bold text-foreground">+{Math.round(10 * draftRep * 2)}</span> chalk.</div>
+        </div>
+        <div>
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Strength boss bonus</Label>
+          <Input
+            type="number" min={0}
+            value={bossBonus === "" ? curBoss : bossBonus}
+            onChange={e => setBossBonus(e.target.value)}
+            className="mt-1"
+          />
+          <div className="text-xs text-muted-foreground mt-1">Added on top of per-rep chalk when the boss is defeated.</div>
+        </div>
+      </div>
+      <div className="mt-4 flex gap-2">
+        <Button onClick={save} disabled={!dirty || busy}>{busy ? "Saving…" : "Save"}</Button>
+        {dirty && <Button variant="ghost" onClick={() => { setPerRep(""); setBossBonus(""); }}>Reset</Button>}
       </div>
     </GameCard>
   );

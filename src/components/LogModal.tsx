@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,20 +6,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate } from "@/game/store";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet } from "@/game/store";
 import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolveGymGradingSystems } from "@/game/gyms";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Info, Swords, Trophy } from "lucide-react";
+import { ArrowLeft, Info, Swords, Trophy, Dumbbell, Timer } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import bossImg from "@/assets/log-boss.webp";
+import strengthImg from "@/assets/log-strength.webp";
+import strengthCoreImg from "@/assets/strength-core.webp";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 
-type Mode = "pick" | "form";
+type Mode = "pick" | "boulder-pick" | "form" | "strength";
 type Kind = "boulder" | "boss";
 
 export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null }) {
@@ -43,7 +45,32 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
         {mode === "pick" ? (
           <>
             <DialogHeader>
-              <DialogTitle>Log a climb</DialogTitle>
+              <DialogTitle>What are you logging?</DialogTitle>
+            </DialogHeader>
+            <div className="grid sm:grid-cols-2 gap-3 mt-2">
+              <PickCard
+                image={boulderImg}
+                title="Boulder"
+                desc="Log a climb — single send, project, or boss battle."
+                onClick={() => setMode("boulder-pick")}
+                ring="ring-[hsl(var(--btn-green))]/60"
+              />
+              <PickCard
+                image={strengthImg}
+                title="Strength"
+                desc="Core or pull-ups — track sets, reps, and rest."
+                onClick={() => setMode("strength")}
+                ring="ring-[hsl(var(--sky))]/60"
+              />
+            </div>
+          </>
+        ) : mode === "boulder-pick" ? (
+          <>
+            <DialogHeader>
+              <div className="flex items-center gap-3">
+                <button onClick={() => setMode("pick")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+                <DialogTitle>Log a climb</DialogTitle>
+              </div>
             </DialogHeader>
             <div className="grid sm:grid-cols-2 gap-3 mt-2">
               <PickCard
@@ -69,11 +96,13 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
               />
             </div>
           </>
+        ) : mode === "strength" ? (
+          <StrengthFlow onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
         ) : kind === "boss" ? (
-          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
+          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
         ) : (
           <BoulderForm
-            onBack={() => editLog ? onOpenChange(false) : setMode("pick")}
+            onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")}
             onDone={() => onOpenChange(false)}
             onSwitchToBoss={() => setKind("boss")}
             editLog={editLog ?? null}

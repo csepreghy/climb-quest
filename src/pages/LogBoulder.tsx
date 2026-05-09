@@ -275,7 +275,7 @@ export default function BoulderLogs() {
                       <div className="text-xs text-muted-foreground truncate">
                         {new Date(ss.date).toLocaleDateString()} · {ss.sets.length} set{ss.sets.length === 1 ? "" : "s"} · {ss.totalReps} reps
                         {" · "}
-                        {ss.sets.map(s => s.reps).join(" / ")}
+                        {ss.sets.map(st => `L${st.level ?? ss.level} · ${st.reps} reps`).join(" / ")}
                       </div>
                     </div>
                   </div>

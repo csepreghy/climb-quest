@@ -549,16 +549,20 @@ function InventoryAdmin() {
             <Select value={draft.group} onValueChange={v => {
               const g = v as ItemGroup;
               const cat = CATEGORIES_BY_GROUP[g][0];
-              setDraft(d => ({
-                ...d,
-                group: g,
-                category: cat,
-                slot: CATEGORY_TO_SLOT[cat],
-                bonusPct: effectAllowed(g, d.rarity, "chalk") ? d.bonusPct : 0,
-                discountPct: effectAllowed(g, d.rarity, "discount") ? d.discountPct : 0,
-                critChancePct: effectAllowed(g, d.rarity, "crit") ? d.critChancePct : 0,
-                bossBonusPct: effectAllowed(g, d.rarity, "boss") ? d.bossBonusPct : 0,
-              }));
+              setDraft(d => {
+                // Buddies default to a 50% chalk bonus (admin-editable).
+                const baseBonus = g === "buddy" && (!d.bonusPct || d.group !== "buddy") ? 50 : d.bonusPct;
+                return {
+                  ...d,
+                  group: g,
+                  category: cat,
+                  slot: CATEGORY_TO_SLOT[cat],
+                  bonusPct: effectAllowed(g, d.rarity, "chalk") ? baseBonus : 0,
+                  discountPct: effectAllowed(g, d.rarity, "discount") ? d.discountPct : 0,
+                  critChancePct: effectAllowed(g, d.rarity, "crit") ? d.critChancePct : 0,
+                  bossBonusPct: effectAllowed(g, d.rarity, "boss") ? d.bossBonusPct : 0,
+                };
+              });
             }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>

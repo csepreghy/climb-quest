@@ -769,3 +769,281 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+// ===================== STRENGTH FLOW =====================
+
+const STRENGTH_LEVELS = [1, 2, 3, 4, 5];
+const REST_OPTIONS = [1, 2, 3, 5]; // minutes
+
+const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image?: string; ring: string; placeholder?: boolean }> = {
+  core: {
+    title: "Core",
+    desc: "Hollow body, leg raises, planks — build the engine.",
+    image: strengthCoreImg,
+    ring: "ring-[hsl(var(--btn-orange))]/60",
+  },
+  pullup: {
+    title: "Pull-up",
+    desc: "Pulling power for steeper walls and bigger moves.",
+    ring: "ring-[hsl(var(--sky))]/60",
+    placeholder: true,
+  },
+};
+
+type StrengthStep = "workout" | "level" | "reps" | "rest-pick" | "rest-timer" | "celebrate";
+
+function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+  const s = useGame();
+  const [step, setStep] = useState<StrengthStep>("workout");
+  const [workout, setWorkout] = useState<StrengthWorkout>("core");
+  const [level, setLevel] = useState<number>(1);
+  const [reps, setReps] = useState<number>(5);
+  const [sets, setSets] = useState<StrengthSet[]>([]);
+  const [restMin, setRestMin] = useState<number>(2);
+
+  function pickWorkout(w: StrengthWorkout) {
+    setWorkout(w);
+    const known = s.strengthLevels?.[w];
+    if (known) {
+      setLevel(known);
+      setStep("reps");
+    } else {
+      setLevel(1);
+      setStep("level");
+    }
+  }
+
+  function logRepsAnd(action: "rest" | "finish") {
+    const cleanReps = Math.max(1, Math.min(10, Math.round(reps)));
+    const newSets = [...sets, { reps: cleanReps }];
+    setSets(newSets);
+    setReps(cleanReps);
+    if (action === "finish") {
+      logStrength({ workout, level, sets: newSets });
+      toast.success(`${WORKOUT_META[workout].title} session logged · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`);
+      setStep("celebrate");
+    } else {
+      setStep("rest-pick");
+    }
+  }
+
+  function pickRest(min: number) {
+    setRestMin(min);
+    // attach rest to last set
+    setSets(prev => prev.length ? prev.map((s, i) => i === prev.length - 1 ? { ...s, restSeconds: min * 60 } : s) : prev);
+    setStep("rest-timer");
+  }
+
+  if (step === "celebrate") {
+    return <SimpleCelebrate total={sets.reduce((a, b) => a + b.reps, 0)} label={`${WORKOUT_META[workout].title} reps logged`} image={WORKOUT_META[workout].image ?? strengthImg} alt={WORKOUT_META[workout].title} />;
+  }
+
+  if (step === "workout") {
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <DialogTitle>Pick a workout</DialogTitle>
+          </div>
+        </DialogHeader>
+        <div className="grid sm:grid-cols-2 gap-3 mt-2">
+          {(["core", "pullup"] as StrengthWorkout[]).map(w => {
+            const meta = WORKOUT_META[w];
+            const placeholder = (
+              <div className="flex flex-col items-center justify-center text-muted-foreground gap-2">
+                <Dumbbell className="h-12 w-12 opacity-60" />
+                <span className="text-xs uppercase tracking-wider">Image coming soon</span>
+              </div>
+            );
+            return (
+              <PickCard
+                key={w}
+                image={meta.image}
+                content={meta.placeholder ? placeholder : undefined}
+                title={meta.title}
+                desc={meta.desc}
+                onClick={() => pickWorkout(w)}
+                ring={meta.ring}
+              />
+            );
+          })}
+        </div>
+      </>
+    );
+  }
+
+  if (step === "level") {
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep("workout")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <HeaderImage src={WORKOUT_META[workout].image ?? boulderImg} alt={WORKOUT_META[workout].title} ring="ring-2 ring-[hsl(var(--btn-orange))]/40" />
+            <DialogTitle>Pick your {WORKOUT_META[workout].title.toLowerCase()} level</DialogTitle>
+          </div>
+        </DialogHeader>
+        <DialogDescription className="px-1">
+          You only choose this once. We'll remember it for next time.
+        </DialogDescription>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3">
+          {STRENGTH_LEVELS.map(lv => (
+            <button
+              key={lv}
+              type="button"
+              onClick={() => { setLevel(lv); setStep("reps"); }}
+              className={cn(
+                "rounded-xl border-2 p-4 text-center transition active:translate-y-[1px]",
+                "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))] hover:ring-4 ring-[hsl(var(--btn-orange))]/30"
+              )}
+            >
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Level</div>
+              <div className="text-3xl font-display font-bold">{lv}</div>
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  if (step === "reps") {
+    const totalReps = sets.reduce((a, b) => a + b.reps, 0);
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => sets.length === 0 ? setStep("workout") : undefined} className={cn("p-1 rounded", sets.length === 0 ? "hover:bg-secondary" : "opacity-30 cursor-not-allowed")}>
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <HeaderImage src={WORKOUT_META[workout].image ?? boulderImg} alt={WORKOUT_META[workout].title} ring="ring-2 ring-[hsl(var(--btn-orange))]/40" />
+            <DialogTitle>{WORKOUT_META[workout].title} · Level {level}</DialogTitle>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {sets.length > 0 && (
+            <div className="rounded-lg border border-border bg-secondary/40 p-3">
+              <div className="menu-label mb-2">This session</div>
+              <div className="flex flex-wrap gap-1.5">
+                {sets.map((st, i) => (
+                  <span key={i} className="text-xs px-2 py-1 rounded-md bg-secondary border border-border tabular-nums">
+                    Set {i + 1}: <span className="font-bold">{st.reps}</span>
+                    {st.restSeconds ? <span className="text-muted-foreground"> · {Math.round(st.restSeconds / 60)}m rest</span> : null}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">Total reps so far: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></div>
+            </div>
+          )}
+
+          <Field label="Reps this set (1–10)">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setReps(r => Math.max(1, r - 1))}
+                className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold active:translate-y-[1px]"
+              >−</button>
+              <Input
+                type="number"
+                min={1}
+                max={10}
+                value={reps}
+                onChange={e => setReps(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
+                className="h-12 text-center text-2xl font-bold tabular-nums flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => setReps(r => Math.min(10, r + 1))}
+                className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold active:translate-y-[1px]"
+              >+</button>
+            </div>
+          </Field>
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
+          <GameButton variant="primary" size="md" onClick={() => logRepsAnd("rest")}>
+            <Timer className="h-4 w-4" /> Log Reps & Rest
+          </GameButton>
+          <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
+            <Trophy className="h-4 w-4" /> Log Reps & Finish
+          </GameButton>
+        </div>
+      </>
+    );
+  }
+
+  if (step === "rest-pick") {
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep("reps")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <DialogTitle>How long to rest?</DialogTitle>
+          </div>
+        </DialogHeader>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+          {REST_OPTIONS.map(min => (
+            <button
+              key={min}
+              type="button"
+              onClick={() => pickRest(min)}
+              className="rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 p-5 text-center transition hover:border-[hsl(var(--btn-orange))] hover:ring-4 ring-[hsl(var(--btn-orange))]/30 active:translate-y-[1px]"
+            >
+              <Timer className="h-6 w-6 mx-auto text-muted-foreground" />
+              <div className="mt-2 text-2xl font-display font-bold">{min}<span className="text-base font-normal text-muted-foreground"> min</span></div>
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  // rest-timer
+  return <RestTimer minutes={restMin} onDone={() => setStep("reps")} />;
+}
+
+function RestTimer({ minutes, onDone }: { minutes: number; onDone: () => void }) {
+  const total = minutes * 60;
+  const [remaining, setRemaining] = useState(total);
+  const startedAt = useRef(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt.current) / 1000);
+      setRemaining(Math.max(0, total - elapsed));
+    }, 250);
+    return () => clearInterval(id);
+  }, [total]);
+
+  const ticking = remaining > 0;
+  const mm = Math.floor(remaining / 60).toString().padStart(2, "0");
+  const ss = (remaining % 60).toString().padStart(2, "0");
+  const pct = ((total - remaining) / total) * 100;
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2"><Timer className="h-5 w-5" /> Resting</DialogTitle>
+      </DialogHeader>
+      <div className="py-6 text-center space-y-4">
+        <div className="text-6xl sm:text-7xl font-display font-bold tabular-nums">{mm}:{ss}</div>
+        <div className="mx-auto max-w-xs h-2.5 rounded-full bg-secondary overflow-hidden border border-border">
+          <div
+            className="h-full transition-all duration-300"
+            style={{ width: `${pct}%`, background: "linear-gradient(90deg, hsl(var(--btn-orange)), hsl(var(--chalk-glow)))" }}
+          />
+        </div>
+        <div className="text-sm text-muted-foreground">
+          {ticking ? "Breathe. Shake out. Get ready." : "Rest complete — back to work."}
+        </div>
+      </div>
+      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-1">
+        <GameButton variant="ghost" size="md" onClick={onDone}>Skip rest</GameButton>
+        <GameButton variant="primary" size="md" onClick={onDone} disabled={ticking}>
+          Next session
+        </GameButton>
+      </div>
+    </>
+  );
+}
+

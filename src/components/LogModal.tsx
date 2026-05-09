@@ -865,7 +865,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
 
   function logRepsAnd(action: "rest" | "finish") {
     const cleanReps = Math.max(1, Math.min(50, Math.round(reps)));
-    const newSets = [...sets, { reps: cleanReps }];
+    const newSets = [...sets, { reps: cleanReps, level }];
     setSets(newSets);
     setReps(cleanReps);
     if (action === "finish") {

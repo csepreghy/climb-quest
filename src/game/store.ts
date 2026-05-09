@@ -481,9 +481,15 @@ export interface StrengthInput {
   level: number;
   sets: StrengthSet[];
   date?: string;
+  /** When true, this session is a successful strength-boss send (level-up). */
+  bossSend?: boolean;
 }
-export function logStrength(input: StrengthInput): { session: StrengthSession } {
+export function logStrength(input: StrengthInput): { session: StrengthSession; chalk: number } {
   const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
+  const perRep = getActivityReward("strength_rep");
+  const mult = strengthLevelMult(input.level);
+  let chalk = Math.round(totalReps * perRep * mult);
+  if (input.bossSend) chalk += getActivityReward("strength_boss_send");
   const session: StrengthSession = {
     id: crypto.randomUUID(),
     date: input.date ?? new Date().toISOString(),
@@ -491,16 +497,38 @@ export function logStrength(input: StrengthInput): { session: StrengthSession } 
     level: input.level,
     sets: input.sets,
     totalReps,
+    chalkTotal: chalk,
+    bossSend: input.bossSend,
   };
-  set(s => ({
-    ...s,
-    strengthSessions: [session, ...(s.strengthSessions ?? [])].slice(0, 500),
-    strengthLevels: { ...(s.strengthLevels ?? {}), [input.workout]: input.level },
-  }));
-  return { session };
+  set(s => {
+    const prevMax = s.strengthLevels?.[input.workout] ?? 0;
+    const nextMax = input.bossSend ? Math.max(prevMax, input.level) : Math.max(prevMax, 1);
+    return {
+      ...s,
+      chalk: s.chalk + chalk,
+      totalChalkEarned: s.totalChalkEarned + chalk,
+      strengthSessions: [session, ...(s.strengthSessions ?? [])].slice(0, 500),
+      strengthLevels: { ...(s.strengthLevels ?? {}), [input.workout]: nextMax },
+    };
+  });
+  return { session, chalk };
 }
 export function deleteStrengthSession(id: string) {
-  set(s => ({ ...s, strengthSessions: (s.strengthSessions ?? []).filter(x => x.id !== id) }));
+  set(s => {
+    const sess = (s.strengthSessions ?? []).find(x => x.id === id);
+    const refund = sess?.chalkTotal ?? 0;
+    return {
+      ...s,
+      strengthSessions: (s.strengthSessions ?? []).filter(x => x.id !== id),
+      chalk: Math.max(0, s.chalk - refund),
+      totalChalkEarned: Math.max(0, s.totalChalkEarned - refund),
+    };
+  });
+}
+
+/** Manually set the user's max-unlocked strength level (used by "Level down"). */
+export function setStrengthLevel(workout: StrengthWorkout, level: number) {
+  set(s => ({ ...s, strengthLevels: { ...(s.strengthLevels ?? {}), [workout]: Math.max(1, level) } }));
 }
 
 export function updateLog(id: string, input: LogInput) {

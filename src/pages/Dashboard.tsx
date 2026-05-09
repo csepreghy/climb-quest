@@ -18,7 +18,8 @@ import { toast } from "sonner";
 import { Plus, ArrowUp, Trophy, TrendingUp, Backpack, ShoppingBag, ChevronRight } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { gradeToVRank, V_SCALE } from "@/game/gyms";
 
 export default function Dashboard() {
   const s = useGame();

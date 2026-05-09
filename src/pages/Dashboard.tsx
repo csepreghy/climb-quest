@@ -206,7 +206,34 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
   );
 }
 
-function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string }[] }) {
+function ChalkOverTimeChart({ logs, gyms }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[] }) {
+  // Pick the grading system used most often in the last 30 days, based on which
+  // logs' grade labels match each gym's available systems.
+  const dominantGs = useMemo<GradingSystem | null>(() => {
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const counts = new Map<string, { gs: GradingSystem; n: number }>();
+    for (const l of logs) {
+      const t = new Date(l.date).getTime();
+      if (t < cutoff) continue;
+      const label = l.gradeMax || l.grade;
+      if (!label) continue;
+      const gym = l.gymId ? gyms.find(g => g.id === l.gymId) : null;
+      if (!gym) continue;
+      const systems = resolveGymGradingSystems(gym);
+      const upper = label.toUpperCase();
+      const match = systems.find(gs => gradeLabels(gs).some(x => x.toUpperCase() === upper)) ?? systems[0];
+      if (!match) continue;
+      const cur = counts.get(match.id);
+      if (cur) cur.n += 1; else counts.set(match.id, { gs: match, n: 1 });
+    }
+    let best: { gs: GradingSystem; n: number } | null = null;
+    for (const v of counts.values()) if (!best || v.n > best.n) best = v;
+    return best?.gs ?? null;
+  }, [logs, gyms]);
+
+  const scaleLabels = useMemo(() => dominantGs ? gradeLabels(dominantGs) : [...V_SCALE], [dominantGs]);
+  const axisTitle = dominantGs ? dominantGs.name : "V Scale";
+
   const data = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -223,6 +250,8 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
     }
     const earliest = Array.from(buckets.values())[0]?.ts ?? 0;
 
+    const upperLabels = scaleLabels.map(l => l.toUpperCase());
+
     for (const l of logs) {
       const d = new Date(l.date);
       const day = (d.getDay() + 6) % 7;
@@ -236,8 +265,17 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
       existing.chalk += l.chalkTotal;
       const gLabel = l.gradeMax || l.grade;
       if (gLabel) {
-        const rank = gradeToVRank(gLabel);
-        if (existing.gradeRank === null || rank > existing.gradeRank) {
+        // Prefer exact index in dominant scale; fall back to V-rank approximation.
+        let rank: number;
+        const idx = upperLabels.indexOf(gLabel.toUpperCase());
+        if (idx >= 0) rank = idx;
+        else if (!dominantGs || dominantGs.kind === "v" || dominantGs.kind === "french") {
+          rank = gradeToVRank(gLabel, dominantGs ?? undefined);
+        } else {
+          // Skip non-matching grades for number/color systems.
+          rank = NaN;
+        }
+        if (!isNaN(rank) && (existing.gradeRank === null || rank > existing.gradeRank)) {
           existing.gradeRank = rank;
         }
       }
@@ -248,12 +286,13 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
         ...b,
         label: new Date(b.ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
       }));
-  }, [logs]);
+  }, [logs, scaleLabels, dominantGs]);
 
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
         <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade per Week
+        <span className="ml-2 text-[10px] font-normal text-muted-foreground normal-case tracking-normal">({axisTitle})</span>
       </h3>
       {data.length === 0 ? (
         <div className="text-sm text-muted-foreground py-8 text-center">
@@ -280,9 +319,9 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
                 tickLine={false}
                 axisLine={false}
                 width={36}
-                domain={[0, V_SCALE.length - 1]}
+                domain={[0, Math.max(1, scaleLabels.length - 1)]}
                 allowDecimals={false}
-                tickFormatter={(v: number) => V_SCALE[Math.round(v)] ?? ""}
+                tickFormatter={(v: number) => scaleLabels[Math.round(v)] ?? ""}
               />
               <Tooltip
                 contentStyle={{
@@ -293,7 +332,7 @@ function ChalkOverTimeChart({ logs }: { logs: { date: string; chalkTotal: number
                 }}
                 labelStyle={{ color: "hsl(var(--foreground))" }}
                 formatter={(v: number, name: string) => {
-                  if (name === "Top grade") return [v == null ? "—" : (V_SCALE[Math.round(v)] ?? String(v)), name];
+                  if (name === "Top grade") return [v == null ? "—" : (scaleLabels[Math.round(v)] ?? String(v)), name];
                   return [`${v.toLocaleString()} chalk`, "Earned"];
                 }}
               />

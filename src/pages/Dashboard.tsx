@@ -283,13 +283,25 @@ function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: st
         }
       }
     }
+    for (const sess of strengthSessions) {
+      const d = new Date(sess.date);
+      const day = (d.getDay() + 6) % 7;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - day);
+      monday.setHours(0, 0, 0, 0);
+      if (monday.getTime() < earliest || monday.getTime() > currentMonday.getTime()) continue;
+      const key = monday.toISOString().slice(0, 10);
+      const existing = buckets.get(key);
+      if (!existing) continue;
+      existing.strength += sess.chalkTotal ?? 0;
+    }
     return Array.from(buckets.values())
       .sort((a, b) => a.ts - b.ts)
       .map(b => ({
         ...b,
         label: new Date(b.ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
       }));
-  }, [logs, scaleLabels, dominantGs]);
+  }, [logs, strengthSessions, scaleLabels, dominantGs]);
 
   return (
     <GameCard className="p-5">

@@ -39,6 +39,8 @@ import { HoldSwatch } from "@/components/HoldSwatch";
 import { GymGradingEditor } from "@/components/GymGradingEditor";
 import { RebalancePreviewModal } from "@/components/RebalancePreviewModal";
 import { useDailyCapConfig, setDailyCapConfig, computeDailyCap, defaultDailyCap, DailyCapConfig, useDailyCapOverrides, setDailyCapOverride } from "@/game/dailyCap";
+import { useActivityRewards, setActivityRewards } from "@/game/activityRewards";
+import { Dumbbell } from "lucide-react";
 
 
 const RARITIES: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"];

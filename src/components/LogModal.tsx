@@ -782,6 +782,19 @@ const REST_OPTIONS = [1, 2, 3, 5]; // minutes
 const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
 const MAX_STRENGTH_LEVEL = 5;
 
+const CORE_LEVEL_NAMES: Record<number, string> = {
+  1: "LEG RAISES",
+  2: "HANGING BENT LEG RAISES",
+  3: "L-SIT RAISES",
+  4: "TUCK RAISES",
+  5: "FRONT LEVER RAISES",
+};
+
+function workoutLevelName(workout: StrengthWorkout, level: number): string {
+  if (workout === "core") return CORE_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  return `LEVEL ${level}`;
+}
+
 function workoutLevelImage(workout: StrengthWorkout, level: number): string | undefined {
   if (workout === "core") return CORE_LEVEL_IMAGES[level];
   return undefined;
@@ -804,6 +817,7 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
 
 type StrengthStep =
   | "workout"
+  | "first-pick"
   | "reps"
   | "boss-reps"       // single-set boss attempt
   | "rest-pick"

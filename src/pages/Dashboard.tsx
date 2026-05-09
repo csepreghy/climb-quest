@@ -348,3 +348,85 @@ function ChalkOverTimeChart({ logs, gyms }: { logs: { date: string; chalkTotal: 
     </GameCard>
   );
 }
+
+/**
+ * Daily strength training "volume" chart.
+ *
+ * Reps alone aren't a fair comparison across difficulties (10 L1 reps ≠ 10 L5 reps).
+ * We use **training volume** = Σ(reps × levelMultiplier) per session per day.
+ * Boss-send sessions get a small +25% credit since they're max-effort single sets.
+ * Bars are split by workout (core vs pull-up) so the user can see balance.
+ */
+function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
+  const data = useMemo(() => {
+    const DAYS = 30;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const buckets: { ts: number; key: string; core: number; pullup: number }[] = [];
+    const byKey = new Map<string, { ts: number; key: string; core: number; pullup: number }>();
+    for (let i = DAYS - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const row = { ts: d.getTime(), key, core: 0, pullup: 0 };
+      buckets.push(row);
+      byKey.set(key, row);
+    }
+    for (const sess of sessions) {
+      const d = new Date(sess.date);
+      d.setHours(0, 0, 0, 0);
+      const key = d.toISOString().slice(0, 10);
+      const row = byKey.get(key);
+      if (!row) continue;
+      const mult = strengthLevelMult(sess.level);
+      const bossBoost = sess.bossSend ? 1.25 : 1;
+      const volume = Math.round(sess.totalReps * mult * bossBoost);
+      if (sess.workout === "core") row.core += volume;
+      else if (sess.workout === "pullup") row.pullup += volume;
+    }
+    return buckets.map(b => ({
+      ...b,
+      label: new Date(b.ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+    }));
+  }, [sessions]);
+
+  const hasAny = data.some(d => d.core > 0 || d.pullup > 0);
+
+  return (
+    <GameCard className="p-5">
+      <h3 className="menu-label mb-1 flex items-center gap-1.5">
+        <Dumbbell className="h-3 w-3" /> Strength Volume · Daily
+      </h3>
+      <p className="text-[10px] text-muted-foreground mb-3 normal-case tracking-normal">
+        Volume = reps × level multiplier (L1 ×1 → L5 ×3). Harder sessions count more, so 5 L5 reps ≈ 15 L1 reps.
+      </p>
+      {!hasAny ? (
+        <div className="text-sm text-muted-foreground py-8 text-center">
+          No strength sessions yet. Log a set to start tracking volume.
+        </div>
+      ) : (
+        <div className="h-48 -ml-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
+              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={Math.max(0, Math.floor(data.length / 10))} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={36} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{
+                  background: "hsl(var(--popover))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: 8,
+                  fontSize: 12,
+                }}
+                labelStyle={{ color: "hsl(var(--foreground))" }}
+                formatter={(v: number, name: string) => [`${v} vol`, name]}
+              />
+              <Bar dataKey="core" name="Core" stackId="a" fill="hsl(var(--btn-orange))" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="pullup" name="Pull-up" stackId="a" fill="hsl(var(--sky))" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </GameCard>
+  );
+}

@@ -778,8 +778,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 // ===================== STRENGTH FLOW =====================
 
-const STRENGTH_LEVELS = [1, 2, 3, 4, 5];
 const REST_OPTIONS = [1, 2, 3, 5]; // minutes
+const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
+const MAX_STRENGTH_LEVEL = 5;
+
+function workoutLevelImage(workout: StrengthWorkout, level: number): string | undefined {
+  if (workout === "core") return CORE_LEVEL_IMAGES[level];
+  return undefined;
+}
 
 const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image?: string; ring: string; placeholder?: boolean }> = {
   core: {
@@ -796,7 +802,15 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
   },
 };
 
-type StrengthStep = "workout" | "level" | "reps" | "rest-pick" | "rest-timer" | "celebrate";
+type StrengthStep =
+  | "workout"
+  | "first-level"     // first-time intro: only L1 + boss attempt
+  | "level-pick"      // returning user: pick from unlocked levels, or attempt next-level boss
+  | "reps"
+  | "boss-reps"       // single-set boss attempt
+  | "rest-pick"
+  | "rest-timer"
+  | "celebrate";
 
 function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
   const s = useGame();
@@ -806,42 +820,100 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [reps, setReps] = useState<number>(5);
   const [sets, setSets] = useState<StrengthSet[]>([]);
   const [restMin, setRestMin] = useState<number>(2);
+  const [bossLevel, setBossLevel] = useState<number>(2);
+  const [bossReps, setBossReps] = useState<number>(0);
+  const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
+
+  const unlockedMax = s.strengthLevels?.[workout] ?? 0;
 
   function pickWorkout(w: StrengthWorkout) {
     setWorkout(w);
-    const known = s.strengthLevels?.[w];
-    if (known) {
-      setLevel(known);
-      setStep("reps");
-    } else {
+    const max = s.strengthLevels?.[w] ?? 0;
+    if (max <= 0) {
       setLevel(1);
-      setStep("level");
+      setStep("first-level");
+    } else {
+      setLevel(max);
+      setStep("level-pick");
     }
   }
 
+  function startReps(lv: number) {
+    setLevel(lv);
+    setSets([]);
+    setStep("reps");
+  }
+
+  function startBoss(targetLevel: number) {
+    setBossLevel(targetLevel);
+    setBossReps(strengthBossTargetReps(targetLevel));
+    setStep("boss-reps");
+  }
+
+  function levelDown() {
+    const next = Math.max(1, unlockedMax - 1);
+    setStrengthLevel(workout, next);
+    toast.success(`Dropped to Level ${next}`);
+    setLevel(next);
+  }
+
   function logRepsAnd(action: "rest" | "finish") {
-    const cleanReps = Math.max(1, Math.min(10, Math.round(reps)));
+    const cleanReps = Math.max(1, Math.min(50, Math.round(reps)));
     const newSets = [...sets, { reps: cleanReps }];
     setSets(newSets);
     setReps(cleanReps);
     if (action === "finish") {
-      logStrength({ workout, level, sets: newSets });
-      toast.success(`${WORKOUT_META[workout].title} session logged · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`);
+      const { chalk } = logStrength({ workout, level, sets: newSets });
+      toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level}`);
+      setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level) ?? WORKOUT_META[workout].image });
       setStep("celebrate");
     } else {
       setStep("rest-pick");
     }
   }
 
+  function commitBoss(repsDone: number) {
+    const target = bossReps;
+    const succeeded = repsDone >= target;
+    const { chalk } = logStrength({
+      workout,
+      level: succeeded ? bossLevel : Math.max(1, bossLevel - 1),
+      sets: [{ reps: repsDone }],
+      bossSend: succeeded,
+    });
+    if (succeeded) {
+      toast.success(`Boss defeated! Unlocked Level ${bossLevel}`);
+    } else {
+      toast(`Boss not sent — ${repsDone}/${target} reps. Logged anyway.`);
+    }
+    setCelebrate({
+      chalk,
+      label: succeeded ? `Strength Boss defeated · L${bossLevel}` : `Boss attempt · ${repsDone}/${target} reps`,
+      image: workoutLevelImage(workout, bossLevel) ?? WORKOUT_META[workout].image,
+    });
+    setStep("celebrate");
+  }
+
   function pickRest(min: number) {
     setRestMin(min);
-    // attach rest to last set
-    setSets(prev => prev.length ? prev.map((s, i) => i === prev.length - 1 ? { ...s, restSeconds: min * 60 } : s) : prev);
+    setSets(prev => prev.length ? prev.map((st, i) => i === prev.length - 1 ? { ...st, restSeconds: min * 60 } : st) : prev);
     setStep("rest-timer");
   }
 
-  if (step === "celebrate") {
-    return <SimpleCelebrate total={sets.reduce((a, b) => a + b.reps, 0)} label={`${WORKOUT_META[workout].title} reps logged`} image={WORKOUT_META[workout].image ?? strengthImg} alt={WORKOUT_META[workout].title} />;
+  if (step === "celebrate" && celebrate) {
+    return (
+      <div className="text-center py-6">
+        <SimpleCelebrate
+          total={celebrate.chalk}
+          label={celebrate.label}
+          image={celebrate.image ?? strengthImg}
+          alt={WORKOUT_META[workout].title}
+        />
+        <div className="mt-4">
+          <GameButton variant="primary" onClick={onDone}>Done</GameButton>
+        </div>
+      </div>
+    );
   }
 
   if (step === "workout") {
@@ -879,34 +951,121 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     );
   }
 
-  if (step === "level") {
+  if (step === "first-level") {
+    // First-time: only L1 available, plus the option to attempt the boss to skip ahead.
     return (
       <>
         <DialogHeader>
           <div className="flex items-center gap-3">
             <button onClick={() => setStep("workout")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
-            <HeaderImage src={WORKOUT_META[workout].image ?? boulderImg} alt={WORKOUT_META[workout].title} ring="ring-2 ring-[hsl(var(--btn-orange))]/40" />
             <DialogTitle>Pick your {WORKOUT_META[workout].title.toLowerCase()} level</DialogTitle>
           </div>
         </DialogHeader>
         <DialogDescription className="px-1">
-          You only choose this once. We'll remember it for next time.
+          You only choose this once. We'll remember it for next time and you can upgrade as you get stronger.
         </DialogDescription>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3">
-          {STRENGTH_LEVELS.map(lv => (
-            <button
-              key={lv}
-              type="button"
-              onClick={() => { setLevel(lv); setStep("reps"); }}
-              className={cn(
-                "rounded-xl border-2 p-4 text-center transition active:translate-y-[1px]",
-                "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))] hover:ring-4 ring-[hsl(var(--btn-orange))]/30"
-              )}
-            >
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Level</div>
-              <div className="text-3xl font-display font-bold">{lv}</div>
-            </button>
-          ))}
+          {[1, 2, 3, 4, 5].map(lv => {
+            const img = workoutLevelImage(workout, lv);
+            const locked = lv > 1;
+            return (
+              <button
+                key={lv}
+                type="button"
+                disabled={locked}
+                onClick={() => startReps(lv)}
+                className={cn(
+                  "rounded-xl border-2 overflow-hidden text-center transition active:translate-y-[1px]",
+                  "border-[hsl(var(--panel-frame))] bg-secondary/50",
+                  locked
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:border-[hsl(var(--btn-orange))] hover:ring-4 ring-[hsl(var(--btn-orange))]/30"
+                )}
+              >
+                {img ? (
+                  <div className="aspect-square w-full overflow-hidden bg-black/40">
+                    <img src={img} alt={`Level ${lv}`} className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="aspect-square w-full grid place-items-center bg-secondary/40 text-muted-foreground">
+                    <Dumbbell className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="p-2">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Level</div>
+                  <div className="text-xl font-display font-bold">{lv}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-2 flex justify-center">
+          <GameButton variant="danger" size="sm" onClick={() => startBoss(2)}>
+            <Skull className="h-4 w-4" /> Skip to Strength Boss · L2 ({strengthBossTargetReps(2)} reps)
+          </GameButton>
+        </div>
+      </>
+    );
+  }
+
+  if (step === "level-pick") {
+    const choices = Array.from({ length: unlockedMax }, (_, i) => i + 1);
+    const canBoss = unlockedMax < MAX_STRENGTH_LEVEL;
+    const nextBoss = unlockedMax + 1;
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep("workout")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <DialogTitle>Pick your {WORKOUT_META[workout].title.toLowerCase()} level</DialogTitle>
+          </div>
+        </DialogHeader>
+        <DialogDescription className="px-1">
+          Pick any unlocked level, attempt the boss to level up, or drop a level if today's tough.
+        </DialogDescription>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3">
+          {choices.map(lv => {
+            const img = workoutLevelImage(workout, lv);
+            return (
+              <button
+                key={lv}
+                type="button"
+                onClick={() => startReps(lv)}
+                className={cn(
+                  "rounded-xl border-2 overflow-hidden text-center transition active:translate-y-[1px]",
+                  "border-[hsl(var(--panel-frame))] bg-secondary/50",
+                  "hover:border-[hsl(var(--btn-orange))] hover:ring-4 ring-[hsl(var(--btn-orange))]/30",
+                  lv === unlockedMax && "ring-2 ring-[hsl(var(--btn-orange))]"
+                )}
+              >
+                {img ? (
+                  <div className="aspect-square w-full overflow-hidden bg-black/40">
+                    <img src={img} alt={`Level ${lv}`} className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="aspect-square w-full grid place-items-center bg-secondary/40 text-muted-foreground">
+                    <Dumbbell className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="p-2">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Level</div>
+                  <div className="text-xl font-display font-bold">{lv}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          {unlockedMax > 1 && (
+            <GameButton variant="ghost" size="sm" onClick={levelDown}>
+              <ChevronDown className="h-4 w-4" /> Level down (now {unlockedMax}, drop to {unlockedMax - 1})
+            </GameButton>
+          )}
+          {canBoss && (
+            <GameButton variant="danger" size="sm" onClick={() => startBoss(nextBoss)}>
+              <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({strengthBossTargetReps(nextBoss)} reps)
+            </GameButton>
+          )}
         </div>
       </>
     );
@@ -914,14 +1073,18 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
 
   if (step === "reps") {
     const totalReps = sets.reduce((a, b) => a + b.reps, 0);
+    const perRep = getActivityReward("strength_rep");
+    const mult = strengthLevelMult(level);
+    const previewChalk = Math.round((totalReps + Math.max(0, Math.round(reps))) * perRep * mult);
+    const lvImg = workoutLevelImage(workout, level);
     return (
       <>
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <button onClick={() => sets.length === 0 ? setStep("workout") : undefined} className={cn("p-1 rounded", sets.length === 0 ? "hover:bg-secondary" : "opacity-30 cursor-not-allowed")}>
+            <button onClick={() => sets.length === 0 ? setStep(unlockedMax > 0 ? "level-pick" : "first-level") : undefined} className={cn("p-1 rounded", sets.length === 0 ? "hover:bg-secondary" : "opacity-30 cursor-not-allowed")}>
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <HeaderImage src={WORKOUT_META[workout].image ?? boulderImg} alt={WORKOUT_META[workout].title} ring="ring-2 ring-[hsl(var(--btn-orange))]/40" />
+            <HeaderImage src={lvImg ?? WORKOUT_META[workout].image ?? boulderImg} alt={WORKOUT_META[workout].title} ring="ring-2 ring-[hsl(var(--btn-orange))]/40" />
             <DialogTitle>{WORKOUT_META[workout].title} · Level {level}</DialogTitle>
           </div>
         </DialogHeader>
@@ -930,19 +1093,29 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           {sets.length > 0 && (
             <div className="rounded-lg border border-border bg-secondary/40 p-3">
               <div className="menu-label mb-2">This session</div>
-              <div className="flex flex-wrap gap-1.5">
+              <ul className="divide-y divide-border/50">
                 {sets.map((st, i) => (
-                  <span key={i} className="text-xs px-2 py-1 rounded-md bg-secondary border border-border tabular-nums">
-                    Set {i + 1}: <span className="font-bold">{st.reps}</span>
-                    {st.restSeconds ? <span className="text-muted-foreground"> · {Math.round(st.restSeconds / 60)}m rest</span> : null}
-                  </span>
+                  <li key={i} className="flex items-center justify-between gap-3 py-1.5 text-sm">
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground w-12">Set {i + 1}</span>
+                      <span className="font-bold tabular-nums">{st.reps} reps</span>
+                    </span>
+                    {st.restSeconds ? (
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {Math.round(st.restSeconds / 60)}m rest
+                      </span>
+                    ) : null}
+                  </li>
                 ))}
+              </ul>
+              <div className="mt-2 text-xs text-muted-foreground flex justify-between">
+                <span>Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></span>
+                <span>Chalk so far: <span className="font-bold gradient-chalk-text tabular-nums">+{Math.round(totalReps * perRep * mult)}</span></span>
               </div>
-              <div className="mt-2 text-xs text-muted-foreground">Total reps so far: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></div>
             </div>
           )}
 
-          <Field label="Reps this set (1–10)">
+          <Field label={`Reps this set (×${mult.toFixed(1)} chalk per rep at L${level})`}>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -952,18 +1125,22 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
               <Input
                 type="number"
                 min={1}
-                max={10}
+                max={50}
                 value={reps}
-                onChange={e => setReps(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
+                onChange={e => setReps(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
                 className="h-12 text-center text-2xl font-bold tabular-nums flex-1"
               />
               <button
                 type="button"
-                onClick={() => setReps(r => Math.min(10, r + 1))}
+                onClick={() => setReps(r => Math.min(50, r + 1))}
                 className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold active:translate-y-[1px]"
               >+</button>
             </div>
           </Field>
+
+          <div className="text-xs text-muted-foreground text-center">
+            Estimated chalk after this set: <span className="font-bold gradient-chalk-text">+{previewChalk}</span>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
@@ -972,6 +1149,48 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </GameButton>
           <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
             <Trophy className="h-4 w-4" /> Log Reps & Finish
+          </GameButton>
+        </div>
+      </>
+    );
+  }
+
+  if (step === "boss-reps") {
+    const lvImg = workoutLevelImage(workout, bossLevel);
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep(unlockedMax > 0 ? "level-pick" : "first-level")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <HeaderImage src={lvImg ?? bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/60" />
+            <DialogTitle className="flex items-center gap-2"><Skull className="h-5 w-5" /> Strength Boss · L{bossLevel}</DialogTitle>
+          </div>
+        </DialogHeader>
+        <DialogDescription className="px-1">
+          One single set. Hit <span className="font-bold text-foreground">{bossReps} reps</span> to defeat the boss and unlock Level {bossLevel}.
+        </DialogDescription>
+        <div className="space-y-4 mt-2">
+          <Field label="Reps in one set">
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setReps(r => Math.max(0, r - 1))}
+                className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold">−</button>
+              <Input type="number" min={0} max={100} value={reps}
+                onChange={e => setReps(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
+                className="h-12 text-center text-2xl font-bold tabular-nums flex-1" />
+              <button type="button" onClick={() => setReps(r => Math.min(100, r + 1))}
+                className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold">+</button>
+            </div>
+          </Field>
+          <div className="text-center text-sm">
+            {reps >= bossReps
+              ? <span className="text-[hsl(var(--btn-green))] font-bold">Boss DEFEATED ({reps}/{bossReps}) — +Bonus chalk!</span>
+              : <span className="text-muted-foreground">{reps}/{bossReps} reps — keep pushing!</span>}
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 pt-3">
+          <GameButton variant="ghost" size="sm" onClick={() => setStep(unlockedMax > 0 ? "level-pick" : "first-level")}>Cancel</GameButton>
+          <GameButton variant="danger" size="md" onClick={() => commitBoss(reps)}>
+            <Skull className="h-4 w-4" /> Log Boss Attempt
           </GameButton>
         </div>
       </>

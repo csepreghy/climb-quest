@@ -85,7 +85,7 @@ export default function Dashboard() {
         <StatCard label="Bosses defeated" value={s.stats.bossesSent} />
       </div>
 
-      <ChalkOverTimeChart logs={s.logs} gyms={gyms} />
+      <ChalkOverTimeChart logs={s.logs} gyms={gyms} strengthSessions={s.strengthSessions ?? []} />
 
       <StrengthVolumeChart sessions={s.strengthSessions ?? []} />
 
@@ -209,7 +209,7 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
   );
 }
 
-function ChalkOverTimeChart({ logs, gyms }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[] }) {
+function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
   // Pick the grading system used most often in the last 30 days, based on which
   // logs' grade labels match each gym's available systems.
   const dominantGs = useMemo<GradingSystem | null>(() => {
@@ -245,11 +245,11 @@ function ChalkOverTimeChart({ logs, gyms }: { logs: { date: string; chalkTotal: 
     currentMonday.setDate(today.getDate() - dayIdx);
 
     const WEEKS = 13; // ~3 months
-    const buckets = new Map<string, { ts: number; chalk: number; gradeRank: number | null }>();
+    const buckets = new Map<string, { ts: number; chalk: number; strength: number; gradeRank: number | null }>();
     for (let i = WEEKS - 1; i >= 0; i--) {
       const m = new Date(currentMonday);
       m.setDate(currentMonday.getDate() - i * 7);
-      buckets.set(m.toISOString().slice(0, 10), { ts: m.getTime(), chalk: 0, gradeRank: null });
+      buckets.set(m.toISOString().slice(0, 10), { ts: m.getTime(), chalk: 0, strength: 0, gradeRank: null });
     }
     const earliest = Array.from(buckets.values())[0]?.ts ?? 0;
 
@@ -283,13 +283,25 @@ function ChalkOverTimeChart({ logs, gyms }: { logs: { date: string; chalkTotal: 
         }
       }
     }
+    for (const sess of strengthSessions) {
+      const d = new Date(sess.date);
+      const day = (d.getDay() + 6) % 7;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - day);
+      monday.setHours(0, 0, 0, 0);
+      if (monday.getTime() < earliest || monday.getTime() > currentMonday.getTime()) continue;
+      const key = monday.toISOString().slice(0, 10);
+      const existing = buckets.get(key);
+      if (!existing) continue;
+      existing.strength += sess.chalkTotal ?? 0;
+    }
     return Array.from(buckets.values())
       .sort((a, b) => a.ts - b.ts)
       .map(b => ({
         ...b,
         label: new Date(b.ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
       }));
-  }, [logs, scaleLabels, dominantGs]);
+  }, [logs, strengthSessions, scaleLabels, dominantGs]);
 
   return (
     <GameCard className="p-5">
@@ -309,6 +321,10 @@ function ChalkOverTimeChart({ logs, gyms }: { logs: { date: string; chalkTotal: 
                 <linearGradient id="chalkGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(var(--btn-orange))" stopOpacity={0.5} />
                   <stop offset="100%" stopColor="hsl(var(--btn-orange))" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="strengthGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--sky))" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="hsl(var(--sky))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
@@ -336,10 +352,11 @@ function ChalkOverTimeChart({ logs, gyms }: { logs: { date: string; chalkTotal: 
                 labelStyle={{ color: "hsl(var(--foreground))" }}
                 formatter={(v: number, name: string) => {
                   if (name === "Top grade") return [v == null ? "—" : (scaleLabels[Math.round(v)] ?? String(v)), name];
-                  return [`${v.toLocaleString()} chalk`, "Earned"];
+                  return [`${v.toLocaleString()} chalk`, name];
                 }}
               />
-              <Area yAxisId="chalk" type="monotone" dataKey="chalk" name="Earned" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
+              <Area yAxisId="chalk" type="monotone" dataKey="chalk" stackId="chalk" name="Climbing" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
+              <Area yAxisId="chalk" type="monotone" dataKey="strength" stackId="chalk" name="Strength" stroke="hsl(var(--sky))" strokeWidth={2} fill="url(#strengthGrad)" />
               <Line yAxisId="grade" type="monotone" dataKey="gradeRank" name="Top grade" stroke="hsl(270 80% 65%)" strokeWidth={2} dot={{ r: 3, fill: "hsl(270 80% 65%)" }} connectNulls />
             </ComposedChart>
           </ResponsiveContainer>
@@ -378,18 +395,9 @@ function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
       const key = d.toISOString().slice(0, 10);
       const row = byKey.get(key);
       if (!row) continue;
+      const mult = strengthLevelMult(sess.level);
       const bossBoost = sess.bossSend ? 1.25 : 1;
-      // Use per-set level when available so mixed-level sessions count fairly.
-      let volume = 0;
-      if (sess.sets?.length) {
-        for (const st of sess.sets) {
-          const lv = st.level ?? sess.level;
-          volume += st.reps * strengthLevelMult(lv);
-        }
-      } else {
-        volume = sess.totalReps * strengthLevelMult(sess.level);
-      }
-      volume = Math.round(volume * bossBoost);
+      const volume = Math.round(sess.totalReps * mult * bossBoost);
       if (sess.workout === "core") row.core += volume;
       else if (sess.workout === "pullup") row.pullup += volume;
     }

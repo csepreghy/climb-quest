@@ -169,7 +169,7 @@ export function targetPrice(item: ShopItem, levelReq: number): number {
 /** Assign a level requirement per item: cheaper-first within rarity, respecting the rarity floor. */
 function computeLevelReqs(items: ShopItem[]): Map<string, number> {
   const out = new Map<string, number>();
-  const groups: Record<Rarity, ShopItem[]> = { common: [], rare: [], epic: [], legendary: [] };
+  const groups: Record<Rarity, ShopItem[]> = { common: [], uncommon: [], rare: [], epic: [], legendary: [] };
   for (const it of items) groups[it.rarity].push(it);
   (Object.keys(groups) as Rarity[]).forEach(r => {
     const list = groups[r].slice().sort((a, b) => {

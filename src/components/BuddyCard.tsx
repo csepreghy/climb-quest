@@ -54,6 +54,12 @@ export function BuddyCard({
         </button>
       )}
 
+      {item.bonus?.mult ? (
+        <div className="absolute top-2 right-2 z-10 text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40">
+          +{Math.round(item.bonus.mult * 100)}%
+        </div>
+      ) : null}
+
       <div className="flex gap-5">
         {/* Image — pushed to the left, slightly smaller than before */}
         <div className={cn("h-32 w-32 sm:h-36 sm:w-36 shrink-0 rounded-xl bg-background/40 overflow-hidden", RARITY_BORDER[item.rarity])}>
@@ -76,17 +82,10 @@ export function BuddyCard({
 
         {/* Details — right side */}
         <div className="min-w-0 flex-1 flex flex-col gap-1.5">
-          <div className="pr-8">
+          <div className="pr-12">
             <div className="text-base font-semibold leading-snug truncate">{item.name}</div>
-            <div className="flex flex-wrap items-center gap-1.5 mt-1">
-              <div className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
-                {item.rarity}
-              </div>
-              {item.bonus?.mult ? (
-                <div className="text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40">
-                  +{Math.round(item.bonus.mult * 100)}% chalk
-                </div>
-              ) : null}
+            <div className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border inline-block mt-1", RARITY_COLOR[item.rarity])}>
+              {item.rarity}
             </div>
           </div>
 

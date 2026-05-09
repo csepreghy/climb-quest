@@ -783,11 +783,11 @@ const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3
 const MAX_STRENGTH_LEVEL = 5;
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
-  1: "LEG RAISES",
-  2: "HANGING BENT LEG RAISES",
-  3: "L-SIT RAISES",
-  4: "TUCK RAISES",
-  5: "FRONT LEVER RAISES",
+  1: "Leg Raises",
+  2: "Bent Leg Raises",
+  3: "L-Sit Raises",
+  4: "Tuck Raises",
+  5: "Front Lever Raises",
 };
 
 function workoutLevelName(workout: StrengthWorkout, level: number): string {
@@ -1007,7 +1007,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                       </div>
                     )}
                     <div className="p-1">
-                      <div className="text-sm font-display font-bold leading-none">L{lv}</div>
+                      <div className="text-xs text-muted-foreground leading-none">L{lv}</div>
+                      <div className="text-[11px] font-display font-bold leading-tight mt-0.5 line-clamp-2">{workoutLevelName(workout, lv)}</div>
                     </div>
                   </button>
                 );

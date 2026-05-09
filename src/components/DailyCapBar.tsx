@@ -22,7 +22,7 @@ export function DailyCapBar({ className }: { className?: string }) {
     ? `Diminishing returns ×${cfg.tier2Mult}`
     : overTier1
       ? `Diminishing returns ×${cfg.tier1Mult}`
-      : "Full chalk";
+      : null;
   return (
     <GameCard className={cn("p-3", className)}>
       <div className="flex items-center justify-between gap-3 mb-1.5 text-xs">
@@ -30,9 +30,11 @@ export function DailyCapBar({ className }: { className?: string }) {
           <span className="uppercase tracking-wider text-muted-foreground">Daily cap</span>
           <span className="tabular-nums font-medium">{used.toLocaleString()} / {cap.toLocaleString()}</span>
         </div>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <span className={cn(overTier1 ? "text-[hsl(var(--btn-orange))]" : "text-chalk-glow")}>{stateLabel}</span>
-        </div>
+        {stateLabel && (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <span className={cn(overTier1 ? "text-[hsl(var(--btn-orange))]" : "text-chalk-glow")}>{stateLabel}</span>
+          </div>
+        )}
       </div>
       <div className="h-2 rounded-full bg-secondary overflow-hidden relative">
         <div className={cn("h-full transition-all", fillCls)} style={{ width: `${fillPct}%` }} />

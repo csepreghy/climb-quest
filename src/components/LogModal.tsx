@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET } from "@/game/store";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, setStrengthLevel } from "@/game/store";
 import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolveGymGradingSystems } from "@/game/gyms";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
@@ -782,6 +782,19 @@ const REST_OPTIONS = [1, 2, 3, 5]; // minutes
 const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
 const MAX_STRENGTH_LEVEL = 5;
 
+const CORE_LEVEL_NAMES: Record<number, string> = {
+  1: "LEG RAISES",
+  2: "HANGING BENT LEG RAISES",
+  3: "L-SIT RAISES",
+  4: "TUCK RAISES",
+  5: "FRONT LEVER RAISES",
+};
+
+function workoutLevelName(workout: StrengthWorkout, level: number): string {
+  if (workout === "core") return CORE_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  return `LEVEL ${level}`;
+}
+
 function workoutLevelImage(workout: StrengthWorkout, level: number): string | undefined {
   if (workout === "core") return CORE_LEVEL_IMAGES[level];
   return undefined;
@@ -804,6 +817,7 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
 
 type StrengthStep =
   | "workout"
+  | "first-pick"
   | "reps"
   | "boss-reps"       // single-set boss attempt
   | "rest-pick"
@@ -829,6 +843,14 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setWorkout(w);
     const max = s.strengthLevels?.[w] ?? 0;
     setLevel(max > 0 ? max : 1);
+    setSets([]);
+    setReps(5);
+    setStep(max <= 0 ? "first-pick" : "reps");
+  }
+
+  function confirmFirstPick(lv: number) {
+    setStrengthLevel(workout, lv);
+    setLevel(lv);
     setSets([]);
     setReps(5);
     setStep("reps");
@@ -932,10 +954,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const totalReps = sets.reduce((a, b) => a + b.reps, 0);
     const lvImg = workoutLevelImage(workout, level);
 
-    const choices = isFirstTime ? [1, 2, 3, 4, 5] : Array.from({ length: unlockedMax }, (_, i) => i + 1);
-    const canBoss = !isFirstTime && unlockedMax < MAX_STRENGTH_LEVEL;
-    const nextBoss = isFirstTime ? 2 : unlockedMax + 1;
+    const choices = Array.from({ length: Math.max(1, unlockedMax) }, (_, i) => i + 1);
+    const canBoss = unlockedMax < MAX_STRENGTH_LEVEL;
+    const nextBoss = Math.min(MAX_STRENGTH_LEVEL, unlockedMax + 1);
     const lockEdit = sets.length > 0;
+    const levelName = workoutLevelName(workout, level);
     return (
       <>
         <DialogHeader>
@@ -944,21 +967,16 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
               <ArrowLeft className="h-4 w-4" />
             </button>
             <HeaderImage src={lvImg ?? WORKOUT_META[workout].image ?? boulderImg} alt={WORKOUT_META[workout].title} ring="ring-2 ring-[hsl(var(--btn-orange))]/40" />
-            <DialogTitle>{WORKOUT_META[workout].title} · Level {level}</DialogTitle>
+            <div className="min-w-0">
+              <DialogTitle className="truncate">{WORKOUT_META[workout].title} · L{level}</DialogTitle>
+              <div className="text-xs text-muted-foreground font-display tracking-wide truncate">{levelName}</div>
+            </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-          {isFirstTime && (
-            <DialogDescription className="px-1">
-              You only choose this once. We'll remember it for next time and you can upgrade as you get stronger.
-            </DialogDescription>
-          )}
-
           <div>
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-              {isFirstTime ? "Pick your starting level" : "Level"}
-            </Label>
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Level</Label>
             <div className="mt-2 grid grid-cols-5 gap-1.5">
               {[1, 2, 3, 4, 5].map(lv => {
                 const img = workoutLevelImage(workout, lv);
@@ -971,6 +989,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     type="button"
                     disabled={disabled}
                     onClick={() => setLevel(lv)}
+                    title={workoutLevelName(workout, lv)}
                     className={cn(
                       "rounded-lg border-2 overflow-hidden text-center transition active:translate-y-[1px]",
                       "border-[hsl(var(--panel-frame))] bg-secondary/50",
@@ -994,7 +1013,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                 );
               })}
             </div>
-            {!lockEdit && (canBoss || isFirstTime) && (
+            {!lockEdit && canBoss && (
               <div className="mt-2 flex flex-wrap justify-center gap-2">
                 <GameButton variant="danger" size="sm" onClick={startBoss}>
                   <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({STRENGTH_BOSS_TARGET} reps total)
@@ -1105,6 +1124,53 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           <GameButton variant="danger" size="md" onClick={addBossRep}>
             <Skull className="h-4 w-4" /> Log +1 Boss Rep
           </GameButton>
+        </div>
+      </>
+    );
+  }
+
+  if (step === "first-pick") {
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep("workout")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <DialogTitle>Pick your {WORKOUT_META[workout].title.toLowerCase()} level</DialogTitle>
+          </div>
+        </DialogHeader>
+        <DialogDescription className="px-1">
+          You only choose this once. We'll remember it for next time and you can upgrade as you get stronger.
+        </DialogDescription>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3 max-h-[60vh] overflow-y-auto pr-1">
+          {[1, 2, 3, 4, 5].map(lv => {
+            const img = workoutLevelImage(workout, lv);
+            const name = workoutLevelName(workout, lv);
+            return (
+              <button
+                key={lv}
+                type="button"
+                onClick={() => confirmFirstPick(lv)}
+                className={cn(
+                  "rounded-lg border-2 overflow-hidden text-center transition active:translate-y-[1px]",
+                  "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
+                )}
+              >
+                {img ? (
+                  <div className="aspect-square w-full overflow-hidden bg-black/40">
+                    <img src={img} alt={name} className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="aspect-square w-full grid place-items-center bg-secondary/40 text-muted-foreground">
+                    <Dumbbell className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="p-2">
+                  <div className="text-xs text-muted-foreground">L{lv}</div>
+                  <div className="text-sm font-display font-bold leading-tight">{name}</div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </>
     );

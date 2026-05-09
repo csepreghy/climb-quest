@@ -845,6 +845,14 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setLevel(max > 0 ? max : 1);
     setSets([]);
     setReps(5);
+    setStep(max <= 0 ? "first-pick" : "reps");
+  }
+
+  function confirmFirstPick(lv: number) {
+    setStrengthLevel(workout, lv);
+    setLevel(lv);
+    setSets([]);
+    setReps(5);
     setStep("reps");
   }
 

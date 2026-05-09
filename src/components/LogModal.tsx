@@ -834,19 +834,10 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setStep("reps");
   }
 
-  function startBoss(targetLevel: number) {
-    setBossLevel(targetLevel);
-    setBossReps(strengthBossTargetReps(targetLevel));
+  function startBoss() {
+    setBossReps(STRENGTH_BOSS_TARGET);
     setReps(0);
     setStep("boss-reps");
-  }
-
-  function levelDown() {
-    if (unlockedMax <= 1) return;
-    const next = Math.max(1, unlockedMax - 1);
-    setStrengthLevel(workout, next);
-    toast.success(`Dropped to Level ${next}`);
-    setLevel(next);
   }
 
   function logRepsAnd(action: "rest" | "finish") {

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, resetGame, resetOnboarding, useGame } from "@/game/store";
+import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, resetGame, resetOnboarding, resetStrengthLevels, useGame } from "@/game/store";
 import { useAuth } from "@/hooks/useAuth";
 import { useActiveSlot, snapshotActiveSlot } from "@/game/adminAccounts";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -317,9 +317,21 @@ function StrengthRewardsCard() {
           <div className="text-xs text-muted-foreground mt-1">Added on top of per-rep chalk when the boss is defeated.</div>
         </div>
       </div>
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex gap-2 flex-wrap">
         <Button onClick={save} disabled={!dirty || busy}>{busy ? "Saving…" : "Save"}</Button>
         {dirty && <Button variant="ghost" onClick={() => { setPerRep(""); setBossBonus(""); }}>Reset</Button>}
+      </div>
+      <div className="mt-4 pt-4 border-t border-border/50">
+        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">First-time strength selection</div>
+        <p className="text-xs text-muted-foreground mb-2">
+          Clears your unlocked strength levels so the first-time level picker shows again next time you log a strength session.
+        </p>
+        <Button
+          variant="secondary"
+          onClick={() => { resetStrengthLevels(); toast.success("First-time strength selection reset"); }}
+        >
+          <Trash2 className="h-4 w-4" /> Reset first-time strength picker
+        </Button>
       </div>
     </GameCard>
   );

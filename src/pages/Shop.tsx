@@ -10,6 +10,7 @@ import { GameButton } from "@/components/ui/game-button";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
+import { BuddyCard } from "@/components/BuddyCard";
 
 type GroupKey = ItemGroup | "all";
 const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [
@@ -17,6 +18,7 @@ const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
   { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk", "Study"] },
   { key: "power",  label: "Power-ups", categories: [] },
+  { key: "buddy",  label: "Climbing Buddies", categories: [] },
 ];
 
 export default function Shop() {
@@ -74,7 +76,10 @@ export default function Shop() {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map(item => <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} state={s} ignoreLevelReq={!!s.ignoreLevelReq} />)}
+          {items.map(item => item.group === "buddy"
+            ? <BuddyShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} state={s} ignoreLevelReq={!!s.ignoreLevelReq} />
+            : <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} state={s} ignoreLevelReq={!!s.ignoreLevelReq} />
+          )}
         </div>
       )}
     </div>

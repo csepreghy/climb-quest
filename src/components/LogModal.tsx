@@ -957,7 +957,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const choices = Array.from({ length: Math.max(1, unlockedMax) }, (_, i) => i + 1);
     const canBoss = unlockedMax < MAX_STRENGTH_LEVEL;
     const nextBoss = Math.min(MAX_STRENGTH_LEVEL, unlockedMax + 1);
-    const lockEdit = sets.length > 0;
+    const lockEdit = false;
     const levelName = workoutLevelName(workout, level);
     return (
       <>

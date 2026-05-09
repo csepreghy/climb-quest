@@ -78,8 +78,15 @@ export function BuddyCard({
         <div className="min-w-0 flex-1 flex flex-col gap-1.5">
           <div className="pr-8">
             <div className="text-base font-semibold leading-snug truncate">{item.name}</div>
-            <div className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border inline-block mt-1", RARITY_COLOR[item.rarity])}>
-              {item.rarity}
+            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+              <div className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
+                {item.rarity}
+              </div>
+              {item.bonus?.mult ? (
+                <div className="text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40">
+                  +{Math.round(item.bonus.mult * 100)}% chalk
+                </div>
+              ) : null}
             </div>
           </div>
 

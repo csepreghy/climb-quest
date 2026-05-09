@@ -378,9 +378,18 @@ function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
       const key = d.toISOString().slice(0, 10);
       const row = byKey.get(key);
       if (!row) continue;
-      const mult = strengthLevelMult(sess.level);
       const bossBoost = sess.bossSend ? 1.25 : 1;
-      const volume = Math.round(sess.totalReps * mult * bossBoost);
+      // Use per-set level when available so mixed-level sessions count fairly.
+      let volume = 0;
+      if (sess.sets?.length) {
+        for (const st of sess.sets) {
+          const lv = st.level ?? sess.level;
+          volume += st.reps * strengthLevelMult(lv);
+        }
+      } else {
+        volume = sess.totalReps * strengthLevelMult(sess.level);
+      }
+      volume = Math.round(volume * bossBoost);
       if (sess.workout === "core") row.core += volume;
       else if (sess.workout === "pullup") row.pullup += volume;
     }

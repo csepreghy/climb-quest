@@ -29,7 +29,7 @@ const NAV_BASE = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/inventory", label: "Inventory", icon: Backpack },
   { to: "/shop", label: "Shop", icon: Store },
-  { to: "/log", label: "Boulder Logs", icon: ScrollText },
+  { to: "/log", label: "Logs", icon: ScrollText },
   
   { to: "/gym", label: "My Gym", icon: Building2 },
   { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
@@ -214,9 +214,9 @@ export default function Layout() {
           </NavLink>
           <div className="flex items-center gap-3">
             <GameButton variant="success" size="sm" onClick={tryOpenLog} className="hidden sm:inline-flex">
-              <Plus className="h-4 w-4" /> Log Boulder
+              <Plus className="h-4 w-4" /> Log
             </GameButton>
-            <GameButton variant="success" size="sm" onClick={tryOpenLog} className="sm:hidden !px-2.5" aria-label="Log Boulder">
+            <GameButton variant="success" size="sm" onClick={tryOpenLog} className="sm:hidden !px-2.5" aria-label="Log">
               <Plus className="h-4 w-4" />
             </GameButton>
             {isAdmin && activeSlot === "test" && <div className="hidden xl:contents"><ThemeButton /></div>}

@@ -619,15 +619,65 @@ export function deleteStrengthSession(id: string) {
   });
 }
 
-/** Manually set the user's max-unlocked strength level (used by "Level down"). */
+/** Manually set the user's max-unlocked strength level (used internally / by admin). */
 export function setStrengthLevel(workout: StrengthWorkout, level: number) {
   set(s => ({ ...s, strengthLevels: { ...(s.strengthLevels ?? {}), [workout]: Math.max(1, level) } }));
 }
 
 /** Reset strength-level selections so the first-time picker shows again. */
 export function resetStrengthLevels() {
-  set(s => ({ ...s, strengthLevels: {} }));
+  set(s => ({ ...s, strengthLevels: {}, strengthBossProgress: {} }));
 }
+
+/** Cumulative reps logged toward the next strength-boss defeat for `workout`. */
+export function getStrengthBossProgress(workout: StrengthWorkout): number {
+  return state.strengthBossProgress?.[workout] ?? 0;
+}
+
+/**
+ * Log a single boss-attempt rep. Each call adds 1 rep toward the cumulative
+ * boss target (10). When cumulative reaches 10, mark a successful boss send,
+ * unlock the next level, and reset progress.
+ */
+export function logStrengthBossRep(workout: StrengthWorkout): {
+  chalk: number;
+  defeated: boolean;
+  progress: number;
+  target: number;
+  unlockedLevel?: number;
+} {
+  const target = STRENGTH_BOSS_TARGET;
+  const prevMax = state.strengthLevels?.[workout] ?? 0;
+  const targetLevel = Math.min(MAX_STRENGTH_LEVEL_CONST, Math.max(1, prevMax + 1));
+  const prevProgress = state.strengthBossProgress?.[workout] ?? 0;
+  const nextProgress = prevProgress + 1;
+  const defeated = nextProgress >= target;
+
+  const { chalk } = logStrength({
+    workout,
+    level: targetLevel,
+    sets: [{ reps: 1 }],
+    bossSend: defeated,
+  });
+
+  set(s => ({
+    ...s,
+    strengthBossProgress: {
+      ...(s.strengthBossProgress ?? {}),
+      [workout]: defeated ? 0 : nextProgress,
+    },
+  }));
+
+  return {
+    chalk,
+    defeated,
+    progress: defeated ? 0 : nextProgress,
+    target,
+    unlockedLevel: defeated ? targetLevel : undefined,
+  };
+}
+
+const MAX_STRENGTH_LEVEL_CONST = 5;
 
 export function updateLog(id: string, input: LogInput) {
   const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date, input.attemptType === "repeat");

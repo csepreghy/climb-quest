@@ -804,8 +804,6 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
 
 type StrengthStep =
   | "workout"
-  | "first-level"     // first-time intro: only L1 + boss attempt
-  | "level-pick"      // returning user: pick from unlocked levels, or attempt next-level boss
   | "reps"
   | "boss-reps"       // single-set boss attempt
   | "rest-pick"
@@ -825,21 +823,12 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
 
   const unlockedMax = s.strengthLevels?.[workout] ?? 0;
+  const isFirstTime = unlockedMax <= 0;
 
   function pickWorkout(w: StrengthWorkout) {
     setWorkout(w);
     const max = s.strengthLevels?.[w] ?? 0;
-    if (max <= 0) {
-      setLevel(1);
-      setStep("first-level");
-    } else {
-      setLevel(max);
-      setStep("level-pick");
-    }
-  }
-
-  function startReps(lv: number) {
-    setLevel(lv);
+    setLevel(max > 0 ? max : 1);
     setSets([]);
     setReps(5);
     setStep("reps");
@@ -853,6 +842,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function levelDown() {
+    if (unlockedMax <= 1) return;
     const next = Math.max(1, unlockedMax - 1);
     setStrengthLevel(workout, next);
     toast.success(`Dropped to Level ${next}`);

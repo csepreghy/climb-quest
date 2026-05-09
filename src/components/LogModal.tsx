@@ -1075,30 +1075,35 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </div>
         </DialogHeader>
         <DialogDescription className="px-1">
-          One single set. Hit <span className="font-bold text-foreground">{bossReps} reps</span> to defeat the boss and unlock Level {bossLevel}.
+          Add boss reps <span className="font-bold text-foreground">one at a time</span> across multiple sessions. Reach <span className="font-bold text-foreground">{bossReps} total reps</span> to defeat the boss and unlock Level {bossLevel}.
         </DialogDescription>
         <div className="space-y-4 mt-2">
-          <Field label="Reps in one set">
-            <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setReps(r => Math.max(0, r - 1))}
-                className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold">−</button>
-              <Input type="number" min={0} max={100} value={reps}
-                onChange={e => setReps(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
-                className="h-12 text-center text-2xl font-bold tabular-nums flex-1" />
-              <button type="button" onClick={() => setReps(r => Math.min(100, r + 1))}
-                className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold">+</button>
-            </div>
-          </Field>
-          <div className="text-center text-sm">
-            {reps >= bossReps
-              ? <span className="text-[hsl(var(--btn-green))] font-bold">Boss DEFEATED ({reps}/{bossReps}) — +Bonus chalk!</span>
-              : <span className="text-muted-foreground">{reps}/{bossReps} reps — keep pushing!</span>}
-          </div>
+          {(() => {
+            const progress = getStrengthBossProgress(workout);
+            const pct = Math.min(100, (progress / bossReps) * 100);
+            return (
+              <>
+                <div className="text-center">
+                  <div className="text-5xl font-display font-bold tabular-nums">
+                    {progress}<span className="text-2xl text-muted-foreground"> / {bossReps}</span>
+                  </div>
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Boss reps logged</div>
+                </div>
+                <div className="mx-auto max-w-sm h-3 rounded-full bg-secondary overflow-hidden border border-border">
+                  <div className="h-full transition-all duration-300"
+                    style={{ width: `${pct}%`, background: "linear-gradient(90deg, hsl(var(--boss)), hsl(var(--btn-orange)))" }} />
+                </div>
+                <div className="text-center text-xs text-muted-foreground">
+                  Each tap logs one rep. Leave and come back any time — your progress is saved.
+                </div>
+              </>
+            );
+          })()}
         </div>
-        <div className="flex justify-end gap-2 pt-3">
-          <GameButton variant="ghost" size="sm" onClick={() => setStep("reps")}>Cancel</GameButton>
-          <GameButton variant="danger" size="md" onClick={() => commitBoss(reps)}>
-            <Skull className="h-4 w-4" /> Log Boss Attempt
+        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
+          <GameButton variant="ghost" size="sm" onClick={() => setStep("reps")}>Back</GameButton>
+          <GameButton variant="danger" size="md" onClick={addBossRep}>
+            <Skull className="h-4 w-4" /> Log +1 Boss Rep
           </GameButton>
         </div>
       </>

@@ -87,6 +87,9 @@ export default function Dashboard() {
 
       <ChalkOverTimeChart logs={s.logs} gyms={gyms} />
 
+      <StrengthVolumeChart sessions={s.strengthSessions ?? []} />
+
+
       {/* All Badges */}
       <GameCard tone="legendary" className="p-5">
         <h3 className="menu-label mb-3 flex items-center gap-1.5">

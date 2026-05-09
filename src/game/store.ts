@@ -497,15 +497,90 @@ export interface StrengthInput {
   /** When true, this session is a successful strength-boss send (level-up). */
   bossSend?: boolean;
 }
-export function logStrength(input: StrengthInput): { session: StrengthSession; chalk: number } {
+export function logStrength(input: StrengthInput): { session: StrengthSession; chalk: number; breakdown: ChalkBreakdown } {
   const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
-  const perRep = getActivityReward("strength_rep");
-  const mult = strengthLevelMult(input.level);
-  let chalk = Math.round(totalReps * perRep * mult);
-  if (input.bossSend) chalk += getActivityReward("strength_boss_send");
+  const maxUnlocked = state.strengthLevels?.[input.workout] ?? 0;
+  const perRep = strengthRepChalk(input.level, maxUnlocked);
+  const base = Math.max(1, Math.round(totalReps * perRep));
+  const dateISO = input.date ?? new Date().toISOString();
+
+  // ----- Apply equipped bonuses (mirrors computeChalk for boulders) -----
+  const bonuses: { source: string; amount: number }[] = [];
+  let running = base;
+  const eq = state.equipped;
+  for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
+    const id = eq[slotKey]; if (!id) continue;
+    const item = getItem(id); if (!item?.bonus) continue;
+    const b = item.bonus;
+    // Strength sessions count as "all"-applies effects only — they aren't bound to ActivityType.
+    if (b.appliesTo === "all" && b.mult > 0) {
+      const amt = Math.round(running * b.mult);
+      bonuses.push({ source: item.name, amount: amt });
+      running += amt;
+    }
+  }
+  // Strength-boss send: flat boss-bonus + strength_boss_send flat reward.
+  if (input.bossSend) {
+    let bossPct = 0;
+    for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
+      const id = eq[slotKey]; if (!id) continue;
+      const item = getItem(id);
+      if (item?.bossBonusPct) bossPct += item.bossBonusPct;
+    }
+    if (bossPct > 0) {
+      const amt = Math.round(running * (bossPct / 100));
+      bonuses.push({ source: `Boss bonus (+${bossPct}%)`, amount: amt });
+      running += amt;
+    }
+    const flat = getActivityReward("strength_boss_send");
+    if (flat > 0) {
+      bonuses.push({ source: "Strength boss send", amount: flat });
+      running += flat;
+    }
+  }
+  // Consumable
+  if (state.pendingConsumable) {
+    const item = getItem(state.pendingConsumable);
+    if (item?.consumableBonus) {
+      const amt = Math.round(running * item.consumableBonus);
+      bonuses.push({ source: item.name + " (consumed)", amount: amt });
+      running += amt;
+    }
+  }
+  // Crit
+  let critProb = 0;
+  for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
+    const id = eq[slotKey]; if (!id) continue;
+    const item = getItem(id);
+    if (item?.critChancePct) {
+      const p = Math.max(0, Math.min(100, item.critChancePct)) / 100;
+      critProb = 1 - (1 - critProb) * (1 - p);
+    }
+  }
+  if (critProb > 0 && Math.random() < critProb) {
+    bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
+    running *= 2;
+  }
+  // Daily cap
+  const cfg = getDailyCapConfig();
+  let capInfo: ChalkBreakdown["capInfo"] | undefined;
+  if (cfg.enabled) {
+    const used = chalkUsedOnDate(state, dateISO);
+    const cap = computeDailyCap(state.level, cfg);
+    const capped = applyDailyCap(running, used, cap, cfg);
+    if (capped.reduced) {
+      bonuses.push({ source: capped.label ?? "Daily cap", amount: capped.granted - running });
+      running = capped.granted;
+    }
+    capInfo = { cap, used, reduced: capped.reduced };
+  }
+
+  const chalk = Math.max(0, running);
+  const breakdown: ChalkBreakdown = { base, bonuses, total: chalk, capInfo };
+
   const session: StrengthSession = {
     id: crypto.randomUUID(),
-    date: input.date ?? new Date().toISOString(),
+    date: dateISO,
     workout: input.workout,
     level: input.level,
     sets: input.sets,
@@ -522,9 +597,10 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
       totalChalkEarned: s.totalChalkEarned + chalk,
       strengthSessions: [session, ...(s.strengthSessions ?? [])].slice(0, 500),
       strengthLevels: { ...(s.strengthLevels ?? {}), [input.workout]: nextMax },
+      pendingConsumable: null,
     };
   });
-  return { session, chalk };
+  return { session, chalk, breakdown };
 }
 export function deleteStrengthSession(id: string) {
   set(s => {

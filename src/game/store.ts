@@ -78,22 +78,23 @@ export interface StrengthSession {
 export function strengthLevelMult(level: number): number {
   return 1 + Math.max(0, level - 1) * 0.5;
 }
-/** Boss target reps in a single set to defeat the next strength level. */
-export function strengthBossTargetReps(nextLevel: number): number {
-  return Math.max(3, nextLevel * 5);
+/** Boss target: cumulative reps across attempts (split sessions, 1 rep per attempt). */
+export const STRENGTH_BOSS_TARGET = 10;
+export function strengthBossTargetReps(_nextLevel?: number): number {
+  return STRENGTH_BOSS_TARGET;
 }
 /**
  * Per-rep chalk based on how the chosen level compares to the user's max-unlocked level.
- * Top tier (max or boss attempt above max) = full reward; one below = 60%; two below = 40%; lower = 20%.
+ * Top tier (max or boss attempt above max) = full reward; one below = 70%; two below = 50%; lower = 30%.
  * The admin "strength_rep" reward acts as the top-tier per-rep value (default 5).
  */
 export function strengthRepChalk(level: number, maxUnlocked: number): number {
   const top = Math.max(1, getActivityReward("strength_rep"));
   const diff = maxUnlocked - level;
   if (diff <= 0) return top;
-  if (diff === 1) return Math.max(1, Math.round(top * 0.6));
-  if (diff === 2) return Math.max(1, Math.round(top * 0.4));
-  return Math.max(1, Math.round(top * 0.2));
+  if (diff === 1) return Math.max(1, Math.round(top * 0.7));
+  if (diff === 2) return Math.max(1, Math.round(top * 0.5));
+  return Math.max(1, Math.round(top * 0.3));
 }
 
 export interface State {

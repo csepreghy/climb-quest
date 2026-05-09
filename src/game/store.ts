@@ -68,6 +68,19 @@ export interface StrengthSession {
   level: number;
   sets: StrengthSet[];
   totalReps: number;
+  /** Chalk earned for this session (computed when logged). */
+  chalkTotal?: number;
+  /** True if this session was a strength-boss attempt that succeeded. */
+  bossSend?: boolean;
+}
+
+/** Strength-level chalk multiplier (L1 → 1×, L5 → 3×). */
+export function strengthLevelMult(level: number): number {
+  return 1 + Math.max(0, level - 1) * 0.5;
+}
+/** Boss target reps in a single set to defeat the next strength level. */
+export function strengthBossTargetReps(nextLevel: number): number {
+  return Math.max(3, nextLevel * 5);
 }
 
 export interface State {

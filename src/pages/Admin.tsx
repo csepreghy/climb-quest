@@ -679,10 +679,13 @@ function InventoryAdmin() {
                 <div key={cat} className="space-y-1.5">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground pl-1">{cat}</div>
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {items.map(item => (
+                    {items.map(item => {
+                      const isBuddy = item.group === "buddy";
+                      const thumb = isBuddy ? "h-20 w-20" : "h-10 w-10";
+                      return (
                       <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg border border-border bg-secondary/30">
-                        <div className="h-10 w-10 grid place-items-center text-xl shrink-0">
-                          {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className="h-10 w-10 object-contain rounded" /> : item.emoji}
+                        <div className={cn("grid place-items-center text-xl shrink-0", thumb)}>
+                          {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className={cn("object-contain rounded", thumb)} /> : item.emoji}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-semibold truncate">{item.name}</div>
@@ -693,7 +696,8 @@ function InventoryAdmin() {
                         <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>
                         <button className="text-destructive" onClick={async () => { if (confirm(`Delete ${item.name}?`)) { try { await deleteCustomItem(item.id); toast.success("Deleted"); } catch (e: any) { toast.error(e?.message ?? "Delete failed"); } } }} title="Delete"><Trash2 className="h-4 w-4" /></button>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}

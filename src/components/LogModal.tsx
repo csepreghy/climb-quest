@@ -855,26 +855,19 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     }
   }
 
-  function commitBoss(repsDone: number) {
-    const target = bossReps;
-    const succeeded = repsDone >= target;
-    const { chalk } = logStrength({
-      workout,
-      level: succeeded ? bossLevel : Math.max(1, bossLevel - 1),
-      sets: [{ reps: repsDone }],
-      bossSend: succeeded,
-    });
-    if (succeeded) {
-      toast.success(`Boss defeated! Unlocked Level ${bossLevel}`);
+  function addBossRep() {
+    const res = logStrengthBossRep(workout);
+    if (res.defeated) {
+      toast.success(`Boss defeated! Unlocked Level ${res.unlockedLevel}`);
+      setCelebrate({
+        chalk: res.chalk,
+        label: `Strength Boss defeated · L${res.unlockedLevel}`,
+        image: workoutLevelImage(workout, res.unlockedLevel ?? bossLevel) ?? WORKOUT_META[workout].image,
+      });
+      setStep("celebrate");
     } else {
-      toast(`Boss not sent — ${repsDone}/${target} reps. Logged anyway.`);
+      toast.success(`+1 rep · ${res.progress}/${res.target}`);
     }
-    setCelebrate({
-      chalk,
-      label: succeeded ? `Strength Boss defeated · L${bossLevel}` : `Boss attempt · ${repsDone}/${target} reps`,
-      image: workoutLevelImage(workout, bossLevel) ?? WORKOUT_META[workout].image,
-    });
-    setStep("celebrate");
   }
 
   function pickRest(min: number) {

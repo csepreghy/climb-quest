@@ -943,137 +943,21 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     );
   }
 
-  if (step === "first-level") {
-    // First-time: only L1 available, plus the option to attempt the boss to skip ahead.
-    return (
-      <>
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setStep("workout")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
-            <DialogTitle>Pick your {WORKOUT_META[workout].title.toLowerCase()} level</DialogTitle>
-          </div>
-        </DialogHeader>
-        <DialogDescription className="px-1">
-          You only choose this once. We'll remember it for next time and you can upgrade as you get stronger.
-        </DialogDescription>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3">
-          {[1, 2, 3, 4, 5].map(lv => {
-            const img = workoutLevelImage(workout, lv);
-            const locked = lv > 1;
-            return (
-              <button
-                key={lv}
-                type="button"
-                disabled={locked}
-                onClick={() => startReps(lv)}
-                className={cn(
-                  "rounded-xl border-2 overflow-hidden text-center transition active:translate-y-[1px]",
-                  "border-[hsl(var(--panel-frame))] bg-secondary/50",
-                  locked
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:border-[hsl(var(--btn-orange))] hover:ring-4 ring-[hsl(var(--btn-orange))]/30"
-                )}
-              >
-                {img ? (
-                  <div className="aspect-square w-full overflow-hidden bg-black/40">
-                    <img src={img} alt={`Level ${lv}`} className="h-full w-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="aspect-square w-full grid place-items-center bg-secondary/40 text-muted-foreground">
-                    <Dumbbell className="h-8 w-8" />
-                  </div>
-                )}
-                <div className="p-2">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Level</div>
-                  <div className="text-xl font-display font-bold">{lv}</div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        <div className="mt-2 flex justify-center">
-          <GameButton variant="danger" size="sm" onClick={() => startBoss(2)}>
-            <Skull className="h-4 w-4" /> Skip to Strength Boss · L2 ({strengthBossTargetReps(2)} reps)
-          </GameButton>
-        </div>
-      </>
-    );
-  }
-
-  if (step === "level-pick") {
-    const choices = Array.from({ length: unlockedMax }, (_, i) => i + 1);
-    const canBoss = unlockedMax < MAX_STRENGTH_LEVEL;
-    const nextBoss = unlockedMax + 1;
-    return (
-      <>
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setStep("workout")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
-            <DialogTitle>Pick your {WORKOUT_META[workout].title.toLowerCase()} level</DialogTitle>
-          </div>
-        </DialogHeader>
-        <DialogDescription className="px-1">
-          Pick any unlocked level, attempt the boss to level up, or drop a level if today's tough.
-        </DialogDescription>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3">
-          {choices.map(lv => {
-            const img = workoutLevelImage(workout, lv);
-            return (
-              <button
-                key={lv}
-                type="button"
-                onClick={() => startReps(lv)}
-                className={cn(
-                  "rounded-xl border-2 overflow-hidden text-center transition active:translate-y-[1px]",
-                  "border-[hsl(var(--panel-frame))] bg-secondary/50",
-                  "hover:border-[hsl(var(--btn-orange))] hover:ring-4 ring-[hsl(var(--btn-orange))]/30",
-                  lv === unlockedMax && "ring-2 ring-[hsl(var(--btn-orange))]"
-                )}
-              >
-                {img ? (
-                  <div className="aspect-square w-full overflow-hidden bg-black/40">
-                    <img src={img} alt={`Level ${lv}`} className="h-full w-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="aspect-square w-full grid place-items-center bg-secondary/40 text-muted-foreground">
-                    <Dumbbell className="h-8 w-8" />
-                  </div>
-                )}
-                <div className="p-2">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Level</div>
-                  <div className="text-xl font-display font-bold">{lv}</div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        <div className="mt-3 flex flex-wrap justify-center gap-2">
-          {unlockedMax > 1 && (
-            <GameButton variant="ghost" size="sm" onClick={levelDown}>
-              <ChevronDown className="h-4 w-4" /> Level down (now {unlockedMax}, drop to {unlockedMax - 1})
-            </GameButton>
-          )}
-          {canBoss && (
-            <GameButton variant="danger" size="sm" onClick={() => startBoss(nextBoss)}>
-              <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({strengthBossTargetReps(nextBoss)} reps)
-            </GameButton>
-          )}
-        </div>
-      </>
-    );
-  }
-
   if (step === "reps") {
     const totalReps = sets.reduce((a, b) => a + b.reps, 0);
     const perRep = getActivityReward("strength_rep");
     const mult = strengthLevelMult(level);
     const previewChalk = Math.round((totalReps + Math.max(0, Math.round(reps))) * perRep * mult);
     const lvImg = workoutLevelImage(workout, level);
+    const choices = isFirstTime ? [1, 2, 3, 4, 5] : Array.from({ length: unlockedMax }, (_, i) => i + 1);
+    const canBoss = !isFirstTime && unlockedMax < MAX_STRENGTH_LEVEL;
+    const nextBoss = isFirstTime ? 2 : unlockedMax + 1;
+    const lockEdit = sets.length > 0;
     return (
       <>
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <button onClick={() => sets.length === 0 ? setStep(unlockedMax > 0 ? "level-pick" : "first-level") : undefined} className={cn("p-1 rounded", sets.length === 0 ? "hover:bg-secondary" : "opacity-30 cursor-not-allowed")}>
+            <button onClick={() => sets.length === 0 ? setStep("workout") : undefined} className={cn("p-1 rounded", sets.length === 0 ? "hover:bg-secondary" : "opacity-30 cursor-not-allowed")}>
               <ArrowLeft className="h-4 w-4" />
             </button>
             <HeaderImage src={lvImg ?? WORKOUT_META[workout].image ?? boulderImg} alt={WORKOUT_META[workout].title} ring="ring-2 ring-[hsl(var(--btn-orange))]/40" />
@@ -1081,7 +965,68 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </div>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+          {isFirstTime && (
+            <DialogDescription className="px-1">
+              You only choose this once. We'll remember it for next time and you can upgrade as you get stronger.
+            </DialogDescription>
+          )}
+
+          <div>
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+              {isFirstTime ? "Pick your starting level" : "Level"}
+            </Label>
+            <div className="mt-2 grid grid-cols-5 gap-1.5">
+              {[1, 2, 3, 4, 5].map(lv => {
+                const img = workoutLevelImage(workout, lv);
+                const unlocked = choices.includes(lv);
+                const selected = lv === level;
+                const disabled = !unlocked || lockEdit;
+                return (
+                  <button
+                    key={lv}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => setLevel(lv)}
+                    className={cn(
+                      "rounded-lg border-2 overflow-hidden text-center transition active:translate-y-[1px]",
+                      "border-[hsl(var(--panel-frame))] bg-secondary/50",
+                      disabled ? "opacity-50 cursor-not-allowed" : "hover:border-[hsl(var(--btn-orange))]",
+                      selected && !disabled && "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40",
+                    )}
+                  >
+                    {img ? (
+                      <div className="aspect-square w-full overflow-hidden bg-black/40">
+                        <img src={img} alt={`Level ${lv}`} className="h-full w-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="aspect-square w-full grid place-items-center bg-secondary/40 text-muted-foreground">
+                        <Dumbbell className="h-6 w-6" />
+                      </div>
+                    )}
+                    <div className="p-1">
+                      <div className="text-sm font-display font-bold leading-none">L{lv}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {!lockEdit && (
+              <div className="mt-2 flex flex-wrap justify-center gap-2">
+                {!isFirstTime && unlockedMax > 1 && (
+                  <GameButton variant="ghost" size="sm" onClick={levelDown}>
+                    <ChevronDown className="h-4 w-4" /> Level down to L{unlockedMax - 1}
+                  </GameButton>
+                )}
+                {(canBoss || isFirstTime) && (
+                  <GameButton variant="danger" size="sm" onClick={() => startBoss(nextBoss)}>
+                    <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({strengthBossTargetReps(nextBoss)} reps)
+                  </GameButton>
+                )}
+              </div>
+            )}
+          </div>
+
           {sets.length > 0 && (
             <div className="rounded-lg border border-border bg-secondary/40 p-3">
               <div className="menu-label mb-2">This session</div>
@@ -1141,6 +1086,48 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </GameButton>
           <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
             <Trophy className="h-4 w-4" /> Log Reps & Finish
+          </GameButton>
+        </div>
+      </>
+    );
+  }
+
+  if (step === "boss-reps") {
+    const lvImg = workoutLevelImage(workout, bossLevel);
+    return (
+      <>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep("reps")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+            <HeaderImage src={lvImg ?? bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/60" />
+            <DialogTitle className="flex items-center gap-2"><Skull className="h-5 w-5" /> Strength Boss · L{bossLevel}</DialogTitle>
+          </div>
+        </DialogHeader>
+        <DialogDescription className="px-1">
+          One single set. Hit <span className="font-bold text-foreground">{bossReps} reps</span> to defeat the boss and unlock Level {bossLevel}.
+        </DialogDescription>
+        <div className="space-y-4 mt-2">
+          <Field label="Reps in one set">
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setReps(r => Math.max(0, r - 1))}
+                className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold">−</button>
+              <Input type="number" min={0} max={100} value={reps}
+                onChange={e => setReps(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
+                className="h-12 text-center text-2xl font-bold tabular-nums flex-1" />
+              <button type="button" onClick={() => setReps(r => Math.min(100, r + 1))}
+                className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold">+</button>
+            </div>
+          </Field>
+          <div className="text-center text-sm">
+            {reps >= bossReps
+              ? <span className="text-[hsl(var(--btn-green))] font-bold">Boss DEFEATED ({reps}/{bossReps}) — +Bonus chalk!</span>
+              : <span className="text-muted-foreground">{reps}/{bossReps} reps — keep pushing!</span>}
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 pt-3">
+          <GameButton variant="ghost" size="sm" onClick={() => setStep("reps")}>Cancel</GameButton>
+          <GameButton variant="danger" size="md" onClick={() => commitBoss(reps)}>
+            <Skull className="h-4 w-4" /> Log Boss Attempt
           </GameButton>
         </div>
       </>

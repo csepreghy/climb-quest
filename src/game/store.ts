@@ -59,6 +59,17 @@ export interface Boss {
 
 export type Equipped = Partial<Record<Slot, string>>;
 
+export type StrengthWorkout = "core" | "pullup";
+export interface StrengthSet { reps: number; restSeconds?: number }
+export interface StrengthSession {
+  id: string;
+  date: string;
+  workout: StrengthWorkout;
+  level: number;
+  sets: StrengthSet[];
+  totalReps: number;
+}
+
 export interface State {
   level: number;
   chalk: number;
@@ -72,6 +83,10 @@ export interface State {
   badgeChalkClaimedFor: string[];
   bosses: Boss[];
   logs: BoulderLog[];
+  /** Strength training sessions (separate from boulder logs). */
+  strengthSessions: StrengthSession[];
+  /** Per-workout chosen difficulty level (set first time the user logs that workout). */
+  strengthLevels: Partial<Record<StrengthWorkout, number>>;
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
   ignoreLevelReq?: boolean;
   /** ISO timestamp when the user completed first-time onboarding. */
@@ -97,6 +112,8 @@ const initialState = (): State => ({
     spawnBoss(BOSS_TEMPLATES[1]),
   ],
   logs: [],
+  strengthSessions: [],
+  strengthLevels: {},
   stats: { totalLogs: 0, totalSends: 0, totalFlashes: 0, bossesSent: 0 },
   ignoreLevelReq: false,
   onboardedAt: null,
@@ -443,6 +460,34 @@ export function deleteLog(id: string) {
       },
     };
   });
+}
+
+// ----- Strength sessions -----
+export interface StrengthInput {
+  workout: StrengthWorkout;
+  level: number;
+  sets: StrengthSet[];
+  date?: string;
+}
+export function logStrength(input: StrengthInput): { session: StrengthSession } {
+  const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
+  const session: StrengthSession = {
+    id: crypto.randomUUID(),
+    date: input.date ?? new Date().toISOString(),
+    workout: input.workout,
+    level: input.level,
+    sets: input.sets,
+    totalReps,
+  };
+  set(s => ({
+    ...s,
+    strengthSessions: [session, ...(s.strengthSessions ?? [])].slice(0, 500),
+    strengthLevels: { ...(s.strengthLevels ?? {}), [input.workout]: input.level },
+  }));
+  return { session };
+}
+export function deleteStrengthSession(id: string) {
+  set(s => ({ ...s, strengthSessions: (s.strengthSessions ?? []).filter(x => x.id !== id) }));
 }
 
 export function updateLog(id: string, input: LogInput) {

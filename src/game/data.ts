@@ -1,8 +1,11 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
-export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup";
-export type ItemGroup = "outfit" | "gear" | "power";
+export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup" | "buddy";
+export type ItemGroup = "outfit" | "gear" | "power" | "buddy";
+
+/** Player level required before the Climbing Buddy slot unlocks. */
+export const BUDDY_SLOT_UNLOCK_LEVEL = 6;
 
 export type EffectKey = "chalk" | "crit" | "boss" | "discount";
 
@@ -13,6 +16,8 @@ export type EffectKey = "chalk" | "crit" | "boss" | "discount";
  *  - boss     → any group, epic+ only
  */
 export function effectAllowed(group: ItemGroup, rarity: Rarity, effect: EffectKey): boolean {
+  // Climbing buddies don't carry chalk/discount/crit/boss yet — perks land in a follow-up step.
+  if (group === "buddy") return false;
   const epicPlus = rarity === "epic" || rarity === "legendary";
   switch (effect) {
     case "chalk":    return group === "outfit" || group === "power";
@@ -74,7 +79,7 @@ export interface ShopItem {
   id: string;
   name: string;
   group: ItemGroup;          // outfit | gear | power
-  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Study" | "Power-up" | "Accessories" | "Auras" | "Titles" | "Consumables";
+  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Study" | "Power-up" | "Accessories" | "Auras" | "Titles" | "Consumables" | "Buddy";
   slot: Slot;
   rarity: Rarity;
   price: number;

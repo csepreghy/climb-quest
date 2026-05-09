@@ -25,6 +25,8 @@ const SLOT_SHARE: Record<Slot, number> = {
   chalk: 1.0, accessory: 1.0, study: 1.0,
   // powerup (1 slot) — concentrated
   powerup: 2.0,
+  // buddy (1 slot) — perks land in a follow-up step
+  buddy: 1.0,
   // legacy slots (kept equipable for back-compat)
   aura: 0.6, title: 0.4,
 };
@@ -66,6 +68,8 @@ const EPIC_LEAN: Record<Slot, "crit" | "boss"> = {
   chalk: "crit", study: "crit", accessory: "crit", hat: "crit", hand: "crit", aura: "crit",
   // boss-leaning (big-effort / power slots)
   powerup: "boss", outfit: "boss", bottoms: "boss", shoes: "boss", title: "boss",
+  // buddy — perks not yet implemented; default lean (effects gated off in effectAllowed)
+  buddy: "boss",
 };
 
 /** Per-rarity crit chance contributed by one item. */

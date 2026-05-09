@@ -5,7 +5,7 @@ import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
-import { Slot, ItemGroup, Rarity, ShopItem, GEAR_SLOTS, gearSlotsUnlocked, LEVELS } from "@/game/data";
+import { Slot, ItemGroup, Rarity, ShopItem, GEAR_SLOTS, gearSlotsUnlocked, LEVELS, BUDDY_SLOT_UNLOCK_LEVEL } from "@/game/data";
 import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame, currentLevel, nextLevel } from "@/game/store";
 import { getItem, useCustomItems } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowRight, Lock, ShoppingBag, Pencil, Check, X } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
+import { BuddyCard } from "@/components/BuddyCard";
 import { LevelsModal } from "@/components/LevelsModal";
 import { computeDailyCap, useDailyCapConfig } from "@/game/dailyCap";
 import { useCharacterName, setCharacterName } from "@/game/characterName";
@@ -32,18 +33,21 @@ const SLOT_LABEL: Record<Slot, string> = {
   aura: "Aura",
   title: "Title",
   powerup: "Power-up",
+  buddy: "Climbing Buddy",
 };
 
 const GROUP_LABEL: Record<ItemGroup, string> = {
   outfit: "Outfit",
   gear: "Gear",
   power: "Power-ups",
+  buddy: "Climbing Buddies",
 };
 
 const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
   outfit: ["outfit", "bottoms", "shoes", "hat", "hand"],
   gear: GEAR_SLOTS,
   power: ["powerup"],
+  buddy: ["buddy"],
 };
 
 function EmptySlotCard({ label, onClick }: { label: string; onClick?: () => void }) {
@@ -198,7 +202,39 @@ export default function Inventory() {
         {/* EQUIPPED */}
         <section className="space-y-4">
           <div className="menu-label">Equipped</div>
-          {(["outfit", "gear", "power"] as ItemGroup[]).map(group => {
+          {(["outfit", "gear", "power", "buddy"] as ItemGroup[]).map(group => {
+            if (group === "buddy") {
+              const buddyId = s.equipped.buddy;
+              const buddy = buddyId ? getItem(buddyId) : null;
+              const unlocked = s.level >= BUDDY_SLOT_UNLOCK_LEVEL;
+              return (
+                <div key={group} className="space-y-2">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">{GROUP_LABEL[group]}</div>
+                  <div className="grid gap-4 grid-cols-1 sm:max-w-md">
+                    {!unlocked ? (
+                      <LockedSlotCard unlocksAt={BUDDY_SLOT_UNLOCK_LEVEL} onClick={() => setLevelsOpen(true)} />
+                    ) : !buddy ? (
+                      (() => {
+                        const slotOwned = owned.filter(o => o.slot === "buddy");
+                        const onClick = () => {
+                          if (slotOwned.length === 0) { toast.info("No climbing buddies yet — visit the shop"); return; }
+                          if (slotOwned.length === 1) { equipItem(slotOwned[0].id); toast.success(`Equipped ${slotOwned[0].name}`); return; }
+                          setCompareItem(slotOwned[0]);
+                        };
+                        return <EmptySlotCard label="Climbing Buddy" onClick={onClick} />;
+                      })()
+                    ) : (
+                      <div className="flex flex-col">
+                        <BuddyCard item={buddy} onClick={() => setSlotPicker(buddy)} />
+                        <div className="flex justify-end mt-1.5">
+                          <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot("buddy")}>Unequip</Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
             if (group === "gear") {
               const max = gearSlotsUnlocked(s.level);
               // Order equipped gear items first, then empty unlocked slots, then locked slots up to 4 total.
@@ -289,18 +325,36 @@ export default function Inventory() {
               <p className="text-sm text-muted-foreground italic">No items yet. Visit the shop to gear up.</p>
             </Card>
           ) : (
-            (["outfit", "gear", "power"] as ItemGroup[]).map(group => {
+            (["buddy", "outfit", "gear", "power"] as ItemGroup[]).map(group => {
               const groupItems = owned.filter(it => it.group === group);
               if (groupItems.length === 0) return null;
+              const isBuddy = group === "buddy";
               return (
                 <div key={group} className="space-y-2">
                   <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">
                     {GROUP_LABEL[group]} ({groupItems.length})
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className={cn("grid gap-4", isBuddy ? "sm:grid-cols-2" : "sm:grid-cols-2")}>
                     {groupItems.map(it => {
                       const isEquipped = !it.consumableBonus && s.equipped[it.slot] === it.id;
                       const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
+                      const removeFn = adminTools ? () => {
+                        if (confirm(`Remove ${it.name} from inventory?`)) {
+                          removeOwnedItem(it.id);
+                          toast.success(`Removed ${it.name}`);
+                        }
+                      } : undefined;
+                      if (isBuddy) {
+                        return (
+                          <BuddyCard
+                            key={it.id}
+                            item={it}
+                            highlight={isEquipped}
+                            onClick={() => setCompareItem(it)}
+                            onRemove={removeFn}
+                          />
+                        );
+                      }
                       return (
                         <ItemCard
                           key={it.id}
@@ -308,12 +362,7 @@ export default function Inventory() {
                           primed={isPrimed}
                           highlight={isEquipped}
                           onClick={() => setCompareItem(it)}
-                          onRemove={adminTools ? () => {
-                            if (confirm(`Remove ${it.name} from inventory?`)) {
-                              removeOwnedItem(it.id);
-                              toast.success(`Removed ${it.name}`);
-                            }
-                          } : undefined}
+                          onRemove={removeFn}
                         />
                       );
                     })}

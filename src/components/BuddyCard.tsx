@@ -54,21 +54,21 @@ export function BuddyCard({
         </button>
       )}
 
-      {/* Big square image */}
-      <div className={cn("w-full aspect-square rounded-xl bg-background/40 overflow-hidden p-2", RARITY_BORDER[item.rarity])}>
+      {/* Image — capped at ~3× standard item thumbnail (80px) */}
+      <div className={cn("h-40 w-40 sm:h-48 sm:w-48 mx-auto rounded-xl bg-background/40 overflow-hidden p-2", RARITY_BORDER[item.rarity])}>
         {isImageEmoji(item.emoji) ? (
           <SmartImage
             src={item.emoji}
             alt={item.name}
-            loaderSize={72}
+            loaderSize={56}
             wrapperClassName="h-full w-full"
             className="h-full w-full object-contain"
           />
         ) : item.emoji ? (
-          <div className="h-full w-full flex items-center justify-center text-7xl sm:text-8xl">{item.emoji}</div>
+          <div className="h-full w-full flex items-center justify-center text-6xl sm:text-7xl">{item.emoji}</div>
         ) : (
           <div className="h-full w-full flex items-center justify-center">
-            <ChalkBagLoader size={72} />
+            <ChalkBagLoader size={56} />
           </div>
         )}
       </div>

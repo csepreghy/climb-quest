@@ -304,7 +304,7 @@ function StrengthRewardsCard() {
             onChange={e => setPerRep(e.target.value)}
             className="mt-1"
           />
-          <div className="text-xs text-muted-foreground mt-1">Example L3, 10 reps: <span className="font-bold text-foreground">+{Math.round(10 * draftRep * 2)}</span> chalk.</div>
+          <div className="text-xs text-muted-foreground mt-1">Example at max level, 10 reps: <span className="font-bold text-foreground">+{10 * draftRep}</span> chalk.</div>
         </div>
         <div>
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Strength boss bonus</Label>

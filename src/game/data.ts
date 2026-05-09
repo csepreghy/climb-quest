@@ -47,7 +47,9 @@ export type ActivityType =
   | "project_boulder"
   | "boulder_send"
   | "boss_attempt"
-  | "boss_send";
+  | "boss_send"
+  | "strength_rep"
+  | "strength_boss_send";
 
 export type Style =
   | "slab" | "vertical" | "overhang" | "cave" | "compression"

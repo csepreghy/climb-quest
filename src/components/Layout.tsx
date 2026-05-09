@@ -4,7 +4,7 @@ import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, A
 import { useLoadCharacterName } from "@/game/characterName";
 import { switchToSlot, useActiveSlot } from "@/game/adminAccounts";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD, onBadgesAwarded, BADGE_CHALK_REWARD } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD, onBadgesAwarded, BADGE_CHALK_REWARD, strengthRepChalk, type StrengthWorkout } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType, BADGE_BY_ID } from "@/game/data";
@@ -345,6 +345,20 @@ function ChalkChip({ value }: { value: number }) {
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
     .sort((a, b) => a.chalk - b.chalk);
 
+  // Strength: per-rep chalk by tier vs the user's max-unlocked level (per workout).
+  const strengthRows = (["core", "pullup"] as StrengthWorkout[]).flatMap(w => {
+    const max = s.strengthLevels?.[w] ?? 0;
+    if (max <= 0) return [];
+    const label = w === "core" ? "Core" : "Pull-up";
+    const tiers: { name: string; chalk: number }[] = [];
+    tiers.push({ name: `${label} L${max} (max)`, chalk: strengthRepChalk(max, max) });
+    if (max >= 2) tiers.push({ name: `${label} L${max - 1}`, chalk: strengthRepChalk(max - 1, max) });
+    if (max >= 3) tiers.push({ name: `${label} L${max - 2}`, chalk: strengthRepChalk(max - 2, max) });
+    if (max >= 4) tiers.push({ name: `${label} ≤L${max - 3}`, chalk: strengthRepChalk(max - 3, max) });
+    return tiers;
+  });
+  const hasStrength = strengthRows.length > 0;
+
   return (
     <>
       <button
@@ -362,7 +376,7 @@ function ChalkChip({ value }: { value: number }) {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <img src={chalkBagImg} alt="" className="h-6 w-6 object-contain" />
@@ -373,68 +387,96 @@ function ChalkChip({ value }: { value: number }) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div>
-              <div className="menu-label mb-2">Per activity (base)</div>
-              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
-                {activities.map(a => (
-                  <div key={a.label} className="flex items-center justify-between px-3 py-2 text-sm">
-                    <span className="text-foreground/90">{a.label}</span>
-                    <span className="tabular-nums font-bold gradient-chalk-text">+{a.chalk}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+            {/* ---------- Column 1 ---------- */}
+            <div className="space-y-4">
+              <div>
+                <div className="menu-label mb-2">Boulders (per send)</div>
+                <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+                  {activities.map(a => (
+                    <div key={a.label} className="flex items-center justify-between px-3 py-2 text-sm">
+                      <span className="text-foreground/90">{a.label}</span>
+                      <span className="tabular-nums font-bold gradient-chalk-text">+{a.chalk}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="menu-label mb-2">Strength (per rep)</div>
+                {hasStrength ? (
+                  <>
+                    <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+                      {strengthRows.map(r => (
+                        <div key={r.name} className="flex items-center justify-between px-3 py-2 text-sm">
+                          <span className="text-foreground/90">{r.name}</span>
+                          <span className="tabular-nums font-bold gradient-chalk-text">+{r.chalk}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                      Per-rep chalk is highest at your max-unlocked level and tapers off below it. Beat the strength boss to raise the bar.
+                    </p>
+                  </>
+                ) : (
+                  <div className="rounded-lg border border-border px-3 py-3 text-xs text-muted-foreground">
+                    Log your first strength session to unlock per-rep chalk rates here.
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
-            <div>
-              <div className="menu-label mb-2">Daily limit</div>
-              <div className="rounded-lg border border-border overflow-hidden">
-                <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-foreground/90">
-                    {showCap ? "Today's cap" : "No daily cap"}
-                  </span>
-                  <span className="tabular-nums font-bold gradient-chalk-text">
-                    {showCap ? `${dailyCap.toLocaleString()} chalk` : "Unlimited"}
-                  </span>
+            {/* ---------- Column 2 ---------- */}
+            <div className="space-y-4">
+              <div>
+                <div className="menu-label mb-2">Daily limit</div>
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="text-foreground/90">
+                      {showCap ? "Today's cap" : "No daily cap"}
+                    </span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">
+                      {showCap ? `${dailyCap.toLocaleString()} chalk` : "Unlimited"}
+                    </span>
+                  </div>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  {showCap
+                    ? "Soft cap — past the cap, chalk earns at reduced rates."
+                    : "Earn as much chalk as you want — no diminishing returns today."}
+                </p>
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1.5">
-                {showCap
-                  ? "Soft cap — past the cap, chalk earns at reduced rates."
-                  : "Earn as much chalk as you want — no diminishing returns today."}
-              </p>
-            </div>
 
-            <div>
-              <div className="menu-label mb-2">Bonuses from equipped gear</div>
-              <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden text-sm">
-                <div className="px-3 py-2">
-                  <div className="font-semibold text-[hsl(var(--epic))]">💥 Crit</div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Each item with a crit chance rolls when you log. On a hit, the run's chalk is doubled (×2).
-                    Multiple crit items combine — odds stack so more gear means a bigger chance, capped at 100%.
-                  </p>
+              <div>
+                <div className="menu-label mb-2">Bonuses from equipped gear</div>
+                <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden text-sm">
+                  <div className="px-3 py-2">
+                    <div className="font-semibold text-[hsl(var(--epic))]">💥 Crit</div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Each item with a crit chance rolls when you log. On a hit, the run's chalk is doubled (×2).
+                      Multiple crit items combine — odds stack so more gear means a bigger chance, capped at 100%.
+                    </p>
+                  </div>
+                  <div className="px-3 py-2">
+                    <div className="font-semibold text-legendary">👹 Boss bonus</div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Only applies to boss attempts and sends. Boss-bonus % from every equipped item is added together,
+                      then granted as extra chalk on top of the base reward.
+                    </p>
+                  </div>
+                  <div className="px-3 py-2">
+                    <div className="font-semibold text-[hsl(var(--btn-orange))]">🛍️ Shop discount</div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Lowers prices in the Shop. Discounts don't stack — only your strongest equipped discount item is
+                      applied to each item's price.
+                    </p>
+                  </div>
                 </div>
-                <div className="px-3 py-2">
-                  <div className="font-semibold text-legendary">👹 Boss bonus</div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Only applies to boss attempts and sends. Boss-bonus % from every equipped item is added together,
-                    then granted as extra chalk on top of the base reward.
-                  </p>
-                </div>
-                <div className="px-3 py-2">
-                  <div className="font-semibold text-[hsl(var(--btn-orange))]">🛍️ Shop discount</div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Lowers prices in the Shop. Discounts don't stack — only your strongest equipped discount item is
-                    applied to each item's price.
-                  </p>
-                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Equipped gear, auras, and consumables apply additional % bonuses on top of the base — including strength sessions.
+                </p>
               </div>
             </div>
-
-            <p className="text-xs text-muted-foreground">
-              Equipped gear, auras, and consumables apply additional % bonuses on top of the base.
-            </p>
           </div>
         </DialogContent>
       </Dialog>

@@ -945,10 +945,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
 
   if (step === "reps") {
     const totalReps = sets.reduce((a, b) => a + b.reps, 0);
-    const perRep = getActivityReward("strength_rep");
-    const mult = strengthLevelMult(level);
-    const previewChalk = Math.round((totalReps + Math.max(0, Math.round(reps))) * perRep * mult);
     const lvImg = workoutLevelImage(workout, level);
+
     const choices = isFirstTime ? [1, 2, 3, 4, 5] : Array.from({ length: unlockedMax }, (_, i) => i + 1);
     const canBoss = !isFirstTime && unlockedMax < MAX_STRENGTH_LEVEL;
     const nextBoss = isFirstTime ? 2 : unlockedMax + 1;
@@ -1045,14 +1043,13 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                   </li>
                 ))}
               </ul>
-              <div className="mt-2 text-xs text-muted-foreground flex justify-between">
-                <span>Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></span>
-                <span>Chalk so far: <span className="font-bold gradient-chalk-text tabular-nums">+{Math.round(totalReps * perRep * mult)}</span></span>
+              <div className="mt-2 text-xs text-muted-foreground">
+                Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span>
               </div>
             </div>
           )}
 
-          <Field label={`Reps this set (×${mult.toFixed(1)} chalk per rep at L${level})`}>
+          <Field label="Reps this set">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -1074,10 +1071,6 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
               >+</button>
             </div>
           </Field>
-
-          <div className="text-xs text-muted-foreground text-center">
-            Estimated chalk after this set: <span className="font-bold gradient-chalk-text">+{previewChalk}</span>
-          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">

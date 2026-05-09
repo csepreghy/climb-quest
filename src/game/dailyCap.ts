@@ -145,13 +145,16 @@ function dayKey(iso: string): string {
   return new Date(iso).toDateString();
 }
 
-/** Sum of chalk earned (logs + boss attempts) on the given local date. */
+/** Sum of chalk earned (logs + boss attempts + strength sessions) on the given local date. */
 export function chalkUsedOnDate(s: State, dateISO: string): number {
   const target = dayKey(dateISO);
   let total = 0;
   for (const l of s.logs) if (dayKey(l.date) === target) total += l.chalkTotal;
   for (const b of s.bosses) for (const a of b.attempts) {
     if (dayKey(a.date) === target) total += a.chalk;
+  }
+  for (const ss of s.strengthSessions ?? []) {
+    if (dayKey(ss.date) === target) total += ss.chalkTotal ?? 0;
   }
   return total;
 }

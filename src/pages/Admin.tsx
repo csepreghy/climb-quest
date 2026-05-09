@@ -293,7 +293,7 @@ function StrengthRewardsCard() {
     <GameCard tone="accent" className="p-5">
       <div className="menu-label mb-3 flex items-center gap-2"><Dumbbell className="h-4 w-4" /> Admin · Strength rewards</div>
       <p className="text-sm text-muted-foreground mb-3">
-        Chalk per rep and bonus chalk for defeating a strength boss. Per-rep chalk is multiplied by the user's strength level (L1 ×1, L2 ×1.5, L3 ×2, L4 ×2.5, L5 ×3).
+        Top-tier per-rep chalk (when logging at your max-unlocked level). One level below pays 60%, two below 40%, three+ below 20%. Boss bonus is added when a strength boss is defeated.
       </p>
       <div className="grid sm:grid-cols-2 gap-3">
         <div>
@@ -304,7 +304,7 @@ function StrengthRewardsCard() {
             onChange={e => setPerRep(e.target.value)}
             className="mt-1"
           />
-          <div className="text-xs text-muted-foreground mt-1">Example L3, 10 reps: <span className="font-bold text-foreground">+{Math.round(10 * draftRep * 2)}</span> chalk.</div>
+          <div className="text-xs text-muted-foreground mt-1">Example at max level, 10 reps: <span className="font-bold text-foreground">+{10 * draftRep}</span> chalk.</div>
         </div>
         <div>
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Strength boss bonus</Label>

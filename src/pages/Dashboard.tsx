@@ -85,7 +85,7 @@ export default function Dashboard() {
         <StatCard label="Bosses defeated" value={s.stats.bossesSent} />
       </div>
 
-      <ChalkOverTimeChart logs={s.logs} gyms={gyms} />
+      <ChalkOverTimeChart logs={s.logs} gyms={gyms} strengthSessions={s.strengthSessions ?? []} />
 
       <StrengthVolumeChart sessions={s.strengthSessions ?? []} />
 

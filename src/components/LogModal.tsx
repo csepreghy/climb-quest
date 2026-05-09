@@ -1250,7 +1250,7 @@ function RestTimer({ minutes, onDone }: { minutes: number; onDone: () => void })
       <div className="flex flex-col sm:flex-row justify-end gap-2 pt-1">
         <GameButton variant="ghost" size="md" onClick={onDone}>Skip rest</GameButton>
         <GameButton variant="primary" size="md" onClick={onDone} disabled={ticking}>
-          Next session
+          More reps
         </GameButton>
       </div>
     </>

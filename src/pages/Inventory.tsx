@@ -40,7 +40,7 @@ const GROUP_LABEL: Record<ItemGroup, string> = {
   outfit: "Outfit",
   gear: "Gear",
   power: "Power-ups",
-  buddy: "Climbing Buddies",
+  buddy: "Climbing Buddy",
 };
 
 const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {

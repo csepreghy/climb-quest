@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ThemeStudio } from "@/components/ThemeStudio";
 import { GameCard } from "@/components/ui/game-card";
@@ -449,6 +449,8 @@ function InventoryAdmin() {
   const [draft, setDraft] = useState<CustomItemInput>(empty);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const formRef = useRef<HTMLDivElement | null>(null);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   function reset() { setDraft(empty); setEditingId(null); }
 
@@ -479,6 +481,11 @@ function InventoryAdmin() {
 
   function startEdit(item: ShopItem) {
     setEditingId(item.id);
+    // Scroll the edit form into view so the admin doesn't have to scroll up.
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => nameInputRef.current?.focus({ preventScroll: true }), 350);
+    });
     setDraft({
       name: item.name,
       group: item.group,
@@ -499,8 +506,8 @@ function InventoryAdmin() {
 
   return (
     <GameCard tone="accent" className="p-5 space-y-5">
-      <div>
-        <div className="menu-label">Inventory items</div>
+      <div ref={formRef} className="scroll-mt-4">
+        <div className="menu-label">{editingId ? "Editing item" : "Inventory items"}</div>
         <p className="text-xs text-muted-foreground mt-1">Create custom shop items, upload an image, set rarity, price and chalk bonus.</p>
       </div>
 
@@ -523,7 +530,7 @@ function InventoryAdmin() {
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label className="text-xs">Name</Label>
-            <Input value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="Send Slippers" />
+            <Input ref={nameInputRef} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="Send Slippers" />
           </div>
           <div>
             <Label className="text-xs">Rarity</Label>

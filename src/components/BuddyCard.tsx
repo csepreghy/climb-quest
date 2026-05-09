@@ -36,7 +36,7 @@ export function BuddyCard({
       shimmer={item.rarity === "legendary"}
       interactive={!!onClick}
       className={cn(
-        "p-4 flex flex-col gap-3 relative",
+        "p-3 relative overflow-hidden",
         onClick && "cursor-pointer",
         highlight && "ring-2 ring-[hsl(var(--btn-orange))]/60"
       )}
@@ -54,43 +54,48 @@ export function BuddyCard({
         </button>
       )}
 
-      {/* Image — capped at ~3× standard item thumbnail (80px) */}
-      <div className={cn("h-40 w-40 sm:h-48 sm:w-48 mx-auto rounded-xl bg-background/40 overflow-hidden p-2", RARITY_BORDER[item.rarity])}>
-        {isImageEmoji(item.emoji) ? (
-          <SmartImage
-            src={item.emoji}
-            alt={item.name}
-            loaderSize={56}
-            wrapperClassName="h-full w-full"
-            className="h-full w-full object-contain"
-          />
-        ) : item.emoji ? (
-          <div className="h-full w-full flex items-center justify-center text-6xl sm:text-7xl">{item.emoji}</div>
-        ) : (
-          <div className="h-full w-full flex items-center justify-center">
-            <ChalkBagLoader size={56} />
+      <div className="flex gap-3">
+        {/* Image — pushed to the left, slightly smaller than before */}
+        <div className={cn("h-32 w-32 sm:h-36 sm:w-36 shrink-0 rounded-xl bg-background/40 overflow-hidden", RARITY_BORDER[item.rarity])}>
+          {isImageEmoji(item.emoji) ? (
+            <SmartImage
+              src={item.emoji}
+              alt={item.name}
+              loaderSize={48}
+              wrapperClassName="h-full w-full"
+              className="h-full w-full object-cover"
+            />
+          ) : item.emoji ? (
+            <div className="h-full w-full flex items-center justify-center text-5xl sm:text-6xl">{item.emoji}</div>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center">
+              <ChalkBagLoader size={48} />
+            </div>
+          )}
+        </div>
+
+        {/* Details — right side */}
+        <div className="min-w-0 flex-1 flex flex-col gap-1.5">
+          <div className="flex items-baseline justify-between gap-2 pr-8">
+            <div className="text-base font-semibold leading-snug truncate">{item.name}</div>
+            <div className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0", RARITY_COLOR[item.rarity])}>
+              {item.rarity}
+            </div>
           </div>
-        )}
-      </div>
 
-      <div className="flex items-baseline justify-between gap-2">
-        <div className="text-base font-semibold leading-snug truncate">{item.name}</div>
-        <div className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0", RARITY_COLOR[item.rarity])}>
-          {item.rarity}
+          {item.desc && <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{item.desc}</p>}
+
+          {showAction && (
+            <div className="flex items-center justify-end mt-auto pt-2">
+              <GameButton size="sm" variant="primary" onClick={(e) => { e.stopPropagation(); onAction?.(); }}>
+                {actionLabel ?? "Equip"}
+              </GameButton>
+            </div>
+          )}
+
+          {footer && <div className="mt-auto pt-2">{footer}</div>}
         </div>
       </div>
-
-      {item.desc && <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>}
-
-      {showAction && (
-        <div className="flex items-center justify-end pt-2 border-t border-border/50">
-          <GameButton size="sm" variant="primary" onClick={(e) => { e.stopPropagation(); onAction?.(); }}>
-            {actionLabel ?? "Equip"}
-          </GameButton>
-        </div>
-      )}
-
-      {footer && <div className="pt-2 border-t border-border/50">{footer}</div>}
     </GameCard>
   );
 }

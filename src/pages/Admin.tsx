@@ -41,7 +41,7 @@ import { RebalancePreviewModal } from "@/components/RebalancePreviewModal";
 import { useDailyCapConfig, setDailyCapConfig, computeDailyCap, defaultDailyCap, DailyCapConfig, useDailyCapOverrides, setDailyCapOverride } from "@/game/dailyCap";
 
 
-const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
+const RARITIES: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"];
 const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [
   { value: "outfit", label: "Outfit" },
   { value: "gear", label: "Gear" },

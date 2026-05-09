@@ -104,6 +104,7 @@ export default function Admin() {
           <BackfillImagesCard />
           <RebalanceCard />
           <DailyCapCard />
+          <StrengthRewardsCard />
         </TabsContent>
 
         <TabsContent value="account" className="space-y-6 mt-6">

@@ -19,7 +19,7 @@ import { Plus, ArrowUp, Trophy, TrendingUp, Backpack, ShoppingBag, ChevronRight 
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { gradeToVRank, V_SCALE } from "@/game/gyms";
+import { gradeToVRank, V_SCALE, gradeLabels, resolveGymGradingSystems, type GradingSystem } from "@/game/gyms";
 
 export default function Dashboard() {
   const s = useGame();

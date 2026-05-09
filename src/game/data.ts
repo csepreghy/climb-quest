@@ -1,6 +1,6 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
-export type Rarity = "common" | "rare" | "epic" | "legendary";
+export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup";
 export type ItemGroup = "outfit" | "gear" | "power";
 
@@ -165,6 +165,7 @@ export const STYLES: Style[] = ["slab","vertical","overhang","cave","compression
 
 export const RARITY_COLOR: Record<Rarity, string> = {
   common: "text-common border-common/40",
+  uncommon: "text-uncommon border-uncommon/50",
   rare: "text-rare border-rare/50",
   epic: "text-epic border-epic/60",
   legendary: "text-legendary border-legendary/60",
@@ -174,6 +175,7 @@ export const RARITY_COLOR: Record<Rarity, string> = {
 // Border ring color around an item's image, by rarity.
 export const RARITY_BORDER: Record<Rarity, string> = {
   common: "ring-2 ring-white/80",
+  uncommon: "ring-2 ring-uncommon",
   rare: "ring-2 ring-rare",
   epic: "ring-2 ring-epic",
   legendary: "ring-2 ring-legendary",

@@ -944,6 +944,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   if (step === "reps") {
+    const totalReps = sets.reduce((a, b) => a + b.reps, 0);
     const lvImg = workoutLevelImage(workout, level);
 
     const choices = isFirstTime ? [1, 2, 3, 4, 5] : Array.from({ length: unlockedMax }, (_, i) => i + 1);

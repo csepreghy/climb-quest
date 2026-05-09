@@ -78,22 +78,23 @@ export interface StrengthSession {
 export function strengthLevelMult(level: number): number {
   return 1 + Math.max(0, level - 1) * 0.5;
 }
-/** Boss target reps in a single set to defeat the next strength level. */
-export function strengthBossTargetReps(nextLevel: number): number {
-  return Math.max(3, nextLevel * 5);
+/** Boss target: cumulative reps across attempts (split sessions, 1 rep per attempt). */
+export const STRENGTH_BOSS_TARGET = 10;
+export function strengthBossTargetReps(_nextLevel?: number): number {
+  return STRENGTH_BOSS_TARGET;
 }
 /**
  * Per-rep chalk based on how the chosen level compares to the user's max-unlocked level.
- * Top tier (max or boss attempt above max) = full reward; one below = 60%; two below = 40%; lower = 20%.
+ * Top tier (max or boss attempt above max) = full reward; one below = 70%; two below = 50%; lower = 30%.
  * The admin "strength_rep" reward acts as the top-tier per-rep value (default 5).
  */
 export function strengthRepChalk(level: number, maxUnlocked: number): number {
   const top = Math.max(1, getActivityReward("strength_rep"));
   const diff = maxUnlocked - level;
   if (diff <= 0) return top;
-  if (diff === 1) return Math.max(1, Math.round(top * 0.6));
-  if (diff === 2) return Math.max(1, Math.round(top * 0.4));
-  return Math.max(1, Math.round(top * 0.2));
+  if (diff === 1) return Math.max(1, Math.round(top * 0.7));
+  if (diff === 2) return Math.max(1, Math.round(top * 0.5));
+  return Math.max(1, Math.round(top * 0.3));
 }
 
 export interface State {
@@ -113,6 +114,8 @@ export interface State {
   strengthSessions: StrengthSession[];
   /** Per-workout chosen difficulty level (set first time the user logs that workout). */
   strengthLevels: Partial<Record<StrengthWorkout, number>>;
+  /** Cumulative reps logged toward the next strength-boss defeat, per workout. */
+  strengthBossProgress?: Partial<Record<StrengthWorkout, number>>;
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
   ignoreLevelReq?: boolean;
   /** ISO timestamp when the user completed first-time onboarding. */
@@ -140,6 +143,7 @@ const initialState = (): State => ({
   logs: [],
   strengthSessions: [],
   strengthLevels: {},
+  strengthBossProgress: {},
   stats: { totalLogs: 0, totalSends: 0, totalFlashes: 0, bossesSent: 0 },
   ignoreLevelReq: false,
   onboardedAt: null,
@@ -615,15 +619,65 @@ export function deleteStrengthSession(id: string) {
   });
 }
 
-/** Manually set the user's max-unlocked strength level (used by "Level down"). */
+/** Manually set the user's max-unlocked strength level (used internally / by admin). */
 export function setStrengthLevel(workout: StrengthWorkout, level: number) {
   set(s => ({ ...s, strengthLevels: { ...(s.strengthLevels ?? {}), [workout]: Math.max(1, level) } }));
 }
 
 /** Reset strength-level selections so the first-time picker shows again. */
 export function resetStrengthLevels() {
-  set(s => ({ ...s, strengthLevels: {} }));
+  set(s => ({ ...s, strengthLevels: {}, strengthBossProgress: {} }));
 }
+
+/** Cumulative reps logged toward the next strength-boss defeat for `workout`. */
+export function getStrengthBossProgress(workout: StrengthWorkout): number {
+  return state.strengthBossProgress?.[workout] ?? 0;
+}
+
+/**
+ * Log a single boss-attempt rep. Each call adds 1 rep toward the cumulative
+ * boss target (10). When cumulative reaches 10, mark a successful boss send,
+ * unlock the next level, and reset progress.
+ */
+export function logStrengthBossRep(workout: StrengthWorkout): {
+  chalk: number;
+  defeated: boolean;
+  progress: number;
+  target: number;
+  unlockedLevel?: number;
+} {
+  const target = STRENGTH_BOSS_TARGET;
+  const prevMax = state.strengthLevels?.[workout] ?? 0;
+  const targetLevel = Math.min(MAX_STRENGTH_LEVEL_CONST, Math.max(1, prevMax + 1));
+  const prevProgress = state.strengthBossProgress?.[workout] ?? 0;
+  const nextProgress = prevProgress + 1;
+  const defeated = nextProgress >= target;
+
+  const { chalk } = logStrength({
+    workout,
+    level: targetLevel,
+    sets: [{ reps: 1 }],
+    bossSend: defeated,
+  });
+
+  set(s => ({
+    ...s,
+    strengthBossProgress: {
+      ...(s.strengthBossProgress ?? {}),
+      [workout]: defeated ? 0 : nextProgress,
+    },
+  }));
+
+  return {
+    chalk,
+    defeated,
+    progress: defeated ? 0 : nextProgress,
+    target,
+    unlockedLevel: defeated ? targetLevel : undefined,
+  };
+}
+
+const MAX_STRENGTH_LEVEL_CONST = 5;
 
 export function updateLog(id: string, input: LogInput) {
   const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date, input.attemptType === "repeat");

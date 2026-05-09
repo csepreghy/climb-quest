@@ -143,6 +143,7 @@ const initialState = (): State => ({
   logs: [],
   strengthSessions: [],
   strengthLevels: {},
+  strengthBossProgress: {},
   stats: { totalLogs: 0, totalSends: 0, totalFlashes: 0, bossesSent: 0 },
   ignoreLevelReq: false,
   onboardedAt: null,

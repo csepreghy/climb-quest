@@ -322,6 +322,10 @@ function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: st
                   <stop offset="0%" stopColor="hsl(var(--btn-orange))" stopOpacity={0.5} />
                   <stop offset="100%" stopColor="hsl(var(--btn-orange))" stopOpacity={0} />
                 </linearGradient>
+                <linearGradient id="strengthGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--sky))" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="hsl(var(--sky))" stopOpacity={0} />
+                </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
               <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
@@ -348,10 +352,11 @@ function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: st
                 labelStyle={{ color: "hsl(var(--foreground))" }}
                 formatter={(v: number, name: string) => {
                   if (name === "Top grade") return [v == null ? "—" : (scaleLabels[Math.round(v)] ?? String(v)), name];
-                  return [`${v.toLocaleString()} chalk`, "Earned"];
+                  return [`${v.toLocaleString()} chalk`, name];
                 }}
               />
-              <Area yAxisId="chalk" type="monotone" dataKey="chalk" name="Earned" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
+              <Area yAxisId="chalk" type="monotone" dataKey="chalk" stackId="chalk" name="Climbing" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
+              <Area yAxisId="chalk" type="monotone" dataKey="strength" stackId="chalk" name="Strength" stroke="hsl(var(--sky))" strokeWidth={2} fill="url(#strengthGrad)" />
               <Line yAxisId="grade" type="monotone" dataKey="gradeRank" name="Top grade" stroke="hsl(270 80% 65%)" strokeWidth={2} dot={{ r: 3, fill: "hsl(270 80% 65%)" }} connectNulls />
             </ComposedChart>
           </ResponsiveContainer>

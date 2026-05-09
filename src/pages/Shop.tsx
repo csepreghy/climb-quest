@@ -182,33 +182,31 @@ function BuddyShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { i
   }
 
   return (
-    <div className="sm:col-span-2 lg:col-span-2">
-      <BuddyCard
-        item={item}
-        footer={
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-sm">
-              {item.price === 0 ? (
-                <span className="text-muted-foreground text-xs">Starter</span>
-              ) : (
-                <span className="font-medium tabular-nums inline-flex items-center gap-1">
-                  {price}
-                  <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" />
-                </span>
-              )}
-            </div>
-            {ownAlready ? (
-              <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Recruited</GameButton>
-            ) : locked ? (
-              <GameButton size="sm" variant="ghost" disabled><Lock className="h-3 w-3" /> Lv {item.levelReq}</GameButton>
+    <BuddyCard
+      item={item}
+      footer={
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-sm">
+            {item.price === 0 ? (
+              <span className="text-muted-foreground text-xs">Starter</span>
             ) : (
-              <GameButton size="sm" variant={!canAfford || item.price === 0 ? "secondary" : "primary"} disabled={!canAfford || item.price === 0} onClick={buy}>
-                {item.price === 0 ? "Free" : canAfford ? "Recruit" : "Not enough Chalk"}
-              </GameButton>
+              <span className="font-medium tabular-nums inline-flex items-center gap-1">
+                {price}
+                <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" />
+              </span>
             )}
           </div>
-        }
-      />
-    </div>
+          {ownAlready ? (
+            <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Recruited</GameButton>
+          ) : locked ? (
+            <GameButton size="sm" variant="ghost" disabled><Lock className="h-3 w-3" /> Lv {item.levelReq}</GameButton>
+          ) : (
+            <GameButton size="sm" variant={!canAfford || item.price === 0 ? "secondary" : "primary"} disabled={!canAfford || item.price === 0} onClick={buy}>
+              {item.price === 0 ? "Free" : canAfford ? "Recruit" : "Not enough Chalk"}
+            </GameButton>
+          )}
+        </div>
+      }
+    />
   );
 }

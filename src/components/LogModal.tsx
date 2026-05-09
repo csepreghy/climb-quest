@@ -944,11 +944,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   if (step === "reps") {
-    const totalReps = sets.reduce((a, b) => a + b.reps, 0);
-    const perRep = getActivityReward("strength_rep");
-    const mult = strengthLevelMult(level);
-    const previewChalk = Math.round((totalReps + Math.max(0, Math.round(reps))) * perRep * mult);
     const lvImg = workoutLevelImage(workout, level);
+
     const choices = isFirstTime ? [1, 2, 3, 4, 5] : Array.from({ length: unlockedMax }, (_, i) => i + 1);
     const canBoss = !isFirstTime && unlockedMax < MAX_STRENGTH_LEVEL;
     const nextBoss = isFirstTime ? 2 : unlockedMax + 1;

@@ -22,7 +22,7 @@ interface Row {
   gender: Gender;
 }
 
-const RARITY_ORDER: Record<Rarity, number> = { legendary: 4, epic: 3, rare: 2, common: 1 };
+const RARITY_ORDER: Record<Rarity, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
 
 function rarestItems(ownedIds: string[], lookup: Map<string, ShopItem>): ShopItem[] {
   const items = ownedIds.map(id => lookup.get(id)).filter(Boolean) as ShopItem[];

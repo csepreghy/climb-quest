@@ -462,7 +462,32 @@ export function deleteLog(id: string) {
   });
 }
 
-export function updateLog(id: string, input: LogInput) {
+// ----- Strength sessions -----
+export interface StrengthInput {
+  workout: StrengthWorkout;
+  level: number;
+  sets: StrengthSet[];
+  date?: string;
+}
+export function logStrength(input: StrengthInput): { session: StrengthSession } {
+  const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
+  const session: StrengthSession = {
+    id: crypto.randomUUID(),
+    date: input.date ?? new Date().toISOString(),
+    workout: input.workout,
+    level: input.level,
+    sets: input.sets,
+    totalReps,
+  };
+  set(s => ({
+    ...s,
+    strengthSessions: [session, ...(s.strengthSessions ?? [])].slice(0, 500),
+    strengthLevels: { ...(s.strengthLevels ?? {}), [input.workout]: input.level },
+  }));
+  return { session };
+}
+export function deleteStrengthSession(id: string) {
+  set(s => ({ ...s, strengthSessions: (s.strengthSessions ?? []).filter(x => x.id !== id) }));
   const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date, input.attemptType === "repeat");
   const mult = input.chalkMultiplier ?? 1;
   const breakdown = mult === 1 ? raw : {

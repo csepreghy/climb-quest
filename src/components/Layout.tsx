@@ -58,10 +58,6 @@ export default function Layout() {
   }, [user, hydrated, s.onboardedAt]);
 
   function tryOpenLog() {
-    if (gymState.gyms.length === 0) {
-      setNeedGymOpen(true);
-      return;
-    }
     setLogOpen(true);
   }
 

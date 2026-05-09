@@ -783,11 +783,11 @@ const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3
 const MAX_STRENGTH_LEVEL = 5;
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
-  1: "LEG RAISES",
-  2: "HANGING BENT LEG RAISES",
-  3: "L-SIT RAISES",
-  4: "TUCK RAISES",
-  5: "FRONT LEVER RAISES",
+  1: "Leg Raises",
+  2: "Bent Leg Raises",
+  3: "L-Sit Raises",
+  4: "Tuck Raises",
+  5: "Front Lever Raises",
 };
 
 function workoutLevelName(workout: StrengthWorkout, level: number): string {

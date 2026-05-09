@@ -841,12 +841,14 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   function startReps(lv: number) {
     setLevel(lv);
     setSets([]);
+    setReps(5);
     setStep("reps");
   }
 
   function startBoss(targetLevel: number) {
     setBossLevel(targetLevel);
     setBossReps(strengthBossTargetReps(targetLevel));
+    setReps(0);
     setStep("boss-reps");
   }
 

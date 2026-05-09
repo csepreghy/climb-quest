@@ -1,6 +1,6 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
-export type Rarity = "common" | "rare" | "epic" | "legendary";
+export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup";
 export type ItemGroup = "outfit" | "gear" | "power";
 

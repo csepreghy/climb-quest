@@ -43,11 +43,11 @@ const SLOT_LABEL: Record<Slot, string> = {
 
 const SLOT_ORDER: Slot[] = ["outfit", "bottoms", "shoes", "hat", "hand", "chalk", "accessory", "aura", "buddy", "title", "study", "powerup"];
 
-function rarestItems(ownedIds: string[], lookup: Map<string, ShopItem>): ShopItem[] {
+function rarestItems(ownedIds: string[], lookup: Map<string, ShopItem>, count = 5): ShopItem[] {
   const items = ownedIds.map(id => lookup.get(id)).filter(Boolean) as ShopItem[];
   return items
     .sort((a, b) => (RARITY_ORDER[b.rarity] - RARITY_ORDER[a.rarity]) || (b.price - a.price))
-    .slice(0, 2);
+    .slice(0, count);
 }
 
 const TROPHY_COLOR: Record<number, string> = {

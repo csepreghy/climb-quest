@@ -117,7 +117,7 @@ export function GameSync() {
         if (!pending.current.game && !pending.current.gyms) return;
         const uid = userIdRef.current;
         const activeSlot = slotRef.current;
-        const payload: Record<string, any> = {
+        const payload: { updated_at: string; game?: any; gyms?: any } = {
           updated_at: new Date().toISOString(),
         };
         if (pending.current.game) payload.game = pending.current.game;
@@ -148,8 +148,8 @@ export function GameSync() {
               if (fetchError) throw fetchError;
               if (remote) {
                 lastRemoteUpdatedAt.current = remote.updated_at ?? null;
-                replaceGameState((remote.game ?? {}) as GameState);
-                replaceGymsState((remote.gyms ?? {}) as GymState);
+                replaceGameState((remote.game ?? {}) as unknown as GameState);
+                replaceGymsState((remote.gyms ?? {}) as unknown as GymState);
               }
               return;
             }

@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, setStrengthLevel } from "@/game/store";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, setStrengthLevel, maxStrengthLevel } from "@/game/store";
 import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolveGymGradingSystems } from "@/game/gyms";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
@@ -23,6 +23,12 @@ import core2 from "@/assets/strength-core-2.webp";
 import core3 from "@/assets/strength-core-3.webp";
 import core4 from "@/assets/strength-core-4.webp";
 import core5 from "@/assets/strength-core-5.webp";
+import pullup1 from "@/assets/strength-pullup-1.png";
+import pullup2 from "@/assets/strength-pullup-2.png";
+import pullup3 from "@/assets/strength-pullup-3.png";
+import pullup4 from "@/assets/strength-pullup-4.png";
+import pullup5 from "@/assets/strength-pullup-5.png";
+import pullup6 from "@/assets/strength-pullup-6.png";
 import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -780,7 +786,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const REST_OPTIONS = [1, 2, 3, 5]; // minutes
 const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
-const MAX_STRENGTH_LEVEL = 5;
+const PULLUP_LEVEL_IMAGES: Record<number, string> = { 1: pullup1, 2: pullup2, 3: pullup3, 4: pullup4, 5: pullup5, 6: pullup6 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
   1: "Leg Raises",
@@ -790,13 +796,24 @@ const CORE_LEVEL_NAMES: Record<number, string> = {
   5: "Front Lever Raises",
 };
 
+const PULLUP_LEVEL_NAMES: Record<number, string> = {
+  1: "Band-Assisted Pull-Ups",
+  2: "Negative Pull-Ups",
+  3: "Pull-Ups",
+  4: "Weighted Pull-Ups",
+  5: "Heavy Weighted Pull-Ups",
+  6: "Archer Pull-Ups",
+};
+
 function workoutLevelName(workout: StrengthWorkout, level: number): string {
   if (workout === "core") return CORE_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "pullup") return PULLUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 
 function workoutLevelImage(workout: StrengthWorkout, level: number): string | undefined {
   if (workout === "core") return CORE_LEVEL_IMAGES[level];
+  if (workout === "pullup") return PULLUP_LEVEL_IMAGES[level];
   return undefined;
 }
 
@@ -810,8 +827,8 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
   pullup: {
     title: "Pull-up",
     desc: "Pulling power for steeper walls and bigger moves.",
+    image: pullup3,
     ring: "ring-[hsl(var(--sky))]/60",
-    placeholder: true,
   },
 };
 

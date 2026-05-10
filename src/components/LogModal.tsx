@@ -69,7 +69,7 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
                 ring="ring-[hsl(var(--btn-green))]/60"
               />
               <PickCard
-                image={strengthImg}
+                image={pullup4}
                 title="Strength"
                 desc="Core or pull-ups — track sets, reps, and rest."
                 onClick={() => setMode("strength")}

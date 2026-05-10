@@ -104,7 +104,9 @@ export function GameSync() {
       if (cancelled) return;
 
       const flush = () => {
+        if (saveTimer.current) { window.clearTimeout(saveTimer.current); saveTimer.current = null; }
         if (!userIdRef.current) return;
+        if (!pending.current.game && !pending.current.gyms) return;
         const payload: Record<string, any> = {
           user_id: userIdRef.current,
           slot: slotRef.current,
@@ -119,6 +121,7 @@ export function GameSync() {
             if (error) console.warn("[sync] save failed", error.message);
           });
       };
+      flushRef.current = flush;
 
       const schedule = () => {
         if (saveTimer.current) window.clearTimeout(saveTimer.current);
@@ -131,7 +134,11 @@ export function GameSync() {
 
     return () => {
       cancelled = true;
-      if (saveTimer.current) window.clearTimeout(saveTimer.current);
+      // Flush any queued writes before tearing down (slot switch / sign-out
+      // / unmount) so recent logs aren't dropped with the debounce timer.
+      flushRef.current?.();
+      flushRef.current = null;
+      if (saveTimer.current) { window.clearTimeout(saveTimer.current); saveTimer.current = null; }
       bindGameRemoteSync(null);
       bindGymsRemoteSync(null);
     };

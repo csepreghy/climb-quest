@@ -999,8 +999,6 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
               {Array.from({ length: maxLv }, (_, i) => i + 1).map(lv => {
                 const img = workoutLevelImage(workout, lv);
                 const unlocked = choices.includes(lv);
-                const img = workoutLevelImage(workout, lv);
-                const unlocked = choices.includes(lv);
                 const selected = lv === level;
                 const disabled = !unlocked || lockEdit;
                 return (

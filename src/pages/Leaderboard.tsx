@@ -25,6 +25,13 @@ interface Row {
 }
 
 const RARITY_ORDER: Record<Rarity, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
+const RARITY_TEXT: Record<Rarity, string> = {
+  legendary: "text-legendary",
+  epic: "text-epic",
+  rare: "text-rare",
+  uncommon: "text-uncommon",
+  common: "text-muted-foreground",
+};
 
 const SLOT_LABEL: Record<Slot, string> = {
   shoes: "Shoes",

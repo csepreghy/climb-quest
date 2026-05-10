@@ -925,7 +925,10 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function addBossRep() {
-    const res = logStrengthBossRep(workout);
+    const progress = getStrengthBossProgress(workout);
+    const remaining = Math.max(1, STRENGTH_BOSS_TARGET - progress);
+    const reps = Math.max(1, Math.min(remaining, Math.round(bossAttempts)));
+    const res = logStrengthBossRep(workout, reps);
     if (res.defeated) {
       toast.success(`Boss defeated! Unlocked Level ${res.unlockedLevel}`);
       setCelebrate({
@@ -935,7 +938,9 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       });
       setStep("celebrate");
     } else {
-      toast.success(`+1 rep · ${res.progress}/${res.target}`);
+      toast.success(`+${reps} rep${reps === 1 ? "" : "s"} · ${res.progress}/${res.target}`);
+      const newRemaining = Math.max(1, res.target - res.progress);
+      setBossAttempts(a => Math.min(a, newRemaining));
     }
   }
 

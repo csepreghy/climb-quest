@@ -43,11 +43,11 @@ const SLOT_LABEL: Record<Slot, string> = {
 
 const SLOT_ORDER: Slot[] = ["outfit", "bottoms", "shoes", "hat", "hand", "chalk", "accessory", "aura", "buddy", "title", "study", "powerup"];
 
-function rarestItems(ownedIds: string[], lookup: Map<string, ShopItem>): ShopItem[] {
+function rarestItems(ownedIds: string[], lookup: Map<string, ShopItem>, count = 5): ShopItem[] {
   const items = ownedIds.map(id => lookup.get(id)).filter(Boolean) as ShopItem[];
   return items
     .sort((a, b) => (RARITY_ORDER[b.rarity] - RARITY_ORDER[a.rarity]) || (b.price - a.price))
-    .slice(0, 2);
+    .slice(0, count);
 }
 
 const TROPHY_COLOR: Record<number, string> = {
@@ -138,7 +138,8 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; lookup: Map<string, ShopItem>; onSelect: () => void }) {
-  const top = rarestItems(row.owned, lookup);
+  const equippedIds = SLOT_ORDER.map(s => row.equipped[s]).filter(Boolean) as string[];
+  const top = rarestItems(equippedIds, lookup, 5);
   return (
     <button
       type="button"
@@ -163,8 +164,18 @@ function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; look
         </div>
       </div>
       <div className="hidden sm:flex gap-1.5">
-        {top.map(item => (
-          <div key={item.id} className={cn("h-9 w-9 rounded-md bg-background/40 grid place-items-center", RARITY_BORDER[item.rarity])} title={`${item.name} (${item.rarity})`}>
+        {top.map((item, idx) => (
+          <div
+            key={item.id}
+            className={cn(
+              "h-9 w-9 rounded-md bg-background/40 grid place-items-center",
+              RARITY_BORDER[item.rarity],
+              // 2 on sm, 3 on md, 5 on lg+
+              idx >= 2 && "hidden md:grid",
+              idx >= 3 && "md:hidden lg:grid",
+            )}
+            title={`${item.name} (${item.rarity})`}
+          >
             {isImageEmoji(item.emoji) ? (
               <SmartImage src={item.emoji} alt={item.name} loaderSize={14} className="h-full w-full object-contain p-0.5" />
             ) : (

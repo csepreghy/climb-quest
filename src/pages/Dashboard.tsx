@@ -170,13 +170,15 @@ function StatCard({ label, value }: { label: string; value: number }) {
 function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }) {
   // Subscribe to catalog so strip re-renders once custom item images load on refresh.
   useCustomItems();
-  const SLOTS: Slot[] = ["outfit", "bottoms", "shoes", "hat", "chalk", "hand", "accessory", "aura"];
+  const SLOTS: Slot[] = ["outfit", "bottoms", "shoes", "hat", "chalk", "hand", "accessory", "aura", "buddy", "study", "powerup"];
+  const RARITY_RANK: Record<string, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
   const equippedItems = SLOTS
     .map(slot => ({ slot, id: equipped[slot] }))
     .filter(e => !!e.id)
     .map(e => ({ slot: e.slot, item: getItem(e.id!) }))
     .filter(e => !!e.item)
-    .slice(0, 4);
+    .sort((a, b) => (RARITY_RANK[b.item!.rarity] - RARITY_RANK[a.item!.rarity]))
+    .slice(0, 5);
 
   return (
     <div className="mt-4">
@@ -186,14 +188,17 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
           Nothing equipped — visit the shop to gear up.
         </Link>
       ) : (
-        <div className="flex gap-2 flex-wrap">
-          {equippedItems.map(({ slot, item }) => (
+        <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+          {equippedItems.map(({ slot, item }, idx) => (
             <Link
               key={slot}
               to="/inventory"
               className={cn(
                 "h-14 w-14 rounded-lg bg-background/50 grid place-items-center transition-transform hover:-translate-y-0.5",
                 RARITY_BORDER[item!.rarity],
+                // Show 3 on mobile, 4 on sm, 5 on md+
+                idx >= 3 && "hidden sm:grid",
+                idx >= 4 && "sm:hidden md:grid",
               )}
               title={item!.name}
             >

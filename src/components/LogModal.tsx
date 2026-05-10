@@ -874,6 +874,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [restMin, setRestMin] = useState<number>(2);
   const [bossLevel, setBossLevel] = useState<number>(2);
   const [bossReps, setBossReps] = useState<number>(0);
+  const [bossAttempts, setBossAttempts] = useState<number>(1);
   const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
 
   const unlockedMax = s.strengthLevels?.[workout] ?? 0;

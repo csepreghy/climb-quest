@@ -7,7 +7,7 @@ import { RARITY_BORDER, Rarity, ShopItem, Gender } from "@/game/data";
 import type { Equipped } from "@/game/store";
 import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
-import { Trophy, ScrollText, Swords } from "lucide-react";
+import { Trophy, ScrollText, Swords, Dumbbell } from "lucide-react";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 interface Row {
@@ -17,6 +17,7 @@ interface Row {
   total_chalk_earned: number;
   total_logs: number;
   bosses_sent: number;
+  strength_sessions: number;
   owned: string[];
   equipped: Equipped;
   gender: Gender;
@@ -120,6 +121,8 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
           <span className="flex items-center gap-1"><ScrollText className="h-3 w-3" />{row.total_logs}</span>
           <span className="opacity-50">·</span>
           <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
+          <span className="opacity-50">·</span>
+          <span className="flex items-center gap-1"><Dumbbell className="h-3 w-3" />{row.strength_sessions ?? 0}</span>
         </div>
       </div>
       <div className="hidden sm:flex gap-1.5">

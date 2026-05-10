@@ -123,7 +123,10 @@ export function GameSync() {
           .then(({ error }) => {
             if (error) console.warn("[sync] save failed", error.message);
           })
-          .finally(() => {
+          .then(() => {
+            saveInFlight.current = false;
+            if (pending.current.game || pending.current.gyms) flush();
+          }, () => {
             saveInFlight.current = false;
             if (pending.current.game || pending.current.gyms) flush();
           });

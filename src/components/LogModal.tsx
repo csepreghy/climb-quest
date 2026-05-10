@@ -860,10 +860,14 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   function pickWorkout(w: StrengthWorkout) {
     setWorkout(w);
     const max = s.strengthLevels?.[w] ?? 0;
+    if (max <= 0) {
+      // Everyone starts at level 1; higher levels are unlocked by beating bosses.
+      setStrengthLevel(w, 1);
+    }
     setLevel(max > 0 ? max : 1);
     setSets([]);
     setReps(5);
-    setStep(max <= 0 ? "first-pick" : "reps");
+    setStep("reps");
   }
 
   function confirmFirstPick(lv: number) {

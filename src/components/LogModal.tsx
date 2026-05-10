@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, Info, Swords, Trophy, Dumbbell, Timer, ChevronDown, Skull } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
+import pickBoulderImg from "@/assets/log-pick-boulder.png";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import bossImg from "@/assets/log-boss.webp";
 import strengthImg from "@/assets/log-strength.webp";
@@ -61,7 +62,7 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
             </DialogHeader>
             <div className="grid sm:grid-cols-2 gap-3 mt-2">
               <PickCard
-                image={boulderImg}
+                image={pickBoulderImg}
                 title="Boulder"
                 desc="Log a climb — single send, project, or boss battle."
                 onClick={() => setMode("boulder-pick")}

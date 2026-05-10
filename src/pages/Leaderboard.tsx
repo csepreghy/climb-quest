@@ -108,21 +108,21 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
   const top = rarestItems(row.owned, lookup);
   return (
     <div className={cn(
-      "flex items-center gap-3 sm:gap-4 py-3 px-2 rounded-md",
+      "flex items-center gap-2 sm:gap-4 py-3 sm:py-3 px-1.5 sm:px-2 rounded-md",
       rank === 1 && "bg-legendary/5",
     )}>
       <RankBadge rank={rank} />
       <ClimberAvatar level={row.level} gender={row.gender} equipped={row.equipped} size="sm" hideLevel />
       <div className="min-w-0 flex-1">
-        <div className="font-semibold truncate">{row.character_name}</div>
-        <div className="text-[11px] text-muted-foreground flex items-center gap-2 flex-wrap">
-          <span>Lv {row.level}</span>
-          <span className="opacity-50">·</span>
-          <span className="flex items-center gap-1"><ScrollText className="h-3 w-3" />{row.total_logs}</span>
-          <span className="opacity-50">·</span>
-          <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
-          <span className="opacity-50">·</span>
-          <span className="flex items-center gap-1"><Dumbbell className="h-3 w-3" />{row.strength_sessions ?? 0}</span>
+        <div className="font-semibold truncate text-sm sm:text-base">{row.character_name}</div>
+        <div className="text-[11px] text-muted-foreground flex items-center gap-x-1.5 gap-y-0.5 flex-wrap mt-0.5">
+          <span className="font-medium">Lv {row.level}</span>
+          <span className="opacity-40">·</span>
+          <span className="flex items-center gap-0.5"><ScrollText className="h-3 w-3" />{row.total_logs}</span>
+          <span className="opacity-40">·</span>
+          <span className="flex items-center gap-0.5"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
+          <span className="opacity-40">·</span>
+          <span className="flex items-center gap-0.5"><Dumbbell className="h-3 w-3" />{row.strength_sessions ?? 0}</span>
         </div>
       </div>
       <div className="hidden sm:flex gap-1.5">
@@ -136,12 +136,12 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
           </div>
         ))}
       </div>
-      <div className="flex flex-col items-end gap-0.5 shrink-0 min-w-[100px]">
-        <div className="flex items-center gap-1.5">
+      <div className="flex flex-col items-end gap-0.5 shrink-0 sm:min-w-[100px]">
+        <div className="flex items-center gap-1">
           <img src={chalkBagImg} alt="" className="h-4 w-4" />
           <span className="text-sm font-bold tabular-nums gradient-chalk-text">{row.total_chalk_earned.toLocaleString()}</span>
         </div>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground">All time</span>
+        <span className="hidden sm:inline text-[9px] uppercase tracking-wider text-muted-foreground">All time</span>
       </div>
     </div>
   );

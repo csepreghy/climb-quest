@@ -797,12 +797,12 @@ const CORE_LEVEL_NAMES: Record<number, string> = {
 };
 
 const PULLUP_LEVEL_NAMES: Record<number, string> = {
-  1: "Band-Assisted Pull-Ups",
-  2: "Negative Pull-Ups",
-  3: "Pull-Ups",
-  4: "Weighted Pull-Ups",
-  5: "Heavy Weighted Pull-Ups",
-  6: "Archer Pull-Ups",
+  1: "Bend-Assisted",
+  2: "Negative",
+  3: "Regular",
+  4: "~10-20% Bodyweight",
+  5: "~40-60% Bodyweight",
+  6: "One-Arm",
 };
 
 function workoutLevelName(workout: StrengthWorkout, level: number): string {

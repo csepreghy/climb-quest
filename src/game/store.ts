@@ -652,7 +652,7 @@ export function logStrengthBossRep(workout: StrengthWorkout): {
 } {
   const target = STRENGTH_BOSS_TARGET;
   const prevMax = state.strengthLevels?.[workout] ?? 0;
-  const targetLevel = Math.min(MAX_STRENGTH_LEVEL_CONST, Math.max(1, prevMax + 1));
+  const targetLevel = Math.min(maxStrengthLevel(workout), Math.max(1, prevMax + 1));
   const prevProgress = state.strengthBossProgress?.[workout] ?? 0;
   const nextProgress = prevProgress + 1;
   const defeated = nextProgress >= target;
@@ -681,7 +681,9 @@ export function logStrengthBossRep(workout: StrengthWorkout): {
   };
 }
 
-const MAX_STRENGTH_LEVEL_CONST = 5;
+export function maxStrengthLevel(workout: StrengthWorkout): number {
+  return workout === "pullup" ? 6 : 5;
+}
 
 export function updateLog(id: string, input: LogInput) {
   const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date, input.attemptType === "repeat");

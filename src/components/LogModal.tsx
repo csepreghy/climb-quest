@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, setStrengthLevel } from "@/game/store";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, setStrengthLevel, maxStrengthLevel } from "@/game/store";
 import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolveGymGradingSystems } from "@/game/gyms";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
@@ -23,6 +23,12 @@ import core2 from "@/assets/strength-core-2.webp";
 import core3 from "@/assets/strength-core-3.webp";
 import core4 from "@/assets/strength-core-4.webp";
 import core5 from "@/assets/strength-core-5.webp";
+import pullup1 from "@/assets/strength-pullup-1.png";
+import pullup2 from "@/assets/strength-pullup-2.png";
+import pullup3 from "@/assets/strength-pullup-3.png";
+import pullup4 from "@/assets/strength-pullup-4.png";
+import pullup5 from "@/assets/strength-pullup-5.png";
+import pullup6 from "@/assets/strength-pullup-6.png";
 import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -780,7 +786,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const REST_OPTIONS = [1, 2, 3, 5]; // minutes
 const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
-const MAX_STRENGTH_LEVEL = 5;
+const PULLUP_LEVEL_IMAGES: Record<number, string> = { 1: pullup1, 2: pullup2, 3: pullup3, 4: pullup4, 5: pullup5, 6: pullup6 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
   1: "Leg Raises",
@@ -790,13 +796,24 @@ const CORE_LEVEL_NAMES: Record<number, string> = {
   5: "Front Lever Raises",
 };
 
+const PULLUP_LEVEL_NAMES: Record<number, string> = {
+  1: "Band-Assisted Pull-Ups",
+  2: "Negative Pull-Ups",
+  3: "Pull-Ups",
+  4: "Weighted Pull-Ups",
+  5: "Heavy Weighted Pull-Ups",
+  6: "Archer Pull-Ups",
+};
+
 function workoutLevelName(workout: StrengthWorkout, level: number): string {
   if (workout === "core") return CORE_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "pullup") return PULLUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 
 function workoutLevelImage(workout: StrengthWorkout, level: number): string | undefined {
   if (workout === "core") return CORE_LEVEL_IMAGES[level];
+  if (workout === "pullup") return PULLUP_LEVEL_IMAGES[level];
   return undefined;
 }
 
@@ -810,8 +827,8 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
   pullup: {
     title: "Pull-up",
     desc: "Pulling power for steeper walls and bigger moves.",
+    image: pullup3,
     ring: "ring-[hsl(var(--sky))]/60",
-    placeholder: true,
   },
 };
 
@@ -857,7 +874,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function startBoss() {
-    const next = Math.min(MAX_STRENGTH_LEVEL, Math.max(1, unlockedMax + 1));
+    const next = Math.min(maxStrengthLevel(workout), Math.max(1, unlockedMax + 1));
     setBossLevel(next);
     setBossReps(STRENGTH_BOSS_TARGET);
     setStep("boss-reps");
@@ -954,9 +971,10 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const totalReps = sets.reduce((a, b) => a + b.reps, 0);
     const lvImg = workoutLevelImage(workout, level);
 
+    const maxLv = maxStrengthLevel(workout);
     const choices = Array.from({ length: Math.max(1, unlockedMax) }, (_, i) => i + 1);
-    const canBoss = unlockedMax < MAX_STRENGTH_LEVEL;
-    const nextBoss = Math.min(MAX_STRENGTH_LEVEL, unlockedMax + 1);
+    const canBoss = unlockedMax < maxLv;
+    const nextBoss = Math.min(maxLv, unlockedMax + 1);
     const lockEdit = false;
     const levelName = workoutLevelName(workout, level);
     return (
@@ -977,8 +995,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           <div>
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">Level</Label>
-            <div className="mt-2 grid grid-cols-5 gap-1.5">
-              {[1, 2, 3, 4, 5].map(lv => {
+            <div className={cn("mt-2 grid gap-1.5", maxLv >= 6 ? "grid-cols-6" : "grid-cols-5")}>
+              {Array.from({ length: maxLv }, (_, i) => i + 1).map(lv => {
                 const img = workoutLevelImage(workout, lv);
                 const unlocked = choices.includes(lv);
                 const selected = lv === level;
@@ -1147,7 +1165,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           You only choose this once. We'll remember it for next time and you can upgrade as you get stronger.
         </DialogDescription>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3 max-h-[60vh] overflow-y-auto pr-1">
-          {[1, 2, 3, 4, 5].map(lv => {
+          {Array.from({ length: maxStrengthLevel(workout) }, (_, i) => i + 1).map(lv => {
             const img = workoutLevelImage(workout, lv);
             const name = workoutLevelName(workout, lv);
             return (

@@ -71,15 +71,34 @@ export default function Admin() {
   const [amount, setAmount] = useState(100);
   return (
     <div className="space-y-6 animate-float-up max-w-5xl">
+      <div className="flex items-center gap-2 mb-2">
+        <Shield className="h-6 w-6 text-primary" />
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Admin</h1>
+          <p className="text-xs text-muted-foreground">Manage game data, users, and presentation.</p>
+        </div>
+      </div>
+
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="flex flex-wrap h-auto">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="levels">Levels</TabsTrigger>
-          <TabsTrigger value="items">Items</TabsTrigger>
-          <TabsTrigger value="gyms">Gyms</TabsTrigger>
-          <TabsTrigger value="theme">Theme</TabsTrigger>
+        <TabsList className="grid grid-cols-4 sm:grid-cols-7 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
+          {[
+            { value: "general", label: "General", Icon: Settings },
+            { value: "account", label: "Account", Icon: UserIcon },
+            { value: "users", label: "Users", Icon: UsersIcon },
+            { value: "levels", label: "Levels", Icon: Layers },
+            { value: "items", label: "Items", Icon: Package },
+            { value: "gyms", label: "Gyms", Icon: MapPin },
+            { value: "theme", label: "Theme", Icon: Palette },
+          ].map(({ value, label, Icon }) => (
+            <TabsTrigger
+              key={value}
+              value={value}
+              className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 text-[11px] sm:text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+            >
+              <Icon className="h-4 w-4" />
+              <span>{label}</span>
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="general" className="space-y-6 mt-6">

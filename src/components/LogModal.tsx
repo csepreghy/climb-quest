@@ -62,7 +62,7 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
             </DialogHeader>
             <div className="grid sm:grid-cols-2 gap-3 mt-2">
               <PickCard
-                image={boulderImg}
+                image={pickBoulderImg}
                 title="Boulder"
                 desc="Log a climb — single send, project, or boss battle."
                 onClick={() => setMode("boulder-pick")}

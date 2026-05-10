@@ -827,7 +827,7 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
   pullup: {
     title: "Pull-up",
     desc: "Pulling power for steeper walls and bigger moves.",
-    image: pullup3,
+    image: pullup4,
     ring: "ring-[hsl(var(--sky))]/60",
   },
 };

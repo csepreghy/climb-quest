@@ -1165,7 +1165,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           You only choose this once. We'll remember it for next time and you can upgrade as you get stronger.
         </DialogDescription>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3 max-h-[60vh] overflow-y-auto pr-1">
-          {[1, 2, 3, 4, 5].map(lv => {
+          {Array.from({ length: maxStrengthLevel(workout) }, (_, i) => i + 1).map(lv => {
             const img = workoutLevelImage(workout, lv);
             const name = workoutLevelName(workout, lv);
             return (

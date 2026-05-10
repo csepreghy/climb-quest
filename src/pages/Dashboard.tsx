@@ -379,13 +379,13 @@ function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
     const DAYS = 30;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const buckets: { ts: number; key: string; core: number; pullup: number }[] = [];
-    const byKey = new Map<string, { ts: number; key: string; core: number; pullup: number }>();
+    const buckets: { ts: number; key: string; core: number; pullup: number; pushup: number }[] = [];
+    const byKey = new Map<string, { ts: number; key: string; core: number; pullup: number; pushup: number }>();
     for (let i = DAYS - 1; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const key = d.toISOString().slice(0, 10);
-      const row = { ts: d.getTime(), key, core: 0, pullup: 0 };
+      const row = { ts: d.getTime(), key, core: 0, pullup: 0, pushup: 0 };
       buckets.push(row);
       byKey.set(key, row);
     }
@@ -400,6 +400,7 @@ function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
       const volume = Math.round(sess.totalReps * mult * bossBoost);
       if (sess.workout === "core") row.core += volume;
       else if (sess.workout === "pullup") row.pullup += volume;
+      else if (sess.workout === "pushup") row.pushup += volume;
     }
     return buckets.map(b => ({
       ...b,
@@ -407,7 +408,7 @@ function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
     }));
   }, [sessions]);
 
-  const hasAny = data.some(d => d.core > 0 || d.pullup > 0);
+  const hasAny = data.some(d => d.core > 0 || d.pullup > 0 || d.pushup > 0);
 
   return (
     <GameCard className="p-5">

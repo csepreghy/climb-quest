@@ -164,8 +164,18 @@ function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; look
         </div>
       </div>
       <div className="hidden sm:flex gap-1.5">
-        {top.map(item => (
-          <div key={item.id} className={cn("h-9 w-9 rounded-md bg-background/40 grid place-items-center", RARITY_BORDER[item.rarity])} title={`${item.name} (${item.rarity})`}>
+        {top.map((item, idx) => (
+          <div
+            key={item.id}
+            className={cn(
+              "h-9 w-9 rounded-md bg-background/40 grid place-items-center",
+              RARITY_BORDER[item.rarity],
+              // 2 on sm, 3 on md, 5 on lg+
+              idx >= 2 && "hidden md:grid",
+              idx >= 3 && "md:hidden lg:grid",
+            )}
+            title={`${item.name} (${item.rarity})`}
+          >
             {isImageEmoji(item.emoji) ? (
               <SmartImage src={item.emoji} alt={item.name} loaderSize={14} className="h-full w-full object-contain p-0.5" />
             ) : (

@@ -874,7 +874,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function startBoss() {
-    const next = Math.min(MAX_STRENGTH_LEVEL, Math.max(1, unlockedMax + 1));
+    const next = Math.min(maxStrengthLevel(workout), Math.max(1, unlockedMax + 1));
     setBossLevel(next);
     setBossReps(STRENGTH_BOSS_TARGET);
     setStep("boss-reps");
@@ -971,9 +971,10 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const totalReps = sets.reduce((a, b) => a + b.reps, 0);
     const lvImg = workoutLevelImage(workout, level);
 
+    const maxLv = maxStrengthLevel(workout);
     const choices = Array.from({ length: Math.max(1, unlockedMax) }, (_, i) => i + 1);
-    const canBoss = unlockedMax < MAX_STRENGTH_LEVEL;
-    const nextBoss = Math.min(MAX_STRENGTH_LEVEL, unlockedMax + 1);
+    const canBoss = unlockedMax < maxLv;
+    const nextBoss = Math.min(maxLv, unlockedMax + 1);
     const lockEdit = false;
     const levelName = workoutLevelName(workout, level);
     return (
@@ -994,8 +995,10 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           <div>
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">Level</Label>
-            <div className="mt-2 grid grid-cols-5 gap-1.5">
-              {[1, 2, 3, 4, 5].map(lv => {
+            <div className={cn("mt-2 grid gap-1.5", maxLv >= 6 ? "grid-cols-6" : "grid-cols-5")}>
+              {Array.from({ length: maxLv }, (_, i) => i + 1).map(lv => {
+                const img = workoutLevelImage(workout, lv);
+                const unlocked = choices.includes(lv);
                 const img = workoutLevelImage(workout, lv);
                 const unlocked = choices.includes(lv);
                 const selected = lv === level;

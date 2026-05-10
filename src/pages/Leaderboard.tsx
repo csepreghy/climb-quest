@@ -121,6 +121,8 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
           <span className="flex items-center gap-1"><ScrollText className="h-3 w-3" />{row.total_logs}</span>
           <span className="opacity-50">·</span>
           <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
+          <span className="opacity-50">·</span>
+          <span className="flex items-center gap-1"><Dumbbell className="h-3 w-3" />{row.strength_sessions ?? 0}</span>
         </div>
       </div>
       <div className="hidden sm:flex gap-1.5">

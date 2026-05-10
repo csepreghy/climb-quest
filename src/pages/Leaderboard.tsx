@@ -3,12 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { GameCard } from "@/components/ui/game-card";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAllItems, isImageEmoji } from "@/game/customItems";
-import { RARITY_BORDER, Rarity, ShopItem, Gender } from "@/game/data";
+import { RARITY_BORDER, Rarity, ShopItem, Gender, Slot } from "@/game/data";
 import type { Equipped } from "@/game/store";
 import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
-import { Trophy, ScrollText, Swords, Dumbbell } from "lucide-react";
+import { Trophy, ScrollText, Swords, Dumbbell, Sparkles } from "lucide-react";
 import chalkBagImg from "@/assets/chalk-bag.png";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Row {
   user_id: string;
@@ -24,6 +25,23 @@ interface Row {
 }
 
 const RARITY_ORDER: Record<Rarity, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
+
+const SLOT_LABEL: Record<Slot, string> = {
+  shoes: "Shoes",
+  chalk: "Chalk",
+  outfit: "Outfit",
+  bottoms: "Bottoms",
+  hat: "Hat",
+  hand: "Hand",
+  accessory: "Accessory",
+  study: "Study",
+  aura: "Aura",
+  title: "Title",
+  powerup: "Power-up",
+  buddy: "Buddy",
+};
+
+const SLOT_ORDER: Slot[] = ["outfit", "bottoms", "shoes", "hat", "hand", "chalk", "accessory", "aura", "buddy", "title", "study", "powerup"];
 
 function rarestItems(ownedIds: string[], lookup: Map<string, ShopItem>): ShopItem[] {
   const items = ownedIds.map(id => lookup.get(id)).filter(Boolean) as ShopItem[];
@@ -41,6 +59,7 @@ const TROPHY_COLOR: Record<number, string> = {
 export default function Leaderboard() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{ row: Row; rank: number } | null>(null);
   const allItems = useAllItems();
   const lookup = new Map(allItems.map(i => [i.id, i]));
 
@@ -81,11 +100,25 @@ export default function Leaderboard() {
         <GameCard className="p-2 sm:p-3">
           <div className="divide-y divide-border/40">
             {rows.map((row, i) => (
-              <RankRow key={row.user_id} row={row} rank={i + 1} lookup={lookup} />
+              <RankRow
+                key={row.user_id}
+                row={row}
+                rank={i + 1}
+                lookup={lookup}
+                onSelect={() => setSelected({ row, rank: i + 1 })}
+              />
             ))}
           </div>
         </GameCard>
       )}
+
+      <ClimberDetailsDialog
+        open={!!selected}
+        onOpenChange={(v) => { if (!v) setSelected(null); }}
+        row={selected?.row ?? null}
+        rank={selected?.rank ?? 0}
+        lookup={lookup}
+      />
     </div>
   );
 }
@@ -104,13 +137,17 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<string, ShopItem> }) {
+function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; lookup: Map<string, ShopItem>; onSelect: () => void }) {
   const top = rarestItems(row.owned, lookup);
   return (
-    <div className={cn(
-      "flex items-center gap-2 sm:gap-4 py-3 sm:py-3 px-1.5 sm:px-2 rounded-md",
-      rank === 1 && "bg-legendary/5",
-    )}>
+    <button
+      type="button"
+      onClick={onSelect}
+      className={cn(
+        "w-full flex items-center gap-2 sm:gap-4 py-3 px-1.5 sm:px-2 rounded-md text-left transition hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+        rank === 1 && "bg-legendary/5",
+      )}
+    >
       <RankBadge rank={rank} />
       <ClimberAvatar level={row.level} gender={row.gender} equipped={row.equipped} size="sm" hideLevel />
       <div className="min-w-0 flex-1">
@@ -143,6 +180,117 @@ function RankRow({ row, rank, lookup }: { row: Row; rank: number; lookup: Map<st
         </div>
         <span className="hidden sm:inline text-[9px] uppercase tracking-wider text-muted-foreground">All time</span>
       </div>
+    </button>
+  );
+}
+
+function ClimberDetailsDialog({
+  open, onOpenChange, row, rank, lookup,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  row: Row | null;
+  rank: number;
+  lookup: Map<string, ShopItem>;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        {row && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                {rank <= 3 && <Trophy className={cn("h-5 w-5", TROPHY_COLOR[rank])} fill="currentColor" />}
+                <span className="truncate">{row.character_name}</span>
+                <span className="text-xs font-normal text-muted-foreground">#{rank}</span>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="flex items-center gap-4">
+              <ClimberAvatar level={row.level} gender={row.gender} equipped={row.equipped} size="lg" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <img src={chalkBagImg} alt="" className="h-4 w-4" />
+                  <span className="text-base font-bold tabular-nums gradient-chalk-text">
+                    {row.total_chalk_earned.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">all-time</span>
+                </div>
+                <div className="text-xs text-muted-foreground">Level {row.level}</div>
+                <div className="text-xs text-muted-foreground">
+                  {row.owned?.length ?? 0} item{(row.owned?.length ?? 0) === 1 ? "" : "s"} owned
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <StatTile icon={<ScrollText className="h-3.5 w-3.5" />} label="Logs" value={row.total_logs} />
+              <StatTile icon={<Swords className="h-3.5 w-3.5" />} label="Bosses" value={row.bosses_sent} />
+              <StatTile icon={<Dumbbell className="h-3.5 w-3.5" />} label="Strength" value={row.strength_sessions ?? 0} />
+            </div>
+
+            <div>
+              <div className="menu-label mb-2 flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3" /> Equipped
+              </div>
+              <EquippedList equipped={row.equipped} lookup={lookup} />
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+      <div className="text-base font-bold tabular-nums leading-none">{value.toLocaleString()}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+        {icon} {label}
+      </div>
+    </div>
+  );
+}
+
+function EquippedList({ equipped, lookup }: { equipped: Equipped; lookup: Map<string, ShopItem> }) {
+  const entries = SLOT_ORDER
+    .map(slot => ({ slot, item: equipped[slot] ? lookup.get(equipped[slot]!) : undefined }))
+    .filter(e => !!e.item) as { slot: Slot; item: ShopItem }[];
+
+  if (entries.length === 0) {
+    return (
+      <div className="text-xs text-muted-foreground italic px-1 py-3 text-center border-2 border-dashed border-border rounded-lg">
+        Nothing equipped.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-1.5">
+      {entries.map(({ slot, item }) => (
+        <div
+          key={slot}
+          className={cn(
+            "flex items-center gap-2.5 rounded-md border-2 bg-background/40 px-2 py-1.5",
+            RARITY_BORDER[item.rarity],
+          )}
+        >
+          <div className="h-9 w-9 shrink-0 rounded-md bg-background/60 grid place-items-center overflow-hidden">
+            {isImageEmoji(item.emoji) ? (
+              <SmartImage src={item.emoji} alt={item.name} loaderSize={14} className="h-full w-full object-contain p-0.5" />
+            ) : (
+              <span className="text-lg">{item.emoji}</span>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium truncate">{item.name}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              {SLOT_LABEL[slot]} · {item.rarity}
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

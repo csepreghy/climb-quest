@@ -31,6 +31,7 @@ export function GameSync() {
   const userIdRef = useRef<string | null>(null);
   const saveTimer = useRef<number | null>(null);
   const saveInFlight = useRef(false);
+  const lastRemoteUpdatedAt = useRef<string | null>(null);
   const pending = useRef<{ game?: GameState; gyms?: GymState }>({});
   const flushRef = useRef<(() => void) | null>(null);
 
@@ -39,14 +40,16 @@ export function GameSync() {
   // logged right before navigating away).
   useEffect(() => {
     const onHide = () => { flushRef.current?.(); };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") onHide();
+    };
     window.addEventListener("beforeunload", onHide);
     window.addEventListener("pagehide", onHide);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") onHide();
-    });
+    document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       window.removeEventListener("beforeunload", onHide);
       window.removeEventListener("pagehide", onHide);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
 
@@ -65,7 +68,7 @@ export function GameSync() {
     (async () => {
       const { data, error } = await supabase
         .from("user_game_state")
-        .select("game, gyms")
+        .select("game, gyms, updated_at")
         .eq("user_id", uid)
         .eq("slot", slot)
         .maybeSingle();
@@ -73,6 +76,7 @@ export function GameSync() {
       if (cancelled) return;
 
       if (!error && data) {
+        lastRemoteUpdatedAt.current = data.updated_at ?? null;
         const game = data.game as unknown as GameState | Record<string, never>;
         const gyms = data.gyms as unknown as GymState | Record<string, never>;
         // Always replace — empty object yields a fresh profile, which is what
@@ -83,12 +87,14 @@ export function GameSync() {
         // No row yet for this slot — start fresh and create the row.
         replaceGameState({} as GameState);
         replaceGymsState({} as GymState);
-        await supabase.from("user_game_state").upsert({
+        const { data: inserted } = await supabase.from("user_game_state").upsert({
           user_id: uid,
           slot,
+          updated_at: new Date().toISOString(),
           game: getGameStateSnapshot() as any,
           gyms: getGymsSnapshot() as any,
-        }, { onConflict: "user_id,slot" });
+        }, { onConflict: "user_id,slot" }).select("updated_at").maybeSingle();
+        lastRemoteUpdatedAt.current = inserted?.updated_at ?? null;
       }
 
       // Only seed mock data into the admin's TEST slot, never personal.
@@ -109,24 +115,61 @@ export function GameSync() {
         if (saveInFlight.current) return;
         if (!userIdRef.current) return;
         if (!pending.current.game && !pending.current.gyms) return;
-        const payload: Record<string, any> = {
-          user_id: userIdRef.current,
-          slot: slotRef.current,
+        const uid = userIdRef.current;
+        const activeSlot = slotRef.current;
+        const payload: { updated_at: string; game?: any; gyms?: any } = {
+          updated_at: new Date().toISOString(),
         };
         if (pending.current.game) payload.game = pending.current.game;
         if (pending.current.gyms) payload.gyms = pending.current.gyms;
         pending.current = {};
         saveInFlight.current = true;
-        supabase
-          .from("user_game_state")
-          .upsert(payload, { onConflict: "user_id,slot" })
-          .then(({ error }) => {
-            if (error) console.warn("[sync] save failed", error.message);
+        (async () => {
+          const expectedUpdatedAt = lastRemoteUpdatedAt.current;
+          if (expectedUpdatedAt) {
+            const { data: saved, error } = await supabase
+              .from("user_game_state")
+              .update(payload)
+              .eq("user_id", uid)
+              .eq("slot", activeSlot)
+              .eq("updated_at", expectedUpdatedAt)
+              .select("updated_at")
+              .maybeSingle();
+
+            if (error) throw error;
+
+            if (!saved) {
+              const { data: remote, error: fetchError } = await supabase
+                .from("user_game_state")
+                .select("game, gyms, updated_at")
+                .eq("user_id", uid)
+                .eq("slot", activeSlot)
+                .maybeSingle();
+              if (fetchError) throw fetchError;
+              if (remote) {
+                lastRemoteUpdatedAt.current = remote.updated_at ?? null;
+                replaceGameState((remote.game ?? {}) as unknown as GameState);
+                replaceGymsState((remote.gyms ?? {}) as unknown as GymState);
+              }
+              return;
+            }
+
+            lastRemoteUpdatedAt.current = saved.updated_at ?? payload.updated_at;
+            return;
+          }
+
+          const { data: saved, error } = await supabase
+            .from("user_game_state")
+            .upsert({ user_id: uid, slot: activeSlot, ...payload }, { onConflict: "user_id,slot" })
+            .select("updated_at")
+            .maybeSingle();
+          if (error) throw error;
+          lastRemoteUpdatedAt.current = saved?.updated_at ?? payload.updated_at;
+        })()
+          .catch((error) => {
+            console.warn("[sync] save failed", error instanceof Error ? error.message : error);
           })
-          .then(() => {
-            saveInFlight.current = false;
-            if (pending.current.game || pending.current.gyms) flush();
-          }, () => {
+          .finally(() => {
             saveInFlight.current = false;
             if (pending.current.game || pending.current.gyms) flush();
           });

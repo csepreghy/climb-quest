@@ -905,6 +905,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const next = Math.min(maxStrengthLevel(workout), Math.max(1, unlockedMax + 1));
     setBossLevel(next);
     setBossReps(STRENGTH_BOSS_TARGET);
+    setBossAttempts(1);
     setStep("boss-reps");
   }
 

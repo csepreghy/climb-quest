@@ -271,34 +271,36 @@ function EquippedList({ equipped, lookup }: { equipped: Equipped; lookup: Map<st
 
   if (entries.length === 0) {
     return (
-      <div className="text-xs text-muted-foreground italic px-1 py-3 text-center border-2 border-dashed border-border rounded-lg">
+      <div className="text-xs text-muted-foreground italic px-1 py-4 text-center border-2 border-dashed border-border rounded-lg">
         Nothing equipped.
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-1.5">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
       {entries.map(({ slot, item }) => (
         <div
           key={slot}
           className={cn(
-            "flex items-center gap-2.5 rounded-md border-2 bg-background/40 px-2 py-1.5",
+            "relative flex flex-col items-center rounded-lg border-2 bg-background/40 p-2 text-center overflow-hidden",
             RARITY_BORDER[item.rarity],
           )}
+          title={`${item.name} · ${item.rarity}`}
         >
-          <div className="h-9 w-9 shrink-0 rounded-md bg-background/60 grid place-items-center overflow-hidden">
+          <div className="absolute top-1 left-1 text-[8px] uppercase tracking-wider px-1 py-0.5 rounded bg-background/70 text-muted-foreground font-semibold">
+            {SLOT_LABEL[slot]}
+          </div>
+          <div className="h-14 w-14 mt-3 mb-1.5 rounded-md bg-background/60 grid place-items-center overflow-hidden">
             {isImageEmoji(item.emoji) ? (
-              <SmartImage src={item.emoji} alt={item.name} loaderSize={14} className="h-full w-full object-contain p-0.5" />
+              <SmartImage src={item.emoji} alt={item.name} loaderSize={18} className="h-full w-full object-contain p-1" />
             ) : (
-              <span className="text-lg">{item.emoji}</span>
+              <span className="text-2xl">{item.emoji}</span>
             )}
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-medium truncate">{item.name}</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              {SLOT_LABEL[slot]} · {item.rarity}
-            </div>
+          <div className="text-[11px] font-semibold leading-tight line-clamp-2 w-full">{item.name}</div>
+          <div className={cn("text-[9px] uppercase tracking-wider mt-0.5 font-bold", `text-${item.rarity === "common" ? "muted-foreground" : item.rarity}`)}>
+            {item.rarity}
           </div>
         </div>
       ))}

@@ -299,7 +299,7 @@ function EquippedList({ equipped, lookup }: { equipped: Equipped; lookup: Map<st
             )}
           </div>
           <div className="text-[11px] font-semibold leading-tight line-clamp-2 w-full">{item.name}</div>
-          <div className={cn("text-[9px] uppercase tracking-wider mt-0.5 font-bold", `text-${item.rarity === "common" ? "muted-foreground" : item.rarity}`)}>
+          <div className={cn("text-[9px] uppercase tracking-wider mt-0.5 font-bold", RARITY_TEXT[item.rarity])}>
             {item.rarity}
           </div>
         </div>

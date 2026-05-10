@@ -7,7 +7,7 @@ import { RARITY_BORDER, Rarity, ShopItem, Gender } from "@/game/data";
 import type { Equipped } from "@/game/store";
 import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
-import { Trophy, ScrollText, Swords } from "lucide-react";
+import { Trophy, ScrollText, Swords, Dumbbell } from "lucide-react";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 interface Row {
@@ -17,6 +17,7 @@ interface Row {
   total_chalk_earned: number;
   total_logs: number;
   bosses_sent: number;
+  strength_sessions: number;
   owned: string[];
   equipped: Equipped;
   gender: Gender;

@@ -138,7 +138,8 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; lookup: Map<string, ShopItem>; onSelect: () => void }) {
-  const top = rarestItems(row.owned, lookup);
+  const equippedIds = SLOT_ORDER.map(s => row.equipped[s]).filter(Boolean) as string[];
+  const top = rarestItems(equippedIds, lookup, 5);
   return (
     <button
       type="button"

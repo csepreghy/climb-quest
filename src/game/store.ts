@@ -643,7 +643,7 @@ export function getStrengthBossProgress(workout: StrengthWorkout): number {
  * boss target (10). When cumulative reaches 10, mark a successful boss send,
  * unlock the next level, and reset progress.
  */
-export function logStrengthBossRep(workout: StrengthWorkout): {
+export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 1): {
   chalk: number;
   defeated: boolean;
   progress: number;
@@ -654,13 +654,15 @@ export function logStrengthBossRep(workout: StrengthWorkout): {
   const prevMax = state.strengthLevels?.[workout] ?? 0;
   const targetLevel = Math.min(maxStrengthLevel(workout), Math.max(1, prevMax + 1));
   const prevProgress = state.strengthBossProgress?.[workout] ?? 0;
-  const nextProgress = prevProgress + 1;
+  const remaining = Math.max(0, target - prevProgress);
+  const reps = Math.max(1, Math.min(remaining > 0 ? remaining : target, Math.round(attempts)));
+  const nextProgress = prevProgress + reps;
   const defeated = nextProgress >= target;
 
   const { chalk } = logStrength({
     workout,
     level: targetLevel,
-    sets: [{ reps: 1 }],
+    sets: [{ reps }],
     bossSend: defeated,
   });
 

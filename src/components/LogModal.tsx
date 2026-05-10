@@ -874,6 +874,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [restMin, setRestMin] = useState<number>(2);
   const [bossLevel, setBossLevel] = useState<number>(2);
   const [bossReps, setBossReps] = useState<number>(0);
+  const [bossAttempts, setBossAttempts] = useState<number>(1);
   const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
 
   const unlockedMax = s.strengthLevels?.[workout] ?? 0;
@@ -904,6 +905,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const next = Math.min(maxStrengthLevel(workout), Math.max(1, unlockedMax + 1));
     setBossLevel(next);
     setBossReps(STRENGTH_BOSS_TARGET);
+    setBossAttempts(1);
     setStep("boss-reps");
   }
 
@@ -923,7 +925,10 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function addBossRep() {
-    const res = logStrengthBossRep(workout);
+    const progress = getStrengthBossProgress(workout);
+    const remaining = Math.max(1, STRENGTH_BOSS_TARGET - progress);
+    const reps = Math.max(1, Math.min(remaining, Math.round(bossAttempts)));
+    const res = logStrengthBossRep(workout, reps);
     if (res.defeated) {
       toast.success(`Boss defeated! Unlocked Level ${res.unlockedLevel}`);
       setCelebrate({
@@ -933,7 +938,9 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       });
       setStep("celebrate");
     } else {
-      toast.success(`+1 rep · ${res.progress}/${res.target}`);
+      toast.success(`+${reps} rep${reps === 1 ? "" : "s"} · ${res.progress}/${res.target}`);
+      const newRemaining = Math.max(1, res.target - res.progress);
+      setBossAttempts(a => Math.min(a, newRemaining));
     }
   }
 
@@ -1147,11 +1154,13 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </div>
         </DialogHeader>
         <DialogDescription className="px-1">
-          Add boss reps <span className="font-bold text-foreground">one at a time</span> across multiple sessions. Reach <span className="font-bold text-foreground">{bossReps} total reps</span> to defeat the boss and unlock Level {bossLevel}.
+          Log boss reps in <span className="font-bold text-foreground">one or more attempts</span> across multiple sessions. Reach <span className="font-bold text-foreground">{bossReps} total reps</span> to defeat the boss and unlock Level {bossLevel}.
         </DialogDescription>
         <div className="space-y-4 mt-2">
           {(() => {
             const progress = getStrengthBossProgress(workout);
+            const remaining = Math.max(1, bossReps - progress);
+            const reps = Math.max(1, Math.min(remaining, Math.round(bossAttempts)));
             const pct = Math.min(100, (progress / bossReps) * 100);
             return (
               <>
@@ -1165,8 +1174,30 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                   <div className="h-full transition-all duration-300"
                     style={{ width: `${pct}%`, background: "linear-gradient(90deg, hsl(var(--boss)), hsl(var(--btn-orange)))" }} />
                 </div>
+                <Field label="Reps this attempt">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBossAttempts(r => Math.max(1, r - 1))}
+                      className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold active:translate-y-[1px]"
+                    >−</button>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={remaining}
+                      value={reps}
+                      onChange={e => setBossAttempts(Math.max(1, Math.min(remaining, Number(e.target.value) || 1)))}
+                      className="h-12 text-center text-2xl font-bold tabular-nums flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setBossAttempts(r => Math.min(remaining, r + 1))}
+                      className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold active:translate-y-[1px]"
+                    >+</button>
+                  </div>
+                </Field>
                 <div className="text-center text-xs text-muted-foreground">
-                  Each tap logs one rep. Leave and come back any time — your progress is saved.
+                  Up to {remaining} rep{remaining === 1 ? "" : "s"} remaining. Leave and come back any time — your progress is saved.
                 </div>
               </>
             );
@@ -1175,7 +1206,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
           <GameButton variant="ghost" size="sm" onClick={() => setStep("reps")}>Back</GameButton>
           <GameButton variant="danger" size="md" onClick={addBossRep}>
-            <Skull className="h-4 w-4" /> Log +1 Boss Rep
+            <Skull className="h-4 w-4" /> Log +{Math.max(1, Math.min(Math.max(1, bossReps - getStrengthBossProgress(workout)), Math.round(bossAttempts)))} Boss Rep{Math.max(1, Math.min(Math.max(1, bossReps - getStrengthBossProgress(workout)), Math.round(bossAttempts))) === 1 ? "" : "s"}
           </GameButton>
         </div>
       </>

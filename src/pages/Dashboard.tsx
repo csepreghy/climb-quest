@@ -77,12 +77,13 @@ export default function Dashboard() {
       </GameCard>
 
       {/* Stats */}
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard label="All-time chalk" value={s.totalChalkEarned} />
         <StatCard label="Total logs" value={s.stats.totalLogs} />
         <StatCard label="Total sends" value={s.stats.totalSends} />
         <StatCard label="Total flashes" value={s.stats.totalFlashes} />
         <StatCard label="Bosses defeated" value={s.stats.bossesSent} />
+        <StatCard label="Strength sessions" value={(s.strengthSessions ?? []).length} />
       </div>
 
       <ChalkOverTimeChart logs={s.logs} gyms={gyms} strengthSessions={s.strengthSessions ?? []} />

@@ -951,6 +951,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             const meta = WORKOUT_META[w];
             const currentLv = Math.max(1, s.strengthLevels?.[w] ?? 1);
             const lvName = workoutLevelName(w, currentLv);
+            const lvImg = workoutLevelImage(w, currentLv) ?? meta.image;
             const placeholder = (
               <div className="flex flex-col items-center justify-center text-muted-foreground gap-2">
                 <Dumbbell className="h-12 w-12 opacity-60" />
@@ -960,7 +961,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             return (
               <PickCard
                 key={w}
-                image={meta.image}
+                image={lvImg}
                 content={meta.placeholder ? placeholder : undefined}
                 title={meta.title}
                 desc={`Current: L${currentLv} · ${lvName}`}

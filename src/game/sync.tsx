@@ -30,6 +30,7 @@ export function GameSync() {
   const slotRef = useRef<AccountSlot>(slot);
   const userIdRef = useRef<string | null>(null);
   const saveTimer = useRef<number | null>(null);
+  const saveInFlight = useRef(false);
   const pending = useRef<{ game?: GameState; gyms?: GymState }>({});
   const flushRef = useRef<(() => void) | null>(null);
 
@@ -105,6 +106,7 @@ export function GameSync() {
 
       const flush = () => {
         if (saveTimer.current) { window.clearTimeout(saveTimer.current); saveTimer.current = null; }
+        if (saveInFlight.current) return;
         if (!userIdRef.current) return;
         if (!pending.current.game && !pending.current.gyms) return;
         const payload: Record<string, any> = {
@@ -114,18 +116,27 @@ export function GameSync() {
         if (pending.current.game) payload.game = pending.current.game;
         if (pending.current.gyms) payload.gyms = pending.current.gyms;
         pending.current = {};
+        saveInFlight.current = true;
         supabase
           .from("user_game_state")
           .upsert(payload, { onConflict: "user_id,slot" })
           .then(({ error }) => {
             if (error) console.warn("[sync] save failed", error.message);
+          })
+          .then(() => {
+            saveInFlight.current = false;
+            if (pending.current.game || pending.current.gyms) flush();
+          }, () => {
+            saveInFlight.current = false;
+            if (pending.current.game || pending.current.gyms) flush();
           });
       };
       flushRef.current = flush;
 
       const schedule = () => {
-        if (saveTimer.current) window.clearTimeout(saveTimer.current);
-        saveTimer.current = window.setTimeout(flush, 600);
+        // Persist immediately for every signed-in user/slot. The old debounce
+        // could lose quick strength logs if the modal/page closed too soon.
+        flush();
       };
 
       bindGameRemoteSync(s => { pending.current.game = s; schedule(); });

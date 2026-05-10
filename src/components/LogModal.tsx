@@ -949,6 +949,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
           {(["core", "pullup"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
+            const currentLv = Math.max(1, s.strengthLevels?.[w] ?? 1);
+            const lvName = workoutLevelName(w, currentLv);
             const placeholder = (
               <div className="flex flex-col items-center justify-center text-muted-foreground gap-2">
                 <Dumbbell className="h-12 w-12 opacity-60" />
@@ -961,7 +963,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                 image={meta.image}
                 content={meta.placeholder ? placeholder : undefined}
                 title={meta.title}
-                desc={meta.desc}
+                desc={`Current: L${currentLv} · ${lvName}`}
                 onClick={() => pickWorkout(w)}
                 ring={meta.ring}
               />

@@ -214,9 +214,34 @@ function ClimberDetailsDialog({
   rank: number;
   lookup: Map<string, ShopItem>;
 }) {
+  const { gyms } = useGyms();
+  const [charts, setCharts] = useState<{ logs: any[]; strengthSessions: StrengthSession[] } | null>(null);
+  const [chartsLoading, setChartsLoading] = useState(false);
+  const [chartsError, setChartsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open || !row) { setCharts(null); setChartsError(null); return; }
+    let cancelled = false;
+    setChartsLoading(true);
+    setChartsError(null);
+    setCharts(null);
+    (async () => {
+      const { data, error } = await supabase.rpc("get_climber_charts", { target_user: row.user_id });
+      if (cancelled) return;
+      setChartsLoading(false);
+      if (error) { setChartsError(error.message); return; }
+      const r = (data as any)?.[0];
+      setCharts({
+        logs: (r?.logs ?? []) as any[],
+        strengthSessions: (r?.strength_sessions ?? []) as StrengthSession[],
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [open, row]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-3xl">
         {row && (
           <>
             <DialogHeader>
@@ -249,6 +274,19 @@ function ClimberDetailsDialog({
               <StatTile icon={<Swords className="h-3.5 w-3.5" />} label="Bosses" value={row.bosses_sent} />
               <StatTile icon={<Dumbbell className="h-3.5 w-3.5" />} label="Strength" value={row.strength_sessions ?? 0} />
             </div>
+
+            {chartsLoading && (
+              <div className="text-xs text-muted-foreground py-4 text-center">Loading charts…</div>
+            )}
+            {chartsError && (
+              <div className="text-xs text-destructive py-2 text-center">{chartsError}</div>
+            )}
+            {charts && (
+              <div className="space-y-3">
+                <ChalkOverTimeChart logs={charts.logs as any} gyms={gyms} strengthSessions={charts.strengthSessions} />
+                <StrengthVolumeChart sessions={charts.strengthSessions} />
+              </div>
+            )}
 
             <div>
               <div className="menu-label mb-2 flex items-center gap-1.5">

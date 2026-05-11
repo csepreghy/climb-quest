@@ -4,7 +4,12 @@ import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { Lock, Check, ArrowUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GameButton } from "@/components/ui/game-button";
+import { computeDailyCap, useDailyCapConfig, useDailyCapOverrides } from "@/game/dailyCap";
 import chalkBagImg from "@/assets/chalk-bag.png";
+
+function isSlotUnlock(u: string): boolean {
+  return /\+\s*\d+\s*(gear|power-?up)\s*slot/i.test(u);
+}
 
 export function LevelsModal({
   open,
@@ -24,6 +29,8 @@ export function LevelsModal({
   onLevelUpClick?: () => void;
 }) {
   useLevelOverrides();
+  const capCfg = useDailyCapConfig();
+  const capOverrides = useDailyCapOverrides();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -96,23 +103,31 @@ export function LevelsModal({
 
                   <p className="text-xs text-muted-foreground italic line-clamp-2">{l.desc}</p>
 
-                  {l.unlocks.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-0.5">
-                      {l.unlocks.map(u => (
-                        <span
-                          key={u}
-                          className={cn(
-                            "text-[10px] px-1.5 py-0.5 rounded border",
-                            past || cur
-                              ? "border-chalk-glow/40 text-chalk-glow bg-chalk-glow/10"
-                              : "border-border text-muted-foreground bg-background/40",
-                          )}
-                        >
-                          {u}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  {(() => {
+                    const slotUnlocks = l.unlocks.filter(isSlotUnlock);
+                    const dailyCap = computeDailyCap(l.level, capCfg, capOverrides);
+                    const chips: { key: string; label: React.ReactNode }[] = [
+                      ...slotUnlocks.map(u => ({ key: u, label: <>{u}</> })),
+                      { key: "__cap", label: <>Daily cap: {dailyCap.toLocaleString()}</> },
+                    ];
+                    return (
+                      <div className="flex flex-wrap gap-1 pt-0.5">
+                        {chips.map(c => (
+                          <span
+                            key={c.key}
+                            className={cn(
+                              "text-[10px] px-1.5 py-0.5 rounded border",
+                              past || cur
+                                ? "border-chalk-glow/40 text-chalk-glow bg-chalk-glow/10"
+                                : "border-border text-muted-foreground bg-background/40",
+                            )}
+                          >
+                            {c.label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
 
                   <div className="pt-1 text-xs">
                     {past ? (

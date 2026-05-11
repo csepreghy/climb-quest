@@ -814,9 +814,22 @@ export function equipItem(id: string): { ok: boolean; reason?: string } {
   }
   set(s => {
     const next: State = { ...s, equipped: { ...s.equipped, [item.slot]: id } };
-    return applyBadges(next, ["first_equip"]);
+    const add = ["first_equip"];
+    if (allRequiredSlotsEquipped(next)) add.push("all_slots_equipped");
+    return applyBadges(next, add);
   });
   return { ok: true };
+}
+
+/** Slots a player at this level should have filled to count as fully kitted. */
+function requiredEquipSlots(level: number): Slot[] {
+  const out: Slot[] = ["shoes", "outfit", "bottoms", "hat"];
+  for (const g of GEAR_SLOTS.slice(0, gearSlotsUnlocked(level))) out.push(g);
+  if (level >= BUDDY_SLOT_UNLOCK_LEVEL) out.push("buddy");
+  return out;
+}
+function allRequiredSlotsEquipped(s: State): boolean {
+  return requiredEquipSlots(s.level).every(sl => !!s.equipped[sl]);
 }
 export function unequipSlot(slot: keyof Equipped) {
   set(s => { const eq = { ...s.equipped }; delete eq[slot]; return { ...s, equipped: eq }; });

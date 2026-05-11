@@ -838,7 +838,14 @@ const PUSHUP_LEVEL_NAMES: Record<number, string> = {
   5: "1-Arm",
 };
 
-const HANDSTAND_LEVEL_NAMES: Record<number, string> = {
+const HANDSTAND_HOLD_NAMES: Record<number, string> = {
+  1: "Downward Dog",
+  2: "Pike on Box",
+  3: "Wall Handstand",
+  4: "Free Handstand",
+  5: "One-Arm Handstand",
+};
+const HANDSTAND_PUSHUP_NAMES: Record<number, string> = {
   1: "Pike Pushup",
   2: "Box Pike Pushup",
   3: "Wall Handstand Pushup",
@@ -867,11 +874,14 @@ function handstandBucketLabel(idx: number): string {
   return HANDSTAND_SECOND_BUCKETS.find(b => b.idx === idx)?.label ?? `${idx}`;
 }
 
-function workoutLevelName(workout: StrengthWorkout, level: number): string {
+function workoutLevelName(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): string {
   if (workout === "core") return CORE_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pullup") return PULLUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pushup") return PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
-  if (workout === "handstand") return HANDSTAND_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "handstand") {
+    const map = mode === "pushup" ? HANDSTAND_PUSHUP_NAMES : HANDSTAND_HOLD_NAMES;
+    return map[level] ?? `LEVEL ${level}`;
+  }
   if (workout === "squat") return SQUAT_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
@@ -1090,7 +1100,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const canBoss = unlockedMax < maxLv;
     const nextBoss = Math.min(maxLv, unlockedMax + 1);
     const lockEdit = false;
-    const levelName = workoutLevelName(workout, level);
+    const levelName = workoutLevelName(workout, level, isHandstand ? handstandMode : undefined);
     return (
       <>
         <DialogHeader>
@@ -1121,7 +1131,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     type="button"
                     disabled={disabled}
                     onClick={() => setLevel(lv)}
-                    title={workoutLevelName(workout, lv)}
+                    title={workoutLevelName(workout, lv, isHandstand ? handstandMode : undefined)}
                     className={cn(
                       "rounded-lg border-2 overflow-hidden text-center transition active:translate-y-[1px]",
                       "border-[hsl(var(--panel-frame))] bg-secondary/50",
@@ -1140,7 +1150,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     )}
                     <div className="p-1">
                       <div className="text-xs text-muted-foreground leading-none">L{lv}</div>
-                      <div className="text-[11px] font-display font-bold leading-tight mt-0.5 line-clamp-2">{workoutLevelName(workout, lv)}</div>
+                      <div className="text-[11px] font-display font-bold leading-tight mt-0.5 line-clamp-2">{workoutLevelName(workout, lv, isHandstand ? handstandMode : undefined)}</div>
                     </div>
                   </button>
                 );
@@ -1180,7 +1190,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                       <span className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-muted-foreground w-10 shrink-0">Set {i + 1}</span>
                         <span className="font-bold tabular-nums">L{lv} · {setIsHold ? `Hold ${handstandBucketLabel(st.reps)}` : `${st.reps} reps`}</span>
-                        <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv)}</span>
+                        <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv, isHandstand ? (st.mode ?? handstandMode) : undefined)}</span>
                       </span>
                       {st.restSeconds ? (
                         <span className="text-xs text-muted-foreground tabular-nums shrink-0">

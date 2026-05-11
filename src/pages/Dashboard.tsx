@@ -22,6 +22,7 @@ import { LogModal } from "@/components/LogModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts";
 import { gradeToVRank, V_SCALE, gradeLabels, resolveGymGradingSystems, type GradingSystem } from "@/game/gyms";
+import { usePublicGyms } from "@/game/publicGyms";
 
 export default function Dashboard() {
   const s = useGame();
@@ -229,6 +230,12 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
 }
 
 export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
+  // Fall back to all known public gyms when a log's gym isn't in the passed list
+  // (e.g. when viewing another climber's chart on the leaderboard).
+  const pub = usePublicGyms();
+  const findGym = (id: string) =>
+    gyms.find(g => g.id === id) ?? pub.gyms.find(g => g.id === id);
+
   // Pick the grading system used most often in the last 30 days, based on which
   // logs' grade labels match each gym's available systems.
   const dominantGs = useMemo<GradingSystem | null>(() => {
@@ -239,7 +246,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
       if (t < cutoff) continue;
       const label = l.gradeMax || l.grade;
       if (!label) continue;
-      const gym = l.gymId ? gyms.find(g => g.id === l.gymId) : null;
+      const gym = l.gymId ? findGym(l.gymId) : null;
       if (!gym) continue;
       const systems = resolveGymGradingSystems(gym);
       const upper = label.toUpperCase();
@@ -251,7 +258,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
     let best: { gs: GradingSystem; n: number } | null = null;
     for (const v of counts.values()) if (!best || v.n > best.n) best = v;
     return best?.gs ?? null;
-  }, [logs, gyms]);
+  }, [logs, gyms, pub.gyms]);
 
   const scaleLabels = useMemo(() => dominantGs ? gradeLabels(dominantGs) : [...V_SCALE], [dominantGs]);
   const axisTitle = dominantGs ? dominantGs.name : "V Scale";

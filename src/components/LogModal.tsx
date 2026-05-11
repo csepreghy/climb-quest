@@ -873,15 +873,16 @@ function workoutLevelName(workout: StrengthWorkout, level: number): string {
   if (workout === "pushup") return PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "handstand") return HANDSTAND_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "squat") return SQUAT_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
-  if (workout === "handstand_pushup") return HANDSTAND_PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 
-function workoutLevelImage(workout: StrengthWorkout, level: number): string | undefined {
+function workoutLevelImage(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): string | undefined {
   if (workout === "core") return CORE_LEVEL_IMAGES[level];
   if (workout === "pullup") return PULLUP_LEVEL_IMAGES[level];
   if (workout === "pushup") return PUSHUP_LEVEL_IMAGES[level];
-  if (workout === "handstand") return HANDSTAND_LEVEL_IMAGES[level];
+  if (workout === "handstand") {
+    return mode === "pushup" ? HANDSTAND_PUSHUP_IMAGES[level] : HANDSTAND_HOLD_IMAGES[level];
+  }
   if (workout === "squat") return SQUAT_LEVEL_IMAGES[level];
   return undefined;
 }
@@ -912,17 +913,12 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
     ring: "ring-[hsl(var(--btn-green))]/60",
   },
   handstand: {
-    title: "Handstand Holds",
-    desc: "Balance and shoulder strength — log seconds held.",
-    image: handstand3,
+    title: "Handstand",
+    desc: "Holds or pushups — balance and pressing power upside down.",
+    image: hspu3,
     ring: "ring-[hsl(var(--boss))]/60",
   },
-  handstand_pushup: {
-    title: "Handstand Pushups",
-    desc: "Inverted pressing power for max shoulder strength.",
-    ring: "ring-[hsl(var(--boss))]/60",
-    placeholder: true,
-  },
+};
 };
 
 type StrengthStep =

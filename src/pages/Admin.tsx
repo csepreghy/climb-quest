@@ -1123,3 +1123,76 @@ function UsersAdmin() {
     </GameCard>
   );
 }
+
+function FeedbackAdmin() {
+  const [rows, setRows] = useState<Array<{
+    id: string; user_id: string; email: string | null; character_name: string | null;
+    category: string; message: string; created_at: string;
+  }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>("all");
+
+  async function load() {
+    setLoading(true);
+    const { data, error } = await supabase.rpc("get_all_feedback");
+    setLoading(false);
+    if (error) { toast.error(error.message); return; }
+    setRows((data ?? []) as any);
+  }
+  useEffect(() => { load(); }, []);
+
+  const categories = Array.from(new Set(rows.map(r => r.category))).sort();
+  const filtered = filter === "all" ? rows : rows.filter(r => r.category === filter);
+
+  async function remove(id: string) {
+    const { error } = await supabase.from("feedback").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Deleted");
+    setRows(prev => prev.filter(r => r.id !== id));
+  }
+
+  return (
+    <GameCard tone="legendary" className="p-5">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div>
+          <div className="menu-label">Admin · User Feedback</div>
+          <p className="text-sm text-muted-foreground mt-1">{rows.length} total submission{rows.length === 1 ? "" : "s"}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All categories</SelectItem>
+              {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button variant="secondary" onClick={load} disabled={loading}>{loading ? "Loading…" : "Refresh"}</Button>
+        </div>
+      </div>
+      {loading && rows.length === 0 ? (
+        <div className="text-sm text-muted-foreground py-8 text-center">Loading feedback…</div>
+      ) : filtered.length === 0 ? (
+        <div className="text-sm text-muted-foreground py-8 text-center">No feedback yet.</div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map(r => (
+            <div key={r.id} className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/30 p-3">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="px-2 py-0.5 rounded-full bg-[hsl(var(--btn-orange))] text-white font-semibold">{r.category}</span>
+                  <span className="font-semibold text-foreground">{r.character_name ?? "Unnamed"}</span>
+                  {r.email && <span className="text-muted-foreground">· {r.email}</span>}
+                  <span className="text-muted-foreground">· {new Date(r.created_at).toLocaleString()}</span>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => remove(r.id)} title="Delete">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-sm whitespace-pre-wrap text-foreground/90">{r.message}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </GameCard>
+  );
+}

@@ -1045,7 +1045,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </div>
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
-          {(["core", "pullup", "pushup", "squat", "handstand", "handstand_pushup"] as StrengthWorkout[]).map(w => {
+          {(["core", "pullup", "pushup", "squat", "handstand"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
             const currentLv = Math.max(1, s.strengthLevels?.[w] ?? 1);
             const lvName = workoutLevelName(w, currentLv);

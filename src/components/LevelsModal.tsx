@@ -29,6 +29,8 @@ export function LevelsModal({
   onLevelUpClick?: () => void;
 }) {
   useLevelOverrides();
+  const capCfg = useDailyCapConfig();
+  const capOverrides = useDailyCapOverrides();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">

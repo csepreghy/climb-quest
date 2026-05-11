@@ -978,15 +978,19 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function logRepsAnd(action: "rest" | "finish") {
-    const cleanReps = Math.max(1, Math.min(50, Math.round(reps)));
-    const newSets = [...sets, { reps: cleanReps, level }];
+    const isHandstandHold = workout === "handstand" && handstandMode === "hold";
+    const cleanReps = isHandstandHold
+      ? Math.max(1, Math.min(4, Math.round(reps)))
+      : Math.max(1, Math.min(50, Math.round(reps)));
+    const setMode: "hold" | "pushup" | undefined = workout === "handstand" ? handstandMode : undefined;
+    const newSets: StrengthSet[] = [...sets, { reps: cleanReps, level, ...(setMode ? { mode: setMode } : {}) }];
     setSets(newSets);
     setReps(cleanReps);
     if (action === "finish") {
       const dateISO = new Date(date).toISOString();
       const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level}`);
-      setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level) ?? WORKOUT_META[workout].image });
+      setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image });
       setStep("celebrate");
     } else {
       setStep("rest-pick");

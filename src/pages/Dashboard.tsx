@@ -22,6 +22,7 @@ import { LogModal } from "@/components/LogModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts";
 import { gradeToVRank, V_SCALE, gradeLabels, resolveGymGradingSystems, type GradingSystem } from "@/game/gyms";
+import { usePublicGyms } from "@/game/publicGyms";
 
 export default function Dashboard() {
   const s = useGame();

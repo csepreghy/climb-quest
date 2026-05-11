@@ -111,26 +111,23 @@ export interface BadgeDef {
 }
 export const BADGES: BadgeDef[] = [
   { id: "first_send",        name: "First Send",        emoji: "🎉", desc: "Sent your first boulder." },
-  { id: "first_flash",       name: "First Flash",       emoji: "⚡", desc: "Flashed a boulder first try." },
+  { id: "first_flash",       name: "Flashed a Boulder", emoji: "⚡", desc: "Flashed a boulder first try." },
   { id: "chalk_monster",     name: "Chalk Monster",     emoji: "👹", desc: "Earned 1,000 Chalk total." },
   { id: "slab_survivor",     name: "Slab Survivor",     emoji: "🧗", desc: "Logged a slab problem." },
   { id: "overhang_enjoyer",  name: "Overhang Enjoyer",  emoji: "🙃", desc: "Logged an overhang problem." },
-  { id: "board_goblin_cert", name: "Board Goblin Certified", emoji: "👺", desc: "Logged 3 board sessions." },
   { id: "crux_breaker",      name: "Crux Breaker",      emoji: "🔓", desc: "Sent a boss project." },
   { id: "project_slayer",    name: "Project Slayer",    emoji: "⚔️", desc: "Sent 3 boss projects." },
   { id: "crocs_equipped",    name: "Crocs Equipped",    emoji: "🩴", desc: "Equipped Crocs." },
-  { id: "golden_crocs",      name: "Golden Crocs Owner",emoji: "👑", desc: "Owned the Golden Crocs." },
-  { id: "shirtless_form",    name: "Shirtless Final Form", emoji: "🦾", desc: "Equipped Minimal Send Kit." },
-  { id: "minimal_kit",       name: "Minimal Send Kit Equipped", emoji: "✨", desc: "Maximum send energy." },
   { id: "dyno_unlocked",     name: "Dyno Devourer Unlocked", emoji: "🦘", desc: "Reached level 6." },
   { id: "demigod_unlocked",  name: "Crimp Demigod Unlocked", emoji: "👑", desc: "Reached level 10." },
-  { id: "got_humbled",       name: "Got Humbled",       emoji: "🥲", desc: "Logged a 'got humbled' result." },
-  { id: "zone_reached",      name: "Zone Reached",      emoji: "🎯", desc: "Reached the zone on a boss project." },
   { id: "tiny_crimp",        name: "Tiny Crimp Survivor", emoji: "🤏", desc: "Logged 5 crimp problems." },
   { id: "first_purchase",    name: "First Purchase",    emoji: "🛍️", desc: "Bought your first shop item." },
   { id: "first_equip",       name: "Geared Up",         emoji: "🎽", desc: "Equipped your first item." },
   { id: "five_purchases",    name: "Shopaholic",        emoji: "🧾", desc: "Bought 5 shop items." },
-  { id: "first_rare_purchase", name: "Going Rare",      emoji: "💎", desc: "Bought your first rare-or-better item." },
+  { id: "all_slots_equipped", name: "Fully Kitted",     emoji: "🧰", desc: "Equipped items on all available slots." },
+  { id: "first_strength_boss", name: "Strength Boss Slayer", emoji: "💪", desc: "Defeated your first strength boss." },
+  { id: "first_buddy",       name: "Buddy System",      emoji: "🐾", desc: "Got your first Climbing Buddy." },
+  { id: "strength_tier_3",   name: "Strength Tier III", emoji: "🏋️", desc: "Reached Level 3 in one strength category." },
 ];
 
 export const BADGE_BY_ID: Record<string, BadgeDef> = Object.fromEntries(BADGES.map(b => [b.id, b]));

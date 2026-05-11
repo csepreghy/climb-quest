@@ -40,6 +40,11 @@ import handstand2 from "@/assets/strength-handstand-2.webp";
 import handstand3 from "@/assets/strength-handstand-3.webp";
 import handstand4 from "@/assets/strength-handstand-4.webp";
 import handstand5 from "@/assets/strength-handstand-5.webp";
+import squat1 from "@/assets/strength-squat-1.png";
+import squat2 from "@/assets/strength-squat-2.png";
+import squat3 from "@/assets/strength-squat-3.png";
+import squat4 from "@/assets/strength-squat-4.png";
+import squat5 from "@/assets/strength-squat-5.png";
 import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -800,6 +805,7 @@ const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3
 const PULLUP_LEVEL_IMAGES: Record<number, string> = { 1: pullup1, 2: pullup2, 3: pullup3, 4: pullup4, 5: pullup5, 6: pullup6 };
 const PUSHUP_LEVEL_IMAGES: Record<number, string> = { 1: pushup1, 2: pushup2, 3: pushup3, 4: pushup4, 5: pushup5 };
 const HANDSTAND_LEVEL_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
+const SQUAT_LEVEL_IMAGES: Record<number, string> = { 1: squat1, 2: squat2, 3: squat3, 4: squat4, 5: squat5 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
   1: "Leg Raises",
@@ -834,7 +840,23 @@ const HANDSTAND_LEVEL_NAMES: Record<number, string> = {
   5: "One-Arm Handstand",
 };
 
-// Seconds buckets used by handstand sets (instead of reps).
+const SQUAT_LEVEL_NAMES: Record<number, string> = {
+  1: "Assisted",
+  2: "Regular",
+  3: "Explosive",
+  4: "Pistol",
+  5: "Shrimp",
+};
+
+const HANDSTAND_PUSHUP_LEVEL_NAMES: Record<number, string> = {
+  1: "Pike Push-up",
+  2: "Elevated Pike",
+  3: "Wall-Assisted HSPU",
+  4: "Free HSPU",
+  5: "One-Arm HSPU",
+};
+
+// Seconds buckets used by handstand (hold) sets (instead of reps).
 // Stored as the bucket index 1..4 in StrengthSet.reps.
 const HANDSTAND_SECOND_BUCKETS: { idx: number; label: string }[] = [
   { idx: 1, label: "1-10s" },
@@ -851,6 +873,8 @@ function workoutLevelName(workout: StrengthWorkout, level: number): string {
   if (workout === "pullup") return PULLUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pushup") return PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "handstand") return HANDSTAND_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "squat") return SQUAT_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "handstand_pushup") return HANDSTAND_PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 
@@ -859,6 +883,7 @@ function workoutLevelImage(workout: StrengthWorkout, level: number): string | un
   if (workout === "pullup") return PULLUP_LEVEL_IMAGES[level];
   if (workout === "pushup") return PUSHUP_LEVEL_IMAGES[level];
   if (workout === "handstand") return HANDSTAND_LEVEL_IMAGES[level];
+  if (workout === "squat") return SQUAT_LEVEL_IMAGES[level];
   return undefined;
 }
 
@@ -881,11 +906,23 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
     image: pushup2,
     ring: "ring-[hsl(var(--btn-green))]/60",
   },
+  squat: {
+    title: "Squat",
+    desc: "Leg drive for high steps, rockovers, and dynos.",
+    image: squat2,
+    ring: "ring-[hsl(var(--btn-green))]/60",
+  },
   handstand: {
-    title: "Handstand",
+    title: "Handstand Holds",
     desc: "Balance and shoulder strength — log seconds held.",
     image: handstand3,
     ring: "ring-[hsl(var(--boss))]/60",
+  },
+  handstand_pushup: {
+    title: "Handstand Pushups",
+    desc: "Inverted pressing power for max shoulder strength.",
+    ring: "ring-[hsl(var(--boss))]/60",
+    placeholder: true,
   },
 };
 
@@ -1014,7 +1051,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </div>
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
-          {(["core", "pullup", "pushup", "handstand"] as StrengthWorkout[]).map(w => {
+          {(["core", "pullup", "pushup", "squat", "handstand", "handstand_pushup"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
             const currentLv = Math.max(1, s.strengthLevels?.[w] ?? 1);
             const lvName = workoutLevelName(w, currentLv);

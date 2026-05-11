@@ -59,7 +59,7 @@ export interface Boss {
 
 export type Equipped = Partial<Record<Slot, string>>;
 
-export type StrengthWorkout = "core" | "pullup" | "pushup" | "handstand";
+export type StrengthWorkout = "core" | "pullup" | "pushup" | "squat" | "handstand" | "handstand_pushup";
 export interface StrengthSet { reps: number; restSeconds?: number; level?: number }
 export interface StrengthSession {
   id: string;
@@ -693,8 +693,6 @@ export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 
 
 export function maxStrengthLevel(workout: StrengthWorkout): number {
   if (workout === "pullup") return 6;
-  if (workout === "pushup") return 5;
-  if (workout === "handstand") return 5;
   return 5;
 }
 

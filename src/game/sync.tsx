@@ -32,8 +32,22 @@ export function GameSync() {
   const saveTimer = useRef<number | null>(null);
   const saveInFlight = useRef(false);
   const lastRemoteUpdatedAt = useRef<string | null>(null);
+  const remoteHadContent = useRef(false);
   const pending = useRef<{ game?: GameState; gyms?: GymState }>({});
   const flushRef = useRef<(() => void) | null>(null);
+
+  // Heuristic: does this game state look like a real, populated profile?
+  // Used as a safety guard so we never overwrite a populated remote row with
+  // an empty/fresh-profile local state (which would silently wipe the slot).
+  const looksPopulated = (g: any): boolean => {
+    if (!g || typeof g !== "object") return false;
+    if (Array.isArray(g.logs) && g.logs.length > 0) return true;
+    if (Array.isArray(g.strengthSessions) && g.strengthSessions.length > 0) return true;
+    if (typeof g.level === "number" && g.level > 1) return true;
+    if (typeof g.totalChalkEarned === "number" && g.totalChalkEarned > 500) return true;
+    if (Array.isArray(g.owned) && g.owned.length > 1) return true;
+    return false;
+  };
 
   // Flush any pending writes before the page is hidden / unloaded so we
   // don't lose the last few hundred ms of activity (e.g. a strength session

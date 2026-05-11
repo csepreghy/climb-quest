@@ -32,8 +32,22 @@ export function GameSync() {
   const saveTimer = useRef<number | null>(null);
   const saveInFlight = useRef(false);
   const lastRemoteUpdatedAt = useRef<string | null>(null);
+  const remoteHadContent = useRef(false);
   const pending = useRef<{ game?: GameState; gyms?: GymState }>({});
   const flushRef = useRef<(() => void) | null>(null);
+
+  // Heuristic: does this game state look like a real, populated profile?
+  // Used as a safety guard so we never overwrite a populated remote row with
+  // an empty/fresh-profile local state (which would silently wipe the slot).
+  const looksPopulated = (g: any): boolean => {
+    if (!g || typeof g !== "object") return false;
+    if (Array.isArray(g.logs) && g.logs.length > 0) return true;
+    if (Array.isArray(g.strengthSessions) && g.strengthSessions.length > 0) return true;
+    if (typeof g.level === "number" && g.level > 1) return true;
+    if (typeof g.totalChalkEarned === "number" && g.totalChalkEarned > 500) return true;
+    if (Array.isArray(g.owned) && g.owned.length > 1) return true;
+    return false;
+  };
 
   // Flush any pending writes before the page is hidden / unloaded so we
   // don't lose the last few hundred ms of activity (e.g. a strength session
@@ -79,12 +93,14 @@ export function GameSync() {
         lastRemoteUpdatedAt.current = data.updated_at ?? null;
         const game = data.game as unknown as GameState | Record<string, never>;
         const gyms = data.gyms as unknown as GymState | Record<string, never>;
+        remoteHadContent.current = looksPopulated(game);
         // Always replace — empty object yields a fresh profile, which is what
         // a brand-new personal slot should look like.
         replaceGameState((game ?? {}) as GameState);
         replaceGymsState((gyms ?? {}) as GymState);
       } else {
         // No row yet for this slot — start fresh and create the row.
+        remoteHadContent.current = false;
         replaceGameState({} as GameState);
         replaceGymsState({} as GymState);
         const { data: inserted } = await supabase.from("user_game_state").upsert({
@@ -123,6 +139,21 @@ export function GameSync() {
         if (pending.current.game) payload.game = pending.current.game;
         if (pending.current.gyms) payload.gyms = pending.current.gyms;
         pending.current = {};
+
+        // Safety guard: never overwrite a remote row that previously had real
+        // content with an empty/fresh-looking game state. This prevents bugs
+        // (or transient empty loads) from silently wiping a user's logs.
+        if (payload.game && remoteHadContent.current && !looksPopulated(payload.game)) {
+          console.error(
+            "[sync] BLOCKED save: would overwrite populated remote with empty state",
+            { uid: userIdRef.current, slot: slotRef.current }
+          );
+          return;
+        }
+        // If we're about to write populated state, mark remote as having content
+        // so future empty writes are also blocked for this session.
+        if (payload.game && looksPopulated(payload.game)) remoteHadContent.current = true;
+
         saveInFlight.current = true;
         (async () => {
           const expectedUpdatedAt = lastRemoteUpdatedAt.current;
@@ -148,6 +179,7 @@ export function GameSync() {
               if (fetchError) throw fetchError;
               if (remote) {
                 lastRemoteUpdatedAt.current = remote.updated_at ?? null;
+                if (looksPopulated(remote.game)) remoteHadContent.current = true;
                 replaceGameState((remote.game ?? {}) as unknown as GameState);
                 replaceGymsState((remote.gyms ?? {}) as unknown as GymState);
               }

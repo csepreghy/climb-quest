@@ -941,7 +941,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [bossReps, setBossReps] = useState<number>(0);
   const [bossAttempts, setBossAttempts] = useState<number>(1);
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
-  const [handstandMode, setHandstandMode] = useState<"hold" | "pushup">("pushup");
+  const [handstandMode, setHandstandMode] = useState<"hold" | "pushup">("hold");
   const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
 
   const unlockedMax = s.strengthLevels?.[workout] ?? 0;
@@ -956,7 +956,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     }
     setLevel(max > 0 ? max : 1);
     setSets([]);
-    setHandstandMode("pushup");
+    setHandstandMode("hold");
     setReps(w === "handstand" ? 5 : 5);
     setStep("reps");
   }
@@ -1209,7 +1209,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           {isHandstand && (
             <Field label="What are you logging?">
               <div className="grid grid-cols-2 gap-2">
-                {(["pushup", "hold"] as const).map(m => {
+                {(["hold", "pushup"] as const).map(m => {
                   const selected = handstandMode === m;
                   return (
                     <button

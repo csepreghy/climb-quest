@@ -104,17 +104,51 @@ export default function Dashboard() {
           {BADGES.map(b => {
             const have = s.badges.includes(b.id);
             return (
-              <div key={b.id} className={cn("flex items-center gap-2 p-2.5 rounded-lg border", have ? "border-legendary/40 bg-legendary/5" : "border-border opacity-50")}>
-                <div className="text-xl">{have ? b.emoji : "❔"}</div>
+              <button
+                type="button"
+                key={b.id}
+                onClick={() => setOpenBadgeId(b.id)}
+                className={cn(
+                  "flex items-center gap-2 p-2.5 rounded-lg border text-left transition hover:-translate-y-0.5",
+                  have ? "border-legendary/40 bg-legendary/5" : "border-border opacity-50"
+                )}
+              >
+                <div className="text-xl shrink-0">{have ? b.emoji : "❔"}</div>
                 <div className="min-w-0">
                   <div className="text-xs font-semibold truncate">{have ? b.name : "Locked"}</div>
                   <div className="text-[10px] text-muted-foreground line-clamp-1">{b.desc}</div>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
       </GameCard>
+
+      {/* Badge details dialog */}
+      <Dialog open={!!openBadgeId} onOpenChange={(v) => { if (!v) setOpenBadgeId(null); }}>
+        <DialogContent className="max-w-sm">
+          {openBadge && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  <div className="text-4xl shrink-0">{openBadgeHave ? openBadge.emoji : "❔"}</div>
+                  <div className="min-w-0">
+                    <DialogTitle className="text-left">
+                      {openBadgeHave ? openBadge.name : "Locked Badge"}
+                    </DialogTitle>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">
+                      {openBadgeHave ? "Unlocked" : "Locked"}
+                    </div>
+                  </div>
+                </div>
+              </DialogHeader>
+              <DialogDescription className="text-sm text-foreground/80 whitespace-normal break-words">
+                {openBadge.desc}
+              </DialogDescription>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Recent logs */}
       <GameCard className="p-5">

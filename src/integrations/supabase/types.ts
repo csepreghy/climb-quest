@@ -128,6 +128,30 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hidden_builtin_items: {
         Row: {
           hidden_at: string
@@ -358,6 +382,18 @@ export type Database = {
           level: number
           total_chalk_earned: number
           total_logs: number
+          user_id: string
+        }[]
+      }
+      get_all_feedback: {
+        Args: never
+        Returns: {
+          category: string
+          character_name: string
+          created_at: string
+          email: string
+          id: string
+          message: string
           user_id: string
         }[]
       }

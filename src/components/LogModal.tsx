@@ -874,11 +874,14 @@ function handstandBucketLabel(idx: number): string {
   return HANDSTAND_SECOND_BUCKETS.find(b => b.idx === idx)?.label ?? `${idx}`;
 }
 
-function workoutLevelName(workout: StrengthWorkout, level: number): string {
+function workoutLevelName(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): string {
   if (workout === "core") return CORE_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pullup") return PULLUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pushup") return PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
-  if (workout === "handstand") return HANDSTAND_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "handstand") {
+    const map = mode === "pushup" ? HANDSTAND_PUSHUP_NAMES : HANDSTAND_HOLD_NAMES;
+    return map[level] ?? `LEVEL ${level}`;
+  }
   if (workout === "squat") return SQUAT_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }

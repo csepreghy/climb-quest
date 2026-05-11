@@ -959,8 +959,9 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function addBossRep() {
+    const target = strengthBossTarget(workout);
     const progress = getStrengthBossProgress(workout);
-    const remaining = Math.max(1, STRENGTH_BOSS_TARGET - progress);
+    const remaining = Math.max(1, target - progress);
     const reps = Math.max(1, Math.min(remaining, Math.round(bossAttempts)));
     const res = logStrengthBossRep(workout, reps);
     if (res.defeated) {
@@ -972,7 +973,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       });
       setStep("celebrate");
     } else {
-      toast.success(`+${reps} rep${reps === 1 ? "" : "s"} · ${res.progress}/${res.target}`);
+      const unit = workout === "handstand" ? (reps === 1 ? "second" : "seconds") : (reps === 1 ? "rep" : "reps");
+      toast.success(`+${reps} ${unit} · ${res.progress}/${res.target}`);
       const newRemaining = Math.max(1, res.target - res.progress);
       setBossAttempts(a => Math.min(a, newRemaining));
     }

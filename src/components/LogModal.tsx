@@ -1190,7 +1190,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                       <span className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-muted-foreground w-10 shrink-0">Set {i + 1}</span>
                         <span className="font-bold tabular-nums">L{lv} · {setIsHold ? `Hold ${handstandBucketLabel(st.reps)}` : `${st.reps} reps`}</span>
-                        <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv)}</span>
+                        <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv, isHandstand ? (st.mode ?? handstandMode) : undefined)}</span>
                       </span>
                       {st.restSeconds ? (
                         <span className="text-xs text-muted-foreground tabular-nums shrink-0">

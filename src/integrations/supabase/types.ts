@@ -361,6 +361,13 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_climber_charts: {
+        Args: { target_user: string }
+        Returns: {
+          logs: Json
+          strength_sessions: Json
+        }[]
+      }
       get_leaderboard: {
         Args: never
         Returns: {

@@ -97,33 +97,7 @@ export default function Dashboard() {
 
 
       {/* All Badges */}
-      <GameCard tone="legendary" className="p-5">
-        <h3 className="menu-label mb-3 flex items-center gap-1.5">
-          <Trophy className="h-3 w-3" /> Badges ({s.badges.length}/{BADGES.length})
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-          {BADGES.map(b => {
-            const have = s.badges.includes(b.id);
-            return (
-              <button
-                type="button"
-                key={b.id}
-                onClick={() => setOpenBadgeId(b.id)}
-                className={cn(
-                  "flex items-center gap-2 p-2.5 rounded-lg border text-left transition hover:-translate-y-0.5",
-                  have ? "border-legendary/40 bg-legendary/5" : "border-border opacity-50"
-                )}
-              >
-                <div className="text-xl shrink-0">{have ? b.emoji : "❔"}</div>
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold truncate">{have ? b.name : "Locked"}</div>
-                  <div className="text-[10px] text-muted-foreground line-clamp-1">{b.desc}</div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </GameCard>
+      <BadgesGrid badges={s.badges} onOpen={(id) => setOpenBadgeId(id)} />
 
       {/* Badge details dialog */}
       <Dialog open={!!openBadgeId} onOpenChange={(v) => { if (!v) setOpenBadgeId(null); }}>

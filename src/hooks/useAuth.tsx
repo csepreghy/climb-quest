@@ -1,14 +1,12 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useActiveSlot } from "@/game/adminAccounts";
 
 interface AuthCtx {
   user: User | null;
   session: Session | null;
-  /** True only when the user has the admin role AND is on the "test" slot. */
   isAdmin: boolean;
-  /** True whenever the user has the admin role, regardless of active slot. */
+  /** Backwards-compat alias — same as isAdmin now that there is no slot concept. */
   hasAdminRole: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
@@ -20,7 +18,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [hasAdminRole, setHasAdminRole] = useState(false);
   const [loading, setLoading] = useState(true);
-  const slot = useActiveSlot(session?.user?.id ?? null);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
@@ -43,10 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  const isAdmin = hasAdminRole && (session?.user?.email ?? "").toLowerCase() === "andrew.chepreghy@gmail.com";
-
   return (
-    <Ctx.Provider value={{ user: session?.user ?? null, session, isAdmin, hasAdminRole, loading, signOut: async () => { await supabase.auth.signOut(); } }}>
+    <Ctx.Provider value={{ user: session?.user ?? null, session, isAdmin: hasAdminRole, hasAdminRole, loading, signOut: async () => { await supabase.auth.signOut(); } }}>
       {children}
     </Ctx.Provider>
   );

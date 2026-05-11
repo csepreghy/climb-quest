@@ -854,13 +854,6 @@ const SQUAT_LEVEL_NAMES: Record<number, string> = {
   5: "Shrimp",
 };
 
-const HANDSTAND_PUSHUP_LEVEL_NAMES: Record<number, string> = {
-  1: "Pike Push-up",
-  2: "Elevated Pike",
-  3: "Wall-Assisted HSPU",
-  4: "Free HSPU",
-  5: "One-Arm HSPU",
-};
 
 // Seconds buckets used by handstand (hold) sets (instead of reps).
 // Stored as the bucket index 1..4 in StrengthSet.reps.

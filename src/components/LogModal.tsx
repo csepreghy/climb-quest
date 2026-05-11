@@ -799,6 +799,7 @@ const REST_OPTIONS = [1, 2, 3, 5]; // minutes
 const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
 const PULLUP_LEVEL_IMAGES: Record<number, string> = { 1: pullup1, 2: pullup2, 3: pullup3, 4: pullup4, 5: pullup5, 6: pullup6 };
 const PUSHUP_LEVEL_IMAGES: Record<number, string> = { 1: pushup1, 2: pushup2, 3: pushup3, 4: pushup4, 5: pushup5 };
+const HANDSTAND_LEVEL_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
   1: "Leg Raises",
@@ -825,10 +826,31 @@ const PUSHUP_LEVEL_NAMES: Record<number, string> = {
   5: "1-Arm",
 };
 
+const HANDSTAND_LEVEL_NAMES: Record<number, string> = {
+  1: "Downward Dog",
+  2: "Pike on Box",
+  3: "Wall Handstand",
+  4: "Free Handstand",
+  5: "One-Arm Handstand",
+};
+
+// Seconds buckets used by handstand sets (instead of reps).
+// Stored as the bucket index 1..4 in StrengthSet.reps.
+const HANDSTAND_SECOND_BUCKETS: { idx: number; label: string }[] = [
+  { idx: 1, label: "1-10s" },
+  { idx: 2, label: "11-30s" },
+  { idx: 3, label: "31-60s" },
+  { idx: 4, label: "60+ s" },
+];
+function handstandBucketLabel(idx: number): string {
+  return HANDSTAND_SECOND_BUCKETS.find(b => b.idx === idx)?.label ?? `${idx}`;
+}
+
 function workoutLevelName(workout: StrengthWorkout, level: number): string {
   if (workout === "core") return CORE_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pullup") return PULLUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pushup") return PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "handstand") return HANDSTAND_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 
@@ -836,6 +858,7 @@ function workoutLevelImage(workout: StrengthWorkout, level: number): string | un
   if (workout === "core") return CORE_LEVEL_IMAGES[level];
   if (workout === "pullup") return PULLUP_LEVEL_IMAGES[level];
   if (workout === "pushup") return PUSHUP_LEVEL_IMAGES[level];
+  if (workout === "handstand") return HANDSTAND_LEVEL_IMAGES[level];
   return undefined;
 }
 
@@ -857,6 +880,12 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
     desc: "Pressing strength for mantles, compression, and lockoffs.",
     image: pushup2,
     ring: "ring-[hsl(var(--btn-green))]/60",
+  },
+  handstand: {
+    title: "Handstand",
+    desc: "Balance and shoulder strength — log seconds held.",
+    image: handstand3,
+    ring: "ring-[hsl(var(--boss))]/60",
   },
 };
 

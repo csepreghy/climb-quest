@@ -139,6 +139,21 @@ export function GameSync() {
         if (pending.current.game) payload.game = pending.current.game;
         if (pending.current.gyms) payload.gyms = pending.current.gyms;
         pending.current = {};
+
+        // Safety guard: never overwrite a remote row that previously had real
+        // content with an empty/fresh-looking game state. This prevents bugs
+        // (or transient empty loads) from silently wiping a user's logs.
+        if (payload.game && remoteHadContent.current && !looksPopulated(payload.game)) {
+          console.error(
+            "[sync] BLOCKED save: would overwrite populated remote with empty state",
+            { uid: userIdRef.current, slot: slotRef.current }
+          );
+          return;
+        }
+        // If we're about to write populated state, mark remote as having content
+        // so future empty writes are also blocked for this session.
+        if (payload.game && looksPopulated(payload.game)) remoteHadContent.current = true;
+
         saveInFlight.current = true;
         (async () => {
           const expectedUpdatedAt = lastRemoteUpdatedAt.current;

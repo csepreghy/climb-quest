@@ -786,12 +786,10 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
     const owned = item.consumableBonus ? s.owned : [...s.owned, id];
     const add: string[] = [];
     if (id === "crocs") add.push("crocs_equipped");
-    if (id === "golden_crocs") add.push("golden_crocs");
-    if (id === "minimal_kit") { add.push("minimal_kit"); add.push("shirtless_form"); }
+    if (item.group === "buddy") add.push("first_buddy");
     if (!item.consumableBonus) {
       if (owned.length >= 1) add.push("first_purchase");
       if (owned.length >= 5) add.push("five_purchases");
-      if (item.rarity && item.rarity !== "common") add.push("first_rare_purchase");
     }
     const next: State = { ...s, chalk: s.chalk - price, owned };
     return applyBadges(next, add);

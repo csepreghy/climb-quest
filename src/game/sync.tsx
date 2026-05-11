@@ -179,6 +179,7 @@ export function GameSync() {
               if (fetchError) throw fetchError;
               if (remote) {
                 lastRemoteUpdatedAt.current = remote.updated_at ?? null;
+                if (looksPopulated(remote.game)) remoteHadContent.current = true;
                 replaceGameState((remote.game ?? {}) as unknown as GameState);
                 replaceGymsState((remote.gyms ?? {}) as unknown as GymState);
               }

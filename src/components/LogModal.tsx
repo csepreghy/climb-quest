@@ -1100,7 +1100,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     const canBoss = unlockedMax < maxLv;
     const nextBoss = Math.min(maxLv, unlockedMax + 1);
     const lockEdit = false;
-    const levelName = workoutLevelName(workout, level);
+    const levelName = workoutLevelName(workout, level, isHandstand ? handstandMode : undefined);
     return (
       <>
         <DialogHeader>

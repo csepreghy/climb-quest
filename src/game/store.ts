@@ -690,6 +690,7 @@ export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 
 export function maxStrengthLevel(workout: StrengthWorkout): number {
   if (workout === "pullup") return 6;
   if (workout === "pushup") return 5;
+  if (workout === "handstand") return 5;
   return 5;
 }
 

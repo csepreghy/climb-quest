@@ -4,7 +4,12 @@ import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { Lock, Check, ArrowUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GameButton } from "@/components/ui/game-button";
+import { computeDailyCap, useDailyCapConfig, useDailyCapOverrides } from "@/game/dailyCap";
 import chalkBagImg from "@/assets/chalk-bag.png";
+
+function isSlotUnlock(u: string): boolean {
+  return /\+\s*\d+\s*(gear|power-?up)\s*slot/i.test(u);
+}
 
 export function LevelsModal({
   open,

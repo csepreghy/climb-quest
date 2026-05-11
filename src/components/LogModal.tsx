@@ -1131,7 +1131,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     type="button"
                     disabled={disabled}
                     onClick={() => setLevel(lv)}
-                    title={workoutLevelName(workout, lv)}
+                    title={workoutLevelName(workout, lv, isHandstand ? handstandMode : undefined)}
                     className={cn(
                       "rounded-lg border-2 overflow-hidden text-center transition active:translate-y-[1px]",
                       "border-[hsl(var(--panel-frame))] bg-secondary/50",

@@ -658,7 +658,7 @@ export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 
   target: number;
   unlockedLevel?: number;
 } {
-  const target = STRENGTH_BOSS_TARGET;
+  const target = strengthBossTarget(workout);
   const prevMax = state.strengthLevels?.[workout] ?? 0;
   const targetLevel = Math.min(maxStrengthLevel(workout), Math.max(1, prevMax + 1));
   const prevProgress = state.strengthBossProgress?.[workout] ?? 0;

@@ -393,7 +393,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
  * Boss-send sessions get a small +25% credit since they're max-effort single sets.
  * Bars are split by workout (core vs pull-up) so the user can see balance.
  */
-function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
+export function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
   const isMobile = useIsMobile();
   const data = useMemo(() => {
     const DAYS = isMobile ? 14 : 30;

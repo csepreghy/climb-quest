@@ -59,7 +59,7 @@ export interface Boss {
 
 export type Equipped = Partial<Record<Slot, string>>;
 
-export type StrengthWorkout = "core" | "pullup" | "pushup";
+export type StrengthWorkout = "core" | "pullup" | "pushup" | "handstand";
 export interface StrengthSet { reps: number; restSeconds?: number; level?: number }
 export interface StrengthSession {
   id: string;

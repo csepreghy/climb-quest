@@ -5,7 +5,6 @@ import {
   bindGameRemoteSync,
   getGameStateSnapshot,
   replaceGameState,
-  adminSeedMockData,
   runRetroBadgeAudit,
   State as GameState,
 } from "./store";
@@ -15,30 +14,20 @@ import {
   replaceGymsState,
   GymState,
 } from "./gyms";
-import { getActiveSlot, useActiveSlot, AccountSlot } from "./adminAccounts";
 
 /**
- * Loads the active slot's game + gyms from the backend on sign-in (and on slot
- * change), and debounce-saves changes back to that same (user_id, slot) row.
- *
- * Admins have two slots ("test" and "personal"), each persisted as its own
- * row in `user_game_state`. Non-admins always use "test".
+ * Loads the user's game + gyms from the backend on sign-in, and persists changes
+ * back to the same row. One row per user — no slot concept.
  */
 export function GameSync() {
-  const { user, hasAdminRole } = useAuth();
-  const slot: AccountSlot = useActiveSlot(user?.id ?? null);
-  const slotRef = useRef<AccountSlot>(slot);
+  const { user } = useAuth();
   const userIdRef = useRef<string | null>(null);
-  const saveTimer = useRef<number | null>(null);
   const saveInFlight = useRef(false);
   const lastRemoteUpdatedAt = useRef<string | null>(null);
   const remoteHadContent = useRef(false);
   const pending = useRef<{ game?: GameState; gyms?: GymState }>({});
   const flushRef = useRef<(() => void) | null>(null);
 
-  // Heuristic: does this game state look like a real, populated profile?
-  // Used as a safety guard so we never overwrite a populated remote row with
-  // an empty/fresh-profile local state (which would silently wipe the slot).
   const looksPopulated = (g: any): boolean => {
     if (!g || typeof g !== "object") return false;
     if (Array.isArray(g.logs) && g.logs.length > 0) return true;
@@ -49,9 +38,6 @@ export function GameSync() {
     return false;
   };
 
-  // Flush any pending writes before the page is hidden / unloaded so we
-  // don't lose the last few hundred ms of activity (e.g. a strength session
-  // logged right before navigating away).
   useEffect(() => {
     const onHide = () => { flushRef.current?.(); };
     const onVisibilityChange = () => {
@@ -70,7 +56,6 @@ export function GameSync() {
   useEffect(() => {
     const uid = user?.id ?? null;
     userIdRef.current = uid;
-    slotRef.current = slot;
 
     if (!uid) {
       bindGameRemoteSync(null);
@@ -84,18 +69,12 @@ export function GameSync() {
         .from("user_game_state")
         .select("game, gyms, updated_at")
         .eq("user_id", uid)
-        .eq("slot", slot)
         .maybeSingle();
 
       if (cancelled) return;
 
       if (error) {
-        // CRITICAL: Do NOT wipe local state or write empty data on a load error.
-        // A transient network/RLS error here previously caused the next code
-        // path to overwrite the user's populated remote row with `{}`, silently
-        // wiping their account. Bail out and leave the existing in-memory
-        // state alone; the next state mutation or page load will retry.
-        console.error("[sync] load failed for slot", slot, "— skipping replace + write to avoid data loss", error);
+        console.error("[sync] load failed — skipping replace + write to avoid data loss", error);
         remoteHadContent.current = false;
         return;
       }
@@ -105,46 +84,30 @@ export function GameSync() {
         const game = data.game as unknown as GameState | Record<string, never>;
         const gyms = data.gyms as unknown as GymState | Record<string, never>;
         remoteHadContent.current = looksPopulated(game);
-        // Always replace — empty object yields a fresh profile, which is what
-        // a brand-new personal slot should look like.
         replaceGameState((game ?? {}) as GameState);
         replaceGymsState((gyms ?? {}) as GymState);
       } else {
-        // No row yet for this slot (data === null AND no error) — safe to
-        // initialize a brand-new fresh profile and create the row.
         remoteHadContent.current = false;
         replaceGameState({} as GameState);
         replaceGymsState({} as GymState);
         const { data: inserted } = await supabase.from("user_game_state").upsert({
           user_id: uid,
-          slot,
           updated_at: new Date().toISOString(),
           game: getGameStateSnapshot() as any,
           gyms: getGymsSnapshot() as any,
-        }, { onConflict: "user_id,slot" }).select("updated_at").maybeSingle();
+        }, { onConflict: "user_id" }).select("updated_at").maybeSingle();
         lastRemoteUpdatedAt.current = inserted?.updated_at ?? null;
       }
 
-      // Only seed mock data into the admin's TEST slot, never personal.
-      if (hasAdminRole && slot === "test") {
-        const snap = getGameStateSnapshot();
-        if (!snap.logs || snap.logs.length === 0) {
-          adminSeedMockData();
-        }
-      }
-
-      // Retroactively grant any deserved badges + back-pay +50 chalk per badge.
       runRetroBadgeAudit();
 
       if (cancelled) return;
 
       const flush = () => {
-        if (saveTimer.current) { window.clearTimeout(saveTimer.current); saveTimer.current = null; }
         if (saveInFlight.current) return;
         if (!userIdRef.current) return;
         if (!pending.current.game && !pending.current.gyms) return;
         const uid = userIdRef.current;
-        const activeSlot = slotRef.current;
         const payload: { updated_at: string; game?: any; gyms?: any } = {
           updated_at: new Date().toISOString(),
         };
@@ -152,18 +115,13 @@ export function GameSync() {
         if (pending.current.gyms) payload.gyms = pending.current.gyms;
         pending.current = {};
 
-        // Safety guard: never overwrite a remote row that previously had real
-        // content with an empty/fresh-looking game state. This prevents bugs
-        // (or transient empty loads) from silently wiping a user's logs.
         if (payload.game && remoteHadContent.current && !looksPopulated(payload.game)) {
           console.error(
             "[sync] BLOCKED save: would overwrite populated remote with empty state",
-            { uid: userIdRef.current, slot: slotRef.current }
+            { uid: userIdRef.current }
           );
           return;
         }
-        // If we're about to write populated state, mark remote as having content
-        // so future empty writes are also blocked for this session.
         if (payload.game && looksPopulated(payload.game)) remoteHadContent.current = true;
 
         saveInFlight.current = true;
@@ -174,7 +132,6 @@ export function GameSync() {
               .from("user_game_state")
               .update(payload)
               .eq("user_id", uid)
-              .eq("slot", activeSlot)
               .eq("updated_at", expectedUpdatedAt)
               .select("updated_at")
               .maybeSingle();
@@ -186,7 +143,6 @@ export function GameSync() {
                 .from("user_game_state")
                 .select("game, gyms, updated_at")
                 .eq("user_id", uid)
-                .eq("slot", activeSlot)
                 .maybeSingle();
               if (fetchError) throw fetchError;
               if (remote) {
@@ -204,7 +160,7 @@ export function GameSync() {
 
           const { data: saved, error } = await supabase
             .from("user_game_state")
-            .upsert({ user_id: uid, slot: activeSlot, ...payload }, { onConflict: "user_id,slot" })
+            .upsert({ user_id: uid, ...payload }, { onConflict: "user_id" })
             .select("updated_at")
             .maybeSingle();
           if (error) throw error;
@@ -220,27 +176,18 @@ export function GameSync() {
       };
       flushRef.current = flush;
 
-      const schedule = () => {
-        // Persist immediately for every signed-in user/slot. The old debounce
-        // could lose quick strength logs if the modal/page closed too soon.
-        flush();
-      };
-
-      bindGameRemoteSync(s => { pending.current.game = s; schedule(); });
-      bindGymsRemoteSync(s => { pending.current.gyms = s; schedule(); });
+      bindGameRemoteSync(s => { pending.current.game = s; flush(); });
+      bindGymsRemoteSync(s => { pending.current.gyms = s; flush(); });
     })();
 
     return () => {
       cancelled = true;
-      // Flush any queued writes before tearing down (slot switch / sign-out
-      // / unmount) so recent logs aren't dropped with the debounce timer.
       flushRef.current?.();
       flushRef.current = null;
-      if (saveTimer.current) { window.clearTimeout(saveTimer.current); saveTimer.current = null; }
       bindGameRemoteSync(null);
       bindGymsRemoteSync(null);
     };
-  }, [user?.id, hasAdminRole, slot]);
+  }, [user?.id]);
 
   return null;
 }

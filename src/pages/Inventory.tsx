@@ -10,7 +10,7 @@ import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame, currentLev
 import { getItem, useCustomItems } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
-import { useActiveSlot } from "@/game/adminAccounts";
+
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowRight, Lock, ShoppingBag, Pencil, Check, X } from "lucide-react";
@@ -103,9 +103,8 @@ function gearUnlockLevel(slotIndex: number): number {
 
 export default function Inventory() {
   const s = useGame();
-  const { isAdmin, user } = useAuth();
-  const activeSlot = useActiveSlot(user?.id ?? null);
-  const adminTools = isAdmin && activeSlot === "test";
+  const { isAdmin } = useAuth();
+  const adminTools = isAdmin;
   useCustomItems();
   const owned = (s.owned.map(id => getItem(id)).filter(Boolean) as ShopItem[])
     .filter(it => !it.gender || it.gender === "unisex" || it.gender === s.gender);

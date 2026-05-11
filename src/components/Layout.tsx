@@ -346,10 +346,10 @@ function ChalkChip({ value }: { value: number }) {
     .sort((a, b) => a.chalk - b.chalk);
 
   // Strength: per-rep chalk by tier vs the user's max-unlocked level (per workout).
-  const strengthRows = (["core", "pullup", "pushup"] as StrengthWorkout[]).flatMap(w => {
+  const strengthRows = (["core", "pullup", "pushup", "handstand"] as StrengthWorkout[]).flatMap(w => {
     const max = s.strengthLevels?.[w] ?? 0;
     if (max <= 0) return [];
-    const label = w === "core" ? "Core" : w === "pullup" ? "Pull-up" : "Push-up";
+    const label = w === "core" ? "Core" : w === "pullup" ? "Pull-up" : w === "pushup" ? "Push-up" : "Handstand";
     const tiers: { name: string; chalk: number }[] = [];
     tiers.push({ name: `${label} L${max} (max)`, chalk: strengthRepChalk(max, max) });
     if (max >= 2) tiers.push({ name: `${label} L${max - 1}`, chalk: strengthRepChalk(max - 1, max) });

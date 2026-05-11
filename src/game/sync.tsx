@@ -89,7 +89,18 @@ export function GameSync() {
 
       if (cancelled) return;
 
-      if (!error && data) {
+      if (error) {
+        // CRITICAL: Do NOT wipe local state or write empty data on a load error.
+        // A transient network/RLS error here previously caused the next code
+        // path to overwrite the user's populated remote row with `{}`, silently
+        // wiping their account. Bail out and leave the existing in-memory
+        // state alone; the next state mutation or page load will retry.
+        console.error("[sync] load failed for slot", slot, "— skipping replace + write to avoid data loss", error);
+        remoteHadContent.current = false;
+        return;
+      }
+
+      if (data) {
         lastRemoteUpdatedAt.current = data.updated_at ?? null;
         const game = data.game as unknown as GameState | Record<string, never>;
         const gyms = data.gyms as unknown as GymState | Record<string, never>;
@@ -99,7 +110,8 @@ export function GameSync() {
         replaceGameState((game ?? {}) as GameState);
         replaceGymsState((gyms ?? {}) as GymState);
       } else {
-        // No row yet for this slot — start fresh and create the row.
+        // No row yet for this slot (data === null AND no error) — safe to
+        // initialize a brand-new fresh profile and create the row.
         remoteHadContent.current = false;
         replaceGameState({} as GameState);
         replaceGymsState({} as GymState);

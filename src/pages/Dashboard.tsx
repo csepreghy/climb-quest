@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { useGame, currentLevel, nextLevel, levelUp, strengthLevelMult, type StrengthSession } from "@/game/store";

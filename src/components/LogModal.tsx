@@ -909,6 +909,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [bossLevel, setBossLevel] = useState<number>(2);
   const [bossReps, setBossReps] = useState<number>(0);
   const [bossAttempts, setBossAttempts] = useState<number>(1);
+  const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
 
   const unlockedMax = s.strengthLevels?.[workout] ?? 0;
@@ -949,7 +950,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setSets(newSets);
     setReps(cleanReps);
     if (action === "finish") {
-      const { chalk } = logStrength({ workout, level, sets: newSets });
+      const dateISO = new Date(date).toISOString();
+      const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level}`);
       setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level) ?? WORKOUT_META[workout].image });
       setStep("celebrate");

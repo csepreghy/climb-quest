@@ -956,7 +956,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     }
     setLevel(max > 0 ? max : 1);
     setSets([]);
-    setHandstandMode("pushup");
+    setHandstandMode("hold");
     setReps(w === "handstand" ? 5 : 5);
     setStep("reps");
   }

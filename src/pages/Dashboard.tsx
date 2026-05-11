@@ -406,13 +406,13 @@ export function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] 
     const DAYS = isMobile ? 14 : 30;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const buckets: { ts: number; key: string; core: number; pullup: number; pushup: number; squat: number; handstand: number; handstand_pushup: number }[] = [];
-    const byKey = new Map<string, { ts: number; key: string; core: number; pullup: number; pushup: number; squat: number; handstand: number; handstand_pushup: number }>();
+    const buckets: { ts: number; key: string; core: number; pullup: number; pushup: number; squat: number; handstand_hold: number; handstand_pushup: number }[] = [];
+    const byKey = new Map<string, { ts: number; key: string; core: number; pullup: number; pushup: number; squat: number; handstand_hold: number; handstand_pushup: number }>();
     for (let i = DAYS - 1; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const key = d.toISOString().slice(0, 10);
-      const row = { ts: d.getTime(), key, core: 0, pullup: 0, pushup: 0, squat: 0, handstand: 0, handstand_pushup: 0 };
+      const row = { ts: d.getTime(), key, core: 0, pullup: 0, pushup: 0, squat: 0, handstand_hold: 0, handstand_pushup: 0 };
       buckets.push(row);
       byKey.set(key, row);
     }
@@ -424,13 +424,20 @@ export function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] 
       if (!row) continue;
       const mult = strengthLevelMult(sess.level);
       const bossBoost = sess.bossSend ? 1.25 : 1;
+      if (sess.workout === "handstand") {
+        // Split by per-set mode.
+        for (const st of sess.sets) {
+          const v = Math.round((st.reps || 0) * mult * bossBoost);
+          if (st.mode === "hold") row.handstand_hold += v;
+          else row.handstand_pushup += v;
+        }
+        continue;
+      }
       const volume = Math.round(sess.totalReps * mult * bossBoost);
       if (sess.workout === "core") row.core += volume;
       else if (sess.workout === "pullup") row.pullup += volume;
       else if (sess.workout === "pushup") row.pushup += volume;
       else if (sess.workout === "squat") row.squat += volume;
-      else if (sess.workout === "handstand") row.handstand += volume;
-      else if (sess.workout === "handstand_pushup") row.handstand_pushup += volume;
     }
     return buckets.map(b => ({
       ...b,
@@ -438,7 +445,7 @@ export function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] 
     }));
   }, [sessions]);
 
-  const hasAny = data.some(d => d.core > 0 || d.pullup > 0 || d.pushup > 0 || d.squat > 0 || d.handstand > 0 || d.handstand_pushup > 0);
+  const hasAny = data.some(d => d.core > 0 || d.pullup > 0 || d.pushup > 0 || d.squat > 0 || d.handstand_hold > 0 || d.handstand_pushup > 0);
 
   return (
     <GameCard className="p-5">
@@ -473,7 +480,7 @@ export function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] 
               <Bar dataKey="pullup" name="Pull-up" stackId="a" fill="hsl(var(--sky))" radius={[0, 0, 0, 0]} />
               <Bar dataKey="pushup" name="Push-up" stackId="a" fill="hsl(var(--btn-green))" radius={[0, 0, 0, 0]} />
               <Bar dataKey="squat" name="Squat" stackId="a" fill="hsl(var(--btn-yellow, var(--btn-orange)))" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="handstand" name="Handstand Hold" stackId="a" fill="hsl(var(--boss))" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="handstand_hold" name="Handstand Hold" stackId="a" fill="hsl(var(--boss))" radius={[0, 0, 0, 0]} />
               <Bar dataKey="handstand_pushup" name="Handstand Pushup" stackId="a" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

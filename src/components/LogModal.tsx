@@ -40,11 +40,16 @@ import handstand2 from "@/assets/strength-handstand-2.webp";
 import handstand3 from "@/assets/strength-handstand-3.webp";
 import handstand4 from "@/assets/strength-handstand-4.webp";
 import handstand5 from "@/assets/strength-handstand-5.webp";
-import squat1 from "@/assets/strength-squat-1.png";
-import squat2 from "@/assets/strength-squat-2.png";
-import squat3 from "@/assets/strength-squat-3.png";
-import squat4 from "@/assets/strength-squat-4.png";
-import squat5 from "@/assets/strength-squat-5.png";
+import hspu1 from "@/assets/strength-handstand-pushup-1.webp";
+import hspu2 from "@/assets/strength-handstand-pushup-2.webp";
+import hspu3 from "@/assets/strength-handstand-pushup-3.webp";
+import hspu4 from "@/assets/strength-handstand-pushup-4.webp";
+import hspu5 from "@/assets/strength-handstand-pushup-5.webp";
+import squat1 from "@/assets/strength-squat-1.webp";
+import squat2 from "@/assets/strength-squat-2.webp";
+import squat3 from "@/assets/strength-squat-3.webp";
+import squat4 from "@/assets/strength-squat-4.webp";
+import squat5 from "@/assets/strength-squat-5.webp";
 import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -804,7 +809,8 @@ const REST_OPTIONS = [1, 2, 3, 5]; // minutes
 const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
 const PULLUP_LEVEL_IMAGES: Record<number, string> = { 1: pullup1, 2: pullup2, 3: pullup3, 4: pullup4, 5: pullup5, 6: pullup6 };
 const PUSHUP_LEVEL_IMAGES: Record<number, string> = { 1: pushup1, 2: pushup2, 3: pushup3, 4: pushup4, 5: pushup5 };
-const HANDSTAND_LEVEL_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
+const HANDSTAND_HOLD_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
+const HANDSTAND_PUSHUP_IMAGES: Record<number, string> = { 1: hspu1, 2: hspu2, 3: hspu3, 4: hspu4, 5: hspu5 };
 const SQUAT_LEVEL_IMAGES: Record<number, string> = { 1: squat1, 2: squat2, 3: squat3, 4: squat4, 5: squat5 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
@@ -833,11 +839,11 @@ const PUSHUP_LEVEL_NAMES: Record<number, string> = {
 };
 
 const HANDSTAND_LEVEL_NAMES: Record<number, string> = {
-  1: "Downward Dog",
-  2: "Pike on Box",
-  3: "Wall Handstand",
-  4: "Free Handstand",
-  5: "One-Arm Handstand",
+  1: "Pike Pushup",
+  2: "Box Pike Pushup",
+  3: "Wall Handstand Pushup",
+  4: "Handstand Pushup",
+  5: "90 Degree Pushup",
 };
 
 const SQUAT_LEVEL_NAMES: Record<number, string> = {
@@ -848,13 +854,6 @@ const SQUAT_LEVEL_NAMES: Record<number, string> = {
   5: "Shrimp",
 };
 
-const HANDSTAND_PUSHUP_LEVEL_NAMES: Record<number, string> = {
-  1: "Pike Push-up",
-  2: "Elevated Pike",
-  3: "Wall-Assisted HSPU",
-  4: "Free HSPU",
-  5: "One-Arm HSPU",
-};
 
 // Seconds buckets used by handstand (hold) sets (instead of reps).
 // Stored as the bucket index 1..4 in StrengthSet.reps.
@@ -874,15 +873,16 @@ function workoutLevelName(workout: StrengthWorkout, level: number): string {
   if (workout === "pushup") return PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "handstand") return HANDSTAND_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "squat") return SQUAT_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
-  if (workout === "handstand_pushup") return HANDSTAND_PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 
-function workoutLevelImage(workout: StrengthWorkout, level: number): string | undefined {
+function workoutLevelImage(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): string | undefined {
   if (workout === "core") return CORE_LEVEL_IMAGES[level];
   if (workout === "pullup") return PULLUP_LEVEL_IMAGES[level];
   if (workout === "pushup") return PUSHUP_LEVEL_IMAGES[level];
-  if (workout === "handstand") return HANDSTAND_LEVEL_IMAGES[level];
+  if (workout === "handstand") {
+    return mode === "pushup" ? HANDSTAND_PUSHUP_IMAGES[level] : HANDSTAND_HOLD_IMAGES[level];
+  }
   if (workout === "squat") return SQUAT_LEVEL_IMAGES[level];
   return undefined;
 }
@@ -913,16 +913,10 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
     ring: "ring-[hsl(var(--btn-green))]/60",
   },
   handstand: {
-    title: "Handstand Holds",
-    desc: "Balance and shoulder strength — log seconds held.",
-    image: handstand3,
+    title: "Handstand",
+    desc: "Holds or pushups — balance and pressing power upside down.",
+    image: hspu3,
     ring: "ring-[hsl(var(--boss))]/60",
-  },
-  handstand_pushup: {
-    title: "Handstand Pushups",
-    desc: "Inverted pressing power for max shoulder strength.",
-    ring: "ring-[hsl(var(--boss))]/60",
-    placeholder: true,
   },
 };
 
@@ -947,6 +941,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [bossReps, setBossReps] = useState<number>(0);
   const [bossAttempts, setBossAttempts] = useState<number>(1);
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [handstandMode, setHandstandMode] = useState<"hold" | "pushup">("pushup");
   const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
 
   const unlockedMax = s.strengthLevels?.[workout] ?? 0;
@@ -961,7 +956,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     }
     setLevel(max > 0 ? max : 1);
     setSets([]);
-    setReps(w === "handstand" ? 1 : 5);
+    setHandstandMode("pushup");
+    setReps(w === "handstand" ? 5 : 5);
     setStep("reps");
   }
 
@@ -982,15 +978,19 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function logRepsAnd(action: "rest" | "finish") {
-    const cleanReps = Math.max(1, Math.min(50, Math.round(reps)));
-    const newSets = [...sets, { reps: cleanReps, level }];
+    const isHandstandHold = workout === "handstand" && handstandMode === "hold";
+    const cleanReps = isHandstandHold
+      ? Math.max(1, Math.min(4, Math.round(reps)))
+      : Math.max(1, Math.min(50, Math.round(reps)));
+    const setMode: "hold" | "pushup" | undefined = workout === "handstand" ? handstandMode : undefined;
+    const newSets: StrengthSet[] = [...sets, { reps: cleanReps, level, ...(setMode ? { mode: setMode } : {}) }];
     setSets(newSets);
     setReps(cleanReps);
     if (action === "finish") {
       const dateISO = new Date(date).toISOString();
       const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level}`);
-      setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level) ?? WORKOUT_META[workout].image });
+      setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image });
       setStep("celebrate");
     } else {
       setStep("rest-pick");
@@ -1012,7 +1012,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       });
       setStep("celebrate");
     } else {
-      const unit = workout === "handstand" ? (reps === 1 ? "second" : "seconds") : (reps === 1 ? "rep" : "reps");
+      const unit = reps === 1 ? "rep" : "reps";
       toast.success(`+${reps} ${unit} · ${res.progress}/${res.target}`);
       const newRemaining = Math.max(1, res.target - res.progress);
       setBossAttempts(a => Math.min(a, newRemaining));
@@ -1051,7 +1051,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </div>
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
-          {(["core", "pullup", "pushup", "squat", "handstand", "handstand_pushup"] as StrengthWorkout[]).map(w => {
+          {(["core", "pullup", "pushup", "squat", "handstand"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
             const currentLv = Math.max(1, s.strengthLevels?.[w] ?? 1);
             const lvName = workoutLevelName(w, currentLv);
@@ -1080,8 +1080,10 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   if (step === "reps") {
-    const totalReps = sets.reduce((a, b) => a + b.reps, 0);
-    const lvImg = workoutLevelImage(workout, level);
+    const isHandstand = workout === "handstand";
+    const isHold = isHandstand && handstandMode === "hold";
+    const totalReps = sets.filter(st => st.mode !== "hold").reduce((a, b) => a + b.reps, 0);
+    const lvImg = workoutLevelImage(workout, level, isHandstand ? handstandMode : undefined);
 
     const maxLv = maxStrengthLevel(workout);
     const choices = Array.from({ length: Math.max(1, unlockedMax) }, (_, i) => i + 1);
@@ -1109,7 +1111,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">Level</Label>
             <div className={cn("mt-2 grid gap-1.5", maxLv >= 6 ? "grid-cols-6" : "grid-cols-5")}>
               {Array.from({ length: maxLv }, (_, i) => i + 1).map(lv => {
-                const img = workoutLevelImage(workout, lv);
+                const img = workoutLevelImage(workout, lv, isHandstand ? handstandMode : undefined);
                 const unlocked = choices.includes(lv);
                 const selected = lv === level;
                 const disabled = !unlocked || lockEdit;
@@ -1147,7 +1149,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             {canBoss && (
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <GameButton variant="danger" size="sm" onClick={startBoss}>
-                  <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({strengthBossTarget(workout)} {workout === "handstand" ? "seconds" : "reps"} total)
+                  <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({strengthBossTarget(workout)} reps total)
                 </GameButton>
               </div>
             )}
@@ -1172,11 +1174,12 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
               <ul className="divide-y divide-border/50">
                 {sets.map((st, i) => {
                   const lv = st.level ?? level;
+                  const setIsHold = st.mode === "hold";
                   return (
                     <li key={i} className="flex items-center justify-between gap-3 py-1.5 text-sm">
                       <span className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-muted-foreground w-10 shrink-0">Set {i + 1}</span>
-                        <span className="font-bold tabular-nums">L{lv} · {workout === "handstand" ? handstandBucketLabel(st.reps) : `${st.reps} reps`}</span>
+                        <span className="font-bold tabular-nums">L{lv} · {setIsHold ? `Hold ${handstandBucketLabel(st.reps)}` : `${st.reps} reps`}</span>
                         <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv)}</span>
                       </span>
                       {st.restSeconds ? (
@@ -1189,14 +1192,54 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                 })}
               </ul>
               <div className="mt-2 text-xs text-muted-foreground">
-                {workout === "handstand"
-                  ? <>Total holds: <span className="font-bold text-foreground tabular-nums">{sets.length}</span></>
-                  : <>Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></>}
+                {isHandstand ? (() => {
+                  const holds = sets.filter(st => st.mode === "hold").length;
+                  const pushups = sets.filter(st => st.mode !== "hold").reduce((a, b) => a + b.reps, 0);
+                  const parts: string[] = [];
+                  if (holds > 0) parts.push(`${holds} hold${holds === 1 ? "" : "s"}`);
+                  if (pushups > 0) parts.push(`${pushups} pushup rep${pushups === 1 ? "" : "s"}`);
+                  return <>Total: <span className="font-bold text-foreground tabular-nums">{parts.join(" · ") || "—"}</span></>;
+                })() : (
+                  <>Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></>
+                )}
               </div>
             </div>
           )}
 
-          {workout === "handstand" ? (
+          {isHandstand && (
+            <Field label="What are you logging?">
+              <div className="grid grid-cols-2 gap-2">
+                {(["pushup", "hold"] as const).map(m => {
+                  const selected = handstandMode === m;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => {
+                        setHandstandMode(m);
+                        setReps(m === "hold" ? 1 : 5);
+                      }}
+                      className={cn(
+                        "rounded-lg border-2 px-3 py-2.5 text-center font-display font-bold transition active:translate-y-[1px]",
+                        "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
+                        selected && "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40",
+                      )}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        {m === "hold" ? <Timer className="h-4 w-4" /> : <Dumbbell className="h-4 w-4" />}
+                        <span>{m === "hold" ? "Handstand Hold" : "Handstand Pushup"}</span>
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5 normal-case tracking-normal">
+                        {m === "hold" ? "Track seconds held" : "Track reps"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          )}
+
+          {isHold ? (
             <Field label="How long did you hold?">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {HANDSTAND_SECOND_BUCKETS.map(b => {
@@ -1247,10 +1290,10 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
           <GameButton variant="primary" size="md" onClick={() => logRepsAnd("rest")}>
-            <Timer className="h-4 w-4" /> {workout === "handstand" ? "Log Hold & Rest" : "Log Reps & Rest"}
+            <Timer className="h-4 w-4" /> {isHold ? "Log Hold & Rest" : "Log Reps & Rest"}
           </GameButton>
           <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
-            <Trophy className="h-4 w-4" /> {workout === "handstand" ? "Log Hold & Finish" : "Log Reps & Finish"}
+            <Trophy className="h-4 w-4" /> {isHold ? "Log Hold & Finish" : "Log Reps & Finish"}
           </GameButton>
         </div>
       </>

@@ -59,8 +59,9 @@ export interface Boss {
 
 export type Equipped = Partial<Record<Slot, string>>;
 
-export type StrengthWorkout = "core" | "pullup" | "pushup" | "squat" | "handstand" | "handstand_pushup";
-export interface StrengthSet { reps: number; restSeconds?: number; level?: number }
+export type StrengthWorkout = "core" | "pullup" | "pushup" | "squat" | "handstand";
+/** For handstand sets, `mode` distinguishes hold (reps = seconds-bucket idx 1-4) from pushup (reps = real rep count). */
+export interface StrengthSet { reps: number; restSeconds?: number; level?: number; mode?: "hold" | "pushup" }
 export interface StrengthSession {
   id: string;
   date: string;
@@ -78,14 +79,14 @@ export interface StrengthSession {
 export function strengthLevelMult(level: number): number {
   return 1 + Math.max(0, level - 1) * 0.5;
 }
-/** Boss target: cumulative reps (or seconds, for handstand) across attempts. */
+/** Boss target: cumulative reps across attempts. */
 export const STRENGTH_BOSS_TARGET = 10;
 export const STRENGTH_BOSS_TARGET_HANDSTAND_SECONDS = 60;
-export function strengthBossTarget(workout: StrengthWorkout): number {
-  return workout === "handstand" ? STRENGTH_BOSS_TARGET_HANDSTAND_SECONDS : STRENGTH_BOSS_TARGET;
+export function strengthBossTarget(_workout: StrengthWorkout): number {
+  return STRENGTH_BOSS_TARGET;
 }
-export function strengthBossTargetReps(_nextLevel?: number, workout?: StrengthWorkout): number {
-  return workout ? strengthBossTarget(workout) : STRENGTH_BOSS_TARGET;
+export function strengthBossTargetReps(_nextLevel?: number, _workout?: StrengthWorkout): number {
+  return STRENGTH_BOSS_TARGET;
 }
 /**
  * Per-rep chalk based on how the chosen level compares to the user's max-unlocked level.
@@ -178,6 +179,26 @@ function load(): State {
       localStorage.setItem(INVENTORY_RESET_KEY, "1");
     }
     if ((merged.gender as string) === "neutral") merged.gender = "male";
+    // Migrate legacy handstand_pushup sessions into handstand workout (mode=pushup).
+    // Tag legacy handstand sessions (which stored seconds-bucket in reps) as mode=hold.
+    if (Array.isArray(merged.strengthSessions)) {
+      merged.strengthSessions = merged.strengthSessions.map(ss => {
+        const w = (ss.workout as string) === "handstand_pushup" ? "handstand" : ss.workout;
+        if (w !== "handstand") return ss;
+        const mode: "hold" | "pushup" = (ss.workout as string) === "handstand_pushup" ? "pushup" : "hold";
+        return {
+          ...ss,
+          workout: "handstand",
+          sets: (ss.sets ?? []).map(st => ({ ...st, mode: st.mode ?? mode })),
+        };
+      });
+    }
+    // Move handstand_pushup unlocked level into handstand if higher.
+    if (merged.strengthLevels && (merged.strengthLevels as Record<string, number>).handstand_pushup) {
+      const hp = (merged.strengthLevels as Record<string, number>).handstand_pushup ?? 0;
+      merged.strengthLevels.handstand = Math.max(merged.strengthLevels.handstand ?? 0, hp);
+      delete (merged.strengthLevels as Record<string, number>).handstand_pushup;
+    }
     return merged;
   } catch { return initialState(); }
 }

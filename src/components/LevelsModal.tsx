@@ -103,23 +103,31 @@ export function LevelsModal({
 
                   <p className="text-xs text-muted-foreground italic line-clamp-2">{l.desc}</p>
 
-                  {l.unlocks.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-0.5">
-                      {l.unlocks.map(u => (
-                        <span
-                          key={u}
-                          className={cn(
-                            "text-[10px] px-1.5 py-0.5 rounded border",
-                            past || cur
-                              ? "border-chalk-glow/40 text-chalk-glow bg-chalk-glow/10"
-                              : "border-border text-muted-foreground bg-background/40",
-                          )}
-                        >
-                          {u}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  {(() => {
+                    const slotUnlocks = l.unlocks.filter(isSlotUnlock);
+                    const dailyCap = computeDailyCap(l.level, capCfg, capOverrides);
+                    const chips: { key: string; label: React.ReactNode }[] = [
+                      ...slotUnlocks.map(u => ({ key: u, label: <>{u}</> })),
+                      { key: "__cap", label: <>Daily cap: {dailyCap.toLocaleString()}</> },
+                    ];
+                    return (
+                      <div className="flex flex-wrap gap-1 pt-0.5">
+                        {chips.map(c => (
+                          <span
+                            key={c.key}
+                            className={cn(
+                              "text-[10px] px-1.5 py-0.5 rounded border",
+                              past || cur
+                                ? "border-chalk-glow/40 text-chalk-glow bg-chalk-glow/10"
+                                : "border-border text-muted-foreground bg-background/40",
+                            )}
+                          >
+                            {c.label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
 
                   <div className="pt-1 text-xs">
                     {past ? (

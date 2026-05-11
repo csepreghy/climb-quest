@@ -1111,7 +1111,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">Level</Label>
             <div className={cn("mt-2 grid gap-1.5", maxLv >= 6 ? "grid-cols-6" : "grid-cols-5")}>
               {Array.from({ length: maxLv }, (_, i) => i + 1).map(lv => {
-                const img = workoutLevelImage(workout, lv);
+                const img = workoutLevelImage(workout, lv, isHandstand ? handstandMode : undefined);
                 const unlocked = choices.includes(lv);
                 const selected = lv === level;
                 const disabled = !unlocked || lockEdit;

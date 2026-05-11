@@ -472,7 +472,9 @@ export function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] 
               <Bar dataKey="core" name="Core" stackId="a" fill="hsl(var(--btn-orange))" radius={[0, 0, 0, 0]} />
               <Bar dataKey="pullup" name="Pull-up" stackId="a" fill="hsl(var(--sky))" radius={[0, 0, 0, 0]} />
               <Bar dataKey="pushup" name="Push-up" stackId="a" fill="hsl(var(--btn-green))" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="handstand" name="Handstand" stackId="a" fill="hsl(var(--boss))" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="squat" name="Squat" stackId="a" fill="hsl(var(--btn-yellow, var(--btn-orange)))" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="handstand" name="Handstand Hold" stackId="a" fill="hsl(var(--boss))" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="handstand_pushup" name="Handstand Pushup" stackId="a" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

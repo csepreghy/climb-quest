@@ -1209,7 +1209,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           {isHandstand && (
             <Field label="What are you logging?">
               <div className="grid grid-cols-2 gap-2">
-                {(["pushup", "hold"] as const).map(m => {
+                {(["hold", "pushup"] as const).map(m => {
                   const selected = handstandMode === m;
                   return (
                     <button

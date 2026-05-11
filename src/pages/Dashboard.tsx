@@ -30,6 +30,9 @@ export default function Dashboard() {
   const next = nextLevel(s);
   const characterName = useCharacterName();
   const [logOpen, setLogOpen] = useState(false);
+  const [openBadgeId, setOpenBadgeId] = useState<string | null>(null);
+  const openBadge = openBadgeId ? BADGES.find(b => b.id === openBadgeId) ?? null : null;
+  const openBadgeHave = openBadge ? s.badges.includes(openBadge.id) : false;
 
   
 

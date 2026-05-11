@@ -79,14 +79,14 @@ export interface StrengthSession {
 export function strengthLevelMult(level: number): number {
   return 1 + Math.max(0, level - 1) * 0.5;
 }
-/** Boss target: cumulative reps (or seconds, for handstand) across attempts. */
+/** Boss target: cumulative reps across attempts. */
 export const STRENGTH_BOSS_TARGET = 10;
 export const STRENGTH_BOSS_TARGET_HANDSTAND_SECONDS = 60;
-export function strengthBossTarget(workout: StrengthWorkout): number {
-  return workout === "handstand" ? STRENGTH_BOSS_TARGET_HANDSTAND_SECONDS : STRENGTH_BOSS_TARGET;
+export function strengthBossTarget(_workout: StrengthWorkout): number {
+  return STRENGTH_BOSS_TARGET;
 }
-export function strengthBossTargetReps(_nextLevel?: number, workout?: StrengthWorkout): number {
-  return workout ? strengthBossTarget(workout) : STRENGTH_BOSS_TARGET;
+export function strengthBossTargetReps(_nextLevel?: number, _workout?: StrengthWorkout): number {
+  return STRENGTH_BOSS_TARGET;
 }
 /**
  * Per-rep chalk based on how the chosen level compares to the user's max-unlocked level.

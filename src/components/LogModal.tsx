@@ -1116,6 +1116,19 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             )}
           </div>
 
+          <Field label="Date">
+            <Input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+              disabled={sets.length > 0}
+            />
+            {sets.length > 0 && (
+              <p className="text-[11px] text-muted-foreground mt-1">Date locked once a set is logged in this session.</p>
+            )}
+          </Field>
+
           {sets.length > 0 && (
             <div className="rounded-lg border border-border bg-secondary/40 p-3">
               <div className="menu-label mb-2">This session</div>

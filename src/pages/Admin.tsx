@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useActiveSlot, snapshotActiveSlot } from "@/game/adminAccounts";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Minus, Upload, Trash2, Pencil, X, FlaskConical, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette } from "lucide-react";
+import { Plus, Minus, Upload, Trash2, Pencil, X, FlaskConical, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { switchToSlot } from "@/game/adminAccounts";
 import {
@@ -80,7 +80,7 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-4 sm:grid-cols-7 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
+        <TabsList className="grid grid-cols-4 sm:grid-cols-8 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
           {[
             { value: "general", label: "General", Icon: Settings },
             { value: "account", label: "Account", Icon: UserIcon },
@@ -89,6 +89,7 @@ export default function Admin() {
             { value: "items", label: "Items", Icon: Package },
             { value: "gyms", label: "Gyms", Icon: MapPin },
             { value: "theme", label: "Theme", Icon: Palette },
+            { value: "feedback", label: "Feedback", Icon: MessageSquare },
           ].map(({ value, label, Icon }) => (
             <TabsTrigger
               key={value}
@@ -241,6 +242,10 @@ export default function Admin() {
           <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>
             <ThemeStudio />
           </div>
+        </TabsContent>
+
+        <TabsContent value="feedback" className="space-y-6 mt-6">
+          <FeedbackAdmin />
         </TabsContent>
       </Tabs>
     </div>

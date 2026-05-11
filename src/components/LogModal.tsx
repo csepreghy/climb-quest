@@ -1012,7 +1012,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       });
       setStep("celebrate");
     } else {
-      const unit = workout === "handstand" ? (reps === 1 ? "second" : "seconds") : (reps === 1 ? "rep" : "reps");
+      const unit = reps === 1 ? "rep" : "reps";
       toast.success(`+${reps} ${unit} · ${res.progress}/${res.target}`);
       const newRemaining = Math.max(1, res.target - res.progress);
       setBossAttempts(a => Math.min(a, newRemaining));

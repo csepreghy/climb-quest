@@ -1108,7 +1108,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             {canBoss && (
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <GameButton variant="danger" size="sm" onClick={startBoss}>
-                  <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({STRENGTH_BOSS_TARGET} {workout === "handstand" ? "holds" : "reps"} total)
+                  <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({strengthBossTarget(workout)} {workout === "handstand" ? "seconds" : "reps"} total)
                 </GameButton>
               </div>
             )}

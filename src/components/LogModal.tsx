@@ -838,7 +838,14 @@ const PUSHUP_LEVEL_NAMES: Record<number, string> = {
   5: "1-Arm",
 };
 
-const HANDSTAND_LEVEL_NAMES: Record<number, string> = {
+const HANDSTAND_HOLD_NAMES: Record<number, string> = {
+  1: "Downward Dog",
+  2: "Pike on Box",
+  3: "Wall Handstand",
+  4: "Free Handstand",
+  5: "One-Arm Handstand",
+};
+const HANDSTAND_PUSHUP_NAMES: Record<number, string> = {
   1: "Pike Pushup",
   2: "Box Pike Pushup",
   3: "Wall Handstand Pushup",

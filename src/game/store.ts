@@ -922,7 +922,6 @@ function deservedBadges(s: State): string[] {
   if (s.logs.some(l => l.styles.includes("overhang"))) out.push("overhang_enjoyer");
   if (s.totalChalkEarned >= 1000) out.push("chalk_monster");
   if (s.logs.filter(l => l.styles.includes("crimp")).length >= 5) out.push("tiny_crimp");
-  // got_humbled badge is awarded inline elsewhere; skip retro detection.
   // Bosses
   if (s.bosses.some(b => b.sent)) out.push("crux_breaker");
   if (s.bosses.filter(b => b.sent).length >= 3) out.push("project_slayer");
@@ -931,17 +930,16 @@ function deservedBadges(s: State): string[] {
   if (s.level >= 10) out.push("demigod_unlocked");
   // Items
   if (s.owned.includes("crocs")) out.push("crocs_equipped");
-  if (s.owned.includes("golden_crocs")) out.push("golden_crocs");
-  if (s.owned.includes("minimal_kit")) { out.push("minimal_kit"); out.push("shirtless_form"); }
+  if (s.owned.some(id => getItem(id)?.group === "buddy")) out.push("first_buddy");
   // Shop activity
   const purchased = s.owned.length;
   if (purchased >= 1) out.push("first_purchase");
   if (purchased >= 5) out.push("five_purchases");
-  if (s.owned.some(id => {
-    const it = getItem(id);
-    return it && it.rarity && it.rarity !== "common";
-  })) out.push("first_rare_purchase");
   if (Object.values(s.equipped).some(Boolean)) out.push("first_equip");
+  if (allRequiredSlotsEquipped(s)) out.push("all_slots_equipped");
+  // Strength
+  if ((s.strengthSessions ?? []).some(x => x.bossSend)) out.push("first_strength_boss");
+  if (Object.values(s.strengthLevels ?? {}).some(v => (v ?? 0) >= 3)) out.push("strength_tier_3");
   return out;
 }
 

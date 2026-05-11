@@ -1150,7 +1150,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     )}
                     <div className="p-1">
                       <div className="text-xs text-muted-foreground leading-none">L{lv}</div>
-                      <div className="text-[11px] font-display font-bold leading-tight mt-0.5 line-clamp-2">{workoutLevelName(workout, lv)}</div>
+                      <div className="text-[11px] font-display font-bold leading-tight mt-0.5 line-clamp-2">{workoutLevelName(workout, lv, isHandstand ? handstandMode : undefined)}</div>
                     </div>
                   </button>
                 );

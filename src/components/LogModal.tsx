@@ -919,7 +919,6 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
     ring: "ring-[hsl(var(--boss))]/60",
   },
 };
-};
 
 type StrengthStep =
   | "workout"

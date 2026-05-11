@@ -81,7 +81,7 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-4 sm:grid-cols-8 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-9 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
           {[
             { value: "general", label: "General", Icon: Settings },
             { value: "account", label: "Account", Icon: UserIcon },
@@ -91,6 +91,7 @@ export default function Admin() {
             { value: "gyms", label: "Gyms", Icon: MapPin },
             { value: "theme", label: "Theme", Icon: Palette },
             { value: "feedback", label: "Feedback", Icon: MessageSquare },
+            { value: "snapshots", label: "Snapshots", Icon: Archive },
           ].map(({ value, label, Icon }) => (
             <TabsTrigger
               key={value}

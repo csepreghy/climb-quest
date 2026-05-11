@@ -5,11 +5,14 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAllItems, isImageEmoji } from "@/game/customItems";
 import { RARITY_BORDER, Rarity, ShopItem, Gender, Slot } from "@/game/data";
 import type { Equipped } from "@/game/store";
+import type { StrengthSession } from "@/game/store";
 import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
 import { Trophy, ScrollText, Swords, Dumbbell, Sparkles } from "lucide-react";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ChalkOverTimeChart, StrengthVolumeChart } from "@/pages/Dashboard";
+import { useAllGyms as useGyms } from "@/game/allGyms";
 
 interface Row {
   user_id: string;

@@ -1289,7 +1289,6 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         </div>
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
-        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
           <GameButton variant="primary" size="md" onClick={() => logRepsAnd("rest")}>
             <Timer className="h-4 w-4" /> {isHold ? "Log Hold & Rest" : "Log Reps & Rest"}
           </GameButton>

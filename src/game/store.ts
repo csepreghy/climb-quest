@@ -2,7 +2,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import {
   ACTIVITY_LABELS, ActivityType, BADGES, BOSS_TEMPLATES,
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
-  GEAR_SLOTS, gearSlotsUnlocked, Slot,
+  GEAR_SLOTS, gearSlotsUnlocked, Slot, BUDDY_SLOT_UNLOCK_LEVEL,
 } from "./data";
 import { getItem } from "./customItems";
 import { getActivityReward } from "./activityRewards";

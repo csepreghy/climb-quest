@@ -35,6 +35,11 @@ import pushup2 from "@/assets/strength-pushup-2.png";
 import pushup3 from "@/assets/strength-pushup-3.png";
 import pushup4 from "@/assets/strength-pushup-4.png";
 import pushup5 from "@/assets/strength-pushup-5.png";
+import handstand1 from "@/assets/strength-handstand-1.png";
+import handstand2 from "@/assets/strength-handstand-2.png";
+import handstand3 from "@/assets/strength-handstand-3.png";
+import handstand4 from "@/assets/strength-handstand-4.png";
+import handstand5 from "@/assets/strength-handstand-5.png";
 import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -794,6 +799,7 @@ const REST_OPTIONS = [1, 2, 3, 5]; // minutes
 const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
 const PULLUP_LEVEL_IMAGES: Record<number, string> = { 1: pullup1, 2: pullup2, 3: pullup3, 4: pullup4, 5: pullup5, 6: pullup6 };
 const PUSHUP_LEVEL_IMAGES: Record<number, string> = { 1: pushup1, 2: pushup2, 3: pushup3, 4: pushup4, 5: pushup5 };
+const HANDSTAND_LEVEL_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
   1: "Leg Raises",
@@ -820,10 +826,31 @@ const PUSHUP_LEVEL_NAMES: Record<number, string> = {
   5: "1-Arm",
 };
 
+const HANDSTAND_LEVEL_NAMES: Record<number, string> = {
+  1: "Downward Dog",
+  2: "Pike on Box",
+  3: "Wall Handstand",
+  4: "Free Handstand",
+  5: "One-Arm Handstand",
+};
+
+// Seconds buckets used by handstand sets (instead of reps).
+// Stored as the bucket index 1..4 in StrengthSet.reps.
+const HANDSTAND_SECOND_BUCKETS: { idx: number; label: string }[] = [
+  { idx: 1, label: "1-10s" },
+  { idx: 2, label: "11-30s" },
+  { idx: 3, label: "31-60s" },
+  { idx: 4, label: "60+ s" },
+];
+function handstandBucketLabel(idx: number): string {
+  return HANDSTAND_SECOND_BUCKETS.find(b => b.idx === idx)?.label ?? `${idx}`;
+}
+
 function workoutLevelName(workout: StrengthWorkout, level: number): string {
   if (workout === "core") return CORE_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pullup") return PULLUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   if (workout === "pushup") return PUSHUP_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "handstand") return HANDSTAND_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 
@@ -831,6 +858,7 @@ function workoutLevelImage(workout: StrengthWorkout, level: number): string | un
   if (workout === "core") return CORE_LEVEL_IMAGES[level];
   if (workout === "pullup") return PULLUP_LEVEL_IMAGES[level];
   if (workout === "pushup") return PUSHUP_LEVEL_IMAGES[level];
+  if (workout === "handstand") return HANDSTAND_LEVEL_IMAGES[level];
   return undefined;
 }
 
@@ -852,6 +880,12 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
     desc: "Pressing strength for mantles, compression, and lockoffs.",
     image: pushup2,
     ring: "ring-[hsl(var(--btn-green))]/60",
+  },
+  handstand: {
+    title: "Handstand",
+    desc: "Balance and shoulder strength — log seconds held.",
+    image: handstand3,
+    ring: "ring-[hsl(var(--boss))]/60",
   },
 };
 
@@ -889,7 +923,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     }
     setLevel(max > 0 ? max : 1);
     setSets([]);
-    setReps(5);
+    setReps(w === "handstand" ? 1 : 5);
     setStep("reps");
   }
 
@@ -976,7 +1010,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           </div>
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
-          {(["core", "pullup", "pushup"] as StrengthWorkout[]).map(w => {
+          {(["core", "pullup", "pushup", "handstand"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
             const currentLv = Math.max(1, s.strengthLevels?.[w] ?? 1);
             const lvName = workoutLevelName(w, currentLv);
@@ -1072,7 +1106,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             {canBoss && (
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <GameButton variant="danger" size="sm" onClick={startBoss}>
-                  <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({STRENGTH_BOSS_TARGET} reps total)
+                  <Skull className="h-4 w-4" /> Strength Boss · L{nextBoss} ({STRENGTH_BOSS_TARGET} {workout === "handstand" ? "holds" : "reps"} total)
                 </GameButton>
               </div>
             )}
@@ -1088,7 +1122,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     <li key={i} className="flex items-center justify-between gap-3 py-1.5 text-sm">
                       <span className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-muted-foreground w-10 shrink-0">Set {i + 1}</span>
-                        <span className="font-bold tabular-nums">L{lv} · {st.reps} reps</span>
+                        <span className="font-bold tabular-nums">L{lv} · {workout === "handstand" ? handstandBucketLabel(st.reps) : `${st.reps} reps`}</span>
                         <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv)}</span>
                       </span>
                       {st.restSeconds ? (
@@ -1101,14 +1135,40 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                 })}
               </ul>
               <div className="mt-2 text-xs text-muted-foreground">
-                Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span>
+                {workout === "handstand"
+                  ? <>Total holds: <span className="font-bold text-foreground tabular-nums">{sets.length}</span></>
+                  : <>Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></>}
               </div>
             </div>
           )}
 
-          <Field label="Reps this set">
-            <div className="flex items-center gap-2">
-              <button
+          {workout === "handstand" ? (
+            <Field label="How long did you hold?">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {HANDSTAND_SECOND_BUCKETS.map(b => {
+                  const selected = reps === b.idx;
+                  return (
+                    <button
+                      key={b.idx}
+                      type="button"
+                      onClick={() => setReps(b.idx)}
+                      className={cn(
+                        "rounded-lg border-2 px-3 py-3 text-center font-display font-bold transition active:translate-y-[1px]",
+                        "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
+                        selected && "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40",
+                      )}
+                    >
+                      <Timer className="h-4 w-4 mx-auto text-muted-foreground" />
+                      <div className="mt-1 text-base">{b.label}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          ) : (
+            <Field label="Reps this set">
+              <div className="flex items-center gap-2">
+                <button
                 type="button"
                 onClick={() => setReps(r => Math.max(1, r - 1))}
                 className="h-12 w-12 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-2xl font-bold active:translate-y-[1px]"
@@ -1128,14 +1188,15 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
               >+</button>
             </div>
           </Field>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
           <GameButton variant="primary" size="md" onClick={() => logRepsAnd("rest")}>
-            <Timer className="h-4 w-4" /> Log Reps & Rest
+            <Timer className="h-4 w-4" /> {workout === "handstand" ? "Log Hold & Rest" : "Log Reps & Rest"}
           </GameButton>
           <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
-            <Trophy className="h-4 w-4" /> Log Reps & Finish
+            <Trophy className="h-4 w-4" /> {workout === "handstand" ? "Log Hold & Finish" : "Log Reps & Finish"}
           </GameButton>
         </div>
       </>

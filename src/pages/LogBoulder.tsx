@@ -269,13 +269,20 @@ export default function BoulderLogs() {
                     </div>
                     <div className="min-w-0">
                       <div className="text-sm font-medium truncate capitalize flex items-center gap-2">
-                        {ss.workout === "pullup" ? "Pull-up" : ss.workout === "pushup" ? "Push-up" : "Core"} · Level {ss.level}
+                        {ss.workout === "pullup" ? "Pull-up" : ss.workout === "pushup" ? "Push-up" : ss.workout === "handstand" ? "Handstand" : "Core"} · Level {ss.level}
                         {ss.bossSend && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-boss/20 text-boss border border-boss/40">Boss</span>}
                       </div>
                       <div className="text-xs text-muted-foreground truncate">
-                        {new Date(ss.date).toLocaleDateString()} · {ss.sets.length} set{ss.sets.length === 1 ? "" : "s"} · {ss.totalReps} reps
+                        {new Date(ss.date).toLocaleDateString()} · {ss.sets.length} {ss.workout === "handstand" ? `hold${ss.sets.length === 1 ? "" : "s"}` : `set${ss.sets.length === 1 ? "" : "s"} · ${ss.totalReps} reps`}
                         {" · "}
-                        {ss.sets.map(st => `L${st.level ?? ss.level} · ${st.reps} reps`).join(" / ")}
+                        {ss.sets.map(st => {
+                          const lv = st.level ?? ss.level;
+                          if (ss.workout === "handstand") {
+                            const labels: Record<number, string> = { 1: "1-10s", 2: "11-30s", 3: "31-60s", 4: "60+s" };
+                            return `L${lv} · ${labels[st.reps] ?? `${st.reps}`}`;
+                          }
+                          return `L${lv} · ${st.reps} reps`;
+                        }).join(" / ")}
                       </div>
                     </div>
                   </div>

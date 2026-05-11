@@ -599,7 +599,7 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
   set(s => {
     const prevMax = s.strengthLevels?.[input.workout] ?? 0;
     const nextMax = input.bossSend ? Math.max(prevMax, input.level) : Math.max(prevMax, 1);
-    return {
+    const next: State = {
       ...s,
       chalk: s.chalk + chalk,
       totalChalkEarned: s.totalChalkEarned + chalk,
@@ -607,6 +607,10 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
       strengthLevels: { ...(s.strengthLevels ?? {}), [input.workout]: nextMax },
       pendingConsumable: null,
     };
+    const add: string[] = [];
+    if (input.bossSend) add.push("first_strength_boss");
+    if (Object.values(next.strengthLevels ?? {}).some(v => (v ?? 0) >= 3)) add.push("strength_tier_3");
+    return applyBadges(next, add);
   });
   return { session, chalk, breakdown };
 }

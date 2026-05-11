@@ -1263,29 +1263,6 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
               </div>
             </Field>
           ) : (
-            <Field label="How long did you hold?">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {HANDSTAND_SECOND_BUCKETS.map(b => {
-                  const selected = reps === b.idx;
-                  return (
-                    <button
-                      key={b.idx}
-                      type="button"
-                      onClick={() => setReps(b.idx)}
-                      className={cn(
-                        "rounded-lg border-2 px-3 py-3 text-center font-display font-bold transition active:translate-y-[1px]",
-                        "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
-                        selected && "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40",
-                      )}
-                    >
-                      <Timer className="h-4 w-4 mx-auto text-muted-foreground" />
-                      <div className="mt-1 text-base">{b.label}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </Field>
-          ) : (
             <Field label="Reps this set">
               <div className="flex items-center gap-2">
                 <button

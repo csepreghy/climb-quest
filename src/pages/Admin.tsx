@@ -12,7 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useActiveSlot, snapshotActiveSlot } from "@/game/adminAccounts";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Minus, Upload, Trash2, Pencil, X, FlaskConical, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare } from "lucide-react";
+import { Plus, Minus, Upload, Trash2, Pencil, X, FlaskConical, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive } from "lucide-react";
+import { SnapshotsAdmin } from "@/components/admin/SnapshotsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { switchToSlot } from "@/game/adminAccounts";
 import {

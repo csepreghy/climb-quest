@@ -849,7 +849,7 @@ const HANDSTAND_LEVEL_NAMES: Record<number, string> = {
 const SQUAT_LEVEL_NAMES: Record<number, string> = {
   1: "Assisted",
   2: "Regular",
-  3: "Explosive",
+  3: "Weighted",
   4: "Pistol",
   5: "Shrimp",
 };

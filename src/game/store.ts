@@ -59,8 +59,9 @@ export interface Boss {
 
 export type Equipped = Partial<Record<Slot, string>>;
 
-export type StrengthWorkout = "core" | "pullup" | "pushup" | "squat" | "handstand" | "handstand_pushup";
-export interface StrengthSet { reps: number; restSeconds?: number; level?: number }
+export type StrengthWorkout = "core" | "pullup" | "pushup" | "squat" | "handstand";
+/** For handstand sets, `mode` distinguishes hold (reps = seconds-bucket idx 1-4) from pushup (reps = real rep count). */
+export interface StrengthSet { reps: number; restSeconds?: number; level?: number; mode?: "hold" | "pushup" }
 export interface StrengthSession {
   id: string;
   date: string;

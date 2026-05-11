@@ -381,8 +381,9 @@ function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: st
  * Bars are split by workout (core vs pull-up) so the user can see balance.
  */
 function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
+  const isMobile = useIsMobile();
   const data = useMemo(() => {
-    const DAYS = 30;
+    const DAYS = isMobile ? 14 : 30;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const buckets: { ts: number; key: string; core: number; pullup: number; pushup: number }[] = [];

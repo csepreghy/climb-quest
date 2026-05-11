@@ -249,6 +249,10 @@ export default function Admin() {
         <TabsContent value="feedback" className="space-y-6 mt-6">
           <FeedbackAdmin />
         </TabsContent>
+
+        <TabsContent value="snapshots" className="space-y-6 mt-6">
+          <SnapshotsAdmin />
+        </TabsContent>
       </Tabs>
     </div>
   );

@@ -9,13 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, resetGame, resetOnboarding, resetStrengthLevels, useGame } from "@/game/store";
 import { useAuth } from "@/hooks/useAuth";
-import { useActiveSlot, snapshotActiveSlot } from "@/game/adminAccounts";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Minus, Upload, Trash2, Pencil, X, FlaskConical, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive } from "lucide-react";
+import { Plus, Minus, Upload, Trash2, Pencil, X, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive } from "lucide-react";
 import { SnapshotsAdmin } from "@/components/admin/SnapshotsAdmin";
 import { supabase } from "@/integrations/supabase/client";
-import { switchToSlot } from "@/game/adminAccounts";
 import {
   useAllItems,
   addCustomItem,
@@ -68,7 +66,6 @@ const CATEGORY_TO_SLOT: Record<string, Slot> = {
 export default function Admin() {
   const s = useGame();
   const { user } = useAuth();
-  const slot = useActiveSlot(user?.id ?? null);
   const [amount, setAmount] = useState(100);
   return (
     <div className="space-y-6 animate-float-up max-w-5xl">
@@ -81,10 +78,9 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-3 sm:grid-cols-9 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
+        <TabsList className="grid grid-cols-4 sm:grid-cols-8 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
           {[
             { value: "general", label: "General", Icon: Settings },
-            { value: "account", label: "Account", Icon: UserIcon },
             { value: "users", label: "Users", Icon: UsersIcon },
             { value: "levels", label: "Levels", Icon: Layers },
             { value: "items", label: "Items", Icon: Package },
@@ -129,63 +125,6 @@ export default function Admin() {
           <StrengthRewardsCard />
         </TabsContent>
 
-        <TabsContent value="account" className="space-y-6 mt-6">
-          {user && (
-            <GameCard tone="legendary" className="p-5">
-              <div className="menu-label mb-3">Admin · Active Account</div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Switch between your personal and test account. Test data stays isolated from your real progress.
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={slot === "personal" ? "default" : "secondary"}
-                  onClick={() => { switchToSlot(user.id, "personal"); toast.success("Switched to personal account"); }}
-                >
-                  <UserIcon className="h-4 w-4" /> Personal
-                </Button>
-                <Button
-                  variant={slot === "test" ? "default" : "secondary"}
-                  onClick={() => { switchToSlot(user.id, "test"); toast.success("Switched to test account"); }}
-                >
-                  <FlaskConical className="h-4 w-4" /> Test
-                </Button>
-                <span className="text-xs text-muted-foreground ml-2">Active: <span className="font-semibold">{slot}</span></span>
-              </div>
-            </GameCard>
-          )}
-          {slot === "test" && (
-            <GameCard tone="legendary" className="p-5">
-              <div className="menu-label mb-3">Admin · Reset Test Account</div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Wipe all chalk, logs, levels, inventory, and bosses on your test account. Your personal account is unaffected.
-              </p>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive"><Trash2 className="h-4 w-4" /> Reset test account to 0</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Reset test account?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This clears chalk, logs, level, inventory, and bosses on the active test account. This cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        resetGame();
-                        if (user) snapshotActiveSlot(user.id);
-                        toast.success("Test account reset");
-                      }}
-                    >
-                      Reset
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </GameCard>
-          )}
           <GameCard tone="legendary" className="p-5">
             <div className="menu-label mb-3">Admin · Chalk Controls</div>
             <div className="text-sm text-muted-foreground mb-3">Current balance: <span className="gradient-chalk-text font-bold tabular-nums">{s.chalk.toLocaleString()}</span></div>

@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { Plus, ArrowUp, Trophy, TrendingUp, Backpack, ShoppingBag, ChevronRight, Dumbbell } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts";
 import { gradeToVRank, V_SCALE, gradeLabels, resolveGymGradingSystems, type GradingSystem } from "@/game/gyms";
 

@@ -1,85 +1,65 @@
-## Scope
+## Time-to-Level-10 estimate
 
-This step adds **Climbing Buddy as its own first-class category** alongside Outfit / Gear / Power-ups, focused on what's visible right now: admin upload, shop display, and inventory display, with **larger, more prominent images** than other items. No perks or level multiplier yet — those land in a follow-up step.
+Level 10 requires **1,000,000 total Chalk** (cumulative cost). Chalk comes from boulders + bosses + strength, modified by your equipped buddy (+50% chalk default), gear/outfit perks, and the soft daily cap.
 
----
+### Key mechanics in the math
 
-## Data shape (`src/game/data.ts`)
+- **Daily cap** grows with level: `100 + 25% × (cost to next level)`, plus up to `+750` from a 30-day streak.
+- Past the cap, chalk earns at **×0.5**; past 2× cap, at **×0.2**. So practical max ≈ **1.5× cap/day** before it stops being worth grinding.
+- Climbing Buddy adds **+50%** to chalk (assumed equipped throughout).
 
-- Extend `ItemGroup` → `"outfit" | "gear" | "power" | "buddy"`.
-- Extend `Slot` → add `"buddy"`.
-- Extend `ShopItem.category` → add `"Buddy"`.
-- `effectAllowed`: buddies don't carry chalk/discount/crit/boss for now (return `false` for all four when group is `"buddy"`). Keeps the admin form clean and prevents accidental balance shifts.
-- Export `BUDDY_SLOT_UNLOCK_LEVEL = 6` (unused this step but referenced by inventory locked state).
+Effective daily cap at each level (no streak, with buddy):
 
-No DB migration needed — `shop_items.group/category/slot` are already free-form `text`.
+```
+Lv   Next-cost   Cap     ~Days at cap   Cumulative days
+1→2     100      125         0.8             0.8
+2→3     200      150         1.3             2.1
+3→4     500      225         2.2             4.3
+4→5    1,200     400         3.0             7.3
+5→6    3,000     850         3.5            10.8
+6→7   10,000   2,600         3.8            14.6
+7→8   35,000   8,850         4.0            18.6
+8→9  150,000  37,600         4.0            22.6
+9→10 800,000 200,100         4.0            26.6
+```
 
----
+So even a daily-grinder who hits the cap **every day** needs ~**27 days minimum**, ~**18 days** if they push into the diminishing tiers.
 
-## Admin panel (`src/pages/Admin.tsx`)
+### Sample session payouts (raw, before buddy ×1.5)
 
-In the items admin form:
+| Session | Activities | Raw chalk | With buddy |
+|---|---|---|---|
+| Light | 1 warm-up · 4 boulders · 1 send · 20 strength reps | 25+280+50+100 = 455 | **~680** |
+| Standard | 2 warm-up · 6 boulders · 1 hard · 3 sends · 1 boss attempt · 40 reps | 50+420+150+150+60+200 = 1,030 | **~1,545** |
+| Big day | 2 warm-up · 8 boulders · 2 hard · 1 project · 5 sends · 2 boss attempts · 80 reps | 50+560+300+250+250+120+400 = 1,930 | **~2,895** |
+| Beast | + boss send + strength boss send + extra projects | ≈ 3,500 raw | **~5,200** |
 
-- Add `{ value: "buddy", label: "Climbing Buddies" }` to `GROUP_OPTIONS`.
-- Add `buddy: ["Buddy"]` to `CATEGORIES_BY_GROUP`.
-- Add `Buddy: "buddy"` to `CATEGORY_TO_SLOT`.
-- When group is `buddy`, hide the chalk-bonus / discount / crit / boss inputs (they're already gated by `effectAllowed`, which now returns false for buddies).
-- Item list renders buddies in their own group section, like the other groups, but with a larger thumbnail (96–112 px) so admins can review the art quality.
+### Estimated time to Level 10 by activity profile
 
----
+Assumes climbing + strength mixed, buddy equipped, soft cap respected. Numbers round to whole weeks/months.
 
-## Shop (`src/pages/Shop.tsx`)
+| Profile | Cadence | Per-session (with buddy) | Weekly chalk | Time to L10 |
+|---|---|---|---|---|
+| **Casual** | 2 sessions/wk (light) | ~680 | ~1,400 | **~14 years** |
+| **Regular** | 3 sessions/wk (standard) | ~1,500 | ~4,500 | **~4.3 years** |
+| **Committed** | 4 sessions/wk (standard + 1 big) | ~1,800 avg | ~7,200 | **~2.7 years** |
+| **Dedicated** | 5 sessions/wk (mostly big days) | ~2,800 | ~14,000 | **~17 months** |
+| **Hardcore** | 6–7 sessions/wk, hits daily cap most days | cap-limited | ~12k–25k early, scaling to ~200k/day at L9 | **~5–8 weeks** (cap-bound floor ≈ 27 days) |
+| **Cap-floor (theoretical)** | Daily, max cap + streak + push into 0.5× tier | 1.5× cap/day | — | **~18 days** |
 
-- Add `{ key: "buddy", label: "Climbing Buddies", categories: [] }` to the `GROUPS` tab list. Place it as the **last tab** so it visually anchors the row.
-- When `group === "buddy"` (or "all" + a buddy is rendered), render a **`BuddyCard`** variant of `ShopCard` instead of the standard card:
-  - Card spans 2 columns on `sm+` (`sm:col-span-2`) so each buddy is large.
-  - Image area is square, ~200–240 px, rendered above the text (vs. the inline 80 px thumbnail other items use).
-  - Rarity ring uses `RARITY_BORDER` at a thicker ring for emphasis.
-  - Same buy/own/lock/price footer as other items.
-- "All" tab interleaves buddies but still renders them with the larger card.
+### What changes the estimate
 
----
+- **Buddy rarity / chalk perk** above the default 50% shortens timelines proportionally (e.g. a 100% buddy roughly halves the casual/regular estimates).
+- **Outfit + power-up chalk perks** stack multiplicatively and can shave 20–40% off mid-game.
+- **Streak**: a maintained 30-day streak adds up to +750 chalk/day cap — meaningful at low levels, marginal at L8+.
+- **Strength bosses** (+300 each) are the best chalk/effort ratio once unlocked; including them in every session noticeably accelerates the Committed/Dedicated tiers.
+- **Daily cap is the real bottleneck** above Level 6. Even a Hardcore player can't go faster than ~4 days/level past L7 without diminishing returns.
 
-## Inventory (`src/pages/Inventory.tsx`)
+### TL;DR
 
-- `GROUP_LABEL.buddy = "Climbing Buddies"`.
-- `GROUP_SLOTS.buddy = ["buddy"]`.
-- `SLOT_LABEL.buddy = "Buddy"`.
-- Add `"buddy"` to the `(["outfit","gear","power","buddy"])` lists in both the **Equipped** section and the **Owned** grouping. Place it **last** in equipped, **first** in owned (so the companion lane has a prominent home).
-- Equipped Buddy lane shows a single slot: empty / locked (Lv 6) / equipped, using a **larger card** (full-width on `sm+`, ~200 px image).
-- Owned Buddies render with the larger card variant (same as shop).
-- A new `BuddyCard` component (next to `ItemCard`) handles the larger layout. `ItemCard` stays unchanged for the other categories.
+- **Hardcore daily grinder:** ~1–2 months
+- **Dedicated 5×/week:** ~1.5 years
+- **Regular 3×/week:** ~4 years
+- **Casual 2×/week:** essentially endgame / multi-year goal
 
-Equip/unequip/buy logic already works generically off `slot` — no store changes needed.
-
----
-
-## New component
-
-`src/components/BuddyCard.tsx` — variant of `ItemCard` with:
-
-- Large square image on top (uses `SmartImage` with bigger `loaderSize`).
-- Name + rarity chip below.
-- Optional description.
-- Optional action button (Equip / Unequip) and admin remove button, mirroring `ItemCard` props so callers swap with minimal change.
-
-Shop uses the same component for its buddy cards (with price footer overlaid, same pattern as `ShopCard`).
-
----
-
-## Out of scope (next step)
-
-- Per-level chalk multiplier.
-- Buddy perks (Beta share, Spotter, Hype, Endurance coach).
-- Buddy slot unlock gating in the store/equip flow beyond UI display.
-- Admin per-perk inputs and rebalance integration.
-
----
-
-## Files affected
-
-- `src/game/data.ts` — extend `ItemGroup`, `Slot`, `ShopItem.category`, `effectAllowed`, add `BUDDY_SLOT_UNLOCK_LEVEL`.
-- `src/pages/Admin.tsx` — add buddy to group/category/slot maps; hide irrelevant inputs for buddies; larger thumbnail in admin item list.
-- `src/pages/Shop.tsx` — new "Climbing Buddies" tab; render buddies via larger card.
-- `src/pages/Inventory.tsx` — add buddy lane (equipped + owned) with larger card.
-- `src/components/BuddyCard.tsx` — new larger-image card component.
+The cap curve is the dominant gate — content scaling (buddies, strength) mostly affects how quickly mid-tier players reach the cap, not the cap floor itself.

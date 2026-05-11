@@ -123,7 +123,32 @@ export default function Admin() {
           <RebalanceCard />
           <DailyCapCard />
           <StrengthRewardsCard />
-        </TabsContent>
+
+          <GameCard tone="legendary" className="p-5">
+            <div className="menu-label mb-3">Admin · Reset This Account</div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Wipe all chalk, logs, levels, inventory, and bosses on your account. Cannot be undone.
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive"><Trash2 className="h-4 w-4" /> Reset account to 0</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset account?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This clears chalk, logs, level, inventory, and bosses. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => { resetGame(); toast.success("Account reset"); }}>
+                    Reset
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </GameCard>
 
           <GameCard tone="legendary" className="p-5">
             <div className="menu-label mb-3">Admin · Chalk Controls</div>

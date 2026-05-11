@@ -1174,11 +1174,12 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
               <ul className="divide-y divide-border/50">
                 {sets.map((st, i) => {
                   const lv = st.level ?? level;
+                  const setIsHold = st.mode === "hold";
                   return (
                     <li key={i} className="flex items-center justify-between gap-3 py-1.5 text-sm">
                       <span className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-muted-foreground w-10 shrink-0">Set {i + 1}</span>
-                        <span className="font-bold tabular-nums">L{lv} · {workout === "handstand" ? handstandBucketLabel(st.reps) : `${st.reps} reps`}</span>
+                        <span className="font-bold tabular-nums">L{lv} · {setIsHold ? `Hold ${handstandBucketLabel(st.reps)}` : `${st.reps} reps`}</span>
                         <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv)}</span>
                       </span>
                       {st.restSeconds ? (
@@ -1191,14 +1192,77 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                 })}
               </ul>
               <div className="mt-2 text-xs text-muted-foreground">
-                {workout === "handstand"
-                  ? <>Total holds: <span className="font-bold text-foreground tabular-nums">{sets.length}</span></>
-                  : <>Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></>}
+                {isHandstand ? (() => {
+                  const holds = sets.filter(st => st.mode === "hold").length;
+                  const pushups = sets.filter(st => st.mode !== "hold").reduce((a, b) => a + b.reps, 0);
+                  const parts: string[] = [];
+                  if (holds > 0) parts.push(`${holds} hold${holds === 1 ? "" : "s"}`);
+                  if (pushups > 0) parts.push(`${pushups} pushup rep${pushups === 1 ? "" : "s"}`);
+                  return <>Total: <span className="font-bold text-foreground tabular-nums">{parts.join(" · ") || "—"}</span></>;
+                })() : (
+                  <>Total reps: <span className="font-bold text-foreground tabular-nums">{totalReps}</span></>
+                )}
               </div>
             </div>
           )}
 
-          {workout === "handstand" ? (
+          {isHandstand && (
+            <Field label="What are you logging?">
+              <div className="grid grid-cols-2 gap-2">
+                {(["pushup", "hold"] as const).map(m => {
+                  const selected = handstandMode === m;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => {
+                        setHandstandMode(m);
+                        setReps(m === "hold" ? 1 : 5);
+                      }}
+                      className={cn(
+                        "rounded-lg border-2 px-3 py-2.5 text-center font-display font-bold transition active:translate-y-[1px]",
+                        "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
+                        selected && "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40",
+                      )}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        {m === "hold" ? <Timer className="h-4 w-4" /> : <Dumbbell className="h-4 w-4" />}
+                        <span>{m === "hold" ? "Handstand Hold" : "Handstand Pushup"}</span>
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5 normal-case tracking-normal">
+                        {m === "hold" ? "Track seconds held" : "Track reps"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          )}
+
+          {isHold ? (
+            <Field label="How long did you hold?">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {HANDSTAND_SECOND_BUCKETS.map(b => {
+                  const selected = reps === b.idx;
+                  return (
+                    <button
+                      key={b.idx}
+                      type="button"
+                      onClick={() => setReps(b.idx)}
+                      className={cn(
+                        "rounded-lg border-2 px-3 py-3 text-center font-display font-bold transition active:translate-y-[1px]",
+                        "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
+                        selected && "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40",
+                      )}
+                    >
+                      <Timer className="h-4 w-4 mx-auto text-muted-foreground" />
+                      <div className="mt-1 text-base">{b.label}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          ) : (
             <Field label="How long did you hold?">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {HANDSTAND_SECOND_BUCKETS.map(b => {

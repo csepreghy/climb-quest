@@ -1073,8 +1073,12 @@ interface AdminUserRow {
 }
 
 function UsersAdmin() {
+  const { user } = useAuth();
   const [rows, setRows] = useState<AdminUserRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmText, setConfirmText] = useState("");
+  const [target, setTarget] = useState<AdminUserRow | null>(null);
 
   async function load() {
     const { data, error } = await supabase.rpc("get_admin_users");
@@ -1082,6 +1086,26 @@ function UsersAdmin() {
     else setRows((data ?? []) as any);
   }
   useEffect(() => { load(); }, []);
+
+  async function performDelete() {
+    if (!target) return;
+    setDeleting(target.user_id);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+        body: { user_id: target.user_id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success(`Deleted ${target.character_name ?? target.email ?? "user"}`);
+      setRows(prev => prev?.filter(r => r.user_id !== target.user_id) ?? null);
+      setTarget(null);
+      setConfirmText("");
+    } catch (e: any) {
+      toast.error("Delete failed: " + (e?.message ?? String(e)));
+    } finally {
+      setDeleting(null);
+    }
+  }
 
   return (
     <GameCard tone="legendary" className="p-5">
@@ -1100,6 +1124,7 @@ function UsersAdmin() {
                 <th className="text-right py-2 px-2">Logs</th>
                 <th className="text-right py-2 px-2">Bosses</th>
                 <th className="text-left py-2 px-2">Joined</th>
+                <th className="text-right py-2 px-2"></th>
               </tr>
             </thead>
             <tbody>
@@ -1120,12 +1145,48 @@ function UsersAdmin() {
                   <td className="py-2 px-2 text-right tabular-nums">{r.total_logs}</td>
                   <td className="py-2 px-2 text-right tabular-nums">{r.bosses_sent}</td>
                   <td className="py-2 px-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td className="py-2 px-2 text-right">
+                    {r.user_id !== user?.id && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Delete user"
+                        disabled={deleting === r.user_id}
+                        onClick={() => { setTarget(r); setConfirmText(""); }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <AlertDialog open={!!target} onOpenChange={(o) => { if (!o) { setTarget(null); setConfirmText(""); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Permanently delete this user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This deletes <strong>{target?.character_name ?? target?.email}</strong> and all of their data:
+              profile, game state (both slots), feedback, and login. This cannot be undone.
+              Type <code>DELETE</code> to confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="DELETE" />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={confirmText !== "DELETE" || !!deleting}
+              onClick={performDelete}
+            >
+              {deleting ? "Deleting…" : "Delete user"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </GameCard>
   );
 }

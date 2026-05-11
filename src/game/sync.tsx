@@ -93,12 +93,14 @@ export function GameSync() {
         lastRemoteUpdatedAt.current = data.updated_at ?? null;
         const game = data.game as unknown as GameState | Record<string, never>;
         const gyms = data.gyms as unknown as GymState | Record<string, never>;
+        remoteHadContent.current = looksPopulated(game);
         // Always replace — empty object yields a fresh profile, which is what
         // a brand-new personal slot should look like.
         replaceGameState((game ?? {}) as GameState);
         replaceGymsState((gyms ?? {}) as GymState);
       } else {
         // No row yet for this slot — start fresh and create the row.
+        remoteHadContent.current = false;
         replaceGameState({} as GameState);
         replaceGymsState({} as GymState);
         const { data: inserted } = await supabase.from("user_game_state").upsert({

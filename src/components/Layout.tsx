@@ -24,6 +24,7 @@ import chalkBagImg from "@/assets/chalk-bag.png";
 import logoImg from "@/assets/climbquest-logo.png";
 import { LevelPreviewCard } from "@/components/LevelPreviewCard";
 import { useAllGyms } from "@/game/allGyms";
+import { FeedbackButton } from "@/components/FeedbackButton";
 
 const NAV_BASE = [
   { to: "/home", label: "Home", icon: Home },
@@ -306,6 +307,8 @@ export default function Layout() {
       <main className="flex-1 container py-6 sm:py-8 pb-28 md:pb-10">
         <Outlet />
       </main>
+
+      <FeedbackButton />
 
       {/* Bottom nav (mobile) */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border">

@@ -809,7 +809,8 @@ const REST_OPTIONS = [1, 2, 3, 5]; // minutes
 const CORE_LEVEL_IMAGES: Record<number, string> = { 1: core1, 2: core2, 3: core3, 4: core4, 5: core5 };
 const PULLUP_LEVEL_IMAGES: Record<number, string> = { 1: pullup1, 2: pullup2, 3: pullup3, 4: pullup4, 5: pullup5, 6: pullup6 };
 const PUSHUP_LEVEL_IMAGES: Record<number, string> = { 1: pushup1, 2: pushup2, 3: pushup3, 4: pushup4, 5: pushup5 };
-const HANDSTAND_LEVEL_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
+const HANDSTAND_HOLD_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
+const HANDSTAND_PUSHUP_IMAGES: Record<number, string> = { 1: hspu1, 2: hspu2, 3: hspu3, 4: hspu4, 5: hspu5 };
 const SQUAT_LEVEL_IMAGES: Record<number, string> = { 1: squat1, 2: squat2, 3: squat3, 4: squat4, 5: squat5 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {

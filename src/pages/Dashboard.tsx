@@ -228,7 +228,7 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
   );
 }
 
-function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
+export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
   // Pick the grading system used most often in the last 30 days, based on which
   // logs' grade labels match each gym's available systems.
   const dominantGs = useMemo<GradingSystem | null>(() => {
@@ -393,7 +393,7 @@ function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: st
  * Boss-send sessions get a small +25% credit since they're max-effort single sets.
  * Bars are split by workout (core vs pull-up) so the user can see balance.
  */
-function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
+export function StrengthVolumeChart({ sessions }: { sessions: StrengthSession[] }) {
   const isMobile = useIsMobile();
   const data = useMemo(() => {
     const DAYS = isMobile ? 14 : 30;

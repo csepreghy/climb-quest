@@ -842,9 +842,14 @@ function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void;
                   ))}
                 </div>
               )}
-              <div className="mt-2 text-[11px] text-muted-foreground">
-                {b.attempts && b.attempts.length > 0 ? `${b.attempts.length} session${b.attempts.length === 1 ? "" : "s"}` : "No sessions yet"}
-              </div>
+              {(() => {
+                const sessionCount = (b.attempts?.length ?? 0) + s.logs.filter(l => l.bossId === b.id).length;
+                return (
+                  <div className="mt-2 text-[11px] text-muted-foreground">
+                    {sessionCount > 0 ? `${sessionCount} session${sessionCount === 1 ? "" : "s"}` : "No sessions yet"}
+                  </div>
+                );
+              })()}
             </button>
           );
         })}

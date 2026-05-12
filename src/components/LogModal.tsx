@@ -54,12 +54,13 @@ import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 
-type Mode = "pick" | "boulder-pick" | "form" | "strength";
+type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing";
 type Kind = "boulder" | "boss";
 
 export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null }) {
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
+  const [selectedBoss, setSelectedBoss] = useState<Boss | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -68,9 +69,23 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
         setMode("form");
       } else {
         setMode("pick");
+        setSelectedBoss(null);
       }
     }
   }, [open, editLog]);
+
+  function openBossFlow() {
+    if (hasBossSendOnDate(new Date().toISOString())) {
+      toast.error("You seem to have defeated more than one boss in a single day, are you sure both were worthy of bosses?");
+    }
+    // Auto-resolve any expired bosses up-front so the user sees current state.
+    const expired = expireOverdueBosses();
+    if (expired.length > 0) {
+      toast.error(`${expired.length} boss${expired.length === 1 ? "" : "es"} timed out — you lost ${expired.length * BOSS_DEFEAT_PENALTY} chalk.`);
+    }
+    setKind("boss");
+    setMode("boss-pick");
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,27 +132,37 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
                 image={bossImg}
                 title="Boss Project"
                 desc="Hard. Multi-session grind. Your nemesis."
-                onClick={() => {
-                  if (hasBossSendOnDate(new Date().toISOString())) {
-                    toast.error("You seem to have defeated more than one boss in a single day, are you sure both were worthy of bosses?");
-                    setKind("boulder"); setMode("form");
-                    return;
-                  }
-                  setKind("boss"); setMode("form");
-                }}
+                onClick={openBossFlow}
                 ring="ring-[hsl(var(--boss))]/70"
               />
             </div>
           </>
         ) : mode === "strength" ? (
           <StrengthFlow onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
+        ) : mode === "boss-pick" ? (
+          <BossPicker
+            onBack={() => setMode("boulder-pick")}
+            onPickExisting={(b) => { setSelectedBoss(b); setMode("boss-existing"); }}
+            onPickNew={() => { setSelectedBoss(null); setMode("boss-new"); }}
+          />
+        ) : mode === "boss-existing" && selectedBoss ? (
+          <BossForm
+            onBack={() => setMode("boss-pick")}
+            onDone={() => onOpenChange(false)}
+            existingBoss={selectedBoss}
+          />
+        ) : mode === "boss-new" ? (
+          <BossForm
+            onBack={() => setMode("boss-pick")}
+            onDone={() => onOpenChange(false)}
+          />
         ) : kind === "boss" ? (
           <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
         ) : (
           <BoulderForm
             onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")}
             onDone={() => onOpenChange(false)}
-            onSwitchToBoss={() => setKind("boss")}
+            onSwitchToBoss={openBossFlow}
             editLog={editLog ?? null}
           />
         )}

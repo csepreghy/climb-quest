@@ -511,7 +511,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
       }
       const created = createBossProject({
         grade, styles, gymId: gymId || undefined, holdColorId: holdColorId || undefined,
-        notes: notes || undefined, name: bossName || undefined,
+        notes: notes || undefined,
       });
       if (!created.ok) { toast.error(created.reason ?? "Could not create boss"); return; }
       bossId = created.boss.id;

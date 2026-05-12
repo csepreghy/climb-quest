@@ -601,78 +601,104 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
     );
   }
 
+  const holdColor = gym?.holdColors.find(c => c.id === holdColorId) ?? null;
+
   return (
     <>
       <DialogHeader>
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
           <HeaderImage src={bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/50" />
-          <DialogTitle>Log Boss Project</DialogTitle>
+          <DialogTitle>{existingBoss ? "Boss Project" : "Log Boss Project"}</DialogTitle>
         </div>
       </DialogHeader>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+        {existingBoss && (
+          <BossSummary boss={existingBoss} gymName={gym?.name} holdColorHex={holdColor?.hex} holdColorHex2={holdColor?.hex2} holdColorName={holdColor?.name} />
+        )}
+
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Date">
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
           </Field>
-          <Field label="Gym">
-            <Select value={gymId} onValueChange={setGymId} disabled={gymState.gyms.length === 0}>
-              <SelectTrigger><SelectValue placeholder="Pick a gym" /></SelectTrigger>
-              <SelectContent>{gymState.gyms.map(g => <SelectItem key={g.id} value={g.id}>{g.name}{g.primary ? " ★" : ""}</SelectItem>)}</SelectContent>
-            </Select>
-          </Field>
-          <Field label="Grading system">
-            <Select value={gsId} onValueChange={setGsId} disabled={availableSystems.length <= 1}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{availableSystems.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}</SelectContent>
-            </Select>
-          </Field>
-          <Field label="Grade">
-            <Select value={grade} onValueChange={setGrade}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
-            </Select>
-          </Field>
-          <Field label="Hold color">
-            {gym && gym.holdColors.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {gym.holdColors.map(c => (
-                  <button key={c.id} type="button" onClick={() => setHoldColorId(c.id === holdColorId ? "" : c.id)}
-                    title={c.name}
-                    className={cn("h-8 w-8 rounded-full border-2 transition",
-                      holdColorId === c.id ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40" : "border-[hsl(var(--panel-frame))] hover:border-[hsl(var(--btn-orange))]")}
-                    style={{ background: c.hex2 ? `linear-gradient(90deg, ${c.hex} 0 50%, ${c.hex2} 50% 100%)` : c.hex }} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground italic">Add hold colors in My Gym.</div>
-            )}
-          </Field>
+          {!lockedFields && (
+            <Field label="Gym">
+              <Select value={gymId} onValueChange={setGymId} disabled={gymState.gyms.length === 0}>
+                <SelectTrigger><SelectValue placeholder="Pick a gym" /></SelectTrigger>
+                <SelectContent>{gymState.gyms.map(g => <SelectItem key={g.id} value={g.id}>{g.name}{g.primary ? " ★" : ""}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
+          )}
+          {!lockedFields && (
+            <Field label="Grading system">
+              <Select value={gsId} onValueChange={setGsId} disabled={availableSystems.length <= 1}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{availableSystems.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
+          )}
+          {!lockedFields && (
+            <Field label="Grade">
+              <Select value={grade} onValueChange={setGrade}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
+          )}
+          {!lockedFields && (
+            <Field label="Hold color">
+              {gym && gym.holdColors.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {gym.holdColors.map(c => (
+                    <button key={c.id} type="button" onClick={() => setHoldColorId(c.id === holdColorId ? "" : c.id)}
+                      title={c.name}
+                      className={cn("h-8 w-8 rounded-full border-2 transition",
+                        holdColorId === c.id ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40" : "border-[hsl(var(--panel-frame))] hover:border-[hsl(var(--btn-orange))]")}
+                      style={{ background: c.hex2 ? `linear-gradient(90deg, ${c.hex} 0 50%, ${c.hex2} 50% 100%)` : c.hex }} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-xs text-muted-foreground italic">Add hold colors in My Gym.</div>
+              )}
+            </Field>
+          )}
+          {!lockedFields && !editLog && (
+            <Field label="Nickname (optional)">
+              <Input value={bossName} onChange={e => setBossName(e.target.value)} placeholder="e.g. The Crimp Lord" />
+            </Field>
+          )}
         </div>
 
-        <div>
-          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {STYLES.map(st => (
-              <button key={st} type="button" onClick={() => toggleStyle(st)}
-                className={cn("text-xs px-2.5 py-1 rounded-full border-2 capitalize transition",
-                  styles.includes(st)
-                    ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
-                    : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
-                {st}
-              </button>
-            ))}
+        {!lockedFields && (
+          <div>
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {STYLES.map(st => (
+                <button key={st} type="button" onClick={() => toggleStyle(st)}
+                  className={cn("text-xs px-2.5 py-1 rounded-full border-2 capitalize transition",
+                    styles.includes(st)
+                      ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
+                      : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
+                  {st}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <Field label="Notes">
           <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="So close. The crux is brutal." rows={2} />
         </Field>
       </div>
 
-      <div className="flex justify-end gap-2 pt-3">
+      <div className="flex flex-wrap justify-end gap-2 pt-3">
         <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
+        {existingBoss && (
+          <GameButton variant="ghost" size="sm" onClick={() => setAdmitOpen(true)}>
+            <Flag className="h-4 w-4" /> Admit defeat
+          </GameButton>
+        )}
         {editLog ? (
           <GameButton variant="success" size="md" onClick={() => commit(editLog.attemptType === "send" || editLog.attemptType === "flash" ? "defeat" : "attempt")}>
             Save changes
@@ -687,6 +713,160 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
             </GameButton>
           </>
         )}
+      </div>
+
+      <Dialog open={admitOpen} onOpenChange={setAdmitOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Admit defeat?</DialogTitle>
+            <DialogDescription>
+              The boss wins. You'll lose <strong>{BOSS_DEFEAT_PENALTY} chalk</strong> and this project will be retired.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-2">
+            <GameButton variant="ghost" size="sm" onClick={() => setAdmitOpen(false)}>Cancel</GameButton>
+            <GameButton variant="danger" size="md" onClick={handleAdmitDefeat}>Admit defeat</GameButton>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// ===================== BOSS PICKER =====================
+
+function formatBossTimeLeft(b: Boss): { label: string; severity: "ok" | "warn" | "crit" } {
+  const ms = bossExpiresAt(b) - Date.now();
+  if (ms <= 0) return { label: "Time's up", severity: "crit" };
+  const days = Math.ceil(ms / 86400000);
+  if (days <= 7) return { label: `${days}d left`, severity: "crit" };
+  if (days <= 21) return { label: `${days}d left`, severity: "warn" };
+  if (days < 60) return { label: `${days}d left`, severity: "ok" };
+  const months = Math.round(days / 30);
+  return { label: `~${months}mo left`, severity: "ok" };
+}
+
+function BossSummary({ boss, gymName, holdColorHex, holdColorHex2, holdColorName }: { boss: Boss; gymName?: string; holdColorHex?: string; holdColorHex2?: string; holdColorName?: string }) {
+  const tl = formatBossTimeLeft(boss);
+  const sevClass = tl.severity === "crit" ? "text-[hsl(var(--boss))]" : tl.severity === "warn" ? "text-[hsl(var(--btn-orange))]" : "text-muted-foreground";
+  return (
+    <div className="rounded-lg border-2 border-[hsl(var(--boss))]/40 bg-secondary/40 p-3 space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="font-display font-bold text-base truncate">
+          {boss.name || `${boss.grade} Boss`}
+        </div>
+        <div className={cn("text-xs flex items-center gap-1 font-bold", sevClass)}>
+          <Clock className="h-3.5 w-3.5" /> {tl.label}
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="font-semibold text-foreground">{boss.grade}</span>
+        {gymName && <span>· {gymName}</span>}
+        {holdColorHex && (
+          <span className="flex items-center gap-1">
+            ·
+            <span
+              className="inline-block h-3.5 w-3.5 rounded-full border border-border"
+              style={{ background: holdColorHex2 ? `linear-gradient(90deg, ${holdColorHex} 0 50%, ${holdColorHex2} 50% 100%)` : holdColorHex }}
+            />
+            {holdColorName}
+          </span>
+        )}
+      </div>
+      {boss.styles.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {boss.styles.map(s => (
+            <span key={s} className="text-[10px] capitalize px-2 py-0.5 rounded-full border border-border bg-background/60">
+              {s}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void; onPickExisting: (b: Boss) => void; onPickNew: () => void }) {
+  const s = useGame();
+  const gymState = useGyms();
+  const active = activeBossProjects(s);
+  const atCap = active.length >= MAX_ACTIVE_BOSSES;
+  return (
+    <>
+      <DialogHeader>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+          <HeaderImage src={bossImg} alt="Boss" ring="ring-2 ring-[hsl(var(--boss))]/50" />
+          <DialogTitle>Boss Projects</DialogTitle>
+        </div>
+        <DialogDescription>
+          Up to {MAX_ACTIVE_BOSSES} active bosses. Each one gives you {BOSS_DEADLINE_DAYS} days — fail to send and you lose {BOSS_DEFEAT_PENALTY} chalk.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+        {active.length === 0 && (
+          <div className="text-sm text-muted-foreground italic px-1">
+            No active boss projects yet. Pick a nemesis below.
+          </div>
+        )}
+        {active.map(b => {
+          const gym = gymState.gyms.find(g => g.id === b.gymId);
+          const holdColor = gym?.holdColors.find(c => c.id === b.holdColorId);
+          const tl = formatBossTimeLeft(b);
+          const sevClass = tl.severity === "crit" ? "text-[hsl(var(--boss))]" : tl.severity === "warn" ? "text-[hsl(var(--btn-orange))]" : "text-muted-foreground";
+          return (
+            <button
+              key={b.id}
+              onClick={() => onPickExisting(b)}
+              className="w-full text-left rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-3 transition hover:border-[hsl(var(--boss))] hover:ring-2 ring-[hsl(var(--boss))]/30"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-display font-bold truncate">{b.name || `${b.grade} Boss`}</div>
+                <div className={cn("text-xs flex items-center gap-1 font-bold", sevClass)}>
+                  <Clock className="h-3.5 w-3.5" /> {tl.label}
+                </div>
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span className="font-semibold text-foreground">{b.grade}</span>
+                {gym && <span>· {gym.name}</span>}
+                {holdColor && (
+                  <span className="flex items-center gap-1">
+                    ·
+                    <span
+                      className="inline-block h-3.5 w-3.5 rounded-full border border-border"
+                      style={{ background: holdColor.hex2 ? `linear-gradient(90deg, ${holdColor.hex} 0 50%, ${holdColor.hex2} 50% 100%)` : holdColor.hex }}
+                    />
+                    {holdColor.name}
+                  </span>
+                )}
+                {b.styles.length > 0 && <span>· {b.styles.join(", ")}</span>}
+              </div>
+              <div className="mt-2 text-[11px] text-muted-foreground">
+                {b.attempts && b.attempts.length > 0 ? `${b.attempts.length} session${b.attempts.length === 1 ? "" : "s"}` : "No sessions yet"}
+              </div>
+            </button>
+          );
+        })}
+
+        <button
+          onClick={onPickNew}
+          disabled={atCap}
+          className={cn(
+            "w-full text-left rounded-xl border-2 border-dashed border-[hsl(var(--panel-frame))] bg-secondary/20 p-3 transition",
+            atCap ? "opacity-50 cursor-not-allowed" : "hover:border-[hsl(var(--btn-green))] hover:bg-secondary/40"
+          )}
+          title={atCap ? `Defeat or admit defeat on a boss to make room (max ${MAX_ACTIVE_BOSSES}).` : undefined}
+        >
+          <div className="flex items-center gap-2 font-display font-bold">
+            <Plus className="h-4 w-4" /> Log a new boss project
+          </div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            {atCap
+              ? `You're at the ${MAX_ACTIVE_BOSSES}-boss cap. Send or retire one first.`
+              : `${MAX_ACTIVE_BOSSES - active.length} slot${MAX_ACTIVE_BOSSES - active.length === 1 ? "" : "s"} left.`}
+          </div>
+        </button>
       </div>
     </>
   );

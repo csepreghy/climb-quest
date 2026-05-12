@@ -32,6 +32,8 @@ export interface BoulderLog {
   attemptType?: AttemptType;
   holdColorId?: string;
   gymId?: string;
+  /** Linked boss-project id, when this log was generated from a boss project. */
+  bossId?: string;
 }
 
 export interface BossAttempt {

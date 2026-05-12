@@ -446,6 +446,13 @@ function ChalkChip({ value }: { value: number }) {
                     </p>
                   </div>
                   <div className="px-3 py-2">
+                    <div className="font-semibold text-[hsl(var(--boss))]">💀 Boss project penalty</div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      You can keep up to 5 active boss projects, each with 60 days to defeat.
+                      If a boss times out — or you admit defeat — you lose <strong>100 chalk</strong> per boss.
+                    </p>
+                  </div>
+                  <div className="px-3 py-2">
                     <div className="font-semibold text-[hsl(var(--btn-orange))]">🛍️ Shop discount</div>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Lowers prices in the Shop. Discounts don't stack — only your strongest equipped discount item is

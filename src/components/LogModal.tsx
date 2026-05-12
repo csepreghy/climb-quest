@@ -479,7 +479,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
   useEffect(() => { if (!lockedFields && grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
   const [styles, setStyles] = useState<Style[]>(existingBoss?.styles ?? editLog?.styles ?? []);
   const [notes, setNotes] = useState(editLog?.notes ?? "");
-  const [bossName, setBossName] = useState<string>("");
+  
   const [admitOpen, setAdmitOpen] = useState(false);
 
   const [step, setStep] = useState<BossStep>("main");
@@ -511,7 +511,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
       }
       const created = createBossProject({
         grade, styles, gymId: gymId || undefined, holdColorId: holdColorId || undefined,
-        notes: notes || undefined, name: bossName || undefined,
+        notes: notes || undefined,
       });
       if (!created.ok) { toast.error(created.reason ?? "Could not create boss"); return; }
       bossId = created.boss.id;
@@ -663,11 +663,6 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
               )}
             </Field>
           )}
-          {!lockedFields && !editLog && (
-            <Field label="Nickname (optional)">
-              <Input value={bossName} onChange={e => setBossName(e.target.value)} placeholder="e.g. The Crimp Lord" />
-            </Field>
-          )}
         </div>
 
         {!lockedFields && (
@@ -751,27 +746,24 @@ function BossSummary({ boss, gymName, holdColorHex, holdColorHex2, holdColorName
   const sevClass = tl.severity === "crit" ? "text-[hsl(var(--boss))]" : tl.severity === "warn" ? "text-[hsl(var(--btn-orange))]" : "text-muted-foreground";
   return (
     <div className="rounded-lg border-2 border-[hsl(var(--boss))]/40 bg-secondary/40 p-3 space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <div className="font-display font-bold text-base truncate">
-          {boss.name || `${boss.grade} Boss`}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          {holdColorHex && (
+            <span
+              className="inline-block h-9 w-9 rounded-full border-2 border-border shrink-0"
+              style={{ background: holdColorHex2 ? `linear-gradient(90deg, ${holdColorHex} 0 50%, ${holdColorHex2} 50% 100%)` : holdColorHex }}
+              aria-label={holdColorName}
+            />
+          )}
+          <div className="min-w-0">
+            <div className="font-display font-bold text-xl leading-none">{boss.grade}</div>
+            {holdColorName && <div className="text-xs text-muted-foreground mt-1 truncate">{holdColorName}{gymName ? ` · ${gymName}` : ""}</div>}
+            {!holdColorName && gymName && <div className="text-xs text-muted-foreground mt-1 truncate">{gymName}</div>}
+          </div>
         </div>
-        <div className={cn("text-xs flex items-center gap-1 font-bold", sevClass)}>
+        <div className={cn("text-xs flex items-center gap-1 font-bold shrink-0", sevClass)}>
           <Clock className="h-3.5 w-3.5" /> {tl.label}
         </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-        <span className="font-semibold text-foreground">{boss.grade}</span>
-        {gymName && <span>· {gymName}</span>}
-        {holdColorHex && (
-          <span className="flex items-center gap-1">
-            ·
-            <span
-              className="inline-block h-3.5 w-3.5 rounded-full border border-border"
-              style={{ background: holdColorHex2 ? `linear-gradient(90deg, ${holdColorHex} 0 50%, ${holdColorHex2} 50% 100%)` : holdColorHex }}
-            />
-            {holdColorName}
-          </span>
-        )}
       </div>
       {(boss.styles?.length ?? 0) > 0 && (
         <div className="flex flex-wrap gap-1">
@@ -800,7 +792,7 @@ function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void;
           <DialogTitle>Boss Projects</DialogTitle>
         </div>
         <DialogDescription>
-          Up to {MAX_ACTIVE_BOSSES} active bosses. Each one gives you {BOSS_DEADLINE_DAYS} days — fail to send and you lose {BOSS_DEFEAT_PENALTY} chalk.
+          Keep track of up to {MAX_ACTIVE_BOSSES} boss projects. Each one gives you {BOSS_DEADLINE_DAYS} day to defeat.
         </DialogDescription>
       </DialogHeader>
 
@@ -821,27 +813,35 @@ function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void;
               onClick={() => onPickExisting(b)}
               className="w-full text-left rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-3 transition hover:border-[hsl(var(--boss))] hover:ring-2 ring-[hsl(var(--boss))]/30"
             >
-              <div className="flex items-center justify-between gap-2">
-                <div className="font-display font-bold truncate">{b.name || `${b.grade} Boss`}</div>
-                <div className={cn("text-xs flex items-center gap-1 font-bold", sevClass)}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  {holdColor && (
+                    <span
+                      className="inline-block h-9 w-9 rounded-full border-2 border-border shrink-0"
+                      style={{ background: holdColor.hex2 ? `linear-gradient(90deg, ${holdColor.hex} 0 50%, ${holdColor.hex2} 50% 100%)` : holdColor.hex }}
+                      aria-label={holdColor.name}
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <div className="font-display font-bold text-xl leading-none">{b.grade}</div>
+                    <div className="mt-1 text-xs text-muted-foreground truncate">
+                      {holdColor?.name}
+                      {holdColor && gym ? " · " : ""}
+                      {gym?.name}
+                    </div>
+                  </div>
+                </div>
+                <div className={cn("text-xs flex items-center gap-1 font-bold shrink-0", sevClass)}>
                   <Clock className="h-3.5 w-3.5" /> {tl.label}
                 </div>
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">{b.grade}</span>
-                {gym && <span>· {gym.name}</span>}
-                {holdColor && (
-                  <span className="flex items-center gap-1">
-                    ·
-                    <span
-                      className="inline-block h-3.5 w-3.5 rounded-full border border-border"
-                      style={{ background: holdColor.hex2 ? `linear-gradient(90deg, ${holdColor.hex} 0 50%, ${holdColor.hex2} 50% 100%)` : holdColor.hex }}
-                    />
-                    {holdColor.name}
-                  </span>
-                )}
-                {(b.styles?.length ?? 0) > 0 && <span>· {b.styles!.join(", ")}</span>}
-              </div>
+              {(b.styles?.length ?? 0) > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {b.styles!.map(s => (
+                    <span key={s} className="text-[10px] capitalize px-2 py-0.5 rounded-full border border-border bg-background/60">{s}</span>
+                  ))}
+                </div>
+              )}
               <div className="mt-2 text-[11px] text-muted-foreground">
                 {b.attempts && b.attempts.length > 0 ? `${b.attempts.length} session${b.attempts.length === 1 ? "" : "s"}` : "No sessions yet"}
               </div>

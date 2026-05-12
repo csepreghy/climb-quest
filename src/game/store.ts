@@ -480,6 +480,7 @@ export interface LogInput {
   attemptType?: AttemptType;
   holdColorId?: string;
   gymId?: string;
+  bossId?: string;
   chalkMultiplier?: number;
   /** Pre-computed difficulty multiplier (climb grade vs player ceiling). Default 1. */
   difficultyMult?: number;

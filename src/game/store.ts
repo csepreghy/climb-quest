@@ -44,17 +44,45 @@ export interface BossAttempt {
 
 export interface Boss {
   id: string;
-  name: string;
+  /** Optional nickname. */
+  name?: string;
   grade: string;
-  style: Style;
-  difficulty: number;
-  emoji: string;
-  flavor: string;
-  attempts: BossAttempt[];
-  highPoint: number; // 0-100
+  /** Multi-style tags. Legacy single `style` migrated into here. */
+  styles: Style[];
+  gymId?: string;
+  holdColorId?: string;
+  notes?: string;
+  /** ISO timestamp the boss project was created. Drives the 2-month deadline. */
+  createdAt: string;
+  /** True after the user successfully defeats the boss. */
   sent: boolean;
   sentDate?: string;
+  /** True after the user admitted defeat (or it expired). Inactive but kept for stats. */
+  defeated?: boolean;
+  defeatedDate?: string;
+  /** "admitted" if user manually admitted defeat, "expired" if past deadline. */
+  defeatedReason?: "admitted" | "expired";
+  // ----- legacy fields (kept optional for back-compat) -----
+  style?: Style;
+  difficulty?: number;
+  emoji?: string;
+  flavor?: string;
+  attempts?: BossAttempt[];
+  highPoint?: number;
   active?: boolean;
+}
+
+/** Maximum simultaneously-active boss projects per user. */
+export const MAX_ACTIVE_BOSSES = 5;
+/** Deadline before an unfinished boss auto-defeats the user. */
+export const BOSS_DEADLINE_DAYS = 60;
+/** Chalk penalty when a boss defeats the user (manual or expiry). */
+export const BOSS_DEFEAT_PENALTY = 100;
+export function bossExpiresAt(b: Boss): number {
+  return new Date(b.createdAt).getTime() + BOSS_DEADLINE_DAYS * 86400000;
+}
+export function isBossExpired(b: Boss, now = Date.now()): boolean {
+  return !b.sent && !b.defeated && now >= bossExpiresAt(b);
 }
 
 export type Equipped = Partial<Record<Slot, string>>;

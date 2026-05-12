@@ -32,6 +32,8 @@ export interface BoulderLog {
   attemptType?: AttemptType;
   holdColorId?: string;
   gymId?: string;
+  /** Linked boss-project id, when this log was generated from a boss project. */
+  bossId?: string;
 }
 
 export interface BossAttempt {
@@ -44,17 +46,45 @@ export interface BossAttempt {
 
 export interface Boss {
   id: string;
-  name: string;
+  /** Optional nickname. */
+  name?: string;
   grade: string;
-  style: Style;
-  difficulty: number;
-  emoji: string;
-  flavor: string;
-  attempts: BossAttempt[];
-  highPoint: number; // 0-100
+  /** Multi-style tags. Legacy single `style` migrated into here. */
+  styles: Style[];
+  gymId?: string;
+  holdColorId?: string;
+  notes?: string;
+  /** ISO timestamp the boss project was created. Drives the 2-month deadline. */
+  createdAt: string;
+  /** True after the user successfully defeats the boss. */
   sent: boolean;
   sentDate?: string;
+  /** True after the user admitted defeat (or it expired). Inactive but kept for stats. */
+  defeated?: boolean;
+  defeatedDate?: string;
+  /** "admitted" if user manually admitted defeat, "expired" if past deadline. */
+  defeatedReason?: "admitted" | "expired";
+  // ----- legacy fields (kept optional for back-compat) -----
+  style?: Style;
+  difficulty?: number;
+  emoji?: string;
+  flavor?: string;
+  attempts?: BossAttempt[];
+  highPoint?: number;
   active?: boolean;
+}
+
+/** Maximum simultaneously-active boss projects per user. */
+export const MAX_ACTIVE_BOSSES = 5;
+/** Deadline before an unfinished boss auto-defeats the user. */
+export const BOSS_DEADLINE_DAYS = 60;
+/** Chalk penalty when a boss defeats the user (manual or expiry). */
+export const BOSS_DEFEAT_PENALTY = 100;
+export function bossExpiresAt(b: Boss): number {
+  return new Date(b.createdAt).getTime() + BOSS_DEADLINE_DAYS * 86400000;
+}
+export function isBossExpired(b: Boss, now = Date.now()): boolean {
+  return !b.sent && !b.defeated && now >= bossExpiresAt(b);
 }
 
 export type Equipped = Partial<Record<Slot, string>>;
@@ -141,10 +171,7 @@ const initialState = (): State => ({
   pendingConsumable: null,
   badges: [],
   badgeChalkClaimedFor: [],
-  bosses: [
-    { ...spawnBoss(BOSS_TEMPLATES[0]), active: true },
-    spawnBoss(BOSS_TEMPLATES[1]),
-  ],
+  bosses: [],
   logs: [],
   strengthSessions: [],
   strengthLevels: {},
@@ -156,7 +183,20 @@ const initialState = (): State => ({
 });
 
 function spawnBoss(t: BossTemplate): Boss {
-  return { id: t.id + "-" + Math.random().toString(36).slice(2,7), name: t.name, grade: t.grade, style: t.style, difficulty: t.difficulty, emoji: t.emoji, flavor: t.flavor, attempts: [], highPoint: 0, sent: false };
+  return {
+    id: t.id + "-" + Math.random().toString(36).slice(2,7),
+    name: t.name,
+    grade: t.grade,
+    styles: [t.style],
+    style: t.style,
+    difficulty: t.difficulty,
+    emoji: t.emoji,
+    flavor: t.flavor,
+    attempts: [],
+    highPoint: 0,
+    sent: false,
+    createdAt: new Date().toISOString(),
+  };
 }
 
 // ----- Store -----
@@ -198,6 +238,17 @@ function load(): State {
       const hp = (merged.strengthLevels as Record<string, number>).handstand_pushup ?? 0;
       merged.strengthLevels.handstand = Math.max(merged.strengthLevels.handstand ?? 0, hp);
       delete (merged.strengthLevels as Record<string, number>).handstand_pushup;
+    }
+    // Migrate / clean up legacy bosses: strip template-spawned bosses (no createdAt),
+    // backfill `styles` from legacy `style` for any user-saved boss.
+    if (Array.isArray(merged.bosses)) {
+      merged.bosses = merged.bosses
+        .filter(b => b && (b.createdAt || b.sent || b.defeated))
+        .map(b => ({
+          ...b,
+          createdAt: b.createdAt ?? new Date().toISOString(),
+          styles: (b.styles && b.styles.length) ? b.styles : (b.style ? [b.style] : []),
+        }));
     }
     return merged;
   } catch { return initialState(); }
@@ -268,7 +319,7 @@ export function activeBoss(s: State) {
 /** Highest difficulty (1–10) of any boss the player has SENT. Default 1. */
 export function playerCeiling(s: State): number {
   let max = 1;
-  for (const b of s.bosses) if (b.sent && b.difficulty > max) max = b.difficulty;
+  for (const b of s.bosses) if (b.sent && (b.difficulty ?? 0) > max) max = b.difficulty ?? max;
   return max;
 }
 
@@ -440,6 +491,7 @@ export interface LogInput {
   attemptType?: AttemptType;
   holdColorId?: string;
   gymId?: string;
+  bossId?: string;
   chalkMultiplier?: number;
   /** Pre-computed difficulty multiplier (climb grade vs player ceiling). Default 1. */
   difficultyMult?: number;
@@ -473,6 +525,7 @@ export function logBoulder(input: LogInput) {
     attemptType: input.attemptType,
     holdColorId: input.holdColorId,
     gymId: input.gymId,
+    bossId: input.bossId,
   };
 
   set(s => {
@@ -1011,18 +1064,19 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
   // Map boss.difficulty (1–10) to a V-rank-ish value (×1.4) so a difficulty-6 boss
   // has the same "feel" as a V8 problem against a V8 ceiling.
   const ceiling = playerCeiling(state);
-  const diffMult = bossDifficultyMultiplier(boss.difficulty, ceiling);
-  const breakdown = computeChalk(activity, [boss.style], outcome === "send" || outcome === "flash", outcome === "flash", diffMult);
+  const diffMult = bossDifficultyMultiplier(boss.difficulty ?? 1, ceiling);
+  const styleForCalc: Style[] = boss.styles && boss.styles.length ? boss.styles : (boss.style ? [boss.style] : []);
+  const breakdown = computeChalk(activity, styleForCalc, outcome === "send" || outcome === "flash", outcome === "flash", diffMult);
   const att: BossAttempt = { id: crypto.randomUUID(), date: new Date().toISOString(), outcome, chalk: breakdown.total, notes };
 
   set(s => {
     const bosses = s.bosses.map(b => {
       if (b.id !== bossId) return b;
-      let highPoint = b.highPoint;
+      let highPoint = b.highPoint ?? 0;
       if (outcome === "send" || outcome === "flash") highPoint = 100;
       else highPoint = Math.min(95, highPoint + 15);
       const sent = outcome === "send" || outcome === "flash";
-      return { ...b, attempts: [att, ...b.attempts], highPoint, sent: b.sent || sent, sentDate: sent ? att.date : b.sentDate };
+      return { ...b, attempts: [att, ...(b.attempts ?? [])], highPoint, sent: b.sent || sent, sentDate: sent ? att.date : b.sentDate };
     });
     const sentNow = outcome === "send" || outcome === "flash";
     const add: string[] = [];
@@ -1051,9 +1105,92 @@ export function createBoss(name: string, grade: string, style: Style, difficulty
     ...s,
     bosses: [
       ...s.bosses,
-      { id: "custom-" + crypto.randomUUID(), name, grade, style, difficulty, emoji: emoji || "👹", flavor: "A custom nemesis.", attempts: [], highPoint: 0, sent: false },
+      {
+        id: "custom-" + crypto.randomUUID(),
+        name, grade,
+        styles: [style], style,
+        difficulty,
+        emoji: emoji || "👹",
+        flavor: "A custom nemesis.",
+        attempts: [], highPoint: 0,
+        sent: false,
+        createdAt: new Date().toISOString(),
+      },
     ],
   }));
+}
+
+// ===================== BOSS PROJECTS (user-saved) =====================
+
+export interface BossProjectInput {
+  grade: string;
+  styles: Style[];
+  gymId?: string;
+  holdColorId?: string;
+  notes?: string;
+  name?: string;
+}
+
+export function activeBossProjects(s: State = state): Boss[] {
+  return s.bosses.filter(b => !b.sent && !b.defeated);
+}
+
+/** Removes any active boss whose deadline has passed; applies the chalk penalty for each. */
+export function expireOverdueBosses(): Boss[] {
+  const now = Date.now();
+  const expired: Boss[] = [];
+  set(s => {
+    const bosses = s.bosses.map(b => {
+      if (isBossExpired(b, now)) {
+        expired.push(b);
+        return { ...b, defeated: true, defeatedDate: new Date(now).toISOString(), defeatedReason: "expired" as const };
+      }
+      return b;
+    });
+    if (expired.length === 0) return s;
+    const penalty = expired.length * BOSS_DEFEAT_PENALTY;
+    return { ...s, bosses, chalk: Math.max(0, s.chalk - penalty) };
+  });
+  return expired;
+}
+
+export function createBossProject(input: BossProjectInput): { boss: Boss; ok: boolean; reason?: string } {
+  if (activeBossProjects(state).length >= MAX_ACTIVE_BOSSES) {
+    return { boss: null as unknown as Boss, ok: false, reason: `You can only have ${MAX_ACTIVE_BOSSES} active boss projects at once.` };
+  }
+  const boss: Boss = {
+    id: "boss-" + crypto.randomUUID(),
+    name: input.name?.trim() || undefined,
+    grade: input.grade,
+    styles: input.styles,
+    gymId: input.gymId,
+    holdColorId: input.holdColorId,
+    notes: input.notes,
+    createdAt: new Date().toISOString(),
+    sent: false,
+    attempts: [],
+    highPoint: 0,
+  };
+  set(s => ({ ...s, bosses: [...s.bosses, boss] }));
+  return { boss, ok: true };
+}
+
+export function markBossSent(bossId: string) {
+  set(s => {
+    const add: string[] = [];
+    const bosses = s.bosses.map(b => b.id === bossId ? { ...b, sent: true, sentDate: new Date().toISOString(), highPoint: 100 } : b);
+    if (bosses.some(b => b.sent)) add.push("crux_breaker");
+    if (bosses.filter(b => b.sent).length >= 3) add.push("project_slayer");
+    return applyBadges({ ...s, bosses }, add);
+  });
+}
+
+/** User manually admits defeat (e.g. gym reset the problem). Applies chalk penalty. */
+export function admitBossDefeat(bossId: string) {
+  set(s => {
+    const bosses = s.bosses.map(b => b.id === bossId ? { ...b, defeated: true, defeatedDate: new Date().toISOString(), defeatedReason: "admitted" as const } : b);
+    return { ...s, bosses, chalk: Math.max(0, s.chalk - BOSS_DEFEAT_PENALTY) };
+  });
 }
 
 export function adminAdjustChalk(delta: number) {

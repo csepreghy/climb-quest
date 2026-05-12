@@ -1049,18 +1049,19 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
   // Map boss.difficulty (1–10) to a V-rank-ish value (×1.4) so a difficulty-6 boss
   // has the same "feel" as a V8 problem against a V8 ceiling.
   const ceiling = playerCeiling(state);
-  const diffMult = bossDifficultyMultiplier(boss.difficulty, ceiling);
-  const breakdown = computeChalk(activity, [boss.style], outcome === "send" || outcome === "flash", outcome === "flash", diffMult);
+  const diffMult = bossDifficultyMultiplier(boss.difficulty ?? 1, ceiling);
+  const styleForCalc: Style[] = boss.styles && boss.styles.length ? boss.styles : (boss.style ? [boss.style] : []);
+  const breakdown = computeChalk(activity, styleForCalc, outcome === "send" || outcome === "flash", outcome === "flash", diffMult);
   const att: BossAttempt = { id: crypto.randomUUID(), date: new Date().toISOString(), outcome, chalk: breakdown.total, notes };
 
   set(s => {
     const bosses = s.bosses.map(b => {
       if (b.id !== bossId) return b;
-      let highPoint = b.highPoint;
+      let highPoint = b.highPoint ?? 0;
       if (outcome === "send" || outcome === "flash") highPoint = 100;
       else highPoint = Math.min(95, highPoint + 15);
       const sent = outcome === "send" || outcome === "flash";
-      return { ...b, attempts: [att, ...b.attempts], highPoint, sent: b.sent || sent, sentDate: sent ? att.date : b.sentDate };
+      return { ...b, attempts: [att, ...(b.attempts ?? [])], highPoint, sent: b.sent || sent, sentDate: sent ? att.date : b.sentDate };
     });
     const sentNow = outcome === "send" || outcome === "flash";
     const add: string[] = [];

@@ -663,11 +663,6 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
               )}
             </Field>
           )}
-          {!lockedFields && !editLog && (
-            <Field label="Nickname (optional)">
-              <Input value={bossName} onChange={e => setBossName(e.target.value)} placeholder="e.g. The Crimp Lord" />
-            </Field>
-          )}
         </div>
 
         {!lockedFields && (

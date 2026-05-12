@@ -514,6 +514,7 @@ export function logBoulder(input: LogInput) {
     attemptType: input.attemptType,
     holdColorId: input.holdColorId,
     gymId: input.gymId,
+    bossId: input.bossId,
   };
 
   set(s => {

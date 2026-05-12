@@ -479,7 +479,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
   useEffect(() => { if (!lockedFields && grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
   const [styles, setStyles] = useState<Style[]>(existingBoss?.styles ?? editLog?.styles ?? []);
   const [notes, setNotes] = useState(editLog?.notes ?? "");
-  const [bossName, setBossName] = useState<string>("");
+  
   const [admitOpen, setAdmitOpen] = useState(false);
 
   const [step, setStep] = useState<BossStep>("main");

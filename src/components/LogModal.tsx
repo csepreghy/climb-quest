@@ -746,27 +746,24 @@ function BossSummary({ boss, gymName, holdColorHex, holdColorHex2, holdColorName
   const sevClass = tl.severity === "crit" ? "text-[hsl(var(--boss))]" : tl.severity === "warn" ? "text-[hsl(var(--btn-orange))]" : "text-muted-foreground";
   return (
     <div className="rounded-lg border-2 border-[hsl(var(--boss))]/40 bg-secondary/40 p-3 space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <div className="font-display font-bold text-base truncate">
-          {boss.name || `${boss.grade} Boss`}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          {holdColorHex && (
+            <span
+              className="inline-block h-9 w-9 rounded-full border-2 border-border shrink-0"
+              style={{ background: holdColorHex2 ? `linear-gradient(90deg, ${holdColorHex} 0 50%, ${holdColorHex2} 50% 100%)` : holdColorHex }}
+              aria-label={holdColorName}
+            />
+          )}
+          <div className="min-w-0">
+            <div className="font-display font-bold text-xl leading-none">{boss.grade}</div>
+            {holdColorName && <div className="text-xs text-muted-foreground mt-1 truncate">{holdColorName}{gymName ? ` · ${gymName}` : ""}</div>}
+            {!holdColorName && gymName && <div className="text-xs text-muted-foreground mt-1 truncate">{gymName}</div>}
+          </div>
         </div>
-        <div className={cn("text-xs flex items-center gap-1 font-bold", sevClass)}>
+        <div className={cn("text-xs flex items-center gap-1 font-bold shrink-0", sevClass)}>
           <Clock className="h-3.5 w-3.5" /> {tl.label}
         </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-        <span className="font-semibold text-foreground">{boss.grade}</span>
-        {gymName && <span>· {gymName}</span>}
-        {holdColorHex && (
-          <span className="flex items-center gap-1">
-            ·
-            <span
-              className="inline-block h-3.5 w-3.5 rounded-full border border-border"
-              style={{ background: holdColorHex2 ? `linear-gradient(90deg, ${holdColorHex} 0 50%, ${holdColorHex2} 50% 100%)` : holdColorHex }}
-            />
-            {holdColorName}
-          </span>
-        )}
       </div>
       {(boss.styles?.length ?? 0) > 0 && (
         <div className="flex flex-wrap gap-1">

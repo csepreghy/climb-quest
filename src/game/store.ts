@@ -1089,9 +1089,92 @@ export function createBoss(name: string, grade: string, style: Style, difficulty
     ...s,
     bosses: [
       ...s.bosses,
-      { id: "custom-" + crypto.randomUUID(), name, grade, style, difficulty, emoji: emoji || "👹", flavor: "A custom nemesis.", attempts: [], highPoint: 0, sent: false },
+      {
+        id: "custom-" + crypto.randomUUID(),
+        name, grade,
+        styles: [style], style,
+        difficulty,
+        emoji: emoji || "👹",
+        flavor: "A custom nemesis.",
+        attempts: [], highPoint: 0,
+        sent: false,
+        createdAt: new Date().toISOString(),
+      },
     ],
   }));
+}
+
+// ===================== BOSS PROJECTS (user-saved) =====================
+
+export interface BossProjectInput {
+  grade: string;
+  styles: Style[];
+  gymId?: string;
+  holdColorId?: string;
+  notes?: string;
+  name?: string;
+}
+
+export function activeBossProjects(s: State = state): Boss[] {
+  return s.bosses.filter(b => !b.sent && !b.defeated);
+}
+
+/** Removes any active boss whose deadline has passed; applies the chalk penalty for each. */
+export function expireOverdueBosses(): Boss[] {
+  const now = Date.now();
+  const expired: Boss[] = [];
+  set(s => {
+    const bosses = s.bosses.map(b => {
+      if (isBossExpired(b, now)) {
+        expired.push(b);
+        return { ...b, defeated: true, defeatedDate: new Date(now).toISOString(), defeatedReason: "expired" as const };
+      }
+      return b;
+    });
+    if (expired.length === 0) return s;
+    const penalty = expired.length * BOSS_DEFEAT_PENALTY;
+    return { ...s, bosses, chalk: Math.max(0, s.chalk - penalty) };
+  });
+  return expired;
+}
+
+export function createBossProject(input: BossProjectInput): { boss: Boss; ok: boolean; reason?: string } {
+  if (activeBossProjects(state).length >= MAX_ACTIVE_BOSSES) {
+    return { boss: null as unknown as Boss, ok: false, reason: `You can only have ${MAX_ACTIVE_BOSSES} active boss projects at once.` };
+  }
+  const boss: Boss = {
+    id: "boss-" + crypto.randomUUID(),
+    name: input.name?.trim() || undefined,
+    grade: input.grade,
+    styles: input.styles,
+    gymId: input.gymId,
+    holdColorId: input.holdColorId,
+    notes: input.notes,
+    createdAt: new Date().toISOString(),
+    sent: false,
+    attempts: [],
+    highPoint: 0,
+  };
+  set(s => ({ ...s, bosses: [...s.bosses, boss] }));
+  return { boss, ok: true };
+}
+
+export function markBossSent(bossId: string) {
+  set(s => {
+    const add: string[] = [];
+    const bosses = s.bosses.map(b => b.id === bossId ? { ...b, sent: true, sentDate: new Date().toISOString(), highPoint: 100 } : b);
+    if (bosses.some(b => b.sent)) add.push("crux_breaker");
+    if (bosses.filter(b => b.sent).length >= 3) add.push("project_slayer");
+    return applyBadges({ ...s, bosses }, add);
+  });
+}
+
+/** User manually admits defeat (e.g. gym reset the problem). Applies chalk penalty. */
+export function admitBossDefeat(bossId: string) {
+  set(s => {
+    const bosses = s.bosses.map(b => b.id === bossId ? { ...b, defeated: true, defeatedDate: new Date().toISOString(), defeatedReason: "admitted" as const } : b);
+    return { ...s, bosses, chalk: Math.max(0, s.chalk - BOSS_DEFEAT_PENALTY) };
+  });
 }
 
 export function adminAdjustChalk(delta: number) {

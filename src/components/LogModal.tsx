@@ -773,9 +773,9 @@ function BossSummary({ boss, gymName, holdColorHex, holdColorHex2, holdColorName
           </span>
         )}
       </div>
-      {boss.styles.length > 0 && (
+      {(boss.styles?.length ?? 0) > 0 && (
         <div className="flex flex-wrap gap-1">
-          {boss.styles.map(s => (
+          {boss.styles!.map(s => (
             <span key={s} className="text-[10px] capitalize px-2 py-0.5 rounded-full border border-border bg-background/60">
               {s}
             </span>

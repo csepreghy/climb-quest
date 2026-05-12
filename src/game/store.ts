@@ -306,7 +306,7 @@ export function activeBoss(s: State) {
 /** Highest difficulty (1–10) of any boss the player has SENT. Default 1. */
 export function playerCeiling(s: State): number {
   let max = 1;
-  for (const b of s.bosses) if (b.sent && b.difficulty > max) max = b.difficulty;
+  for (const b of s.bosses) if (b.sent && (b.difficulty ?? 0) > max) max = b.difficulty ?? max;
   return max;
 }
 

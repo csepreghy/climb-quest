@@ -840,7 +840,7 @@ function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void;
                     {holdColor.name}
                   </span>
                 )}
-                {b.styles.length > 0 && <span>· {b.styles.join(", ")}</span>}
+                {(b.styles?.length ?? 0) > 0 && <span>· {b.styles!.join(", ")}</span>}
               </div>
               <div className="mt-2 text-[11px] text-muted-foreground">
                 {b.attempts && b.attempts.length > 0 ? `${b.attempts.length} session${b.attempts.length === 1 ? "" : "s"}` : "No sessions yet"}

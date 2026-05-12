@@ -239,6 +239,17 @@ function load(): State {
       merged.strengthLevels.handstand = Math.max(merged.strengthLevels.handstand ?? 0, hp);
       delete (merged.strengthLevels as Record<string, number>).handstand_pushup;
     }
+    // Migrate / clean up legacy bosses: strip template-spawned bosses (no createdAt),
+    // backfill `styles` from legacy `style` for any user-saved boss.
+    if (Array.isArray(merged.bosses)) {
+      merged.bosses = merged.bosses
+        .filter(b => b && (b.createdAt || b.sent || b.defeated))
+        .map(b => ({
+          ...b,
+          createdAt: b.createdAt ?? new Date().toISOString(),
+          styles: (b.styles && b.styles.length) ? b.styles : (b.style ? [b.style] : []),
+        }));
+    }
     return merged;
   } catch { return initialState(); }
 }

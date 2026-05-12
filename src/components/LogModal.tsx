@@ -453,9 +453,11 @@ const ATTEMPT_TIERS: { v: AttemptTier; label: string; mult: number; desc: string
   { v: "10+", label: "10+ attempts", mult: 1.5, desc: "Full grind mode" },
 ];
 
-function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null }) {
+function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null; existingBoss?: Boss | null }) {
   const gymState = useGyms();
-  const initialGymId = editLog?.gymId
+  const lockedFields = !!existingBoss; // when attacking an existing boss, fields are read-only
+  const initialGymId = existingBoss?.gymId
+    ?? editLog?.gymId
     ?? gymState.lastUsedGymId
     ?? gymState.gyms.find(g => g.primary)?.id
     ?? gymState.gyms[0]?.id
@@ -472,16 +474,19 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
   const grades = gs ? gradeLabels(gs) : [];
 
   const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
-  const [holdColorId, setHoldColorId] = useState<string>(editLog?.holdColorId ?? "");
-  const [grade, setGrade] = useState(editLog?.grade ?? grades[0] ?? "V5");
-  useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
-  const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
+  const [holdColorId, setHoldColorId] = useState<string>(existingBoss?.holdColorId ?? editLog?.holdColorId ?? "");
+  const [grade, setGrade] = useState(existingBoss?.grade ?? editLog?.grade ?? grades[0] ?? "V5");
+  useEffect(() => { if (!lockedFields && grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
+  const [styles, setStyles] = useState<Style[]>(existingBoss?.styles ?? editLog?.styles ?? []);
   const [notes, setNotes] = useState(editLog?.notes ?? "");
+  const [bossName, setBossName] = useState<string>("");
+  const [admitOpen, setAdmitOpen] = useState(false);
 
   const [step, setStep] = useState<BossStep>("main");
   const [celebrate, setCelebrate] = useState<{ total: number; defeated: boolean; breakdown: ReturnType<typeof computeChalk> } | null>(null);
 
   function toggleStyle(st: Style) {
+    if (lockedFields) return;
     setStyles(prev => prev.includes(st) ? prev.filter(x => x !== st) : [...prev, st]);
   }
 
@@ -496,6 +501,22 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
     const locationStr = [gym?.name, holdColor?.name && `${holdColor.name} hold`].filter(Boolean).join(" · ");
     const activity: ActivityType = outcome === "defeat" ? "boss_send" : "boss_attempt";
     const mult = outcome === "attempt" ? (ATTEMPT_TIERS.find(t => t.v === attemptTier)?.mult ?? 1) : 1;
+
+    // Resolve target boss id: existing boss, or create a new boss project.
+    let bossId = existingBoss?.id;
+    if (!editLog && !bossId) {
+      if (activeBossProjects().length >= MAX_ACTIVE_BOSSES) {
+        toast.error(`You can only have ${MAX_ACTIVE_BOSSES} active boss projects at once. Defeat or admit defeat on one first.`);
+        return;
+      }
+      const created = createBossProject({
+        grade, styles, gymId: gymId || undefined, holdColorId: holdColorId || undefined,
+        notes: notes || undefined, name: bossName || undefined,
+      });
+      if (!created.ok) { toast.error(created.reason ?? "Could not create boss"); return; }
+      bossId = created.boss.id;
+    }
+
     const input = {
       activity,
       date: dateISO,
@@ -508,6 +529,7 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
       attemptType: (outcome === "defeat" ? "send" : "project") as AttemptType,
       holdColorId: holdColorId || undefined,
       gymId: gymId || undefined,
+      bossId,
       chalkMultiplier: mult,
     };
     if (editLog) {
@@ -517,8 +539,8 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
       return;
     }
     const res = logBoulder(input);
+    if (outcome === "defeat" && bossId) markBossSent(bossId);
     const breakdown = computeChalk(activity, styles, outcome === "defeat", false);
-    // Apply multiplier to displayed breakdown amounts so they match the saved total.
     const scaled: ReturnType<typeof computeChalk> = {
       base: Math.round(breakdown.base * mult),
       bonuses: breakdown.bonuses.map(b => ({ ...b, amount: Math.round(b.amount * mult) })),
@@ -529,6 +551,14 @@ function BossForm({ onBack, onDone, editLog }: { onBack: () => void; onDone: () 
     if (outcome !== "defeat") {
       setTimeout(() => { setCelebrate(null); onDone(); }, 1600);
     }
+  }
+
+  function handleAdmitDefeat() {
+    if (!existingBoss) return;
+    admitBossDefeat(existingBoss.id);
+    toast.error(`Boss won. You lost ${BOSS_DEFEAT_PENALTY} chalk.`);
+    setAdmitOpen(false);
+    onDone();
   }
 
   if (celebrate) {

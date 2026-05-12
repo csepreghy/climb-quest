@@ -792,7 +792,7 @@ function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void;
           <DialogTitle>Boss Projects</DialogTitle>
         </div>
         <DialogDescription>
-          Up to {MAX_ACTIVE_BOSSES} active bosses. Each one gives you {BOSS_DEADLINE_DAYS} days — fail to send and you lose {BOSS_DEFEAT_PENALTY} chalk.
+          Keep track of up to {MAX_ACTIVE_BOSSES} boss projects. Each one gives you {BOSS_DEADLINE_DAYS} day to defeat.
         </DialogDescription>
       </DialogHeader>
 

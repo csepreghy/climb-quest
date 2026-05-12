@@ -163,7 +163,7 @@ export function chalkUsedOnDate(s: State, dateISO: string): number {
 export function currentStreak(s: State): number {
   const days = new Set<string>();
   for (const l of s.logs) days.add(dayKey(l.date));
-  for (const b of s.bosses) for (const a of b.attempts) days.add(dayKey(a.date));
+  for (const b of s.bosses) for (const a of (b.attempts ?? [])) days.add(dayKey(a.date));
   if (days.size === 0) return 0;
 
   const today = new Date();

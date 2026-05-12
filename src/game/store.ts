@@ -169,10 +169,7 @@ const initialState = (): State => ({
   pendingConsumable: null,
   badges: [],
   badgeChalkClaimedFor: [],
-  bosses: [
-    { ...spawnBoss(BOSS_TEMPLATES[0]), active: true },
-    spawnBoss(BOSS_TEMPLATES[1]),
-  ],
+  bosses: [],
   logs: [],
   strengthSessions: [],
   strengthLevels: {},
@@ -184,7 +181,20 @@ const initialState = (): State => ({
 });
 
 function spawnBoss(t: BossTemplate): Boss {
-  return { id: t.id + "-" + Math.random().toString(36).slice(2,7), name: t.name, grade: t.grade, style: t.style, difficulty: t.difficulty, emoji: t.emoji, flavor: t.flavor, attempts: [], highPoint: 0, sent: false };
+  return {
+    id: t.id + "-" + Math.random().toString(36).slice(2,7),
+    name: t.name,
+    grade: t.grade,
+    styles: [t.style],
+    style: t.style,
+    difficulty: t.difficulty,
+    emoji: t.emoji,
+    flavor: t.flavor,
+    attempts: [],
+    highPoint: 0,
+    sent: false,
+    createdAt: new Date().toISOString(),
+  };
 }
 
 // ----- Store -----

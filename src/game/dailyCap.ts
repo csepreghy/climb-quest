@@ -150,7 +150,7 @@ export function chalkUsedOnDate(s: State, dateISO: string): number {
   const target = dayKey(dateISO);
   let total = 0;
   for (const l of s.logs) if (dayKey(l.date) === target) total += l.chalkTotal;
-  for (const b of s.bosses) for (const a of b.attempts) {
+  for (const b of s.bosses) for (const a of (b.attempts ?? [])) {
     if (dayKey(a.date) === target) total += a.chalk;
   }
   for (const ss of s.strengthSessions ?? []) {

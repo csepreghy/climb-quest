@@ -341,7 +341,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
             <Field label="Grade (max)">
               <Select value={gradeMax || grade} onValueChange={setGradeMax}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+                <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
               </Select>
             </Field>
           )}

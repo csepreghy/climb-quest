@@ -1318,6 +1318,53 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     );
   }
 
+  if (step === "session-summary") {
+    const totalChalk = sessionLogs.reduce((a, l) => a + l.chalk, 0);
+    const totalReps = sessionLogs.reduce(
+      (a, l) => a + l.sets.filter(st => st.mode !== "hold").reduce((x, y) => x + y.reps, 0),
+      0,
+    );
+    return (
+      <>
+        <DialogHeader>
+          <DialogTitle>Session complete</DialogTitle>
+          <DialogDescription>
+            {sessionLogs.length} workouts · {totalReps} total reps
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto pr-1">
+          {sessionLogs.map((l, i) => {
+            const meta = WORKOUT_META[l.workout];
+            const repCount = l.sets.filter(st => st.mode !== "hold").reduce((x, y) => x + y.reps, 0);
+            const holdCount = l.sets.filter(st => st.mode === "hold").length;
+            const img = workoutLevelImage(l.workout, l.level, l.mode) ?? meta.image;
+            return (
+              <div key={i} className="flex items-center gap-3 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2">
+                <HeaderImage src={img ?? strengthImg} alt={meta.title} ring="ring-2 ring-[hsl(var(--btn-orange))]/40" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-display font-bold truncate">{meta.title} · L{l.level}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {l.sets.length} set{l.sets.length === 1 ? "" : "s"}
+                    {repCount > 0 ? ` · ${repCount} reps` : ""}
+                    {holdCount > 0 ? ` · ${holdCount} hold${holdCount === 1 ? "" : "s"}` : ""}
+                  </div>
+                </div>
+                <div className="text-right font-display font-bold text-[hsl(var(--btn-orange))]">+{l.chalk}</div>
+              </div>
+            );
+          })}
+          <div className="flex items-center justify-between rounded-lg border-2 border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/10 p-3">
+            <span className="font-display font-bold uppercase tracking-wider text-sm">Session total</span>
+            <span className="font-display font-bold text-xl text-[hsl(var(--btn-orange))]">+{totalChalk} Chalk</span>
+          </div>
+        </div>
+        <DialogFooter>
+          <GameButton variant="primary" onClick={onDone}>Done</GameButton>
+        </DialogFooter>
+      </>
+    );
+  }
+
   if (step === "workout") {
     return (
       <>
@@ -1327,6 +1374,14 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             <DialogTitle>Pick a workout</DialogTitle>
           </div>
         </DialogHeader>
+        {sessionLogs.length > 0 && (
+          <div className="mt-2 flex items-center justify-between rounded-md border border-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/10 px-3 py-2 text-xs">
+            <span className="text-muted-foreground">
+              Session so far · {sessionLogs.length} workout{sessionLogs.length === 1 ? "" : "s"}
+            </span>
+            <span className="font-display font-bold text-[hsl(var(--btn-orange))]">+{sessionChalkSoFar} Chalk</span>
+          </div>
+        )}
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
           {(["core", "pullup", "pushup", "squat", "handstand"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];

@@ -329,7 +329,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
             <div className="flex gap-2">
               <Select value={grade} onValueChange={setGrade}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+                <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
               </Select>
               <button type="button" onClick={() => setUseRange(r => !r)}
                 className="text-xs px-2 rounded-md border border-border bg-secondary/50 whitespace-nowrap">

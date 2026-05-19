@@ -342,6 +342,14 @@ export default function Inventory() {
                     {groupItems.map(it => {
                       const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
                       const removeFn = undefined;
+                      const sellPrice = Math.floor((it.price ?? 0) / 2);
+                      const canSell = !it.consumableBonus && sellPrice > 0;
+                      const handleSell = canSell ? () => {
+                        if (!confirm(`Sell ${it.name} for ${sellPrice} chalk? This won't count toward total chalk earned.`)) return;
+                        const r = sellItem(it.id);
+                        if (!r.ok) { toast.error(r.reason ?? "Cannot sell"); return; }
+                        toast.success(`Sold ${it.name} · +${r.refund} chalk`);
+                      } : undefined;
                       if (isBuddy) {
                         return (
                           <BuddyCard
@@ -359,6 +367,8 @@ export default function Inventory() {
                           primed={isPrimed}
                           onClick={() => setCompareItem(it)}
                           onRemove={removeFn}
+                          onSell={handleSell}
+                          sellPrice={sellPrice}
                         />
                       );
                     })}

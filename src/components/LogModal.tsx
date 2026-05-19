@@ -202,6 +202,20 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   // Boulderlounge's custom grading).
   const gs = availableSystems.find(g => g.id === gsId) ?? availableSystems[0];
   const grades = gs ? gradeLabels(gs) : [];
+  const gradeHex = (label: string) => gs?.kind === "color" ? gs.colors?.find(c => c.name === label)?.hex : undefined;
+  const renderGradeItem = (gr: string) => {
+    const hex = gradeHex(gr);
+    return (
+      <SelectItem key={gr} value={gr}>
+        {hex ? (
+          <span className="flex items-center gap-2">
+            <span className="inline-block h-3.5 w-3.5 rounded-full border border-[hsl(var(--panel-frame))]" style={{ background: hex }} />
+            {gr}
+          </span>
+        ) : gr}
+      </SelectItem>
+    );
+  };
 
   const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
   const [holdColorId, setHoldColorId] = useState<string>(editLog?.holdColorId ?? "");
@@ -315,7 +329,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
             <div className="flex gap-2">
               <Select value={grade} onValueChange={setGrade}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+                <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
               </Select>
               <button type="button" onClick={() => setUseRange(r => !r)}
                 className="text-xs px-2 rounded-md border border-border bg-secondary/50 whitespace-nowrap">
@@ -327,7 +341,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
             <Field label="Grade (max)">
               <Select value={gradeMax || grade} onValueChange={setGradeMax}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+                <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
               </Select>
             </Field>
           )}
@@ -472,6 +486,20 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
   useEffect(() => { setGsId(availableSystems[0]?.id ?? "v_grades"); }, [gymId]);
   const gs = availableSystems.find(g => g.id === gsId) ?? availableSystems[0];
   const grades = gs ? gradeLabels(gs) : [];
+  const gradeHex = (label: string) => gs?.kind === "color" ? gs.colors?.find(c => c.name === label)?.hex : undefined;
+  const renderGradeItem = (gr: string) => {
+    const hex = gradeHex(gr);
+    return (
+      <SelectItem key={gr} value={gr}>
+        {hex ? (
+          <span className="flex items-center gap-2">
+            <span className="inline-block h-3.5 w-3.5 rounded-full border border-[hsl(var(--panel-frame))]" style={{ background: hex }} />
+            {gr}
+          </span>
+        ) : gr}
+      </SelectItem>
+    );
+  };
 
   const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
   const [holdColorId, setHoldColorId] = useState<string>(existingBoss?.holdColorId ?? editLog?.holdColorId ?? "");
@@ -642,7 +670,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
             <Field label="Grade">
               <Select value={grade} onValueChange={setGrade}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+                <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
               </Select>
             </Field>
           )}

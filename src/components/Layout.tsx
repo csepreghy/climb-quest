@@ -327,19 +327,13 @@ function ChalkChip({ value }: { value: number }) {
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
     .sort((a, b) => a.chalk - b.chalk);
 
-  // Strength: per-rep chalk by tier vs the user's max-unlocked level (per workout).
-  const strengthRows = (["core", "pullup", "pushup", "handstand"] as StrengthWorkout[]).flatMap(w => {
-    const max = s.strengthLevels?.[w] ?? 0;
-    if (max <= 0) return [];
-    const label = w === "core" ? "Core" : w === "pullup" ? "Pull-up" : w === "pushup" ? "Push-up" : "Handstand";
-    const tiers: { name: string; chalk: number }[] = [];
-    tiers.push({ name: `${label} L${max} (max)`, chalk: strengthRepChalk(max, max) });
-    if (max >= 2) tiers.push({ name: `${label} L${max - 1}`, chalk: strengthRepChalk(max - 1, max) });
-    if (max >= 3) tiers.push({ name: `${label} L${max - 2}`, chalk: strengthRepChalk(max - 2, max) });
-    if (max >= 4) tiers.push({ name: `${label} ≤L${max - 3}`, chalk: strengthRepChalk(max - 3, max) });
-    return tiers;
-  });
-  const hasStrength = strengthRows.length > 0;
+  // Strength: general per-rep tier explanation (independent of user's unlocked levels).
+  const strengthTiers = [
+    { name: "Max level", chalk: strengthRepChalk(10, 10) },
+    { name: "Max level − 1", chalk: strengthRepChalk(9, 10) },
+    { name: "Max level − 2", chalk: strengthRepChalk(8, 10) },
+    { name: "Lower levels", chalk: strengthRepChalk(1, 10) },
+  ];
 
   return (
     <>
@@ -386,25 +380,17 @@ function ChalkChip({ value }: { value: number }) {
 
               <div>
                 <div className="menu-label mb-2">Strength (per rep)</div>
-                {hasStrength ? (
-                  <>
-                    <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
-                      {strengthRows.map(r => (
-                        <div key={r.name} className="flex items-center justify-between px-3 py-2 text-sm">
-                          <span className="text-foreground/90">{r.name}</span>
-                          <span className="tabular-nums font-bold gradient-chalk-text">+{r.chalk}</span>
-                        </div>
-                      ))}
+                <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+                  {strengthTiers.map(r => (
+                    <div key={r.name} className="flex items-center justify-between px-3 py-2 text-sm">
+                      <span className="text-foreground/90">{r.name}</span>
+                      <span className="tabular-nums font-bold gradient-chalk-text">+{r.chalk}</span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1.5">
-                      Per-rep chalk is highest at your max-unlocked level and tapers off below it. Beat the strength boss to raise the bar.
-                    </p>
-                  </>
-                ) : (
-                  <div className="rounded-lg border border-border px-3 py-3 text-xs text-muted-foreground">
-                    Log your first strength session to unlock per-rep chalk rates here.
-                  </div>
-                )}
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Per-rep chalk is highest at your max-unlocked level and tapers off below it. Beat the strength boss to raise the bar.
+                </p>
               </div>
             </div>
 

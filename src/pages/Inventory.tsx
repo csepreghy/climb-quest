@@ -124,6 +124,16 @@ export default function Inventory() {
   const [slotPicker, setSlotPicker] = useState<ShopItem | null>(null);
   const [emptyGearPicker, setEmptyGearPicker] = useState(false);
   const [levelsOpen, setLevelsOpen] = useState(false);
+  const [sellTarget, setSellTarget] = useState<ShopItem | null>(null);
+  const sellRefund = sellTarget ? Math.floor((sellTarget.price ?? 0) / 2) : 0;
+  function confirmSell() {
+    if (!sellTarget) return;
+    const r = sellItem(sellTarget.id);
+    if (!r.ok) { toast.error(r.reason ?? "Cannot sell"); setSellTarget(null); return; }
+    toast.success(`Sold ${sellTarget.name} · +${r.refund} chalk`);
+    setCompareItem(c => (c?.id === sellTarget.id ? null : c));
+    setSellTarget(null);
+  }
   const cur = currentLevel(s);
   const nxt = nextLevel(s);
   const canLevelUp = !!nxt && s.chalk >= nxt.cost;

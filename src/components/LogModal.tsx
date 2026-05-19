@@ -1227,7 +1227,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setStep("boss-reps");
   }
 
-  function logRepsAnd(action: "rest" | "finish") {
+  function logRepsAnd(action: "rest" | "finish" | "new-workout") {
     const isHandstandHold = workout === "handstand" && handstandMode === "hold";
     const cleanReps = isHandstandHold
       ? Math.max(1, Math.min(4, Math.round(reps)))
@@ -1242,6 +1242,13 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level}`);
       setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image });
       setStep("celebrate");
+    } else if (action === "new-workout") {
+      const dateISO = new Date(date).toISOString();
+      const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
+      toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level} · pick next workout`);
+      setSets([]);
+      setReps(5);
+      setStep("workout");
     } else {
       setStep("rest-pick");
     }

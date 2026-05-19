@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowRight, Lock, ShoppingBag, Pencil, Check, X } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
+import chalkBagImg from "@/assets/chalk-bag.png";
 import { BuddyCard } from "@/components/BuddyCard";
 import { LevelsModal } from "@/components/LevelsModal";
 import { computeDailyCap, useDailyCapConfig } from "@/game/dailyCap";

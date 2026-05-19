@@ -422,17 +422,6 @@ export default function Inventory() {
 
               <div className="flex justify-end gap-2 pt-2 flex-wrap">
                 <Button variant="ghost" onClick={() => setCompareItem(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Close</Button>
-                {s.owned.includes(compareItem.id) && !compareItem.consumableBonus && (compareItem.price ?? 0) > 0 && (() => {
-                  const refund = Math.floor((compareItem.price ?? 0) / 2);
-                  return (
-                    <Button
-                      variant="destructive"
-                      onClick={() => setSellTarget(compareItem)}
-                    >
-                      Sell · {refund} chalk
-                    </Button>
-                  );
-                })()}
                 {(() => {
                   const alreadyOn = compareItem.consumableBonus
                     ? s.pendingConsumable === compareItem.id

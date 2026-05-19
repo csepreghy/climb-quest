@@ -927,6 +927,25 @@ export function removeOwnedItem(id: string) {
     };
   });
 }
+/** Sell an owned item for half its base price. Adds chalk WITHOUT counting toward totalChalkEarned. */
+export function sellItem(id: string): { ok: boolean; refund?: number; reason?: string } {
+  const item = getItem(id);
+  if (!item) return { ok: false, reason: "Unknown item" };
+  if (!state.owned.includes(id)) return { ok: false, reason: "Not owned" };
+  const refund = Math.max(0, Math.floor((item.price ?? 0) / 2));
+  set(s => {
+    const eq = { ...s.equipped };
+    for (const k of Object.keys(eq) as (keyof Equipped)[]) if (eq[k] === id) delete eq[k];
+    return {
+      ...s,
+      owned: s.owned.filter(x => x !== id),
+      equipped: eq,
+      pendingConsumable: s.pendingConsumable === id ? null : s.pendingConsumable,
+      chalk: s.chalk + refund,
+    };
+  });
+  return { ok: true, refund };
+}
 export function setGender(g: Gender) { set(s => ({ ...s, gender: g })); }
 export function completeOnboarding() {
   set(s => ({ ...s, onboardedAt: new Date().toISOString() }));

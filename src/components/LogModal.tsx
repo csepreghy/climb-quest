@@ -268,12 +268,12 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       return;
     }
     const res = logBoulder(input);
-    setCelebrating({ total: res.log.chalkTotal });
+    setCelebrating({ total: res.log.chalkTotal, critPre: findCritPre(res.breakdown) });
     toast.success(`+${res.log.chalkTotal} Chalk earned`);
     setTimeout(() => { setCelebrating(null); onDone(); }, 1600);
   }
 
-  if (celebrating) return <SimpleCelebrate total={celebrating.total} label="Sent it!" />;
+  if (celebrating) return <SimpleCelebrate total={celebrating.total} label="Sent it!" critPre={celebrating.critPre} />;
 
   return (
     <>

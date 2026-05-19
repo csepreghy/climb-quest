@@ -7,7 +7,7 @@ import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHyd
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType, BADGE_BY_ID } from "@/game/data";
-import { useDailyCapConfig, computeDailyCap } from "@/game/dailyCap";
+import { useDailyCapConfig, computeDailyCap, chalkUsedOnDate } from "@/game/dailyCap";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";

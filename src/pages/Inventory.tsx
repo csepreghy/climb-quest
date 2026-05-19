@@ -410,8 +410,25 @@ export default function Inventory() {
 
               <BonusDiff current={equippedItem} next={compareItem} />
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 flex-wrap">
                 <Button variant="ghost" onClick={() => setCompareItem(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Close</Button>
+                {s.owned.includes(compareItem.id) && !compareItem.consumableBonus && (compareItem.price ?? 0) > 0 && (() => {
+                  const refund = Math.floor((compareItem.price ?? 0) / 2);
+                  return (
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        if (!confirm(`Sell ${compareItem.name} for ${refund} chalk? This won't count toward total chalk earned.`)) return;
+                        const r = sellItem(compareItem.id);
+                        if (!r.ok) { toast.error(r.reason ?? "Cannot sell"); return; }
+                        toast.success(`Sold ${compareItem.name} · +${r.refund} chalk`);
+                        setCompareItem(null);
+                      }}
+                    >
+                      Sell · {refund} chalk
+                    </Button>
+                  );
+                })()}
                 {(() => {
                   const alreadyOn = compareItem.consumableBonus
                     ? s.pendingConsumable === compareItem.id

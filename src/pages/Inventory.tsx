@@ -525,15 +525,20 @@ export default function Inventory() {
           {sellTarget && (
             <>
               <DialogHeader>
-                <DialogTitle>Sell {sellTarget.name}?</DialogTitle>
-                <DialogDescription>
-                  You'll receive <span className="font-bold gradient-chalk-text">{sellRefund} chalk</span> (half the purchase price).
-                  This won't count toward your total chalk earned on the leaderboard.
-                </DialogDescription>
+                <DialogTitle>Are you sure you want to sell {sellTarget.name}?</DialogTitle>
               </DialogHeader>
-              <DialogFooter className="gap-2 sm:gap-2">
+              <div className="max-w-xs mx-auto w-full">
+                <ItemCard item={sellTarget} />
+              </div>
+              <DialogFooter className="gap-2 sm:gap-2 items-center">
                 <Button variant="ghost" onClick={() => setSellTarget(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Cancel</Button>
-                <Button variant="destructive" onClick={confirmSell}>Sell · {sellRefund} chalk</Button>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1.5 text-sm font-bold tabular-nums gradient-chalk-text">
+                    <img src={chalkBagImg} alt="" className="h-5 w-5 object-contain" />
+                    {sellRefund}
+                  </span>
+                  <GameButton variant="primary" onClick={confirmSell}>Sell</GameButton>
+                </div>
               </DialogFooter>
             </>
           )}

@@ -617,7 +617,7 @@ function specialBonusSummary(eq: ReturnType<typeof useGame>["equipped"]) {
     out.push({
       label: "Boss attempts/sends",
       value: `+${Math.round(bossPct)}%`,
-      tone: "text-destructive",
+      tone: "text-legendary",
     });
   }
 

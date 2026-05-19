@@ -1,0 +1,1 @@
+UPDATE public.shop_items SET category='Pants' WHERE category='Bottom';

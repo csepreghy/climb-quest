@@ -354,12 +354,7 @@ export default function Inventory() {
                       const removeFn = undefined;
                       const sellPrice = Math.floor((it.price ?? 0) / 2);
                       const canSell = !it.consumableBonus && sellPrice > 0;
-                      const handleSell = canSell ? () => {
-                        if (!confirm(`Sell ${it.name} for ${sellPrice} chalk? This won't count toward total chalk earned.`)) return;
-                        const r = sellItem(it.id);
-                        if (!r.ok) { toast.error(r.reason ?? "Cannot sell"); return; }
-                        toast.success(`Sold ${it.name} · +${r.refund} chalk`);
-                      } : undefined;
+                      const handleSell = canSell ? () => setSellTarget(it) : undefined;
                       if (isBuddy) {
                         return (
                           <BuddyCard

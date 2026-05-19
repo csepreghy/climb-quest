@@ -1325,6 +1325,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           label={celebrate.label}
           image={celebrate.image ?? strengthImg}
           alt={WORKOUT_META[workout].title}
+          critPre={celebrate.critPre}
         />
         <div className="mt-4">
           <GameButton variant="primary" onClick={onDone}>Done</GameButton>

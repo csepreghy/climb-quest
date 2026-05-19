@@ -1202,6 +1202,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [handstandMode, setHandstandMode] = useState<"hold" | "pushup">("hold");
   const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
+  const [sessionLogs, setSessionLogs] = useState<SessionLogEntry[]>([]);
+  const sessionChalkSoFar = sessionLogs.reduce((acc, l) => acc + l.chalk, 0);
 
   const unlockedMax = s.strengthLevels?.[workout] ?? 0;
   const isFirstTime = unlockedMax <= 0;

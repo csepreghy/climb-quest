@@ -1251,12 +1251,21 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       const dateISO = new Date(date).toISOString();
       const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level}`);
-      setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image });
-      setStep("celebrate");
+      const finalEntry: SessionLogEntry = { workout, level, sets: newSets, chalk, mode: setMode };
+      if (sessionLogs.length > 0) {
+        // Chained session — show summary across all logged workouts. Chalk for each
+        // segment has already been awarded via logStrength; we only display the sum.
+        setSessionLogs(prev => [...prev, finalEntry]);
+        setStep("session-summary");
+      } else {
+        setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image });
+        setStep("celebrate");
+      }
     } else if (action === "new-workout") {
       const dateISO = new Date(date).toISOString();
       const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level} · pick next workout`);
+      setSessionLogs(prev => [...prev, { workout, level, sets: newSets, chalk, mode: setMode }]);
       setSets([]);
       setReps(5);
       setStep("workout");

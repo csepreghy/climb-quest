@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { Slot, ItemGroup, Rarity, ShopItem, GEAR_SLOTS, gearSlotsUnlocked, LEVELS, BUDDY_SLOT_UNLOCK_LEVEL } from "@/game/data";
 import { equipItem, unequipSlot, removeOwnedItem, sellItem, setGender, useGame, currentLevel, nextLevel } from "@/game/store";

@@ -607,7 +607,7 @@ function specialBonusSummary(eq: ReturnType<typeof useGame>["equipped"]) {
     out.push({
       label: "Crit chance (×2)",
       value: `${Math.round(critProb * 100)}%`,
-      tone: "text-chalk-glow",
+      tone: "text-[hsl(var(--epic))]",
     });
   }
 
@@ -617,7 +617,7 @@ function specialBonusSummary(eq: ReturnType<typeof useGame>["equipped"]) {
     out.push({
       label: "Boss attempts/sends",
       value: `+${Math.round(bossPct)}%`,
-      tone: "text-destructive",
+      tone: "text-legendary",
     });
   }
 

@@ -318,6 +318,7 @@ function ChalkChip({ value }: { value: number }) {
   const s = useGame();
   const dailyCapCfg = useDailyCapConfig();
   const dailyCap = computeDailyCap(s.level, dailyCapCfg);
+  const usedToday = chalkUsedOnDate(s, new Date().toISOString());
   const showCap = dailyCapCfg.enabled && dailyCap > 0;
 
   // Activity rows sorted ascending by points

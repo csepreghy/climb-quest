@@ -670,7 +670,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
             <Field label="Grade">
               <Select value={grade} onValueChange={setGrade}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{grades.map(gr => <SelectItem key={gr} value={gr}>{gr}</SelectItem>)}</SelectContent>
+                <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
               </Select>
             </Field>
           )}

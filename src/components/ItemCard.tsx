@@ -5,7 +5,7 @@ import { isImageEmoji } from "@/game/customItems";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 import { cn } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
+import { Trash2, Coins } from "lucide-react";
 
 export function ItemCard({
   item,
@@ -16,6 +16,8 @@ export function ItemCard({
   primed,
   highlight,
   onRemove,
+  onSell,
+  sellPrice,
 }: {
   item: ShopItem;
   showAction?: boolean;
@@ -25,6 +27,8 @@ export function ItemCard({
   primed?: boolean;
   highlight?: boolean;
   onRemove?: () => void;
+  onSell?: () => void;
+  sellPrice?: number;
 }) {
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;

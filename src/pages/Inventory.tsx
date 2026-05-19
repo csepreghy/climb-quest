@@ -325,7 +325,12 @@ export default function Inventory() {
             </Card>
           ) : (
             (["buddy", "outfit", "gear", "power"] as ItemGroup[]).map(group => {
-              const groupItems = owned.filter(it => it.group === group);
+              const groupItems = owned.filter(it => {
+                if (it.group !== group) return false;
+                // Hide equipped (non-consumable) and primed consumables — they already show in the Equipped section.
+                if (it.consumableBonus) return s.pendingConsumable !== it.id;
+                return s.equipped[it.slot] !== it.id;
+              });
               if (groupItems.length === 0) return null;
               const isBuddy = group === "buddy";
               return (
@@ -335,7 +340,6 @@ export default function Inventory() {
                   </div>
                   <div className={cn("grid gap-4", isBuddy ? "sm:grid-cols-2" : "sm:grid-cols-2")}>
                     {groupItems.map(it => {
-                      const isEquipped = !it.consumableBonus && s.equipped[it.slot] === it.id;
                       const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
                       const removeFn = adminTools ? () => {
                         if (confirm(`Remove ${it.name} from inventory?`)) {
@@ -348,7 +352,6 @@ export default function Inventory() {
                           <BuddyCard
                             key={it.id}
                             item={it}
-                            highlight={isEquipped}
                             onClick={() => setCompareItem(it)}
                             onRemove={removeFn}
                           />
@@ -359,7 +362,6 @@ export default function Inventory() {
                           key={it.id}
                           item={it}
                           primed={isPrimed}
-                          highlight={isEquipped}
                           onClick={() => setCompareItem(it)}
                           onRemove={removeFn}
                         />

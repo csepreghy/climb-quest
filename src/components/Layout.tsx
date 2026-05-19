@@ -411,7 +411,7 @@ function ChalkChip({ value }: { value: number }) {
             <div className="space-y-4">
               <div>
                 <div className="menu-label mb-2">Daily limit</div>
-                <div className="rounded-lg border border-border overflow-hidden">
+                <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
                   <div className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-foreground/90">
                       {showCap ? "Today's cap" : "No daily cap"}
@@ -420,6 +420,14 @@ function ChalkChip({ value }: { value: number }) {
                       {showCap ? `${dailyCap.toLocaleString()} chalk` : "Unlimited"}
                     </span>
                   </div>
+                  {showCap && (
+                    <div className="flex items-center justify-between px-3 py-2 text-sm">
+                      <span className="text-foreground/90">Earned today</span>
+                      <span className="tabular-nums font-bold gradient-chalk-text">
+                        {usedToday.toLocaleString()} / {dailyCap.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1.5">
                   {showCap

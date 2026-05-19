@@ -31,7 +31,7 @@ const NAV_BASE = [
   { to: "/shop", label: "Shop", icon: Store },
   { to: "/log", label: "Logs", icon: ScrollText },
   
-  { to: "/gym", label: "My Gym", icon: Building2 },
+  { to: "/gym", label: "My Gym", mobileLabel: "Gym", icon: Building2 },
   { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
 const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };
@@ -298,7 +298,7 @@ export default function Layout() {
                   isActive ? "text-foreground" : "text-muted-foreground")
               }>
               <n.icon className="h-5 w-5" />
-              <span className="truncate">{n.label.split(" ")[0]}</span>
+              <span className="truncate">{(n as any).mobileLabel ?? n.label.split(" ")[0]}</span>
             </NavLink>
           ))}
         </div>

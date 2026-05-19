@@ -5,7 +5,7 @@ import { isImageEmoji } from "@/game/customItems";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 import { cn } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
+import { Trash2, Coins } from "lucide-react";
 
 export function ItemCard({
   item,
@@ -16,6 +16,8 @@ export function ItemCard({
   primed,
   highlight,
   onRemove,
+  onSell,
+  sellPrice,
 }: {
   item: ShopItem;
   showAction?: boolean;
@@ -25,6 +27,8 @@ export function ItemCard({
   primed?: boolean;
   highlight?: boolean;
   onRemove?: () => void;
+  onSell?: () => void;
+  sellPrice?: number;
 }) {
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
@@ -85,11 +89,18 @@ export function ItemCard({
         </div>
       </div>
       {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
-      {showAction && (
-        <div className="flex items-center justify-end pt-2 border-t border-border/50">
-          <GameButton size="sm" variant="primary" onClick={(e) => { e.stopPropagation(); onAction?.(); }}>
-            {actionLabel ?? "Equip"}
-          </GameButton>
+      {(showAction || onSell) && (
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50">
+          {onSell && typeof sellPrice === "number" && sellPrice > 0 && (
+            <GameButton size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onSell(); }} title="Sell for half price">
+              <Coins className="h-3.5 w-3.5" /> Sell · {sellPrice}
+            </GameButton>
+          )}
+          {showAction && (
+            <GameButton size="sm" variant="primary" onClick={(e) => { e.stopPropagation(); onAction?.(); }}>
+              {actionLabel ?? "Equip"}
+            </GameButton>
+          )}
         </div>
       )}
     </GameCard>

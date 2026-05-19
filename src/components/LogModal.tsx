@@ -926,13 +926,30 @@ function PreviewReward({ preview }: { preview: ReturnType<typeof computeChalk> }
   );
 }
 
-function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: { total: number; label: string; image?: string; alt?: string }) {
+function findCritPre(breakdown?: { bonuses: { source: string; amount: number }[] }): number | null {
+  if (!breakdown) return null;
+  const crit = breakdown.bonuses.find(b => b.source.startsWith("Crit!"));
+  return crit ? crit.amount : null;
+}
+
+function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder", critPre }: { total: number; label: string; image?: string; alt?: string; critPre?: number | null }) {
+  const hasCrit = typeof critPre === "number" && critPre > 0;
   return (
     <div className="py-10 text-center">
       <div className="mx-auto h-40 w-40 rounded-2xl overflow-hidden border-4 border-[hsl(var(--btn-orange))] shadow-[0_0_40px_hsl(var(--btn-orange)/0.55)] animate-banner-pop">
         <img src={image} alt={alt} className="h-full w-full object-cover" />
       </div>
       <div className="mt-5 menu-label">{label}</div>
+      {hasCrit && (
+        <div className="mt-3 flex items-center justify-center gap-2 animate-pop-in">
+          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-[hsl(var(--epic))]/20 text-[hsl(var(--epic))] border border-[hsl(var(--epic))]/40">
+            💥 Crit!
+          </span>
+          <span className="text-sm font-semibold tabular-nums text-foreground/80">
+            {critPre} × 2 = <span className="gradient-chalk-text">{critPre! * 2}</span>
+          </span>
+        </div>
+      )}
       <div className="mt-2 flex items-center justify-center gap-3 animate-pop-in">
         <img src={chalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--chalk-glow)/0.6)]" />
         <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{total}</span>

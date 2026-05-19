@@ -150,7 +150,7 @@ function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: 
           ) : (
             <span className="font-medium tabular-nums inline-flex items-center gap-1">
               
-              {price}
+              {price.toLocaleString()}
               <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" />
             </span>
           )}
@@ -191,7 +191,7 @@ function BuddyShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { i
               <span className="text-muted-foreground text-xs">Starter</span>
             ) : (
               <span className="font-medium tabular-nums inline-flex items-center gap-1">
-                {price}
+                {price.toLocaleString()}
                 <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" />
               </span>
             )}

@@ -535,7 +535,7 @@ export default function Inventory() {
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1.5 text-sm font-bold tabular-nums gradient-chalk-text">
                     <img src={chalkBagImg} alt="" className="h-5 w-5 object-contain" />
-                    {sellRefund}
+                    {sellRefund.toLocaleString()}
                   </span>
                   <GameButton variant="primary" onClick={confirmSell}>Sell</GameButton>
                 </div>

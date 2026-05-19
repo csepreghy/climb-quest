@@ -327,19 +327,13 @@ function ChalkChip({ value }: { value: number }) {
     .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
     .sort((a, b) => a.chalk - b.chalk);
 
-  // Strength: per-rep chalk by tier vs the user's max-unlocked level (per workout).
-  const strengthRows = (["core", "pullup", "pushup", "handstand"] as StrengthWorkout[]).flatMap(w => {
-    const max = s.strengthLevels?.[w] ?? 0;
-    if (max <= 0) return [];
-    const label = w === "core" ? "Core" : w === "pullup" ? "Pull-up" : w === "pushup" ? "Push-up" : "Handstand";
-    const tiers: { name: string; chalk: number }[] = [];
-    tiers.push({ name: `${label} L${max} (max)`, chalk: strengthRepChalk(max, max) });
-    if (max >= 2) tiers.push({ name: `${label} L${max - 1}`, chalk: strengthRepChalk(max - 1, max) });
-    if (max >= 3) tiers.push({ name: `${label} L${max - 2}`, chalk: strengthRepChalk(max - 2, max) });
-    if (max >= 4) tiers.push({ name: `${label} ≤L${max - 3}`, chalk: strengthRepChalk(max - 3, max) });
-    return tiers;
-  });
-  const hasStrength = strengthRows.length > 0;
+  // Strength: general per-rep tier explanation (independent of user's unlocked levels).
+  const strengthTiers = [
+    { name: "Max level", chalk: strengthRepChalk(10, 10) },
+    { name: "Max level − 1", chalk: strengthRepChalk(9, 10) },
+    { name: "Max level − 2", chalk: strengthRepChalk(8, 10) },
+    { name: "Lower levels", chalk: strengthRepChalk(1, 10) },
+  ];
 
   return (
     <>

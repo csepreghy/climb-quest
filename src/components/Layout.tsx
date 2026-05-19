@@ -380,25 +380,17 @@ function ChalkChip({ value }: { value: number }) {
 
               <div>
                 <div className="menu-label mb-2">Strength (per rep)</div>
-                {hasStrength ? (
-                  <>
-                    <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
-                      {strengthRows.map(r => (
-                        <div key={r.name} className="flex items-center justify-between px-3 py-2 text-sm">
-                          <span className="text-foreground/90">{r.name}</span>
-                          <span className="tabular-nums font-bold gradient-chalk-text">+{r.chalk}</span>
-                        </div>
-                      ))}
+                <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
+                  {strengthTiers.map(r => (
+                    <div key={r.name} className="flex items-center justify-between px-3 py-2 text-sm">
+                      <span className="text-foreground/90">{r.name}</span>
+                      <span className="tabular-nums font-bold gradient-chalk-text">+{r.chalk}</span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1.5">
-                      Per-rep chalk is highest at your max-unlocked level and tapers off below it. Beat the strength boss to raise the bar.
-                    </p>
-                  </>
-                ) : (
-                  <div className="rounded-lg border border-border px-3 py-3 text-xs text-muted-foreground">
-                    Log your first strength session to unlock per-rep chalk rates here.
-                  </div>
-                )}
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Per-rep chalk is highest at your max-unlocked level and tapers off below it. Beat the strength boss to raise the bar.
+                </p>
               </div>
             </div>
 

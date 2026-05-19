@@ -427,13 +427,7 @@ export default function Inventory() {
                   return (
                     <Button
                       variant="destructive"
-                      onClick={() => {
-                        if (!confirm(`Sell ${compareItem.name} for ${refund} chalk? This won't count toward total chalk earned.`)) return;
-                        const r = sellItem(compareItem.id);
-                        if (!r.ok) { toast.error(r.reason ?? "Cannot sell"); return; }
-                        toast.success(`Sold ${compareItem.name} · +${r.refund} chalk`);
-                        setCompareItem(null);
-                      }}
+                      onClick={() => setSellTarget(compareItem)}
                     >
                       Sell · {refund} chalk
                     </Button>

@@ -298,7 +298,7 @@ export default function Layout() {
                   isActive ? "text-foreground" : "text-muted-foreground")
               }>
               <n.icon className="h-5 w-5" />
-              <span className="truncate">{n.label.split(" ")[0]}</span>
+              <span className="truncate">{(n as any).mobileLabel ?? n.label.split(" ")[0]}</span>
             </NavLink>
           ))}
         </div>

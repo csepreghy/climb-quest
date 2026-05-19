@@ -5,7 +5,8 @@ import { isImageEmoji } from "@/game/customItems";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 import { cn } from "@/lib/utils";
-import { Trash2, Coins } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 export function ItemCard({
   item,

@@ -7,7 +7,7 @@ import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHyd
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType, BADGE_BY_ID } from "@/game/data";
-import { useDailyCapConfig, computeDailyCap } from "@/game/dailyCap";
+import { useDailyCapConfig, computeDailyCap, chalkUsedOnDate } from "@/game/dailyCap";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -318,6 +318,7 @@ function ChalkChip({ value }: { value: number }) {
   const s = useGame();
   const dailyCapCfg = useDailyCapConfig();
   const dailyCap = computeDailyCap(s.level, dailyCapCfg);
+  const usedToday = chalkUsedOnDate(s, new Date().toISOString());
   const showCap = dailyCapCfg.enabled && dailyCap > 0;
 
   // Activity rows sorted ascending by points
@@ -411,7 +412,7 @@ function ChalkChip({ value }: { value: number }) {
             <div className="space-y-4">
               <div>
                 <div className="menu-label mb-2">Daily limit</div>
-                <div className="rounded-lg border border-border overflow-hidden">
+                <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden">
                   <div className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-foreground/90">
                       {showCap ? "Today's cap" : "No daily cap"}
@@ -420,6 +421,14 @@ function ChalkChip({ value }: { value: number }) {
                       {showCap ? `${dailyCap.toLocaleString()} chalk` : "Unlimited"}
                     </span>
                   </div>
+                  {showCap && (
+                    <div className="flex items-center justify-between px-3 py-2 text-sm">
+                      <span className="text-foreground/90">Earned today</span>
+                      <span className="tabular-nums font-bold gradient-chalk-text">
+                        {usedToday.toLocaleString()} / {dailyCap.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1.5">
                   {showCap

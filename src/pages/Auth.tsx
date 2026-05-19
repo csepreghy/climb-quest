@@ -57,16 +57,15 @@ export default function Auth() {
           <Link to="/" aria-label="ClimbQuest home" className="inline-block">
             <img src={logoImg} alt="ClimbQuest" className="h-28 w-auto mx-auto drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]" />
           </Link>
-          <div className="text-xs text-muted-foreground">{mode === "signin" ? "Sign in to continue" : "Create your account"}</div>
         </div>
-        <GameButton type="button" variant="primary" className="w-full" onClick={google}>Continue with Google</GameButton>
-        <div className="text-[10px] text-center text-muted-foreground uppercase tracking-wider py-1">or</div>
+        <GameButton type="button" variant="primary" className="w-full" onClick={google}>Sign in with Google</GameButton>
+        <div className="text-[10px] text-center text-muted-foreground uppercase tracking-wider my-4">or</div>
         <form onSubmit={submit} className="space-y-3">
           <div><Label>Email</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></div>
           <div><Label>Password</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} /></div>
           <GameButton type="submit" variant="primary" className="w-full" disabled={busy}>{mode === "signin" ? "Sign in" : "Sign up"}</GameButton>
         </form>
-        <button type="button" className="text-xs text-muted-foreground hover:text-foreground w-full text-center" onClick={() => setMode(m => m === "signin" ? "signup" : "signin")}>
+        <button type="button" className="text-xs text-muted-foreground hover:text-foreground w-full text-center mt-4" onClick={() => setMode(m => m === "signin" ? "signup" : "signin")}>
           {mode === "signin" ? "Need an account? Sign up" : "Have an account? Sign in"}
         </button>
       </GameCard>

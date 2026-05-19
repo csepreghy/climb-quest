@@ -6,7 +6,7 @@ import { GameButton } from "@/components/ui/game-button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { Slot, ItemGroup, Rarity, ShopItem, GEAR_SLOTS, gearSlotsUnlocked, LEVELS, BUDDY_SLOT_UNLOCK_LEVEL } from "@/game/data";
-import { equipItem, unequipSlot, removeOwnedItem, setGender, useGame, currentLevel, nextLevel } from "@/game/store";
+import { equipItem, unequipSlot, removeOwnedItem, sellItem, setGender, useGame, currentLevel, nextLevel } from "@/game/store";
 import { getItem, useCustomItems } from "@/game/customItems";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { useAuth } from "@/hooks/useAuth";
@@ -325,7 +325,12 @@ export default function Inventory() {
             </Card>
           ) : (
             (["buddy", "outfit", "gear", "power"] as ItemGroup[]).map(group => {
-              const groupItems = owned.filter(it => it.group === group);
+              const groupItems = owned.filter(it => {
+                if (it.group !== group) return false;
+                // Hide equipped (non-consumable) and primed consumables — they already show in the Equipped section.
+                if (it.consumableBonus) return s.pendingConsumable !== it.id;
+                return s.equipped[it.slot] !== it.id;
+              });
               if (groupItems.length === 0) return null;
               const isBuddy = group === "buddy";
               return (
@@ -335,7 +340,6 @@ export default function Inventory() {
                   </div>
                   <div className={cn("grid gap-4", isBuddy ? "sm:grid-cols-2" : "sm:grid-cols-2")}>
                     {groupItems.map(it => {
-                      const isEquipped = !it.consumableBonus && s.equipped[it.slot] === it.id;
                       const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
                       const removeFn = adminTools ? () => {
                         if (confirm(`Remove ${it.name} from inventory?`)) {
@@ -348,7 +352,6 @@ export default function Inventory() {
                           <BuddyCard
                             key={it.id}
                             item={it}
-                            highlight={isEquipped}
                             onClick={() => setCompareItem(it)}
                             onRemove={removeFn}
                           />
@@ -359,7 +362,6 @@ export default function Inventory() {
                           key={it.id}
                           item={it}
                           primed={isPrimed}
-                          highlight={isEquipped}
                           onClick={() => setCompareItem(it)}
                           onRemove={removeFn}
                         />
@@ -408,8 +410,25 @@ export default function Inventory() {
 
               <BonusDiff current={equippedItem} next={compareItem} />
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 flex-wrap">
                 <Button variant="ghost" onClick={() => setCompareItem(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Close</Button>
+                {s.owned.includes(compareItem.id) && !compareItem.consumableBonus && (compareItem.price ?? 0) > 0 && (() => {
+                  const refund = Math.floor((compareItem.price ?? 0) / 2);
+                  return (
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        if (!confirm(`Sell ${compareItem.name} for ${refund} chalk? This won't count toward total chalk earned.`)) return;
+                        const r = sellItem(compareItem.id);
+                        if (!r.ok) { toast.error(r.reason ?? "Cannot sell"); return; }
+                        toast.success(`Sold ${compareItem.name} · +${r.refund} chalk`);
+                        setCompareItem(null);
+                      }}
+                    >
+                      Sell · {refund} chalk
+                    </Button>
+                  );
+                })()}
                 {(() => {
                   const alreadyOn = compareItem.consumableBonus
                     ? s.pendingConsumable === compareItem.id

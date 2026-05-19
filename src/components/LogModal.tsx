@@ -1546,11 +1546,14 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         </div>
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
-          <GameButton variant="primary" size="md" onClick={() => logRepsAnd("rest")}>
-            <Timer className="h-4 w-4" /> {isHold ? "Log Hold & Rest" : "Log Reps & Rest"}
+          <GameButton variant="ghost" size="md" onClick={() => logRepsAnd("rest")}>
+            <Timer className="h-4 w-4" /> {isHold ? "LOG & REST" : "LOG & REST"}
+          </GameButton>
+          <GameButton variant="primary" size="md" onClick={() => logRepsAnd("new-workout")}>
+            <Plus className="h-4 w-4" /> LOG & NEW WORKOUT
           </GameButton>
           <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
-            <Trophy className="h-4 w-4" /> {isHold ? "Log Hold & Finish" : "Log Reps & Finish"}
+            <Trophy className="h-4 w-4" /> LOG & FINISH
           </GameButton>
         </div>
       </>

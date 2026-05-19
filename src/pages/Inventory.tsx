@@ -341,12 +341,7 @@ export default function Inventory() {
                   <div className={cn("grid gap-4", isBuddy ? "sm:grid-cols-2" : "sm:grid-cols-2")}>
                     {groupItems.map(it => {
                       const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
-                      const removeFn = adminTools ? () => {
-                        if (confirm(`Remove ${it.name} from inventory?`)) {
-                          removeOwnedItem(it.id);
-                          toast.success(`Removed ${it.name}`);
-                        }
-                      } : undefined;
+                      const removeFn = undefined;
                       if (isBuddy) {
                         return (
                           <BuddyCard

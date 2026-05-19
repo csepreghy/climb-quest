@@ -1177,7 +1177,16 @@ type StrengthStep =
   | "boss-reps"       // single-set boss attempt
   | "rest-pick"
   | "rest-timer"
-  | "celebrate";
+  | "celebrate"
+  | "session-summary";
+
+type SessionLogEntry = {
+  workout: StrengthWorkout;
+  level: number;
+  sets: StrengthSet[];
+  chalk: number;
+  mode?: "hold" | "pushup";
+};
 
 function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
   const s = useGame();

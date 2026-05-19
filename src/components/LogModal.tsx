@@ -486,6 +486,20 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
   useEffect(() => { setGsId(availableSystems[0]?.id ?? "v_grades"); }, [gymId]);
   const gs = availableSystems.find(g => g.id === gsId) ?? availableSystems[0];
   const grades = gs ? gradeLabels(gs) : [];
+  const gradeHex = (label: string) => gs?.kind === "color" ? gs.colors?.find(c => c.name === label)?.hex : undefined;
+  const renderGradeItem = (gr: string) => {
+    const hex = gradeHex(gr);
+    return (
+      <SelectItem key={gr} value={gr}>
+        {hex ? (
+          <span className="flex items-center gap-2">
+            <span className="inline-block h-3.5 w-3.5 rounded-full border border-[hsl(var(--panel-frame))]" style={{ background: hex }} />
+            {gr}
+          </span>
+        ) : gr}
+      </SelectItem>
+    );
+  };
 
   const [date, setDate] = useState(() => (editLog?.date ?? new Date().toISOString()).slice(0, 10));
   const [holdColorId, setHoldColorId] = useState<string>(existingBoss?.holdColorId ?? editLog?.holdColorId ?? "");

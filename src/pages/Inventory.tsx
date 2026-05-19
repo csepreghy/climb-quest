@@ -530,6 +530,27 @@ export default function Inventory() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!sellTarget} onOpenChange={(o) => { if (!o) setSellTarget(null); }}>
+        <DialogContent className="max-w-md">
+          {sellTarget && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Sell {sellTarget.name}?</DialogTitle>
+                <DialogDescription>
+                  You'll receive <span className="font-bold gradient-chalk-text">{sellRefund} chalk</span> (half the purchase price).
+                  This won't count toward your total chalk earned on the leaderboard.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="gap-2 sm:gap-2">
+                <Button variant="ghost" onClick={() => setSellTarget(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Cancel</Button>
+                <Button variant="destructive" onClick={confirmSell}>Sell · {sellRefund} chalk</Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+
       <LevelsModal
         open={levelsOpen}
         onOpenChange={setLevelsOpen}

@@ -216,7 +216,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   const [attemptType, setAttemptType] = useState<AttemptType>(editLog?.attemptType ?? "send");
   const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
   const [notes, setNotes] = useState(editLog?.notes ?? "");
-  const [celebrating, setCelebrating] = useState<{ total: number } | null>(null);
+  const [celebrating, setCelebrating] = useState<{ total: number; critPre: number | null } | null>(null);
   const [projectPromptOpen, setProjectPromptOpen] = useState(false);
 
   const sent = attemptType === "flash" || attemptType === "send";
@@ -268,12 +268,12 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       return;
     }
     const res = logBoulder(input);
-    setCelebrating({ total: res.log.chalkTotal });
+    setCelebrating({ total: res.log.chalkTotal, critPre: findCritPre(res.breakdown) });
     toast.success(`+${res.log.chalkTotal} Chalk earned`);
     setTimeout(() => { setCelebrating(null); onDone(); }, 1600);
   }
 
-  if (celebrating) return <SimpleCelebrate total={celebrating.total} label="Sent it!" />;
+  if (celebrating) return <SimpleCelebrate total={celebrating.total} label="Sent it!" critPre={celebrating.critPre} />;
 
   return (
     <>
@@ -564,7 +564,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
   if (celebrate) {
     return celebrate.defeated
       ? <BossCelebrate total={celebrate.total} breakdown={celebrate.breakdown} onDone={() => { setCelebrate(null); onDone(); }} />
-      : <SimpleCelebrate total={celebrate.total} label="Logged attempt!" image={bossImg} alt="Boss" />;
+      : <SimpleCelebrate total={celebrate.total} label="Logged attempt!" image={bossImg} alt="Boss" critPre={findCritPre(celebrate.breakdown)} />;
   }
 
   if (step === "attempts") {
@@ -926,13 +926,30 @@ function PreviewReward({ preview }: { preview: ReturnType<typeof computeChalk> }
   );
 }
 
-function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder" }: { total: number; label: string; image?: string; alt?: string }) {
+function findCritPre(breakdown?: { bonuses: { source: string; amount: number }[] }): number | null {
+  if (!breakdown) return null;
+  const crit = breakdown.bonuses.find(b => b.source.startsWith("Crit!"));
+  return crit ? crit.amount : null;
+}
+
+function SimpleCelebrate({ total, label, image = boulderImg, alt = "Boulder", critPre }: { total: number; label: string; image?: string; alt?: string; critPre?: number | null }) {
+  const hasCrit = typeof critPre === "number" && critPre > 0;
   return (
     <div className="py-10 text-center">
       <div className="mx-auto h-40 w-40 rounded-2xl overflow-hidden border-4 border-[hsl(var(--btn-orange))] shadow-[0_0_40px_hsl(var(--btn-orange)/0.55)] animate-banner-pop">
         <img src={image} alt={alt} className="h-full w-full object-cover" />
       </div>
       <div className="mt-5 menu-label">{label}</div>
+      {hasCrit && (
+        <div className="mt-3 flex items-center justify-center gap-2 animate-pop-in">
+          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-[hsl(var(--epic))]/20 text-[hsl(var(--epic))] border border-[hsl(var(--epic))]/40">
+            💥 Crit!
+          </span>
+          <span className="text-sm font-semibold tabular-nums text-foreground/80">
+            {critPre} × 2 = <span className="gradient-chalk-text">{critPre! * 2}</span>
+          </span>
+        </div>
+      )}
       <div className="mt-2 flex items-center justify-center gap-3 animate-pop-in">
         <img src={chalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--chalk-glow)/0.6)]" />
         <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{total}</span>
@@ -1201,7 +1218,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [bossAttempts, setBossAttempts] = useState<number>(1);
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [handstandMode, setHandstandMode] = useState<"hold" | "pushup">("hold");
-  const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string } | null>(null);
+  const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string; critPre?: number | null } | null>(null);
   const [sessionLogs, setSessionLogs] = useState<SessionLogEntry[]>([]);
   const sessionChalkSoFar = sessionLogs.reduce((acc, l) => acc + l.chalk, 0);
 
@@ -1249,16 +1266,14 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setReps(cleanReps);
     if (action === "finish") {
       const dateISO = new Date(date).toISOString();
-      const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
+      const { chalk, breakdown } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(`+${chalk} Chalk · ${WORKOUT_META[workout].title} L${level}`);
       const finalEntry: SessionLogEntry = { workout, level, sets: newSets, chalk, mode: setMode };
       if (sessionLogs.length > 0) {
-        // Chained session — show summary across all logged workouts. Chalk for each
-        // segment has already been awarded via logStrength; we only display the sum.
         setSessionLogs(prev => [...prev, finalEntry]);
         setStep("session-summary");
       } else {
-        setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image });
+        setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image, critPre: findCritPre(breakdown) });
         setStep("celebrate");
       }
     } else if (action === "new-workout") {
@@ -1310,6 +1325,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           label={celebrate.label}
           image={celebrate.image ?? strengthImg}
           alt={WORKOUT_META[workout].title}
+          critPre={celebrate.critPre}
         />
         <div className="mt-4">
           <GameButton variant="primary" onClick={onDone}>Done</GameButton>

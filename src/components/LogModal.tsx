@@ -1250,19 +1250,21 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [sessionLogs, setSessionLogs] = useState<SessionLogEntry[]>([]);
   const sessionChalkSoFar = sessionLogs.reduce((acc, l) => acc + l.chalk, 0);
 
-  const unlockedMax = s.strengthLevels?.[workout] ?? 0;
+  const unlockedMax = s.strengthLevels?.[strengthKey(workout, handstandMode)] ?? 0;
   const isFirstTime = unlockedMax <= 0;
 
   function pickWorkout(w: StrengthWorkout) {
     setWorkout(w);
-    const max = s.strengthLevels?.[w] ?? 0;
+    // For handstand, default to hold and seed both modes independently.
+    const initialMode: "hold" | "pushup" = "hold";
+    const max = s.strengthLevels?.[strengthKey(w, initialMode)] ?? 0;
     if (max <= 0) {
       // Everyone starts at level 1; higher levels are unlocked by beating bosses.
-      setStrengthLevel(w, 1);
+      setStrengthLevel(w, 1, w === "handstand" ? initialMode : undefined);
     }
     setLevel(max > 0 ? max : 1);
     setSets([]);
-    setHandstandMode("hold");
+    setHandstandMode(initialMode);
     setReps(w === "handstand" ? 5 : 5);
     setStep("reps");
   }

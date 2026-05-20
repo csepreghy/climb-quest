@@ -47,6 +47,11 @@ export default function Auth() {
     if (r.error) toast.error("Google sign-in failed");
   }
 
+  async function apple() {
+    const r = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin });
+    if (r.error) toast.error("Apple sign-in failed");
+  }
+
   return (
     <div className="min-h-screen grid place-items-center p-6 relative">
       <Link to="/" className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition">
@@ -59,6 +64,7 @@ export default function Auth() {
           </Link>
         </div>
         <GameButton type="button" variant="primary" className="w-full mt-4" onClick={google}>Sign in with Google</GameButton>
+        <GameButton type="button" variant="secondary" className="w-full" onClick={apple}>Sign in with Apple</GameButton>
         <div className="text-[10px] text-center text-muted-foreground uppercase tracking-wider my-4">or</div>
         <form onSubmit={submit} className="space-y-3">
           <div><Label>Email</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></div>

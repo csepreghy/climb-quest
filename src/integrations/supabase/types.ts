@@ -377,6 +377,7 @@ export type Database = {
           email: string
           is_admin: boolean
           level: number
+          provider: string
           total_chalk_earned: number
           total_logs: number
           user_id: string

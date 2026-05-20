@@ -1034,6 +1034,16 @@ interface AdminUserRow {
   total_logs: number;
   bosses_sent: number;
   created_at: string;
+  provider: string | null;
+}
+
+function providerLabel(p: string | null | undefined): string {
+  switch ((p ?? "email").toLowerCase()) {
+    case "google": return "Google";
+    case "apple": return "Apple";
+    case "email": return "Email";
+    default: return (p ?? "Email").replace(/^./, c => c.toUpperCase());
+  }
 }
 
 function UsersAdmin() {
@@ -1083,6 +1093,7 @@ function UsersAdmin() {
               <tr className="border-b border-border">
                 <th className="text-left py-2 px-2">Climber</th>
                 <th className="text-left py-2 px-2">Email</th>
+                <th className="text-left py-2 px-2">Sign-up</th>
                 <th className="text-right py-2 px-2">Lv</th>
                 <th className="text-right py-2 px-2">All-time chalk</th>
                 <th className="text-right py-2 px-2">Logs</th>
@@ -1104,6 +1115,11 @@ function UsersAdmin() {
                     )}
                   </td>
                   <td className="py-2 px-2 text-muted-foreground">{r.email}</td>
+                  <td className="py-2 px-2">
+                    <span className="inline-block px-2 py-0.5 rounded-full bg-secondary/60 border border-border text-[11px] font-semibold">
+                      {providerLabel(r.provider)}
+                    </span>
+                  </td>
                   <td className="py-2 px-2 text-right tabular-nums">{r.level}</td>
                   <td className="py-2 px-2 text-right tabular-nums gradient-chalk-text font-bold">{r.total_chalk_earned.toLocaleString()}</td>
                   <td className="py-2 px-2 text-right tabular-nums">{r.total_logs}</td>

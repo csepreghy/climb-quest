@@ -63,7 +63,7 @@ export default function Auth() {
             <img src={logoImg} alt="ClimbQuest" className="h-28 w-auto mx-auto drop-shadow-[0_2px_6px_hsl(0_0%_0%/0.55)]" />
           </Link>
         </div>
-        <GameButton type="button" variant="primary" className="w-full mt-4" onClick={google}>Sign in with Google</GameButton>
+        <GameButton type="button" variant="primary" className="w-full mt-4 mb-3" onClick={google}>Sign in with Google</GameButton>
         <GameButton type="button" variant="secondary" className="w-full" onClick={apple}>Sign in with Apple</GameButton>
         <div className="text-[10px] text-center text-muted-foreground uppercase tracking-wider my-4">or</div>
         <form onSubmit={submit} className="space-y-3">

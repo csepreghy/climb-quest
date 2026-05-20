@@ -1595,6 +1595,9 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                       type="button"
                       onClick={() => {
                         setHandstandMode(m);
+                        const modeMax = s.strengthLevels?.[strengthKey(workout, m)] ?? 0;
+                        if (modeMax <= 0) setStrengthLevel(workout, 1, m);
+                        setLevel(Math.max(1, modeMax));
                         setReps(m === "hold" ? 1 : 5);
                       }}
                       className={cn(

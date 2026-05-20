@@ -1320,11 +1320,12 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function addBossRep() {
+    const mode = workout === "handstand" ? handstandMode : undefined;
     const target = strengthBossTarget(workout);
-    const progress = getStrengthBossProgress(workout);
+    const progress = getStrengthBossProgress(workout, mode);
     const remaining = Math.max(1, target - progress);
     const reps = Math.max(1, Math.min(remaining, Math.round(bossAttempts)));
-    const res = logStrengthBossRep(workout, reps);
+    const res = logStrengthBossRep(workout, reps, mode);
     if (res.defeated) {
       toast.success(`Boss defeated! Unlocked Level ${res.unlockedLevel}`);
       setCelebrate({

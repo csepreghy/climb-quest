@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, strengthBossTarget, setStrengthLevel, maxStrengthLevel, Boss, activeBossProjects, createBossProject, markBossSent, admitBossDefeat, expireOverdueBosses, MAX_ACTIVE_BOSSES, BOSS_DEADLINE_DAYS, BOSS_DEFEAT_PENALTY, bossExpiresAt } from "@/game/store";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, strengthBossTarget, setStrengthLevel, maxStrengthLevel, strengthKey, Boss, activeBossProjects, createBossProject, markBossSent, admitBossDefeat, expireOverdueBosses, MAX_ACTIVE_BOSSES, BOSS_DEADLINE_DAYS, BOSS_DEFEAT_PENALTY, bossExpiresAt } from "@/game/store";
 import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolveGymGradingSystems } from "@/game/gyms";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
@@ -1250,25 +1250,27 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [sessionLogs, setSessionLogs] = useState<SessionLogEntry[]>([]);
   const sessionChalkSoFar = sessionLogs.reduce((acc, l) => acc + l.chalk, 0);
 
-  const unlockedMax = s.strengthLevels?.[workout] ?? 0;
+  const unlockedMax = s.strengthLevels?.[strengthKey(workout, handstandMode)] ?? 0;
   const isFirstTime = unlockedMax <= 0;
 
   function pickWorkout(w: StrengthWorkout) {
     setWorkout(w);
-    const max = s.strengthLevels?.[w] ?? 0;
+    // For handstand, default to hold and seed both modes independently.
+    const initialMode: "hold" | "pushup" = "hold";
+    const max = s.strengthLevels?.[strengthKey(w, initialMode)] ?? 0;
     if (max <= 0) {
       // Everyone starts at level 1; higher levels are unlocked by beating bosses.
-      setStrengthLevel(w, 1);
+      setStrengthLevel(w, 1, w === "handstand" ? initialMode : undefined);
     }
     setLevel(max > 0 ? max : 1);
     setSets([]);
-    setHandstandMode("hold");
+    setHandstandMode(initialMode);
     setReps(w === "handstand" ? 5 : 5);
     setStep("reps");
   }
 
   function confirmFirstPick(lv: number) {
-    setStrengthLevel(workout, lv);
+    setStrengthLevel(workout, lv, workout === "handstand" ? handstandMode : undefined);
     setLevel(lv);
     setSets([]);
     setReps(5);
@@ -1318,11 +1320,12 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function addBossRep() {
+    const mode = workout === "handstand" ? handstandMode : undefined;
     const target = strengthBossTarget(workout);
-    const progress = getStrengthBossProgress(workout);
+    const progress = getStrengthBossProgress(workout, mode);
     const remaining = Math.max(1, target - progress);
     const reps = Math.max(1, Math.min(remaining, Math.round(bossAttempts)));
-    const res = logStrengthBossRep(workout, reps);
+    const res = logStrengthBossRep(workout, reps, mode);
     if (res.defeated) {
       toast.success(`Boss defeated! Unlocked Level ${res.unlockedLevel}`);
       setCelebrate({
@@ -1429,7 +1432,9 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
           {(["core", "pullup", "pushup", "squat", "handstand"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
-            const currentLv = Math.max(1, s.strengthLevels?.[w] ?? 1);
+            const currentLv = w === "handstand"
+              ? Math.max(1, s.strengthLevels?.handstand_hold ?? 0, s.strengthLevels?.handstand_pushup ?? 0)
+              : Math.max(1, s.strengthLevels?.[w] ?? 1);
             const lvName = workoutLevelName(w, currentLv);
             const lvImg = workoutLevelImage(w, currentLv) ?? meta.image;
             const placeholder = (
@@ -1593,6 +1598,9 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                       type="button"
                       onClick={() => {
                         setHandstandMode(m);
+                        const modeMax = s.strengthLevels?.[strengthKey(workout, m)] ?? 0;
+                        if (modeMax <= 0) setStrengthLevel(workout, 1, m);
+                        setLevel(Math.max(1, modeMax));
                         setReps(m === "hold" ? 1 : 5);
                       }}
                       className={cn(
@@ -1699,7 +1707,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         </DialogDescription>
         <div className="space-y-4 mt-2">
           {(() => {
-            const progress = getStrengthBossProgress(workout);
+            const progress = getStrengthBossProgress(workout, workout === "handstand" ? handstandMode : undefined);
             const remaining = Math.max(1, bossReps - progress);
             const perAttemptMax = workout === "handstand" ? Math.min(60, remaining) : remaining;
             const reps = Math.max(1, Math.min(perAttemptMax, Math.round(bossAttempts)));
@@ -1753,7 +1761,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           <GameButton variant="danger" size="md" onClick={addBossRep}>
             {(() => {
               const target = strengthBossTarget(workout);
-              const remaining = Math.max(1, target - getStrengthBossProgress(workout));
+              const remaining = Math.max(1, target - getStrengthBossProgress(workout, workout === "handstand" ? handstandMode : undefined));
               const cap = workout === "handstand" ? Math.min(60, remaining) : remaining;
               const n = Math.max(1, Math.min(cap, Math.round(bossAttempts)));
               const unit = workout === "handstand" ? (n === 1 ? "Second" : "Seconds") : (n === 1 ? "Rep" : "Reps");

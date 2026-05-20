@@ -132,6 +132,15 @@ export function strengthRepChalk(level: number, maxUnlocked: number): number {
   return Math.max(1, Math.round(top * 0.3));
 }
 
+/**
+ * Storage key for per-workout strength state. Handstand splits into hold vs pushup
+ * so each mode tracks its own unlocked level + boss progress independently.
+ */
+export function strengthKey(workout: StrengthWorkout, mode?: "hold" | "pushup"): string {
+  if (workout === "handstand") return mode === "pushup" ? "handstand_pushup" : "handstand_hold";
+  return workout;
+}
+
 export interface State {
   level: number;
   chalk: number;
@@ -148,9 +157,10 @@ export interface State {
   /** Strength training sessions (separate from boulder logs). */
   strengthSessions: StrengthSession[];
   /** Per-workout chosen difficulty level (set first time the user logs that workout). */
-  strengthLevels: Partial<Record<StrengthWorkout, number>>;
-  /** Cumulative reps logged toward the next strength-boss defeat, per workout. */
-  strengthBossProgress?: Partial<Record<StrengthWorkout, number>>;
+  /** Keyed by `strengthKey(workout, mode)` — for handstand this splits hold vs pushup. */
+  strengthLevels: Record<string, number>;
+  /** Cumulative reps logged toward the next strength-boss defeat, keyed like `strengthLevels`. */
+  strengthBossProgress?: Record<string, number>;
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
   ignoreLevelReq?: boolean;
   /** ISO timestamp when the user completed first-time onboarding. */
@@ -234,10 +244,23 @@ function load(): State {
       });
     }
     // Move handstand_pushup unlocked level into handstand if higher.
-    if (merged.strengthLevels && (merged.strengthLevels as Record<string, number>).handstand_pushup) {
-      const hp = (merged.strengthLevels as Record<string, number>).handstand_pushup ?? 0;
-      merged.strengthLevels.handstand = Math.max(merged.strengthLevels.handstand ?? 0, hp);
-      delete (merged.strengthLevels as Record<string, number>).handstand_pushup;
+    if (merged.strengthLevels && (merged.strengthLevels as Record<string, number>).handstand_pushup !== undefined) {
+      // legacy: pre-split handstand_pushup key already exists as its own; nothing to merge.
+    }
+    // Split combined "handstand" key into separate hold/pushup keys.
+    if (merged.strengthLevels && (merged.strengthLevels as Record<string, number>).handstand !== undefined) {
+      const lv = (merged.strengthLevels as Record<string, number>).handstand ?? 0;
+      const sl = merged.strengthLevels as Record<string, number>;
+      sl.handstand_hold = Math.max(sl.handstand_hold ?? 0, lv);
+      sl.handstand_pushup = Math.max(sl.handstand_pushup ?? 0, lv);
+      delete sl.handstand;
+    }
+    if (merged.strengthBossProgress && (merged.strengthBossProgress as Record<string, number>).handstand !== undefined) {
+      const pg = (merged.strengthBossProgress as Record<string, number>).handstand ?? 0;
+      const bp = merged.strengthBossProgress as Record<string, number>;
+      bp.handstand_hold = Math.max(bp.handstand_hold ?? 0, pg);
+      bp.handstand_pushup = Math.max(bp.handstand_pushup ?? 0, pg);
+      delete bp.handstand;
     }
     // Migrate / clean up legacy bosses: strip template-spawned bosses (no createdAt),
     // backfill `styles` from legacy `style` for any user-saved boss.
@@ -581,7 +604,11 @@ export interface StrengthInput {
 }
 export function logStrength(input: StrengthInput): { session: StrengthSession; chalk: number; breakdown: ChalkBreakdown } {
   const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
-  const maxUnlocked = state.strengthLevels?.[input.workout] ?? 0;
+  // For handstand, derive mode from the first set so hold vs pushup track separately.
+  const sessionMode: "hold" | "pushup" | undefined =
+    input.workout === "handstand" ? (input.sets[0]?.mode ?? "hold") : undefined;
+  const key = strengthKey(input.workout, sessionMode);
+  const maxUnlocked = state.strengthLevels?.[key] ?? 0;
   const base = Math.max(1, Math.round(
     input.sets.reduce((sum, st) => {
       const lv = st.level ?? input.level;
@@ -675,14 +702,14 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     bossSend: input.bossSend,
   };
   set(s => {
-    const prevMax = s.strengthLevels?.[input.workout] ?? 0;
+    const prevMax = s.strengthLevels?.[key] ?? 0;
     const nextMax = input.bossSend ? Math.max(prevMax, input.level) : Math.max(prevMax, 1);
     const next: State = {
       ...s,
       chalk: s.chalk + chalk,
       totalChalkEarned: s.totalChalkEarned + chalk,
       strengthSessions: [session, ...(s.strengthSessions ?? [])].slice(0, 500),
-      strengthLevels: { ...(s.strengthLevels ?? {}), [input.workout]: nextMax },
+      strengthLevels: { ...(s.strengthLevels ?? {}), [key]: nextMax },
       pendingConsumable: null,
     };
     const add: string[] = [];
@@ -706,8 +733,9 @@ export function deleteStrengthSession(id: string) {
 }
 
 /** Manually set the user's max-unlocked strength level (used internally / by admin). */
-export function setStrengthLevel(workout: StrengthWorkout, level: number) {
-  set(s => ({ ...s, strengthLevels: { ...(s.strengthLevels ?? {}), [workout]: Math.max(1, level) } }));
+export function setStrengthLevel(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup") {
+  const key = strengthKey(workout, mode);
+  set(s => ({ ...s, strengthLevels: { ...(s.strengthLevels ?? {}), [key]: Math.max(1, level) } }));
 }
 
 /** Reset strength-level selections so the first-time picker shows again. */
@@ -716,8 +744,8 @@ export function resetStrengthLevels() {
 }
 
 /** Cumulative reps logged toward the next strength-boss defeat for `workout`. */
-export function getStrengthBossProgress(workout: StrengthWorkout): number {
-  return state.strengthBossProgress?.[workout] ?? 0;
+export function getStrengthBossProgress(workout: StrengthWorkout, mode?: "hold" | "pushup"): number {
+  return state.strengthBossProgress?.[strengthKey(workout, mode)] ?? 0;
 }
 
 /**
@@ -725,17 +753,18 @@ export function getStrengthBossProgress(workout: StrengthWorkout): number {
  * boss target (10). When cumulative reaches 10, mark a successful boss send,
  * unlock the next level, and reset progress.
  */
-export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 1): {
+export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 1, mode?: "hold" | "pushup"): {
   chalk: number;
   defeated: boolean;
   progress: number;
   target: number;
   unlockedLevel?: number;
 } {
+  const key = strengthKey(workout, mode);
   const target = strengthBossTarget(workout);
-  const prevMax = state.strengthLevels?.[workout] ?? 0;
+  const prevMax = state.strengthLevels?.[key] ?? 0;
   const targetLevel = Math.min(maxStrengthLevel(workout), Math.max(1, prevMax + 1));
-  const prevProgress = state.strengthBossProgress?.[workout] ?? 0;
+  const prevProgress = state.strengthBossProgress?.[key] ?? 0;
   const remaining = Math.max(0, target - prevProgress);
   const reps = Math.max(1, Math.min(remaining > 0 ? remaining : target, Math.round(attempts)));
   const nextProgress = prevProgress + reps;
@@ -744,7 +773,7 @@ export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 
   const { chalk } = logStrength({
     workout,
     level: targetLevel,
-    sets: [{ reps }],
+    sets: [{ reps, ...(mode ? { mode } : {}) }],
     bossSend: defeated,
   });
 
@@ -752,7 +781,7 @@ export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 
     ...s,
     strengthBossProgress: {
       ...(s.strengthBossProgress ?? {}),
-      [workout]: defeated ? 0 : nextProgress,
+      [key]: defeated ? 0 : nextProgress,
     },
   }));
 

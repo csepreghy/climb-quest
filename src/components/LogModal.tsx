@@ -1759,7 +1759,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           <GameButton variant="danger" size="md" onClick={addBossRep}>
             {(() => {
               const target = strengthBossTarget(workout);
-              const remaining = Math.max(1, target - getStrengthBossProgress(workout));
+              const remaining = Math.max(1, target - getStrengthBossProgress(workout, workout === "handstand" ? handstandMode : undefined));
               const cap = workout === "handstand" ? Math.min(60, remaining) : remaining;
               const n = Math.max(1, Math.min(cap, Math.round(bossAttempts)));
               const unit = workout === "handstand" ? (n === 1 ? "Second" : "Seconds") : (n === 1 ? "Rep" : "Reps");

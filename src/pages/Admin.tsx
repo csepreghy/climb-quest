@@ -1034,6 +1034,16 @@ interface AdminUserRow {
   total_logs: number;
   bosses_sent: number;
   created_at: string;
+  provider: string | null;
+}
+
+function providerLabel(p: string | null | undefined): string {
+  switch ((p ?? "email").toLowerCase()) {
+    case "google": return "Google";
+    case "apple": return "Apple";
+    case "email": return "Email";
+    default: return (p ?? "Email").replace(/^./, c => c.toUpperCase());
+  }
 }
 
 function UsersAdmin() {

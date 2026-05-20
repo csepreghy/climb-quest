@@ -1270,7 +1270,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   }
 
   function confirmFirstPick(lv: number) {
-    setStrengthLevel(workout, lv);
+    setStrengthLevel(workout, lv, workout === "handstand" ? handstandMode : undefined);
     setLevel(lv);
     setSets([]);
     setReps(5);

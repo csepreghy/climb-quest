@@ -604,7 +604,11 @@ export interface StrengthInput {
 }
 export function logStrength(input: StrengthInput): { session: StrengthSession; chalk: number; breakdown: ChalkBreakdown } {
   const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
-  const maxUnlocked = state.strengthLevels?.[input.workout] ?? 0;
+  // For handstand, derive mode from the first set so hold vs pushup track separately.
+  const sessionMode: "hold" | "pushup" | undefined =
+    input.workout === "handstand" ? (input.sets[0]?.mode ?? "hold") : undefined;
+  const key = strengthKey(input.workout, sessionMode);
+  const maxUnlocked = state.strengthLevels?.[key] ?? 0;
   const base = Math.max(1, Math.round(
     input.sets.reduce((sum, st) => {
       const lv = st.level ?? input.level;

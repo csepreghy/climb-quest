@@ -1432,7 +1432,9 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         <div className="grid sm:grid-cols-2 gap-3 mt-2">
           {(["core", "pullup", "pushup", "squat", "handstand"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
-            const currentLv = Math.max(1, s.strengthLevels?.[w] ?? 1);
+            const currentLv = w === "handstand"
+              ? Math.max(1, s.strengthLevels?.handstand_hold ?? 0, s.strengthLevels?.handstand_pushup ?? 0)
+              : Math.max(1, s.strengthLevels?.[w] ?? 1);
             const lvName = workoutLevelName(w, currentLv);
             const lvImg = workoutLevelImage(w, currentLv) ?? meta.image;
             const placeholder = (

@@ -148,9 +148,10 @@ export interface State {
   /** Strength training sessions (separate from boulder logs). */
   strengthSessions: StrengthSession[];
   /** Per-workout chosen difficulty level (set first time the user logs that workout). */
-  strengthLevels: Partial<Record<StrengthWorkout, number>>;
-  /** Cumulative reps logged toward the next strength-boss defeat, per workout. */
-  strengthBossProgress?: Partial<Record<StrengthWorkout, number>>;
+  /** Keyed by `strengthKey(workout, mode)` — for handstand this splits hold vs pushup. */
+  strengthLevels: Record<string, number>;
+  /** Cumulative reps logged toward the next strength-boss defeat, keyed like `strengthLevels`. */
+  strengthBossProgress?: Record<string, number>;
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
   ignoreLevelReq?: boolean;
   /** ISO timestamp when the user completed first-time onboarding. */

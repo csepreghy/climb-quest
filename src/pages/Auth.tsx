@@ -64,6 +64,7 @@ export default function Auth() {
           </Link>
         </div>
         <GameButton type="button" variant="primary" className="w-full mt-4" onClick={google}>Sign in with Google</GameButton>
+        <GameButton type="button" variant="secondary" className="w-full" onClick={apple}>Sign in with Apple</GameButton>
         <div className="text-[10px] text-center text-muted-foreground uppercase tracking-wider my-4">or</div>
         <form onSubmit={submit} className="space-y-3">
           <div><Label>Email</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></div>

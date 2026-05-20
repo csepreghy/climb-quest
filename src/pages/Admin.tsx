@@ -1093,6 +1093,7 @@ function UsersAdmin() {
               <tr className="border-b border-border">
                 <th className="text-left py-2 px-2">Climber</th>
                 <th className="text-left py-2 px-2">Email</th>
+                <th className="text-left py-2 px-2">Sign-up</th>
                 <th className="text-right py-2 px-2">Lv</th>
                 <th className="text-right py-2 px-2">All-time chalk</th>
                 <th className="text-right py-2 px-2">Logs</th>

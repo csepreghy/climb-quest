@@ -733,8 +733,9 @@ export function deleteStrengthSession(id: string) {
 }
 
 /** Manually set the user's max-unlocked strength level (used internally / by admin). */
-export function setStrengthLevel(workout: StrengthWorkout, level: number) {
-  set(s => ({ ...s, strengthLevels: { ...(s.strengthLevels ?? {}), [workout]: Math.max(1, level) } }));
+export function setStrengthLevel(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup") {
+  const key = strengthKey(workout, mode);
+  set(s => ({ ...s, strengthLevels: { ...(s.strengthLevels ?? {}), [key]: Math.max(1, level) } }));
 }
 
 /** Reset strength-level selections so the first-time picker shows again. */
@@ -743,8 +744,8 @@ export function resetStrengthLevels() {
 }
 
 /** Cumulative reps logged toward the next strength-boss defeat for `workout`. */
-export function getStrengthBossProgress(workout: StrengthWorkout): number {
-  return state.strengthBossProgress?.[workout] ?? 0;
+export function getStrengthBossProgress(workout: StrengthWorkout, mode?: "hold" | "pushup"): number {
+  return state.strengthBossProgress?.[strengthKey(workout, mode)] ?? 0;
 }
 
 /**
@@ -752,17 +753,18 @@ export function getStrengthBossProgress(workout: StrengthWorkout): number {
  * boss target (10). When cumulative reaches 10, mark a successful boss send,
  * unlock the next level, and reset progress.
  */
-export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 1): {
+export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 1, mode?: "hold" | "pushup"): {
   chalk: number;
   defeated: boolean;
   progress: number;
   target: number;
   unlockedLevel?: number;
 } {
+  const key = strengthKey(workout, mode);
   const target = strengthBossTarget(workout);
-  const prevMax = state.strengthLevels?.[workout] ?? 0;
+  const prevMax = state.strengthLevels?.[key] ?? 0;
   const targetLevel = Math.min(maxStrengthLevel(workout), Math.max(1, prevMax + 1));
-  const prevProgress = state.strengthBossProgress?.[workout] ?? 0;
+  const prevProgress = state.strengthBossProgress?.[key] ?? 0;
   const remaining = Math.max(0, target - prevProgress);
   const reps = Math.max(1, Math.min(remaining > 0 ? remaining : target, Math.round(attempts)));
   const nextProgress = prevProgress + reps;
@@ -771,7 +773,7 @@ export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 
   const { chalk } = logStrength({
     workout,
     level: targetLevel,
-    sets: [{ reps }],
+    sets: [{ reps, ...(mode ? { mode } : {}) }],
     bossSend: defeated,
   });
 
@@ -779,7 +781,7 @@ export function logStrengthBossRep(workout: StrengthWorkout, attempts: number = 
     ...s,
     strengthBossProgress: {
       ...(s.strengthBossProgress ?? {}),
-      [workout]: defeated ? 0 : nextProgress,
+      [key]: defeated ? 0 : nextProgress,
     },
   }));
 

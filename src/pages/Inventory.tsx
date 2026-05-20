@@ -187,6 +187,22 @@ export default function Inventory() {
               </ul>
             )}
           </div>
+          {totalBonusByActivity.length > 0 && (() => {
+            const stacked = totalBonusByActivity.reduce((p, b) => p * (1 + b.mult), 1);
+            const totalPct = Math.round((stacked - 1) * 100);
+            return (
+              <div className="pt-2 border-t border-border/50">
+                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Total Bonus</div>
+                <div className="flex justify-between items-baseline gap-2">
+                  <span className="text-xs text-muted-foreground">Stacked (multiplicative)</span>
+                  <span className="text-chalk-glow font-bold tabular-nums">+{totalPct}%</span>
+                </div>
+                <div className="text-[10px] text-muted-foreground/80 mt-1 leading-snug">
+                  Bonuses multiply: e.g. two +50% items = 1.5 × 1.5 = +125%, not +100%. Activity-specific bonuses only apply on matching logs.
+                </div>
+              </div>
+            );
+          })()}
           {specialSummary.length > 0 && (
             <div className="pt-2 border-t border-border/50">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Special</div>

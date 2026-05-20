@@ -1705,7 +1705,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         </DialogDescription>
         <div className="space-y-4 mt-2">
           {(() => {
-            const progress = getStrengthBossProgress(workout);
+            const progress = getStrengthBossProgress(workout, workout === "handstand" ? handstandMode : undefined);
             const remaining = Math.max(1, bossReps - progress);
             const perAttemptMax = workout === "handstand" ? Math.min(60, remaining) : remaining;
             const reps = Math.max(1, Math.min(perAttemptMax, Math.round(bossAttempts)));

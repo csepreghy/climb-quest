@@ -702,14 +702,14 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     bossSend: input.bossSend,
   };
   set(s => {
-    const prevMax = s.strengthLevels?.[input.workout] ?? 0;
+    const prevMax = s.strengthLevels?.[key] ?? 0;
     const nextMax = input.bossSend ? Math.max(prevMax, input.level) : Math.max(prevMax, 1);
     const next: State = {
       ...s,
       chalk: s.chalk + chalk,
       totalChalkEarned: s.totalChalkEarned + chalk,
       strengthSessions: [session, ...(s.strengthSessions ?? [])].slice(0, 500),
-      strengthLevels: { ...(s.strengthLevels ?? {}), [input.workout]: nextMax },
+      strengthLevels: { ...(s.strengthLevels ?? {}), [key]: nextMax },
       pendingConsumable: null,
     };
     const add: string[] = [];

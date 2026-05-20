@@ -197,9 +197,6 @@ export default function Inventory() {
                   <span className="text-xs text-muted-foreground">Stacked (multiplicative)</span>
                   <span className="text-chalk-glow font-bold tabular-nums">+{totalPct}%</span>
                 </div>
-                <div className="text-[10px] text-muted-foreground/80 mt-1 leading-snug">
-                  Bonuses multiply: e.g. two +50% items = 1.5 × 1.5 = +125%, not +100%. Activity-specific bonuses only apply on matching logs.
-                </div>
               </div>
             );
           })()}

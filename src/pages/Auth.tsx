@@ -47,6 +47,11 @@ export default function Auth() {
     if (r.error) toast.error("Google sign-in failed");
   }
 
+  async function apple() {
+    const r = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin });
+    if (r.error) toast.error("Apple sign-in failed");
+  }
+
   return (
     <div className="min-h-screen grid place-items-center p-6 relative">
       <Link to="/" className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition">

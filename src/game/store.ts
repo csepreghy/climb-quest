@@ -132,6 +132,15 @@ export function strengthRepChalk(level: number, maxUnlocked: number): number {
   return Math.max(1, Math.round(top * 0.3));
 }
 
+/**
+ * Storage key for per-workout strength state. Handstand splits into hold vs pushup
+ * so each mode tracks its own unlocked level + boss progress independently.
+ */
+export function strengthKey(workout: StrengthWorkout, mode?: "hold" | "pushup"): string {
+  if (workout === "handstand") return mode === "pushup" ? "handstand_pushup" : "handstand_hold";
+  return workout;
+}
+
 export interface State {
   level: number;
   chalk: number;

@@ -244,10 +244,23 @@ function load(): State {
       });
     }
     // Move handstand_pushup unlocked level into handstand if higher.
-    if (merged.strengthLevels && (merged.strengthLevels as Record<string, number>).handstand_pushup) {
-      const hp = (merged.strengthLevels as Record<string, number>).handstand_pushup ?? 0;
-      merged.strengthLevels.handstand = Math.max(merged.strengthLevels.handstand ?? 0, hp);
-      delete (merged.strengthLevels as Record<string, number>).handstand_pushup;
+    if (merged.strengthLevels && (merged.strengthLevels as Record<string, number>).handstand_pushup !== undefined) {
+      // legacy: pre-split handstand_pushup key already exists as its own; nothing to merge.
+    }
+    // Split combined "handstand" key into separate hold/pushup keys.
+    if (merged.strengthLevels && (merged.strengthLevels as Record<string, number>).handstand !== undefined) {
+      const lv = (merged.strengthLevels as Record<string, number>).handstand ?? 0;
+      const sl = merged.strengthLevels as Record<string, number>;
+      sl.handstand_hold = Math.max(sl.handstand_hold ?? 0, lv);
+      sl.handstand_pushup = Math.max(sl.handstand_pushup ?? 0, lv);
+      delete sl.handstand;
+    }
+    if (merged.strengthBossProgress && (merged.strengthBossProgress as Record<string, number>).handstand !== undefined) {
+      const pg = (merged.strengthBossProgress as Record<string, number>).handstand ?? 0;
+      const bp = merged.strengthBossProgress as Record<string, number>;
+      bp.handstand_hold = Math.max(bp.handstand_hold ?? 0, pg);
+      bp.handstand_pushup = Math.max(bp.handstand_pushup ?? 0, pg);
+      delete bp.handstand;
     }
     // Migrate / clean up legacy bosses: strip template-spawned bosses (no createdAt),
     // backfill `styles` from legacy `style` for any user-saved boss.

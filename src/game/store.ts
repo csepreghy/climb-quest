@@ -755,6 +755,76 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
   });
   return { session, chalk, breakdown };
 }
+
+// ----- Hold-style strength (timer-based) -----
+function holdRecordKey(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): string {
+  return `${strengthKey(workout, mode)}:${level}`;
+}
+export function getHoldRecord(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): number {
+  return state.strengthHoldRecords?.[holdRecordKey(workout, level, mode)] ?? 0;
+}
+
+export interface HoldInput {
+  workout: StrengthWorkout;
+  level: number;
+  seconds: number;
+  mode?: "hold" | "pushup";
+  date?: string;
+  /** When true, treat as a successful hold boss send (unlocks next level). */
+  bossSend?: boolean;
+}
+export function logStrengthHold(input: HoldInput): {
+  session: StrengthSession;
+  chalk: number;
+  breakdown: ChalkBreakdown;
+  prevRecord: number;
+  newRecord: number;
+  isNewRecord: boolean;
+  isFirstEver: boolean;
+} {
+  const seconds = Math.max(0, Math.round(input.seconds));
+  const mode = input.mode ?? "hold";
+  const prevRecord = getHoldRecord(input.workout, input.level, mode);
+  const isFirstEver = prevRecord <= 0;
+  const isNewRecord = !isFirstEver && seconds > prevRecord;
+
+  let baseOverride: number;
+  if (input.bossSend) {
+    baseOverride = getActivityReward("strength_boss_send");
+  } else if (isFirstEver) {
+    baseOverride = HOLD_REWARDS.FIRST_EVER;
+  } else if (seconds > prevRecord) {
+    baseOverride = HOLD_REWARDS.PR_BEAT;
+  } else if (seconds >= prevRecord * 0.5) {
+    baseOverride = HOLD_REWARDS.TIER_50;
+  } else if (seconds >= prevRecord * 0.1) {
+    baseOverride = HOLD_REWARDS.TIER_10;
+  } else {
+    baseOverride = 0;
+  }
+
+  const result = logStrength({
+    workout: input.workout,
+    level: input.level,
+    sets: [{ reps: seconds, level: input.level, mode }],
+    date: input.date,
+    bossSend: input.bossSend,
+    baseOverride,
+  });
+
+  const newRecord = Math.max(prevRecord, seconds);
+  if (newRecord > prevRecord) {
+    set(s => ({
+      ...s,
+      strengthHoldRecords: {
+        ...(s.strengthHoldRecords ?? {}),
+        [holdRecordKey(input.workout, input.level, mode)]: newRecord,
+      },
+    }));
+  }
+
+  return { ...result, prevRecord, newRecord, isNewRecord: isNewRecord || isFirstEver, isFirstEver };
+}
 export function deleteStrengthSession(id: string) {
   set(s => {
     const sess = (s.strengthSessions ?? []).find(x => x.id === id);

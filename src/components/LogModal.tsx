@@ -2072,8 +2072,8 @@ function HoldTimerView(props: {
           {phase === "running" && (bossMode
             ? <>Target: {targetSeconds}s</>
             : recordSeconds && recordSeconds > 0
-              ? <>Beat {recordSeconds}s for +200 chalk</>
-              : <>First hold — any time gets +100 chalk</>
+              ? <>Beat {recordSeconds}s for a new record</>
+              : <>First hold at this level — go for it!</>
           )}
           {phase === "stopped" && (bossMode
             ? (reached ? <>Boss target reached!</> : <>Need {targetSeconds}s unbroken — try again</>)

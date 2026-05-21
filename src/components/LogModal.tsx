@@ -1230,6 +1230,12 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
     image: hspu3,
     ring: "ring-[hsl(var(--boss))]/60",
   },
+  plank: {
+    title: "Plank",
+    desc: "Core lockdown — timed holds from basic to 90-degree.",
+    image: plank2,
+    ring: "ring-[hsl(var(--btn-orange))]/60",
+  },
 };
 
 type StrengthStep =

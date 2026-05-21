@@ -64,8 +64,11 @@ export default function Dashboard() {
             <EquippedStrip equipped={s.equipped} />
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
-              <GameButton variant="success" onClick={() => setLogOpen(true)}>
-                <Plus className="h-4 w-4" /> Log
+              <GameButton variant="success" onClick={() => { setLogInitialMode("boulder-pick"); setLogOpen(true); }}>
+                <Plus className="h-4 w-4" /> Log boulder
+              </GameButton>
+              <GameButton variant="success" onClick={() => { setLogInitialMode("strength"); setLogOpen(true); }}>
+                <Dumbbell className="h-4 w-4" /> Log strength
               </GameButton>
               {next && s.chalk >= next.cost && (
                 <GameButton variant="primary" onClick={onLevelUp}>

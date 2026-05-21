@@ -633,6 +633,8 @@ export interface StrengthInput {
   date?: string;
   /** When true, this session is a successful strength-boss send (level-up). */
   bossSend?: boolean;
+  /** When provided, skips the per-rep base calculation and uses this as the base chalk (used by hold tier rewards). */
+  baseOverride?: number;
 }
 export function logStrength(input: StrengthInput): { session: StrengthSession; chalk: number; breakdown: ChalkBreakdown } {
   const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
@@ -641,12 +643,14 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     input.workout === "handstand" ? (input.sets[0]?.mode ?? "hold") : undefined;
   const key = strengthKey(input.workout, sessionMode);
   const maxUnlocked = state.strengthLevels?.[key] ?? 0;
-  const base = Math.max(1, Math.round(
-    input.sets.reduce((sum, st) => {
-      const lv = st.level ?? input.level;
-      return sum + (st.reps || 0) * strengthRepChalk(lv, maxUnlocked);
-    }, 0)
-  ));
+  const base = input.baseOverride !== undefined
+    ? Math.max(0, Math.round(input.baseOverride))
+    : Math.max(1, Math.round(
+        input.sets.reduce((sum, st) => {
+          const lv = st.level ?? input.level;
+          return sum + (st.reps || 0) * strengthRepChalk(lv, maxUnlocked);
+        }, 0)
+      ));
   const dateISO = input.date ?? new Date().toISOString();
 
   // ----- Apply equipped bonuses (mirrors computeChalk for boulders) -----

@@ -1982,16 +1982,18 @@ function HoldTimerView(props: {
   recordSeconds?: number;
   targetSeconds?: number; // boss target
   bossMode?: boolean;
+  autoStart?: boolean; // skip "ready" phase, jump straight to 5s countdown
   onBack: () => void;
   onSave: (seconds: number) => void;
 }) {
-  const { title, subtitle, image, recordSeconds, targetSeconds, bossMode, onBack, onSave } = props;
-  const [phase, setPhase] = useState<HoldPhase>("ready");
+  const { title, subtitle, image, recordSeconds, targetSeconds, bossMode, autoStart, onBack, onSave } = props;
+  const [phase, setPhase] = useState<HoldPhase>(autoStart ? "countdown" : "ready");
   const [countdown, setCountdown] = useState(5);
   const [elapsed, setElapsed] = useState(0); // tenths of a second
   const [adjusted, setAdjusted] = useState<number>(0); // editable seconds
   const startRef = useRef<number>(0);
   const countdownStartRef = useRef<number>(0);
+
 
   // Countdown tick
   useEffect(() => {

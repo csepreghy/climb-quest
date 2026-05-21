@@ -24,9 +24,9 @@ export function PickCard({
       type={onClick ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        "group rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden w-full",
+        "group rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden w-full h-full",
         "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
-        "flex sm:block",
+        "flex sm:flex sm:flex-col",
         onClick && "hover:ring-4 transition active:translate-y-[2px]",
         ring,
       )}
@@ -42,7 +42,7 @@ export function PickCard({
               />
             )}
       </div>
-      <div className="p-3 sm:p-4 min-w-0 flex-1">
+      <div className="p-3 sm:p-4 min-w-0 flex-1 sm:flex-1">
         <div className="font-display font-bold text-base sm:text-lg">{title}</div>
         <div className="text-xs text-muted-foreground mt-1 leading-snug">{desc}</div>
       </div>

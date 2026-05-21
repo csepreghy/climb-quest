@@ -392,7 +392,37 @@ function ChalkChip({ value }: { value: number }) {
                   Per-rep chalk is highest at your max-unlocked level and tapers off below it. Beat the strength boss to raise the bar.
                 </p>
               </div>
+
+              <div>
+                <div className="menu-label mb-2">Hold-type strength (per attempt)</div>
+                <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden text-sm">
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <span className="text-foreground/90">New personal record</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+200</span>
+                  </div>
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <span className="text-foreground/90">First hold ever (per level)</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+100</span>
+                  </div>
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <span className="text-foreground/90">≥ 50% of your record</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+50</span>
+                  </div>
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <span className="text-foreground/90">≥ 10% of your record</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+10</span>
+                  </div>
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <span className="text-foreground/90">Boss send (30s unbroken)</span>
+                    <span className="tabular-nums font-bold gradient-chalk-text">+300</span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Records are tracked separately per level. Holds under 10% of your record earn no chalk.
+                </p>
+              </div>
             </div>
+
 
             {/* ---------- Column 2 ---------- */}
             <div className="space-y-4">

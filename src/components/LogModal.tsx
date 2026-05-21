@@ -1194,6 +1194,7 @@ function workoutLevelImage(workout: StrengthWorkout, level: number, mode?: "hold
     return mode === "pushup" ? HANDSTAND_PUSHUP_IMAGES[level] : HANDSTAND_HOLD_IMAGES[level];
   }
   if (workout === "squat") return SQUAT_LEVEL_IMAGES[level];
+  if (workout === "plank") return PLANK_LEVEL_IMAGES[level];
   return undefined;
 }
 

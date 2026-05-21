@@ -90,8 +90,22 @@ export function isBossExpired(b: Boss, now = Date.now()): boolean {
 export type Equipped = Partial<Record<Slot, string>>;
 
 export type StrengthWorkout = "core" | "pullup" | "pushup" | "squat" | "handstand";
-/** For handstand sets, `mode` distinguishes hold (reps = seconds-bucket idx 1-4) from pushup (reps = real rep count). */
+/** For handstand hold sets, `reps` stores seconds held (e.g. 45 = 45s). For pushup-style sets, `reps` is rep count. */
 export interface StrengthSet { reps: number; restSeconds?: number; level?: number; mode?: "hold" | "pushup" }
+
+/** Hold chalk rewards (single-rep timer-based). */
+export const HOLD_REWARDS = {
+  PR_BEAT: 200,
+  FIRST_EVER: 100,
+  TIER_50: 50,
+  TIER_10: 10,
+} as const;
+/** Required unbroken duration (seconds) to defeat a hold-style strength boss. */
+export const HOLD_BOSS_TARGET_SECONDS = 30;
+/** Identifies hold-style strength exercises (handstand hold today; extensible later). */
+export function isHoldExercise(workout: StrengthWorkout, mode?: "hold" | "pushup"): boolean {
+  return workout === "handstand" && mode === "hold";
+}
 export interface StrengthSession {
   id: string;
   date: string;
@@ -161,6 +175,8 @@ export interface State {
   strengthLevels: Record<string, number>;
   /** Cumulative reps logged toward the next strength-boss defeat, keyed like `strengthLevels`. */
   strengthBossProgress?: Record<string, number>;
+  /** Personal record (best seconds held) for hold-style sets, keyed `${strengthKey}:${level}`. */
+  strengthHoldRecords?: Record<string, number>;
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
   ignoreLevelReq?: boolean;
   /** ISO timestamp when the user completed first-time onboarding. */
@@ -186,6 +202,7 @@ const initialState = (): State => ({
   strengthSessions: [],
   strengthLevels: {},
   strengthBossProgress: {},
+  strengthHoldRecords: {},
   stats: { totalLogs: 0, totalSends: 0, totalFlashes: 0, bossesSent: 0 },
   ignoreLevelReq: false,
   onboardedAt: null,
@@ -241,6 +258,21 @@ function load(): State {
           workout: "handstand",
           sets: (ss.sets ?? []).map(st => ({ ...st, mode: st.mode ?? mode })),
         };
+      });
+    }
+    // Migrate legacy handstand-hold bucket idx (1..4) to representative seconds.
+    if (Array.isArray(merged.strengthSessions)) {
+      const BUCKET_SECONDS: Record<number, number> = { 1: 10, 2: 20, 3: 45, 4: 75 };
+      merged.strengthSessions = merged.strengthSessions.map(ss => {
+        if (ss.workout !== "handstand") return ss;
+        const sets = (ss.sets ?? []).map(st => {
+          if (st.mode === "hold" && st.reps >= 1 && st.reps <= 4) {
+            return { ...st, reps: BUCKET_SECONDS[st.reps] ?? st.reps };
+          }
+          return st;
+        });
+        const totalReps = sets.reduce((a, b) => a + (b.reps || 0), 0);
+        return { ...ss, sets, totalReps };
       });
     }
     // Move handstand_pushup unlocked level into handstand if higher.
@@ -601,6 +633,8 @@ export interface StrengthInput {
   date?: string;
   /** When true, this session is a successful strength-boss send (level-up). */
   bossSend?: boolean;
+  /** When provided, skips the per-rep base calculation and uses this as the base chalk (used by hold tier rewards). */
+  baseOverride?: number;
 }
 export function logStrength(input: StrengthInput): { session: StrengthSession; chalk: number; breakdown: ChalkBreakdown } {
   const totalReps = input.sets.reduce((a, b) => a + (b.reps || 0), 0);
@@ -609,12 +643,14 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     input.workout === "handstand" ? (input.sets[0]?.mode ?? "hold") : undefined;
   const key = strengthKey(input.workout, sessionMode);
   const maxUnlocked = state.strengthLevels?.[key] ?? 0;
-  const base = Math.max(1, Math.round(
-    input.sets.reduce((sum, st) => {
-      const lv = st.level ?? input.level;
-      return sum + (st.reps || 0) * strengthRepChalk(lv, maxUnlocked);
-    }, 0)
-  ));
+  const base = input.baseOverride !== undefined
+    ? Math.max(0, Math.round(input.baseOverride))
+    : Math.max(1, Math.round(
+        input.sets.reduce((sum, st) => {
+          const lv = st.level ?? input.level;
+          return sum + (st.reps || 0) * strengthRepChalk(lv, maxUnlocked);
+        }, 0)
+      ));
   const dateISO = input.date ?? new Date().toISOString();
 
   // ----- Apply equipped bonuses (mirrors computeChalk for boulders) -----
@@ -718,6 +754,76 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     return applyBadges(next, add);
   });
   return { session, chalk, breakdown };
+}
+
+// ----- Hold-style strength (timer-based) -----
+function holdRecordKey(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): string {
+  return `${strengthKey(workout, mode)}:${level}`;
+}
+export function getHoldRecord(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): number {
+  return state.strengthHoldRecords?.[holdRecordKey(workout, level, mode)] ?? 0;
+}
+
+export interface HoldInput {
+  workout: StrengthWorkout;
+  level: number;
+  seconds: number;
+  mode?: "hold" | "pushup";
+  date?: string;
+  /** When true, treat as a successful hold boss send (unlocks next level). */
+  bossSend?: boolean;
+}
+export function logStrengthHold(input: HoldInput): {
+  session: StrengthSession;
+  chalk: number;
+  breakdown: ChalkBreakdown;
+  prevRecord: number;
+  newRecord: number;
+  isNewRecord: boolean;
+  isFirstEver: boolean;
+} {
+  const seconds = Math.max(0, Math.round(input.seconds));
+  const mode = input.mode ?? "hold";
+  const prevRecord = getHoldRecord(input.workout, input.level, mode);
+  const isFirstEver = prevRecord <= 0;
+  const isNewRecord = !isFirstEver && seconds > prevRecord;
+
+  let baseOverride: number;
+  if (input.bossSend) {
+    baseOverride = getActivityReward("strength_boss_send");
+  } else if (isFirstEver) {
+    baseOverride = HOLD_REWARDS.FIRST_EVER;
+  } else if (seconds > prevRecord) {
+    baseOverride = HOLD_REWARDS.PR_BEAT;
+  } else if (seconds >= prevRecord * 0.5) {
+    baseOverride = HOLD_REWARDS.TIER_50;
+  } else if (seconds >= prevRecord * 0.1) {
+    baseOverride = HOLD_REWARDS.TIER_10;
+  } else {
+    baseOverride = 0;
+  }
+
+  const result = logStrength({
+    workout: input.workout,
+    level: input.level,
+    sets: [{ reps: seconds, level: input.level, mode }],
+    date: input.date,
+    bossSend: input.bossSend,
+    baseOverride,
+  });
+
+  const newRecord = Math.max(prevRecord, seconds);
+  if (newRecord > prevRecord) {
+    set(s => ({
+      ...s,
+      strengthHoldRecords: {
+        ...(s.strengthHoldRecords ?? {}),
+        [holdRecordKey(input.workout, input.level, mode)]: newRecord,
+      },
+    }));
+  }
+
+  return { ...result, prevRecord, newRecord, isNewRecord: isNewRecord || isFirstEver, isFirstEver };
 }
 export function deleteStrengthSession(id: string) {
   set(s => {

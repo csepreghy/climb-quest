@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
-import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, strengthBossTarget, setStrengthLevel, maxStrengthLevel, strengthKey, Boss, activeBossProjects, createBossProject, markBossSent, admitBossDefeat, expireOverdueBosses, MAX_ACTIVE_BOSSES, BOSS_DEADLINE_DAYS, BOSS_DEFEAT_PENALTY, bossExpiresAt } from "@/game/store";
+import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, strengthBossTarget, setStrengthLevel, maxStrengthLevel, strengthKey, Boss, activeBossProjects, createBossProject, markBossSent, admitBossDefeat, expireOverdueBosses, MAX_ACTIVE_BOSSES, BOSS_DEADLINE_DAYS, BOSS_DEFEAT_PENALTY, bossExpiresAt, logStrengthHold, getHoldRecord, isHoldExercise, HOLD_BOSS_TARGET_SECONDS } from "@/game/store";
 import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolveGymGradingSystems } from "@/game/gyms";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
@@ -1220,6 +1220,8 @@ type StrengthStep =
   | "first-pick"
   | "reps"
   | "boss-reps"       // single-set boss attempt
+  | "hold-timer"      // regular hold (timer)
+  | "hold-boss-timer" // boss hold (timer, must reach 30s unbroken)
   | "rest-pick"
   | "rest-timer"
   | "celebrate"
@@ -1246,7 +1248,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   const [bossAttempts, setBossAttempts] = useState<number>(1);
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [handstandMode, setHandstandMode] = useState<"hold" | "pushup">("hold");
-  const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string; critPre?: number | null } | null>(null);
+  const [celebrate, setCelebrate] = useState<{ chalk: number; label: string; image?: string; critPre?: number | null; subline?: string } | null>(null);
   const [sessionLogs, setSessionLogs] = useState<SessionLogEntry[]>([]);
   const sessionChalkSoFar = sessionLogs.reduce((acc, l) => acc + l.chalk, 0);
 
@@ -1282,7 +1284,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setBossLevel(next);
     setBossReps(strengthBossTarget(workout));
     setBossAttempts(1);
-    setStep("boss-reps");
+    if (isHoldExercise(workout, handstandMode)) {
+      setStep("hold-boss-timer");
+    } else {
+      setStep("boss-reps");
+    }
   }
 
   function logRepsAnd(action: "rest" | "finish" | "new-workout") {
@@ -1358,6 +1364,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           alt={WORKOUT_META[workout].title}
           critPre={celebrate.critPre}
         />
+        {celebrate.subline && (
+          <div className="mt-3 text-sm font-display font-bold text-[hsl(var(--chalk-glow))]">
+            {celebrate.subline}
+          </div>
+        )}
         <div className="mt-4">
           <GameButton variant="primary" onClick={onDone}>Done</GameButton>
         </div>
@@ -1560,7 +1571,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     <li key={i} className="flex items-center justify-between gap-3 py-1.5 text-sm">
                       <span className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-muted-foreground w-10 shrink-0">Set {i + 1}</span>
-                        <span className="font-bold tabular-nums">L{lv} · {setIsHold ? `Hold ${handstandBucketLabel(st.reps)}` : `${st.reps} reps`}</span>
+                        <span className="font-bold tabular-nums">L{lv} · {setIsHold ? `${st.reps}s hold` : `${st.reps} reps`}</span>
                         <span className="text-xs text-muted-foreground truncate">{workoutLevelName(workout, lv, isHandstand ? (st.mode ?? handstandMode) : undefined)}</span>
                       </span>
                       {st.restSeconds ? (
@@ -1624,28 +1635,23 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           )}
 
           {isHold ? (
-            <Field label="How long did you hold?">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {HANDSTAND_SECOND_BUCKETS.map(b => {
-                  const selected = reps === b.idx;
-                  return (
-                    <button
-                      key={b.idx}
-                      type="button"
-                      onClick={() => setReps(b.idx)}
-                      className={cn(
-                        "rounded-lg border-2 px-3 py-3 text-center font-display font-bold transition active:translate-y-[1px]",
-                        "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
-                        selected && "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40",
-                      )}
-                    >
-                      <Timer className="h-4 w-4 mx-auto text-muted-foreground" />
-                      <div className="mt-1 text-base">{b.label}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </Field>
+            (() => {
+              const pr = getHoldRecord(workout, level, "hold");
+              return (
+                <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-4 text-center space-y-3">
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">Current record (L{level})</div>
+                    <div className="font-display font-bold text-3xl tabular-nums">
+                      {pr > 0 ? `${pr}s` : "—"}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Beat your record for +{200} chalk · ≥50% for +50 · ≥10% for +10
+                    {pr <= 0 && <> · First hold ever at this level grants +100</>}
+                  </p>
+                </div>
+              );
+            })()
           ) : (
             <Field label="Reps this set">
               <div className="flex items-center gap-2">
@@ -1672,20 +1678,94 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
-          <GameButton variant="ghost" size="md" onClick={() => logRepsAnd("rest")}>
-            <Timer className="h-4 w-4" /> {isHold ? "LOG & REST" : "LOG & REST"}
-          </GameButton>
-          <GameButton variant="primary" size="md" onClick={() => logRepsAnd("new-workout")}>
-            <Plus className="h-4 w-4" /> LOG & NEW WORKOUT
-          </GameButton>
-          <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
-            <Trophy className="h-4 w-4" /> LOG & FINISH
-          </GameButton>
-        </div>
+        {isHold ? (
+          <div className="flex justify-end pt-3">
+            <GameButton variant="success" size="md" onClick={() => setStep("hold-timer")}>
+              <Timer className="h-4 w-4" /> START HOLD
+            </GameButton>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
+            <GameButton variant="ghost" size="md" onClick={() => logRepsAnd("rest")}>
+              <Timer className="h-4 w-4" /> LOG & REST
+            </GameButton>
+            <GameButton variant="primary" size="md" onClick={() => logRepsAnd("new-workout")}>
+              <Plus className="h-4 w-4" /> LOG & NEW WORKOUT
+            </GameButton>
+            <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
+              <Trophy className="h-4 w-4" /> LOG & FINISH
+            </GameButton>
+          </div>
+        )}
       </>
     );
   }
+
+  if (step === "hold-timer") {
+    const lvImg = workoutLevelImage(workout, level, "hold");
+    const lvName = workoutLevelName(workout, level, "hold");
+    const pr = getHoldRecord(workout, level, "hold");
+    return (
+      <HoldTimerView
+        title={`${WORKOUT_META[workout].title} Hold · L${level}`}
+        subtitle={lvName}
+        image={lvImg ?? WORKOUT_META[workout].image}
+        recordSeconds={pr}
+        onBack={() => setStep("reps")}
+        onSave={(seconds) => {
+          const dateISO = new Date(date).toISOString();
+          const res = logStrengthHold({ workout, level, seconds, mode: "hold", date: dateISO });
+          toast.success(`+${res.chalk} Chalk · ${seconds}s hold`);
+          let subline: string | undefined;
+          if (res.isFirstEver) subline = "🎉 First hold logged at this level!";
+          else if (res.isNewRecord) subline = `🏆 New record! +${seconds - res.prevRecord}s over your best`;
+          setCelebrate({
+            chalk: res.chalk,
+            label: `${WORKOUT_META[workout].title} L${level} · ${seconds}s hold`,
+            image: lvImg ?? WORKOUT_META[workout].image,
+            critPre: findCritPre(res.breakdown),
+            subline,
+          });
+          setStep("celebrate");
+        }}
+      />
+    );
+  }
+
+  if (step === "hold-boss-timer") {
+    const lvImg = workoutLevelImage(workout, bossLevel, "hold");
+    const lvName = workoutLevelName(workout, bossLevel, "hold");
+    return (
+      <HoldTimerView
+        title={`Strength Boss · L${bossLevel}`}
+        subtitle={lvName}
+        image={lvImg ?? bossImg}
+        targetSeconds={HOLD_BOSS_TARGET_SECONDS}
+        bossMode
+        onBack={() => setStep("reps")}
+        onSave={(seconds) => {
+          if (seconds < HOLD_BOSS_TARGET_SECONDS) {
+            toast.error(`Only ${seconds}s — need ${HOLD_BOSS_TARGET_SECONDS}s unbroken. Try again!`);
+            return;
+          }
+          const dateISO = new Date(date).toISOString();
+          const res = logStrengthHold({
+            workout, level: bossLevel, seconds, mode: "hold", date: dateISO, bossSend: true,
+          });
+          toast.success(`Boss defeated! Unlocked Level ${bossLevel}`);
+          setCelebrate({
+            chalk: res.chalk,
+            label: `Strength Boss defeated · L${bossLevel} · ${seconds}s`,
+            image: lvImg ?? WORKOUT_META[workout].image,
+            critPre: findCritPre(res.breakdown),
+            subline: `🏆 You held for ${seconds}s — Level ${bossLevel} unlocked!`,
+          });
+          setStep("celebrate");
+        }}
+      />
+    );
+  }
+
 
   if (step === "boss-reps") {
     const lvImg = workoutLevelImage(workout, bossLevel);
@@ -1891,6 +1971,181 @@ function RestTimer({ minutes, onDone }: { minutes: number; onDone: () => void })
         <GameButton variant="primary" size="md" onClick={onDone} disabled={ticking}>
           More reps
         </GameButton>
+      </div>
+    </>
+  );
+}
+
+// ===================== HOLD TIMER =====================
+type HoldPhase = "ready" | "countdown" | "running" | "stopped";
+
+function HoldTimerView(props: {
+  title: string;
+  subtitle?: string;
+  image?: string;
+  recordSeconds?: number;
+  targetSeconds?: number; // boss target
+  bossMode?: boolean;
+  onBack: () => void;
+  onSave: (seconds: number) => void;
+}) {
+  const { title, subtitle, image, recordSeconds, targetSeconds, bossMode, onBack, onSave } = props;
+  const [phase, setPhase] = useState<HoldPhase>("ready");
+  const [countdown, setCountdown] = useState(5);
+  const [elapsed, setElapsed] = useState(0); // tenths of a second
+  const [adjusted, setAdjusted] = useState<number>(0); // editable seconds
+  const startRef = useRef<number>(0);
+  const countdownStartRef = useRef<number>(0);
+
+  // Countdown tick
+  useEffect(() => {
+    if (phase !== "countdown") return;
+    countdownStartRef.current = Date.now();
+    const id = setInterval(() => {
+      const elapsedMs = Date.now() - countdownStartRef.current;
+      const remaining = Math.max(0, 5 - Math.floor(elapsedMs / 1000));
+      setCountdown(remaining);
+      if (elapsedMs >= 5000) {
+        clearInterval(id);
+        startRef.current = Date.now();
+        setElapsed(0);
+        setPhase("running");
+      }
+    }, 100);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  // Stopwatch tick
+  useEffect(() => {
+    if (phase !== "running") return;
+    const id = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startRef.current) / 100));
+    }, 100);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  const seconds = Math.floor(elapsed / 10);
+  const tenths = elapsed % 10;
+  const display = phase === "stopped" ? adjusted : seconds;
+  const ss = String(Math.floor(display)).padStart(2, "0");
+  const mm = String(Math.floor(display / 60)).padStart(2, "0");
+  const realSs = String(seconds).padStart(2, "0");
+  const realMm = String(Math.floor(seconds / 60)).padStart(2, "0");
+
+  function stopHold() {
+    const final = Math.floor(elapsed / 10);
+    setAdjusted(final);
+    setPhase("stopped");
+  }
+  function retry() {
+    setElapsed(0);
+    setAdjusted(0);
+    setCountdown(5);
+    setPhase("ready");
+  }
+
+  const reached = targetSeconds !== undefined ? adjusted >= targetSeconds : true;
+
+  return (
+    <>
+      <DialogHeader>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+          {image && <HeaderImage src={image} alt={title} ring={bossMode ? "ring-2 ring-[hsl(var(--boss))]/60" : "ring-2 ring-[hsl(var(--btn-orange))]/40"} />}
+          <div className="min-w-0">
+            <DialogTitle className="truncate flex items-center gap-2">
+              {bossMode && <Skull className="h-5 w-5" />} {title}
+            </DialogTitle>
+            {subtitle && <div className="text-xs text-muted-foreground font-display tracking-wide truncate">{subtitle}</div>}
+          </div>
+        </div>
+      </DialogHeader>
+
+      <div className="py-6 text-center space-y-4">
+        {/* Status line */}
+        <div className="text-xs uppercase tracking-wider text-muted-foreground">
+          {phase === "ready" && (bossMode
+            ? <>Hold for {targetSeconds}s unbroken to defeat the boss</>
+            : recordSeconds && recordSeconds > 0
+              ? <>Current record: <span className="text-foreground font-bold">{recordSeconds}s</span></>
+              : <>First hold at this level — go for it!</>
+          )}
+          {phase === "countdown" && <>Get ready…</>}
+          {phase === "running" && (bossMode
+            ? <>Target: {targetSeconds}s</>
+            : recordSeconds && recordSeconds > 0
+              ? <>Beat {recordSeconds}s for +200 chalk</>
+              : <>First hold — any time gets +100 chalk</>
+          )}
+          {phase === "stopped" && (bossMode
+            ? (reached ? <>Boss target reached!</> : <>Need {targetSeconds}s unbroken — try again</>)
+            : <>Adjust if needed, then save</>
+          )}
+        </div>
+
+        {/* Big display */}
+        {phase === "countdown" ? (
+          <div className="font-display font-bold text-8xl tabular-nums text-[hsl(var(--btn-orange))]">
+            {countdown}
+          </div>
+        ) : phase === "stopped" ? (
+          <div className="space-y-2">
+            <div className="font-display font-bold text-7xl tabular-nums">
+              {adjusted}<span className="text-3xl text-muted-foreground">s</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setAdjusted(v => Math.max(0, v - 1))}
+                className="h-10 w-10 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-xl font-bold active:translate-y-[1px]"
+              >−</button>
+              <Input
+                type="number"
+                min={0}
+                value={adjusted}
+                onChange={e => setAdjusted(Math.max(0, Math.round(Number(e.target.value) || 0)))}
+                className="h-10 w-24 text-center text-xl font-bold tabular-nums"
+              />
+              <button
+                type="button"
+                onClick={() => setAdjusted(v => v + 1)}
+                className="h-10 w-10 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-xl font-bold active:translate-y-[1px]"
+              >+</button>
+            </div>
+            <div className="text-[11px] text-muted-foreground">Stopwatch read {seconds}s · adjust if needed</div>
+          </div>
+        ) : (
+          <div className="font-display font-bold text-7xl sm:text-8xl tabular-nums">
+            {realMm}:{realSs}<span className="text-3xl text-muted-foreground">.{tenths}</span>
+          </div>
+        )}
+
+        {/* Action */}
+        {phase === "ready" && (
+          <GameButton variant="success" size="md" onClick={() => { setCountdown(5); setPhase("countdown"); }}>
+            <Timer className="h-4 w-4" /> START HOLD
+          </GameButton>
+        )}
+        {phase === "running" && (
+          <GameButton variant="danger" size="md" onClick={stopHold}>
+            <Flag className="h-4 w-4" /> STOP HOLD
+          </GameButton>
+        )}
+        {phase === "stopped" && (
+          <div className="flex flex-col sm:flex-row justify-center gap-2">
+            <GameButton variant="ghost" size="md" onClick={retry}>
+              Retry
+            </GameButton>
+            <GameButton
+              variant={bossMode && !reached ? "ghost" : "success"}
+              size="md"
+              onClick={() => onSave(adjusted)}
+              disabled={bossMode && !reached}
+            >
+              <Trophy className="h-4 w-4" /> {bossMode ? "Log Boss Send" : "Save Hold"}
+            </GameButton>
+          </div>
+        )}
       </div>
     </>
   );

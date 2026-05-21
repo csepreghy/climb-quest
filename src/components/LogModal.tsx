@@ -62,7 +62,7 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing";
 type Kind = "boulder" | "boss";
 
-export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null }) {
+export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode }) {
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
   const [selectedBoss, setSelectedBoss] = useState<Boss | null>(null);
@@ -73,11 +73,11 @@ export function LogModal({ open, onOpenChange, editLog }: { open: boolean; onOpe
         setKind(editLog.isBoss ? "boss" : "boulder");
         setMode("form");
       } else {
-        setMode("pick");
+        setMode(initialMode ?? "pick");
         setSelectedBoss(null);
       }
     }
-  }, [open, editLog]);
+  }, [open, editLog, initialMode]);
 
   function openBossFlow() {
     if (hasBossSendOnDate(new Date().toISOString())) {

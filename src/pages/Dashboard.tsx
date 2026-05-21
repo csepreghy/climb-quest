@@ -32,6 +32,7 @@ export default function Dashboard() {
   const next = nextLevel(s);
   const characterName = useCharacterName();
   const [logOpen, setLogOpen] = useState(false);
+  const [logInitialMode, setLogInitialMode] = useState<"boulder-pick" | "strength">("boulder-pick");
   const [openBadgeId, setOpenBadgeId] = useState<string | null>(null);
   const openBadge = openBadgeId ? BADGES.find(b => b.id === openBadgeId) ?? null : null;
   const openBadgeHave = openBadge ? s.badges.includes(openBadge.id) : false;
@@ -44,7 +45,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-float-up">
-      <LogModal open={logOpen} onOpenChange={setLogOpen} />
+      <LogModal open={logOpen} onOpenChange={setLogOpen} initialMode={logInitialMode} />
       {/* Hero card */}
       <GameCard tone="accent" className="p-5 sm:p-7">
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">
@@ -63,8 +64,11 @@ export default function Dashboard() {
             <EquippedStrip equipped={s.equipped} />
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
-              <GameButton variant="success" onClick={() => setLogOpen(true)}>
-                <Plus className="h-4 w-4" /> Log
+              <GameButton variant="success" onClick={() => { setLogInitialMode("boulder-pick"); setLogOpen(true); }}>
+                <Plus className="h-4 w-4" /> Log boulder
+              </GameButton>
+              <GameButton variant="success" onClick={() => { setLogInitialMode("strength"); setLogOpen(true); }}>
+                <Dumbbell className="h-4 w-4" /> Log strength
               </GameButton>
               {next && s.chalk >= next.cost && (
                 <GameButton variant="primary" onClick={onLevelUp}>

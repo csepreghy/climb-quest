@@ -260,6 +260,21 @@ function load(): State {
         };
       });
     }
+    // Migrate legacy handstand-hold bucket idx (1..4) to representative seconds.
+    if (Array.isArray(merged.strengthSessions)) {
+      const BUCKET_SECONDS: Record<number, number> = { 1: 10, 2: 20, 3: 45, 4: 75 };
+      merged.strengthSessions = merged.strengthSessions.map(ss => {
+        if (ss.workout !== "handstand") return ss;
+        const sets = (ss.sets ?? []).map(st => {
+          if (st.mode === "hold" && st.reps >= 1 && st.reps <= 4) {
+            return { ...st, reps: BUCKET_SECONDS[st.reps] ?? st.reps };
+          }
+          return st;
+        });
+        const totalReps = sets.reduce((a, b) => a + (b.reps || 0), 0);
+        return { ...ss, sets, totalReps };
+      });
+    }
     // Move handstand_pushup unlocked level into handstand if higher.
     if (merged.strengthLevels && (merged.strengthLevels as Record<string, number>).handstand_pushup !== undefined) {
       // legacy: pre-split handstand_pushup key already exists as its own; nothing to merge.

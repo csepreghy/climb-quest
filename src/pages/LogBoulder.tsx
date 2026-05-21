@@ -269,7 +269,7 @@ export default function BoulderLogs() {
                     </div>
                     <div className="min-w-0">
                       <div className="text-sm font-medium truncate capitalize flex items-center gap-2">
-                        {ss.workout === "pullup" ? "Pull-up" : ss.workout === "pushup" ? "Push-up" : ss.workout === "handstand" ? "Handstand" : "Core"} · Level {ss.level}
+                        {ss.workout === "pullup" ? "Pull-up" : ss.workout === "pushup" ? "Push-up" : ss.workout === "handstand" ? "Handstand" : ss.workout === "squat" ? "Squat" : ss.workout === "plank" ? "Plank" : "Core"} · Level {ss.level}
                         {ss.bossSend && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-boss/20 text-boss border border-boss/40">Boss</span>}
                       </div>
                       <div className="text-xs text-muted-foreground truncate">

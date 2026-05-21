@@ -50,6 +50,11 @@ import squat2 from "@/assets/strength-squat-2.webp";
 import squat3 from "@/assets/strength-squat-3.webp";
 import squat4 from "@/assets/strength-squat-4.webp";
 import squat5 from "@/assets/strength-squat-5.webp";
+import plank1 from "@/assets/strength-plank-1.webp";
+import plank2 from "@/assets/strength-plank-2.webp";
+import plank3 from "@/assets/strength-plank-3.webp";
+import plank4 from "@/assets/strength-plank-4.webp";
+import plank5 from "@/assets/strength-plank-5.webp";
 import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -1097,6 +1102,7 @@ const PUSHUP_LEVEL_IMAGES: Record<number, string> = { 1: pushup1, 2: pushup2, 3:
 const HANDSTAND_HOLD_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
 const HANDSTAND_PUSHUP_IMAGES: Record<number, string> = { 1: hspu1, 2: hspu2, 3: hspu3, 4: hspu4, 5: hspu5 };
 const SQUAT_LEVEL_IMAGES: Record<number, string> = { 1: squat1, 2: squat2, 3: squat3, 4: squat4, 5: squat5 };
+const PLANK_LEVEL_IMAGES: Record<number, string> = { 1: plank1, 2: plank2, 3: plank3, 4: plank4, 5: plank5 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
   1: "Leg Raises",
@@ -1146,6 +1152,15 @@ const SQUAT_LEVEL_NAMES: Record<number, string> = {
   5: "Shrimp",
 };
 
+const PLANK_LEVEL_NAMES: Record<number, string> = {
+  1: "Basic Plank",
+  2: "Full Plank",
+  3: "1 Arm",
+  4: "1 Arm, 1 Foot",
+  5: "90 Degree Hold",
+};
+
+
 
 // Seconds buckets used by handstand (hold) sets (instead of reps).
 // Stored as the bucket index 1..4 in StrengthSet.reps.
@@ -1168,6 +1183,7 @@ function workoutLevelName(workout: StrengthWorkout, level: number, mode?: "hold"
     return map[level] ?? `LEVEL ${level}`;
   }
   if (workout === "squat") return SQUAT_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "plank") return PLANK_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 
@@ -1179,6 +1195,7 @@ function workoutLevelImage(workout: StrengthWorkout, level: number, mode?: "hold
     return mode === "pushup" ? HANDSTAND_PUSHUP_IMAGES[level] : HANDSTAND_HOLD_IMAGES[level];
   }
   if (workout === "squat") return SQUAT_LEVEL_IMAGES[level];
+  if (workout === "plank") return PLANK_LEVEL_IMAGES[level];
   return undefined;
 }
 
@@ -1212,6 +1229,12 @@ const WORKOUT_META: Record<StrengthWorkout, { title: string; desc: string; image
     desc: "Holds or pushups — balance and pressing power upside down.",
     image: hspu3,
     ring: "ring-[hsl(var(--boss))]/60",
+  },
+  plank: {
+    title: "Plank",
+    desc: "Core lockdown — timed holds from basic to 90-degree.",
+    image: plank2,
+    ring: "ring-[hsl(var(--btn-orange))]/60",
   },
 };
 
@@ -1440,8 +1463,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             <span className="font-display font-bold text-[hsl(var(--btn-orange))]">+{sessionChalkSoFar} Chalk</span>
           </div>
         )}
-        <div className="grid sm:grid-cols-2 gap-3 mt-2">
-          {(["core", "pullup", "pushup", "squat", "handstand"] as StrengthWorkout[]).map(w => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-2">
+          {(["core", "pullup", "pushup", "squat", "handstand", "plank"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
             const currentLv = w === "handstand"
               ? Math.max(1, s.strengthLevels?.handstand_hold ?? 0, s.strengthLevels?.handstand_pushup ?? 0)
@@ -1473,9 +1496,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
 
   if (step === "reps") {
     const isHandstand = workout === "handstand";
-    const isHold = isHandstand && handstandMode === "hold";
+    const isPlank = workout === "plank";
+    const isHold = (isHandstand && handstandMode === "hold") || isPlank;
     const totalReps = sets.filter(st => st.mode !== "hold").reduce((a, b) => a + b.reps, 0);
     const lvImg = workoutLevelImage(workout, level, isHandstand ? handstandMode : undefined);
+
 
     const maxLv = maxStrengthLevel(workout);
     const choices = Array.from({ length: Math.max(1, unlockedMax) }, (_, i) => i + 1);

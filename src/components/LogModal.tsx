@@ -1971,3 +1971,178 @@ function RestTimer({ minutes, onDone }: { minutes: number; onDone: () => void })
   );
 }
 
+// ===================== HOLD TIMER =====================
+type HoldPhase = "ready" | "countdown" | "running" | "stopped";
+
+function HoldTimerView(props: {
+  title: string;
+  subtitle?: string;
+  image?: string;
+  recordSeconds?: number;
+  targetSeconds?: number; // boss target
+  bossMode?: boolean;
+  onBack: () => void;
+  onSave: (seconds: number) => void;
+}) {
+  const { title, subtitle, image, recordSeconds, targetSeconds, bossMode, onBack, onSave } = props;
+  const [phase, setPhase] = useState<HoldPhase>("ready");
+  const [countdown, setCountdown] = useState(5);
+  const [elapsed, setElapsed] = useState(0); // tenths of a second
+  const [adjusted, setAdjusted] = useState<number>(0); // editable seconds
+  const startRef = useRef<number>(0);
+  const countdownStartRef = useRef<number>(0);
+
+  // Countdown tick
+  useEffect(() => {
+    if (phase !== "countdown") return;
+    countdownStartRef.current = Date.now();
+    const id = setInterval(() => {
+      const elapsedMs = Date.now() - countdownStartRef.current;
+      const remaining = Math.max(0, 5 - Math.floor(elapsedMs / 1000));
+      setCountdown(remaining);
+      if (elapsedMs >= 5000) {
+        clearInterval(id);
+        startRef.current = Date.now();
+        setElapsed(0);
+        setPhase("running");
+      }
+    }, 100);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  // Stopwatch tick
+  useEffect(() => {
+    if (phase !== "running") return;
+    const id = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startRef.current) / 100));
+    }, 100);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  const seconds = Math.floor(elapsed / 10);
+  const tenths = elapsed % 10;
+  const display = phase === "stopped" ? adjusted : seconds;
+  const ss = String(Math.floor(display)).padStart(2, "0");
+  const mm = String(Math.floor(display / 60)).padStart(2, "0");
+  const realSs = String(seconds).padStart(2, "0");
+  const realMm = String(Math.floor(seconds / 60)).padStart(2, "0");
+
+  function stopHold() {
+    const final = Math.floor(elapsed / 10);
+    setAdjusted(final);
+    setPhase("stopped");
+  }
+  function retry() {
+    setElapsed(0);
+    setAdjusted(0);
+    setCountdown(5);
+    setPhase("ready");
+  }
+
+  const reached = targetSeconds !== undefined ? adjusted >= targetSeconds : true;
+
+  return (
+    <>
+      <DialogHeader>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
+          {image && <HeaderImage src={image} alt={title} ring={bossMode ? "ring-2 ring-[hsl(var(--boss))]/60" : "ring-2 ring-[hsl(var(--btn-orange))]/40"} />}
+          <div className="min-w-0">
+            <DialogTitle className="truncate flex items-center gap-2">
+              {bossMode && <Skull className="h-5 w-5" />} {title}
+            </DialogTitle>
+            {subtitle && <div className="text-xs text-muted-foreground font-display tracking-wide truncate">{subtitle}</div>}
+          </div>
+        </div>
+      </DialogHeader>
+
+      <div className="py-6 text-center space-y-4">
+        {/* Status line */}
+        <div className="text-xs uppercase tracking-wider text-muted-foreground">
+          {phase === "ready" && (bossMode
+            ? <>Hold for {targetSeconds}s unbroken to defeat the boss</>
+            : recordSeconds && recordSeconds > 0
+              ? <>Current record: <span className="text-foreground font-bold">{recordSeconds}s</span></>
+              : <>First hold at this level — go for it!</>
+          )}
+          {phase === "countdown" && <>Get ready…</>}
+          {phase === "running" && (bossMode
+            ? <>Target: {targetSeconds}s</>
+            : recordSeconds && recordSeconds > 0
+              ? <>Beat {recordSeconds}s for +200 chalk</>
+              : <>First hold — any time gets +100 chalk</>
+          )}
+          {phase === "stopped" && (bossMode
+            ? (reached ? <>Boss target reached!</> : <>Need {targetSeconds}s unbroken — try again</>)
+            : <>Adjust if needed, then save</>
+          )}
+        </div>
+
+        {/* Big display */}
+        {phase === "countdown" ? (
+          <div className="font-display font-bold text-8xl tabular-nums text-[hsl(var(--btn-orange))]">
+            {countdown}
+          </div>
+        ) : phase === "stopped" ? (
+          <div className="space-y-2">
+            <div className="font-display font-bold text-7xl tabular-nums">
+              {adjusted}<span className="text-3xl text-muted-foreground">s</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setAdjusted(v => Math.max(0, v - 1))}
+                className="h-10 w-10 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-xl font-bold active:translate-y-[1px]"
+              >−</button>
+              <Input
+                type="number"
+                min={0}
+                value={adjusted}
+                onChange={e => setAdjusted(Math.max(0, Math.round(Number(e.target.value) || 0)))}
+                className="h-10 w-24 text-center text-xl font-bold tabular-nums"
+              />
+              <button
+                type="button"
+                onClick={() => setAdjusted(v => v + 1)}
+                className="h-10 w-10 rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary text-xl font-bold active:translate-y-[1px]"
+              >+</button>
+            </div>
+            <div className="text-[11px] text-muted-foreground">Stopwatch read {seconds}s · adjust if needed</div>
+          </div>
+        ) : (
+          <div className="font-display font-bold text-7xl sm:text-8xl tabular-nums">
+            {realMm}:{realSs}<span className="text-3xl text-muted-foreground">.{tenths}</span>
+          </div>
+        )}
+
+        {/* Action */}
+        {phase === "ready" && (
+          <GameButton variant="success" size="md" onClick={() => { setCountdown(5); setPhase("countdown"); }}>
+            <Timer className="h-4 w-4" /> START HOLD
+          </GameButton>
+        )}
+        {phase === "running" && (
+          <GameButton variant="danger" size="md" onClick={stopHold}>
+            <Flag className="h-4 w-4" /> STOP HOLD
+          </GameButton>
+        )}
+        {phase === "stopped" && (
+          <div className="flex flex-col sm:flex-row justify-center gap-2">
+            <GameButton variant="ghost" size="md" onClick={retry}>
+              Retry
+            </GameButton>
+            <GameButton
+              variant={bossMode && !reached ? "ghost" : "success"}
+              size="md"
+              onClick={() => onSave(adjusted)}
+              disabled={bossMode && !reached}
+            >
+              <Trophy className="h-4 w-4" /> {bossMode ? "Log Boss Send" : "Save Hold"}
+            </GameButton>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+

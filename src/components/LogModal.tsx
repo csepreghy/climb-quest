@@ -1630,28 +1630,23 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           )}
 
           {isHold ? (
-            <Field label="How long did you hold?">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {HANDSTAND_SECOND_BUCKETS.map(b => {
-                  const selected = reps === b.idx;
-                  return (
-                    <button
-                      key={b.idx}
-                      type="button"
-                      onClick={() => setReps(b.idx)}
-                      className={cn(
-                        "rounded-lg border-2 px-3 py-3 text-center font-display font-bold transition active:translate-y-[1px]",
-                        "border-[hsl(var(--panel-frame))] bg-secondary/50 hover:border-[hsl(var(--btn-orange))]",
-                        selected && "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40",
-                      )}
-                    >
-                      <Timer className="h-4 w-4 mx-auto text-muted-foreground" />
-                      <div className="mt-1 text-base">{b.label}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </Field>
+            (() => {
+              const pr = getHoldRecord(workout, level, "hold");
+              return (
+                <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-4 text-center space-y-3">
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">Current record (L{level})</div>
+                    <div className="font-display font-bold text-3xl tabular-nums">
+                      {pr > 0 ? `${pr}s` : "—"}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Beat your record for +{200} chalk · ≥50% for +50 · ≥10% for +10
+                    {pr <= 0 && <> · First hold ever at this level grants +100</>}
+                  </p>
+                </div>
+              );
+            })()
           ) : (
             <Field label="Reps this set">
               <div className="flex items-center gap-2">
@@ -1678,17 +1673,25 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
-          <GameButton variant="ghost" size="md" onClick={() => logRepsAnd("rest")}>
-            <Timer className="h-4 w-4" /> {isHold ? "LOG & REST" : "LOG & REST"}
-          </GameButton>
-          <GameButton variant="primary" size="md" onClick={() => logRepsAnd("new-workout")}>
-            <Plus className="h-4 w-4" /> LOG & NEW WORKOUT
-          </GameButton>
-          <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
-            <Trophy className="h-4 w-4" /> LOG & FINISH
-          </GameButton>
-        </div>
+        {isHold ? (
+          <div className="flex justify-end pt-3">
+            <GameButton variant="success" size="md" onClick={() => setStep("hold-timer")}>
+              <Timer className="h-4 w-4" /> START HOLD
+            </GameButton>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
+            <GameButton variant="ghost" size="md" onClick={() => logRepsAnd("rest")}>
+              <Timer className="h-4 w-4" /> LOG & REST
+            </GameButton>
+            <GameButton variant="primary" size="md" onClick={() => logRepsAnd("new-workout")}>
+              <Plus className="h-4 w-4" /> LOG & NEW WORKOUT
+            </GameButton>
+            <GameButton variant="success" size="md" onClick={() => logRepsAnd("finish")}>
+              <Trophy className="h-4 w-4" /> LOG & FINISH
+            </GameButton>
+          </div>
+        )}
       </>
     );
   }

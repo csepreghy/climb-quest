@@ -2052,9 +2052,9 @@ function HoldTimerView(props: {
   const seconds = Math.floor(elapsed / 10);
   const tenths = elapsed % 10;
   const display = phase === "stopped" ? adjusted : seconds;
-  const ss = String(Math.floor(display)).padStart(2, "0");
+  const ss = String(Math.floor(display % 60)).padStart(2, "0");
   const mm = String(Math.floor(display / 60)).padStart(2, "0");
-  const realSs = String(seconds).padStart(2, "0");
+  const realSs = String(seconds % 60).padStart(2, "0");
   const realMm = String(Math.floor(seconds / 60)).padStart(2, "0");
 
   function stopHold() {

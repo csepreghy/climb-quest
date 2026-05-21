@@ -175,6 +175,8 @@ export interface State {
   strengthLevels: Record<string, number>;
   /** Cumulative reps logged toward the next strength-boss defeat, keyed like `strengthLevels`. */
   strengthBossProgress?: Record<string, number>;
+  /** Personal record (best seconds held) for hold-style sets, keyed `${strengthKey}:${level}`. */
+  strengthHoldRecords?: Record<string, number>;
   stats: { totalLogs: number; totalSends: number; totalFlashes: number; bossesSent: number; };
   ignoreLevelReq?: boolean;
   /** ISO timestamp when the user completed first-time onboarding. */

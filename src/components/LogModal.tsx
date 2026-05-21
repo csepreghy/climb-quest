@@ -1645,10 +1645,6 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                       {pr > 0 ? `${pr}s` : "—"}
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Beat your record for +{200} chalk · ≥50% for +50 · ≥10% for +10
-                    {pr <= 0 && <> · First hold ever at this level grants +100</>}
-                  </p>
                 </div>
               );
             })()
@@ -1711,6 +1707,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         subtitle={lvName}
         image={lvImg ?? WORKOUT_META[workout].image}
         recordSeconds={pr}
+        autoStart
         onBack={() => setStep("reps")}
         onSave={(seconds) => {
           const dateISO = new Date(date).toISOString();
@@ -1742,6 +1739,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         image={lvImg ?? bossImg}
         targetSeconds={HOLD_BOSS_TARGET_SECONDS}
         bossMode
+        autoStart
         onBack={() => setStep("reps")}
         onSave={(seconds) => {
           if (seconds < HOLD_BOSS_TARGET_SECONDS) {
@@ -1986,16 +1984,18 @@ function HoldTimerView(props: {
   recordSeconds?: number;
   targetSeconds?: number; // boss target
   bossMode?: boolean;
+  autoStart?: boolean; // skip "ready" phase, jump straight to 5s countdown
   onBack: () => void;
   onSave: (seconds: number) => void;
 }) {
-  const { title, subtitle, image, recordSeconds, targetSeconds, bossMode, onBack, onSave } = props;
-  const [phase, setPhase] = useState<HoldPhase>("ready");
+  const { title, subtitle, image, recordSeconds, targetSeconds, bossMode, autoStart, onBack, onSave } = props;
+  const [phase, setPhase] = useState<HoldPhase>(autoStart ? "countdown" : "ready");
   const [countdown, setCountdown] = useState(5);
   const [elapsed, setElapsed] = useState(0); // tenths of a second
   const [adjusted, setAdjusted] = useState<number>(0); // editable seconds
   const startRef = useRef<number>(0);
   const countdownStartRef = useRef<number>(0);
+
 
   // Countdown tick
   useEffect(() => {
@@ -2074,8 +2074,8 @@ function HoldTimerView(props: {
           {phase === "running" && (bossMode
             ? <>Target: {targetSeconds}s</>
             : recordSeconds && recordSeconds > 0
-              ? <>Beat {recordSeconds}s for +200 chalk</>
-              : <>First hold — any time gets +100 chalk</>
+              ? <>Beat {recordSeconds}s for a new record</>
+              : <>First hold at this level — go for it!</>
           )}
           {phase === "stopped" && (bossMode
             ? (reached ? <>Boss target reached!</> : <>Need {targetSeconds}s unbroken — try again</>)

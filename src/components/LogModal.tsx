@@ -1645,10 +1645,6 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                       {pr > 0 ? `${pr}s` : "—"}
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Beat your record for +{200} chalk · ≥50% for +50 · ≥10% for +10
-                    {pr <= 0 && <> · First hold ever at this level grants +100</>}
-                  </p>
                 </div>
               );
             })()

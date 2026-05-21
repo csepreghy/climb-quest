@@ -1364,6 +1364,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
           alt={WORKOUT_META[workout].title}
           critPre={celebrate.critPre}
         />
+        {celebrate.subline && (
+          <div className="mt-3 text-sm font-display font-bold text-[hsl(var(--chalk-glow))]">
+            {celebrate.subline}
+          </div>
+        )}
         <div className="mt-4">
           <GameButton variant="primary" onClick={onDone}>Done</GameButton>
         </div>

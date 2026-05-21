@@ -1696,6 +1696,72 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     );
   }
 
+  if (step === "hold-timer") {
+    const lvImg = workoutLevelImage(workout, level, "hold");
+    const lvName = workoutLevelName(workout, level, "hold");
+    const pr = getHoldRecord(workout, level, "hold");
+    return (
+      <HoldTimerView
+        title={`${WORKOUT_META[workout].title} Hold · L${level}`}
+        subtitle={lvName}
+        image={lvImg ?? WORKOUT_META[workout].image}
+        recordSeconds={pr}
+        onBack={() => setStep("reps")}
+        onSave={(seconds) => {
+          const dateISO = new Date(date).toISOString();
+          const res = logStrengthHold({ workout, level, seconds, mode: "hold", date: dateISO });
+          toast.success(`+${res.chalk} Chalk · ${seconds}s hold`);
+          let subline: string | undefined;
+          if (res.isFirstEver) subline = "🎉 First hold logged at this level!";
+          else if (res.isNewRecord) subline = `🏆 New record! +${seconds - res.prevRecord}s over your best`;
+          setCelebrate({
+            chalk: res.chalk,
+            label: `${WORKOUT_META[workout].title} L${level} · ${seconds}s hold`,
+            image: lvImg ?? WORKOUT_META[workout].image,
+            critPre: findCritPre(res.breakdown),
+            subline,
+          });
+          setStep("celebrate");
+        }}
+      />
+    );
+  }
+
+  if (step === "hold-boss-timer") {
+    const lvImg = workoutLevelImage(workout, bossLevel, "hold");
+    const lvName = workoutLevelName(workout, bossLevel, "hold");
+    return (
+      <HoldTimerView
+        title={`Strength Boss · L${bossLevel}`}
+        subtitle={lvName}
+        image={lvImg ?? bossImg}
+        targetSeconds={HOLD_BOSS_TARGET_SECONDS}
+        bossMode
+        onBack={() => setStep("reps")}
+        onSave={(seconds) => {
+          if (seconds < HOLD_BOSS_TARGET_SECONDS) {
+            toast.error(`Only ${seconds}s — need ${HOLD_BOSS_TARGET_SECONDS}s unbroken. Try again!`);
+            return;
+          }
+          const dateISO = new Date(date).toISOString();
+          const res = logStrengthHold({
+            workout, level: bossLevel, seconds, mode: "hold", date: dateISO, bossSend: true,
+          });
+          toast.success(`Boss defeated! Unlocked Level ${bossLevel}`);
+          setCelebrate({
+            chalk: res.chalk,
+            label: `Strength Boss defeated · L${bossLevel} · ${seconds}s`,
+            image: lvImg ?? WORKOUT_META[workout].image,
+            critPre: findCritPre(res.breakdown),
+            subline: `🏆 You held for ${seconds}s — Level ${bossLevel} unlocked!`,
+          });
+          setStep("celebrate");
+        }}
+      />
+    );
+  }
+
+
   if (step === "boss-reps") {
     const lvImg = workoutLevelImage(workout, bossLevel);
     return (

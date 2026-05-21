@@ -1102,6 +1102,7 @@ const PUSHUP_LEVEL_IMAGES: Record<number, string> = { 1: pushup1, 2: pushup2, 3:
 const HANDSTAND_HOLD_IMAGES: Record<number, string> = { 1: handstand1, 2: handstand2, 3: handstand3, 4: handstand4, 5: handstand5 };
 const HANDSTAND_PUSHUP_IMAGES: Record<number, string> = { 1: hspu1, 2: hspu2, 3: hspu3, 4: hspu4, 5: hspu5 };
 const SQUAT_LEVEL_IMAGES: Record<number, string> = { 1: squat1, 2: squat2, 3: squat3, 4: squat4, 5: squat5 };
+const PLANK_LEVEL_IMAGES: Record<number, string> = { 1: plank1, 2: plank2, 3: plank3, 4: plank4, 5: plank5 };
 
 const CORE_LEVEL_NAMES: Record<number, string> = {
   1: "Leg Raises",

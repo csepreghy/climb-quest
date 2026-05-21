@@ -1220,6 +1220,8 @@ type StrengthStep =
   | "first-pick"
   | "reps"
   | "boss-reps"       // single-set boss attempt
+  | "hold-timer"      // regular hold (timer)
+  | "hold-boss-timer" // boss hold (timer, must reach 30s unbroken)
   | "rest-pick"
   | "rest-timer"
   | "celebrate"

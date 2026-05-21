@@ -1183,6 +1183,7 @@ function workoutLevelName(workout: StrengthWorkout, level: number, mode?: "hold"
     return map[level] ?? `LEVEL ${level}`;
   }
   if (workout === "squat") return SQUAT_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
+  if (workout === "plank") return PLANK_LEVEL_NAMES[level] ?? `LEVEL ${level}`;
   return `LEVEL ${level}`;
 }
 

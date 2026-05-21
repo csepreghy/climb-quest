@@ -1463,8 +1463,8 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
             <span className="font-display font-bold text-[hsl(var(--btn-orange))]">+{sessionChalkSoFar} Chalk</span>
           </div>
         )}
-        <div className="grid sm:grid-cols-2 gap-3 mt-2">
-          {(["core", "pullup", "pushup", "squat", "handstand"] as StrengthWorkout[]).map(w => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-2">
+          {(["core", "pullup", "pushup", "squat", "handstand", "plank"] as StrengthWorkout[]).map(w => {
             const meta = WORKOUT_META[w];
             const currentLv = w === "handstand"
               ? Math.max(1, s.strengthLevels?.handstand_hold ?? 0, s.strengthLevels?.handstand_pushup ?? 0)

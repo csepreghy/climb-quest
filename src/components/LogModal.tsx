@@ -1496,9 +1496,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
 
   if (step === "reps") {
     const isHandstand = workout === "handstand";
-    const isHold = isHandstand && handstandMode === "hold";
+    const isPlank = workout === "plank";
+    const isHold = (isHandstand && handstandMode === "hold") || isPlank;
     const totalReps = sets.filter(st => st.mode !== "hold").reduce((a, b) => a + b.reps, 0);
     const lvImg = workoutLevelImage(workout, level, isHandstand ? handstandMode : undefined);
+
 
     const maxLv = maxStrengthLevel(workout);
     const choices = Array.from({ length: Math.max(1, unlockedMax) }, (_, i) => i + 1);

@@ -1707,6 +1707,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         subtitle={lvName}
         image={lvImg ?? WORKOUT_META[workout].image}
         recordSeconds={pr}
+        autoStart
         onBack={() => setStep("reps")}
         onSave={(seconds) => {
           const dateISO = new Date(date).toISOString();

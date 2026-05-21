@@ -273,16 +273,24 @@ export default function BoulderLogs() {
                         {ss.bossSend && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-boss/20 text-boss border border-boss/40">Boss</span>}
                       </div>
                       <div className="text-xs text-muted-foreground truncate">
-                        {new Date(ss.date).toLocaleDateString()} · {ss.sets.length} {ss.workout === "handstand" ? `hold${ss.sets.length === 1 ? "" : "s"}` : `set${ss.sets.length === 1 ? "" : "s"} · ${ss.totalReps} reps`}
-                        {" · "}
-                        {ss.sets.map(st => {
-                          const lv = st.level ?? ss.level;
-                          if (ss.workout === "handstand") {
-                            const labels: Record<number, string> = { 1: "1-10s", 2: "11-30s", 3: "31-60s", 4: "60+s" };
-                            return `L${lv} · ${labels[st.reps] ?? `${st.reps}`}`;
+                        {(() => {
+                          const isHandstand = ss.workout === "handstand";
+                          const holds = ss.sets.filter(st => st.mode === "hold");
+                          const reps = ss.sets.filter(st => st.mode !== "hold");
+                          const parts: string[] = [];
+                          if (holds.length) parts.push(`${holds.length} hold${holds.length === 1 ? "" : "s"}`);
+                          if (reps.length) {
+                            const repTotal = reps.reduce((a, b) => a + (b.reps || 0), 0);
+                            parts.push(`${reps.length} set${reps.length === 1 ? "" : "s"} · ${repTotal} reps`);
                           }
-                          return `L${lv} · ${st.reps} reps`;
-                        }).join(" / ")}
+                          const summary = parts.join(" · ") || `${ss.sets.length} set${ss.sets.length === 1 ? "" : "s"}`;
+                          const detail = ss.sets.map(st => {
+                            const lv = st.level ?? ss.level;
+                            if (st.mode === "hold") return `L${lv} · ${st.reps}s`;
+                            return `L${lv} · ${st.reps} reps`;
+                          }).join(" / ");
+                          return <>{new Date(ss.date).toLocaleDateString()} · {summary} · {detail}</>;
+                        })()}
                       </div>
                     </div>
                   </div>

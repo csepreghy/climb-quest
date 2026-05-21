@@ -1152,6 +1152,15 @@ const SQUAT_LEVEL_NAMES: Record<number, string> = {
   5: "Shrimp",
 };
 
+const PLANK_LEVEL_NAMES: Record<number, string> = {
+  1: "Basic Plank",
+  2: "Full Plank",
+  3: "1 Arm",
+  4: "1 Arm, 1 Foot",
+  5: "90 Degree Hold",
+};
+
+
 
 // Seconds buckets used by handstand (hold) sets (instead of reps).
 // Stored as the bucket index 1..4 in StrengthSet.reps.

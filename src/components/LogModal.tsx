@@ -1284,7 +1284,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setBossLevel(next);
     setBossReps(strengthBossTarget(workout));
     setBossAttempts(1);
-    setStep("boss-reps");
+    if (isHoldExercise(workout, handstandMode)) {
+      setStep("hold-boss-timer");
+    } else {
+      setStep("boss-reps");
+    }
   }
 
   function logRepsAnd(action: "rest" | "finish" | "new-workout") {

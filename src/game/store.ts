@@ -89,8 +89,8 @@ export function isBossExpired(b: Boss, now = Date.now()): boolean {
 
 export type Equipped = Partial<Record<Slot, string>>;
 
-export type StrengthWorkout = "core" | "pullup" | "pushup" | "squat" | "handstand";
-/** For handstand hold sets, `reps` stores seconds held (e.g. 45 = 45s). For pushup-style sets, `reps` is rep count. */
+export type StrengthWorkout = "core" | "pullup" | "pushup" | "squat" | "handstand" | "plank";
+/** For hold sets (handstand hold, plank), `reps` stores seconds held. For pushup-style sets, `reps` is rep count. */
 export interface StrengthSet { reps: number; restSeconds?: number; level?: number; mode?: "hold" | "pushup" }
 
 /** Hold chalk rewards (single-rep timer-based). */
@@ -102,8 +102,9 @@ export const HOLD_REWARDS = {
 } as const;
 /** Required unbroken duration (seconds) to defeat a hold-style strength boss. */
 export const HOLD_BOSS_TARGET_SECONDS = 30;
-/** Identifies hold-style strength exercises (handstand hold today; extensible later). */
+/** Identifies hold-style strength exercises. Plank is always a hold; handstand depends on mode. */
 export function isHoldExercise(workout: StrengthWorkout, mode?: "hold" | "pushup"): boolean {
+  if (workout === "plank") return true;
   return workout === "handstand" && mode === "hold";
 }
 export interface StrengthSession {

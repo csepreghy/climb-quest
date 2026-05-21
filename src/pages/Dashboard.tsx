@@ -45,7 +45,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-float-up">
-      <LogModal open={logOpen} onOpenChange={setLogOpen} />
+      <LogModal open={logOpen} onOpenChange={setLogOpen} initialMode={logInitialMode} />
       {/* Hero card */}
       <GameCard tone="accent" className="p-5 sm:p-7">
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">

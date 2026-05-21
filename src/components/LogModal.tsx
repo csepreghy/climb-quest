@@ -1739,6 +1739,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         image={lvImg ?? bossImg}
         targetSeconds={HOLD_BOSS_TARGET_SECONDS}
         bossMode
+        autoStart
         onBack={() => setStep("reps")}
         onSave={(seconds) => {
           if (seconds < HOLD_BOSS_TARGET_SECONDS) {

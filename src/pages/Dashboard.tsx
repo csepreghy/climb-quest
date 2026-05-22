@@ -98,6 +98,8 @@ export default function Dashboard() {
 
       <ChalkOverTimeChart logs={s.logs} gyms={gyms} strengthSessions={s.strengthSessions ?? []} />
 
+      <StrengthRepsHoldChart sessions={s.strengthSessions ?? []} />
+
       <StrengthVolumeChart sessions={s.strengthSessions ?? []} />
 
 

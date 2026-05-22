@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Trophy, ScrollText, Swords, Dumbbell, Sparkles } from "lucide-react";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChalkOverTimeChart, StrengthVolumeChart } from "@/pages/Dashboard";
+import { ChalkOverTimeChart, StrengthRepsHoldChart } from "@/pages/Dashboard";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 
 interface Row {
@@ -284,7 +284,7 @@ function ClimberDetailsDialog({
             {charts && (
               <div className="space-y-3">
                 <ChalkOverTimeChart logs={charts.logs as any} gyms={gyms} strengthSessions={charts.strengthSessions} />
-                <StrengthVolumeChart sessions={charts.strengthSessions} />
+                <StrengthRepsHoldChart sessions={charts.strengthSessions} />
               </div>
             )}
 

@@ -160,8 +160,8 @@ function inputToRow(id: string, input: CustomItemInput, imageUrl?: string | null
     applies_to: (input.appliesTo ?? "all") as any,
     level_req: input.levelReq ?? null,
     price_mult: 1 - discount / 100,
-    crit_chance_pct: effectAllowed(g, r, "crit") ? Math.max(0, Math.min(100, input.critChancePct ?? 0)) : 0,
-    boss_bonus_pct: effectAllowed(g, r, "boss") ? Math.max(0, input.bossBonusPct ?? 0) : 0,
+    crit_chance_pct: Math.max(0, Math.min(100, input.critChancePct ?? 0)),
+    boss_bonus_pct: Math.max(0, input.bossBonusPct ?? 0),
     gender: input.gender ?? "unisex",
   };
 }

@@ -515,15 +515,16 @@ function InventoryAdmin() {
   const all = useAllItems();
   const [draft, setDraft] = useState<CustomItemInput>(empty);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [activeKey, setActiveKey] = useState<{ group: ItemGroup; category: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const formRef = useRef<HTMLDivElement | null>(null);
+  const topFormRef = useRef<HTMLDivElement | null>(null);
+  const inlineFormRef = useRef<HTMLDivElement | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
-  function reset() { setDraft(empty); setEditingId(null); }
+  function reset() { setDraft(empty); setEditingId(null); setActiveKey(null); }
 
   async function pickImage(file: File) {
     if (file.size > 20 * 1024 * 1024) { toast.error("Image too large (max 20 MB)"); return; }
-    // Show local preview immediately; actual upload happens in save() (resized to 360px webp).
     const previewUrl = URL.createObjectURL(file);
     setDraft(d => ({ ...d, imageDataUrl: previewUrl, imageFile: file }));
   }
@@ -546,14 +547,8 @@ function InventoryAdmin() {
     } finally { setBusy(false); }
   }
 
-  function startEdit(item: ShopItem) {
-    setEditingId(item.id);
-    // Scroll the edit form into view so the admin doesn't have to scroll up.
-    requestAnimationFrame(() => {
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      setTimeout(() => nameInputRef.current?.focus({ preventScroll: true }), 350);
-    });
-    setDraft({
+  function draftFromItem(item: ShopItem): CustomItemInput {
+    return {
       name: item.name,
       group: item.group,
       category: item.category,
@@ -568,145 +563,159 @@ function InventoryAdmin() {
       critChancePct: item.critChancePct ?? 0,
       bossBonusPct: item.bossBonusPct ?? 0,
       gender: item.gender ?? "unisex",
+    };
+  }
+
+  function scrollToInline() {
+    requestAnimationFrame(() => {
+      inlineFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => nameInputRef.current?.focus({ preventScroll: true }), 350);
     });
   }
 
-  return (
-    <GameCard tone="accent" className="p-5 space-y-5">
-      <div ref={formRef} className="scroll-mt-4">
-        <div className="menu-label">{editingId ? "Editing item" : "Inventory items"}</div>
-        <p className="text-xs text-muted-foreground mt-1">Create custom shop items, upload an image, set rarity, price and chalk bonus.</p>
-      </div>
+  function startEdit(item: ShopItem) {
+    setEditingId(item.id);
+    setActiveKey({ group: item.group, category: item.category });
+    setDraft(draftFromItem(item));
+    scrollToInline();
+  }
 
-      {/* Form */}
-      <div className="grid gap-3 md:grid-cols-[120px,1fr]">
-        {/* Image picker */}
-        <div className="space-y-2">
-          <Label className="text-xs">Image</Label>
-          <label className="flex flex-col items-center justify-center h-28 w-28 rounded-lg border-2 border-dashed border-[hsl(var(--panel-frame))] bg-secondary/40 cursor-pointer hover:border-[hsl(var(--btn-orange))] overflow-hidden">
-            {draft.imageDataUrl
-              ? <img src={draft.imageDataUrl} alt="" className="h-full w-full object-contain" />
-              : <div className="text-center text-muted-foreground text-xs"><Upload className="h-5 w-5 mx-auto mb-1" />Upload</div>}
-            <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) pickImage(f); }} />
-          </label>
-          {draft.imageDataUrl && (
-            <button className="text-[10px] text-muted-foreground hover:text-destructive" onClick={() => setDraft(d => ({ ...d, imageDataUrl: undefined }))}>Clear</button>
-          )}
+  function startCopy(item: ShopItem) {
+    setEditingId(null);
+    setActiveKey({ group: item.group, category: item.category });
+    setDraft({ ...draftFromItem(item), name: `${item.name} (copy)` });
+    scrollToInline();
+  }
+
+  function renderForm(refTarget: React.MutableRefObject<HTMLDivElement | null>) {
+    return (
+      <div className="space-y-5">
+        <div ref={refTarget} className="scroll-mt-4">
+          <div className="menu-label">{editingId ? "Editing item" : activeKey ? "Copying item" : "Inventory items"}</div>
+          <p className="text-xs text-muted-foreground mt-1">Create custom shop items, upload an image, set rarity, price and chalk bonus.</p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <Label className="text-xs">Name</Label>
-            <Input ref={nameInputRef} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="Send Slippers" />
+        <div className="grid gap-3 md:grid-cols-[120px,1fr]">
+          <div className="space-y-2">
+            <Label className="text-xs">Image</Label>
+            <label className="flex flex-col items-center justify-center h-28 w-28 rounded-lg border-2 border-dashed border-[hsl(var(--panel-frame))] bg-secondary/40 cursor-pointer hover:border-[hsl(var(--btn-orange))] overflow-hidden">
+              {draft.imageDataUrl
+                ? <img src={draft.imageDataUrl} alt="" className="h-full w-full object-contain" />
+                : <div className="text-center text-muted-foreground text-xs"><Upload className="h-5 w-5 mx-auto mb-1" />Upload</div>}
+              <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) pickImage(f); }} />
+            </label>
+            {draft.imageDataUrl && (
+              <button className="text-[10px] text-muted-foreground hover:text-destructive" onClick={() => setDraft(d => ({ ...d, imageDataUrl: undefined }))}>Clear</button>
+            )}
           </div>
-          <div>
-            <Label className="text-xs">Rarity</Label>
-            <Select value={draft.rarity} onValueChange={v => {
-              const r = v as Rarity;
-              setDraft(d => ({
-                ...d,
-                rarity: r,
-                bonusPct: effectAllowed(d.group, r, "chalk") ? d.bonusPct : 0,
-                discountPct: effectAllowed(d.group, r, "discount") ? d.discountPct : 0,
-                critChancePct: effectAllowed(d.group, r, "crit") ? d.critChancePct : 0,
-                bossBonusPct: effectAllowed(d.group, r, "boss") ? d.bossBonusPct : 0,
-              }));
-            }}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {RARITIES.map(r => <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-xs">Group</Label>
-            <Select value={draft.group} onValueChange={v => {
-              const g = v as ItemGroup;
-              const cat = CATEGORIES_BY_GROUP[g][0];
-              setDraft(d => {
-                // Buddies default to a 50% chalk bonus (admin-editable).
-                const baseBonus = g === "buddy" && (!d.bonusPct || d.group !== "buddy") ? 50 : d.bonusPct;
-                return {
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label className="text-xs">Name</Label>
+              <Input ref={nameInputRef} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="Send Slippers" />
+            </div>
+            <div>
+              <Label className="text-xs">Rarity</Label>
+              <Select value={draft.rarity} onValueChange={v => {
+                const r = v as Rarity;
+                setDraft(d => ({
                   ...d,
-                  group: g,
-                  category: cat,
-                  slot: CATEGORY_TO_SLOT[cat],
-                  bonusPct: effectAllowed(g, d.rarity, "chalk") ? baseBonus : 0,
-                  discountPct: effectAllowed(g, d.rarity, "discount") ? d.discountPct : 0,
-                  critChancePct: effectAllowed(g, d.rarity, "crit") ? d.critChancePct : 0,
-                  bossBonusPct: effectAllowed(g, d.rarity, "boss") ? d.bossBonusPct : 0,
-                };
-              });
-            }}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {GROUP_OPTIONS.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          {draft.group !== "power" && (
-            <div>
-              <Label className="text-xs">Category</Label>
-              <Select value={draft.category} onValueChange={v => setDraft(d => ({ ...d, category: v as ShopItem["category"], slot: CATEGORY_TO_SLOT[v] ?? d.slot }))}>
+                  rarity: r,
+                  bonusPct: effectAllowed(d.group, r, "chalk") ? d.bonusPct : 0,
+                  discountPct: effectAllowed(d.group, r, "discount") ? d.discountPct : 0,
+                }));
+              }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES_BY_GROUP[draft.group].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {RARITIES.map(r => <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-          )}
-          {(draft.category === "Top" || draft.category === "Pants") && (
             <div>
-              <Label className="text-xs">Gender</Label>
-              <Select value={draft.gender ?? "unisex"} onValueChange={v => setDraft(d => ({ ...d, gender: v as "male" | "female" | "unisex" }))}>
+              <Label className="text-xs">Group</Label>
+              <Select value={draft.group} onValueChange={v => {
+                const g = v as ItemGroup;
+                const cat = CATEGORIES_BY_GROUP[g][0];
+                setDraft(d => {
+                  const baseBonus = g === "buddy" && (!d.bonusPct || d.group !== "buddy") ? 50 : d.bonusPct;
+                  return {
+                    ...d,
+                    group: g,
+                    category: cat,
+                    slot: CATEGORY_TO_SLOT[cat],
+                    bonusPct: effectAllowed(g, d.rarity, "chalk") ? baseBonus : 0,
+                    discountPct: effectAllowed(g, d.rarity, "discount") ? d.discountPct : 0,
+                  };
+                });
+              }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unisex">Unisex (everyone)</SelectItem>
-                  <SelectItem value="male">Male only</SelectItem>
-                  <SelectItem value="female">Female only</SelectItem>
+                  {GROUP_OPTIONS.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-          )}
-          <div>
-            <Label className="text-xs">Price (Chalk)</Label>
-            <Input type="number" min={0} value={draft.price} onChange={e => setDraft(d => ({ ...d, price: parseInt(e.target.value) || 0 }))} />
-          </div>
-          {effectAllowed(draft.group, draft.rarity, "chalk") && (
+            {draft.group !== "power" && (
+              <div>
+                <Label className="text-xs">Category</Label>
+                <Select value={draft.category} onValueChange={v => setDraft(d => ({ ...d, category: v as ShopItem["category"], slot: CATEGORY_TO_SLOT[v] ?? d.slot }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES_BY_GROUP[draft.group].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {(draft.category === "Top" || draft.category === "Pants") && (
+              <div>
+                <Label className="text-xs">Gender</Label>
+                <Select value={draft.gender ?? "unisex"} onValueChange={v => setDraft(d => ({ ...d, gender: v as "male" | "female" | "unisex" }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unisex">Unisex (everyone)</SelectItem>
+                    <SelectItem value="male">Male only</SelectItem>
+                    <SelectItem value="female">Female only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
-              <Label className="text-xs">Chalk bonus %</Label>
-              <Input type="number" min={0} value={draft.bonusPct} onChange={e => setDraft(d => ({ ...d, bonusPct: parseInt(e.target.value) || 0 }))} />
+              <Label className="text-xs">Price (Chalk)</Label>
+              <Input type="number" min={0} value={draft.price} onChange={e => setDraft(d => ({ ...d, price: parseInt(e.target.value) || 0 }))} />
             </div>
-          )}
-          <div>
-            <Label className="text-xs">Level requirement</Label>
-            <Input
-              type="number"
-              min={1}
-              max={10}
-              placeholder="None"
-              value={draft.levelReq ?? ""}
-              onChange={e => {
-                const v = e.target.value;
-                setDraft(d => ({ ...d, levelReq: v === "" ? undefined : Math.max(1, parseInt(v) || 1) }));
-              }}
-            />
-          </div>
-          {effectAllowed(draft.group, draft.rarity, "discount") && (
+            {effectAllowed(draft.group, draft.rarity, "chalk") && (
+              <div>
+                <Label className="text-xs">Chalk bonus %</Label>
+                <Input type="number" min={0} value={draft.bonusPct} onChange={e => setDraft(d => ({ ...d, bonusPct: parseInt(e.target.value) || 0 }))} />
+              </div>
+            )}
             <div>
-              <Label className="text-xs">Shop discount %</Label>
+              <Label className="text-xs">Level requirement</Label>
               <Input
                 type="number"
-                min={0}
-                max={100}
-                placeholder="0"
-                value={draft.discountPct ?? 0}
-                onChange={e => setDraft(d => ({ ...d, discountPct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+                min={1}
+                max={10}
+                placeholder="None"
+                value={draft.levelReq ?? ""}
+                onChange={e => {
+                  const v = e.target.value;
+                  setDraft(d => ({ ...d, levelReq: v === "" ? undefined : Math.max(1, parseInt(v) || 1) }));
+                }}
               />
-              <p className="text-[10px] text-muted-foreground mt-1">Equipped item reduces shop prices. Discounts don't stack — best one wins.</p>
             </div>
-          )}
-          {effectAllowed(draft.group, draft.rarity, "crit") && (
+            {effectAllowed(draft.group, draft.rarity, "discount") && (
+              <div>
+                <Label className="text-xs">Shop discount %</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="0"
+                  value={draft.discountPct ?? 0}
+                  onChange={e => setDraft(d => ({ ...d, discountPct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) }))}
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">Equipped item reduces shop prices. Discounts don't stack — best one wins.</p>
+              </div>
+            )}
             <div>
               <Label className="text-xs">Crit chance %</Label>
               <Input
@@ -718,8 +727,6 @@ function InventoryAdmin() {
               />
               <p className="text-[10px] text-muted-foreground mt-1">Chance every log's chalk doubles. Stacks across equipped items.</p>
             </div>
-          )}
-          {effectAllowed(draft.group, draft.rarity, "boss") && (
             <div>
               <Label className="text-xs">Boss bonus %</Label>
               <Input
@@ -730,19 +737,24 @@ function InventoryAdmin() {
               />
               <p className="text-[10px] text-muted-foreground mt-1">Extra % chalk on boss attempts and sends. Sums across equipped items.</p>
             </div>
-          )}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          {(editingId || activeKey) && <Button variant="ghost" onClick={reset}><X className="h-4 w-4" /> Cancel</Button>}
+          <GameButton variant="primary" onClick={save} disabled={busy}>
+            {editingId ? "Update item" : <><Plus className="h-4 w-4" /> Create item</>}
+          </GameButton>
         </div>
       </div>
+    );
+  }
 
-      <div className="flex justify-end gap-2">
-        {editingId && <Button variant="ghost" onClick={reset}><X className="h-4 w-4" /> Cancel</Button>}
-        <GameButton variant="primary" onClick={save} disabled={busy}>
-          {editingId ? "Update item" : <><Plus className="h-4 w-4" /> Create item</>}
-        </GameButton>
-      </div>
+  return (
+    <GameCard tone="accent" className="p-5 space-y-5">
+      {!activeKey && renderForm(topFormRef)}
 
-      {/* Existing items list, grouped */}
-      <div className="space-y-4 pt-2 border-t border-border">
+      <div className={cn("space-y-4", !activeKey && "pt-2 border-t border-border")}>
         <div className="menu-label">All items ({all.length})</div>
         {GROUP_OPTIONS.map(group => {
           const inGroup = all.filter(i => i.group === group.value);
@@ -753,38 +765,48 @@ function InventoryAdmin() {
           return (
             <div key={group.value} className="space-y-2">
               <div className="text-xs uppercase tracking-wider font-bold text-foreground">{group.label} ({inGroup.length})</div>
-              {byCategory.map(({ cat, items }) => (
-                <div key={cat} className="space-y-1.5">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground pl-1">{cat}</div>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {items.map(item => {
-                      const isBuddy = item.group === "buddy";
-                      const thumb = isBuddy ? "h-20 w-20" : "h-10 w-10";
-                      return (
-                      <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg border border-border bg-secondary/30">
-                        <div className={cn("grid place-items-center text-xl shrink-0", thumb)}>
-                          {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className={cn("object-contain rounded", thumb)} /> : item.emoji}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold truncate">{item.name}</div>
-                          <div className="text-[10px] text-muted-foreground capitalize">
-                            {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}{item.levelReq ? ` · Lv ${item.levelReq}+` : ""}{(item.category === "Top" || item.category === "Pants") ? ` · ${item.gender ?? "unisex"}` : ""}
+              {byCategory.map(({ cat, items }) => {
+                const showFormHere = activeKey?.group === group.value && activeKey?.category === cat;
+                return (
+                  <div key={cat} className="space-y-1.5">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground pl-1">{cat}</div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {items.map(item => {
+                        const isBuddy = item.group === "buddy";
+                        const thumb = isBuddy ? "h-20 w-20" : "h-10 w-10";
+                        return (
+                        <div key={item.id} className={cn("flex items-center gap-3 p-2 rounded-lg border bg-secondary/30", editingId === item.id ? "border-[hsl(var(--btn-orange))]" : "border-border")}>
+                          <div className={cn("grid place-items-center text-xl shrink-0", thumb)}>
+                            {isImageEmoji(item.emoji) ? <img src={item.emoji} alt="" className={cn("object-contain rounded", thumb)} /> : item.emoji}
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold truncate">{item.name}</div>
+                            <div className="text-[10px] text-muted-foreground capitalize">
+                              {item.rarity} · {item.price} chalk{item.bonus?.mult ? ` · +${Math.round(item.bonus.mult * 100)}%` : ""}{item.levelReq ? ` · Lv ${item.levelReq}+` : ""}{(item.category === "Top" || item.category === "Pants") ? ` · ${item.gender ?? "unisex"}` : ""}
+                            </div>
+                          </div>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => startCopy(item)} title="Copy"><Copy className="h-4 w-4" /></button>
+                          <button className="text-destructive" onClick={async () => { if (confirm(`Delete ${item.name}?`)) { try { await deleteCustomItem(item.id); toast.success("Deleted"); } catch (e: any) { toast.error(e?.message ?? "Delete failed"); } } }} title="Delete"><Trash2 className="h-4 w-4" /></button>
                         </div>
-                        <button className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(item)} title="Edit"><Pencil className="h-4 w-4" /></button>
-                        <button className="text-destructive" onClick={async () => { if (confirm(`Delete ${item.name}?`)) { try { await deleteCustomItem(item.id); toast.success("Deleted"); } catch (e: any) { toast.error(e?.message ?? "Delete failed"); } } }} title="Delete"><Trash2 className="h-4 w-4" /></button>
+                        );
+                      })}
+                    </div>
+                    {showFormHere && (
+                      <div className="mt-3 p-3 rounded-lg border-2 border-[hsl(var(--btn-orange))] bg-background/40">
+                        {renderForm(inlineFormRef)}
                       </div>
-                      );
-                    })}
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           );
         })}
       </div>
     </GameCard>
   );
+
 }
 
 function LevelsAdmin() {

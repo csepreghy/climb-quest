@@ -284,7 +284,7 @@ function ClimberDetailsDialog({
             {charts && (
               <div className="space-y-3">
                 <ChalkOverTimeChart logs={charts.logs as any} gyms={gyms} strengthSessions={charts.strengthSessions} />
-                <StrengthVolumeChart sessions={charts.strengthSessions} />
+                <StrengthRepsHoldChart sessions={charts.strengthSessions} />
               </div>
             )}
 

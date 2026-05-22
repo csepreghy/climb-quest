@@ -263,7 +263,7 @@ export default function Inventory() {
               // Order equipped gear items first, then empty unlocked slots, then locked slots up to 4 total.
               const equippedGear = GEAR_SLOTS
                 .map(sl => ({ slot: sl, id: s.equipped[sl] }))
-                .filter(x => !!x.id) as { slot: Slot; id: string }[];
+                .filter(x => !!x.id && !!getItem(x.id!)) as { slot: Slot; id: string }[];
               const emptyCount = Math.max(0, max - equippedGear.length);
               const lockedCount = Math.max(0, 4 - max);
               return (
@@ -274,7 +274,8 @@ export default function Inventory() {
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {equippedGear.map(({ slot, id }) => {
-                      const it = getItem(id)!;
+                      const it = getItem(id);
+                      if (!it) return null;
                       return (
                         <div key={slot} className="flex flex-col">
                           <div className="flex-1"><ItemCard item={it} onClick={() => setSlotPicker(it)} /></div>

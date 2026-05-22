@@ -98,6 +98,8 @@ export default function Dashboard() {
 
       <ChalkOverTimeChart logs={s.logs} gyms={gyms} strengthSessions={s.strengthSessions ?? []} />
 
+      <StrengthRepsHoldChart sessions={s.strengthSessions ?? []} />
+
       <StrengthVolumeChart sessions={s.strengthSessions ?? []} />
 
 
@@ -388,6 +390,89 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
               <Area yAxisId="chalk" type="monotone" dataKey="chalk" stackId="chalk" name="Climbing" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
               <Area yAxisId="chalk" type="monotone" dataKey="strength" stackId="chalk" name="Strength" stroke="hsl(var(--sky))" strokeWidth={2} fill="url(#strengthGrad)" />
               <Line yAxisId="grade" type="monotone" dataKey="gradeRank" name="Top grade" stroke="hsl(270 80% 65%)" strokeWidth={2} dot={{ r: 3, fill: "hsl(270 80% 65%)" }} connectNulls />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </GameCard>
+  );
+}
+
+/**
+ * Daily strength reps (stacked bars by category) + hold seconds (line).
+ * Reps: core, pull-up, push-up, squat, handstand push-up — counted regardless of level.
+ * Hold seconds: plank + handstand hold, summed per day.
+ */
+export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[] }) {
+  const isMobile = useIsMobile();
+  const data = useMemo(() => {
+    const DAYS = isMobile ? 14 : 30;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    type Row = { ts: number; key: string; label: string; core: number; pullup: number; pushup: number; squat: number; handstand_pushup: number; hold_sec: number };
+    const buckets: Row[] = [];
+    const byKey = new Map<string, Row>();
+    for (let i = DAYS - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const row: Row = { ts: d.getTime(), key, label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }), core: 0, pullup: 0, pushup: 0, squat: 0, handstand_pushup: 0, hold_sec: 0 };
+      buckets.push(row);
+      byKey.set(key, row);
+    }
+    for (const sess of sessions) {
+      const d = new Date(sess.date);
+      d.setHours(0, 0, 0, 0);
+      const row = byKey.get(d.toISOString().slice(0, 10));
+      if (!row) continue;
+      if (sess.workout === "plank") {
+        for (const st of sess.sets) row.hold_sec += st.reps || 0;
+      } else if (sess.workout === "handstand") {
+        for (const st of sess.sets) {
+          if (st.mode === "hold") row.hold_sec += st.reps || 0;
+          else row.handstand_pushup += st.reps || 0;
+        }
+      } else if (sess.workout === "core") row.core += sess.totalReps;
+      else if (sess.workout === "pullup") row.pullup += sess.totalReps;
+      else if (sess.workout === "pushup") row.pushup += sess.totalReps;
+      else if (sess.workout === "squat") row.squat += sess.totalReps;
+    }
+    return buckets;
+  }, [sessions, isMobile]);
+
+  const hasAny = data.some(d => d.core || d.pullup || d.pushup || d.squat || d.handstand_pushup || d.hold_sec);
+
+  return (
+    <GameCard className="p-5">
+      <h3 className="menu-label mb-1 flex items-center gap-1.5">
+        <Dumbbell className="h-3 w-3" /> Strength Reps & Holds · Daily
+      </h3>
+      <p className="text-[10px] text-muted-foreground mb-3 normal-case tracking-normal">
+        Bars: total reps per category (all levels). Line: seconds held (plank + handstand hold).
+      </p>
+      {!hasAny ? (
+        <div className="text-sm text-muted-foreground py-8 text-center">
+          No strength sessions yet.
+        </div>
+      ) : (
+        <div className="h-48 -ml-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
+              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={Math.max(0, Math.floor(data.length / 10))} />
+              <YAxis yAxisId="reps" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={36} allowDecimals={false} />
+              <YAxis yAxisId="sec" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={36} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                labelStyle={{ color: "hsl(var(--foreground))" }}
+                formatter={(v: number, name: string) => [name === "Hold" ? `${v}s` : `${v} reps`, name]}
+              />
+              <Bar yAxisId="reps" dataKey="core" name="Core" stackId="r" fill="hsl(var(--btn-orange))" />
+              <Bar yAxisId="reps" dataKey="pullup" name="Pull-up" stackId="r" fill="hsl(var(--sky))" />
+              <Bar yAxisId="reps" dataKey="pushup" name="Push-up" stackId="r" fill="hsl(var(--btn-green))" />
+              <Bar yAxisId="reps" dataKey="squat" name="Squat" stackId="r" fill="hsl(var(--btn-yellow, var(--btn-orange)))" />
+              <Bar yAxisId="reps" dataKey="handstand_pushup" name="Handstand Pushup" stackId="r" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+              <Line yAxisId="sec" type="monotone" dataKey="hold_sec" name="Hold" stroke="hsl(var(--boss))" strokeWidth={2} dot={{ r: 2 }} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

@@ -5,7 +5,7 @@ export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "
 export type ItemGroup = "outfit" | "gear" | "power" | "buddy";
 
 /** Player level required before the Climbing Buddy slot unlocks. */
-export const BUDDY_SLOT_UNLOCK_LEVEL = 6;
+export const BUDDY_SLOT_UNLOCK_LEVEL = 5;
 
 export type EffectKey = "chalk" | "crit" | "boss" | "discount";
 

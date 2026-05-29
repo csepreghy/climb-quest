@@ -209,6 +209,95 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_reads: {
+        Row: {
+          created_at: string
+          dismissed_at: string | null
+          id: string
+          notification_id: string
+          seen_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          notification_id: string
+          seen_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          notification_id?: string
+          seen_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_reads_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          audience: string
+          body: string
+          created_at: string
+          expires_at: string | null
+          highlights: Json | null
+          id: string
+          payload: Json | null
+          priority: string
+          source: string
+          starts_at: string | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          audience?: string
+          body: string
+          created_at?: string
+          expires_at?: string | null
+          highlights?: Json | null
+          id?: string
+          payload?: Json | null
+          priority?: string
+          source?: string
+          starts_at?: string | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          audience?: string
+          body?: string
+          created_at?: string
+          expires_at?: string | null
+          highlights?: Json | null
+          id?: string
+          payload?: Json | null
+          priority?: string
+          source?: string
+          starts_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           character_name: string | null

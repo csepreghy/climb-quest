@@ -24,6 +24,7 @@ import logoImg from "@/assets/climbquest-logo.png";
 import { LevelPreviewCard } from "@/components/LevelPreviewCard";
 import { useAllGyms } from "@/game/allGyms";
 import { FeedbackButton } from "@/components/FeedbackButton";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 const NAV_BASE = [
   { to: "/home", label: "Home", icon: Home },
@@ -215,6 +216,7 @@ export default function Layout() {
               <Plus className="h-4 w-4" />
             </GameButton>
             {isAdmin && <div className="hidden xl:contents"><ThemeButton /></div>}
+            <NotificationCenter />
             <ChalkChip value={s.chalk} />
             <button type="button" onClick={() => setLevelsOpen(true)}
               className={cn(

@@ -1108,7 +1108,19 @@ function UsersAdmin() {
       toast.error("Delete failed: " + (e?.message ?? String(e)));
     } finally {
       setDeleting(null);
-    }
+  }
+
+  async function toggleArchive(row: AdminUserRow) {
+    const archive = !row.archived_at;
+    const { error } = await supabase.rpc("set_user_archived", {
+      target_user: row.user_id,
+      archived: archive,
+    });
+    if (error) { toast.error(error.message); return; }
+    toast.success(archive ? `Archived ${row.character_name ?? row.email ?? "user"}` : `Restored ${row.character_name ?? row.email ?? "user"}`);
+    setRows(prev => prev?.map(r => r.user_id === row.user_id ? { ...r, archived_at: archive ? new Date().toISOString() : null } : r) ?? null);
+  }
+
   }
 
   return (

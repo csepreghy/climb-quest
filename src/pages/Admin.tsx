@@ -1112,7 +1112,7 @@ function UsersAdmin() {
 
   async function toggleArchive(row: AdminUserRow) {
     const archive = !row.archived_at;
-    const { error } = await supabase.rpc("set_user_archived", {
+    const { error } = await (supabase.rpc as any)("set_user_archived", {
       target_user: row.user_id,
       archived: archive,
     });

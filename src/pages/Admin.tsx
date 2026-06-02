@@ -1108,6 +1108,7 @@ function UsersAdmin() {
       toast.error("Delete failed: " + (e?.message ?? String(e)));
     } finally {
       setDeleting(null);
+    }
   }
 
   async function toggleArchive(row: AdminUserRow) {
@@ -1121,7 +1122,6 @@ function UsersAdmin() {
     setRows(prev => prev?.map(r => r.user_id === row.user_id ? { ...r, archived_at: archive ? new Date().toISOString() : null } : r) ?? null);
   }
 
-  }
 
   return (
     <GameCard tone="legendary" className="p-5">

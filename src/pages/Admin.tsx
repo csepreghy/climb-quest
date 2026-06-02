@@ -1063,7 +1063,9 @@ interface AdminUserRow {
   bosses_sent: number;
   created_at: string;
   provider: string | null;
+  archived_at: string | null;
 }
+
 
 function providerLabel(p: string | null | undefined): string {
   switch ((p ?? "email").toLowerCase()) {

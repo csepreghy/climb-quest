@@ -182,14 +182,23 @@ export function NotificationCenter() {
                 </div>
               )}
 
-              <DialogFooter className="gap-2 sm:gap-2">
-                {active.action_label && active.action_url && (
-                  <GameButton variant="primary" size="sm" onClick={onAction}>
-                    {active.action_label}
-                  </GameButton>
-                )}
-                <GameButton variant="ghost" size="sm" onClick={onDismiss}>
-                  Nice!
+              <DialogFooter>
+                <GameButton
+                  variant="primary"
+                  size="sm"
+                  onClick={async () => {
+                    if (active.action_url) {
+                      const url = active.action_url;
+                      setActive(null);
+                      if (url.startsWith("/")) nav(url);
+                      else window.open(url, "_blank", "noopener,noreferrer");
+                    } else {
+                      setActive(null);
+                    }
+                    await dismiss(active.id);
+                  }}
+                >
+                  Continue Climbing
                 </GameButton>
               </DialogFooter>
             </>

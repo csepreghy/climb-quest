@@ -187,14 +187,8 @@ export function NotificationCenter() {
                   variant="primary"
                   size="sm"
                   onClick={async () => {
-                    if (active.action_url) {
-                      const url = active.action_url;
-                      setActive(null);
-                      if (url.startsWith("/")) nav(url);
-                      else window.open(url, "_blank", "noopener,noreferrer");
-                    } else {
-                      setActive(null);
-                    }
+                    setActive(null);
+                    nav("/home");
                     await dismiss(active.id);
                   }}
                 >

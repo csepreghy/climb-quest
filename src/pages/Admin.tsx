@@ -1146,11 +1146,19 @@ function UsersAdmin() {
             </thead>
             <tbody>
               {rows.map(r => (
-                <tr key={r.user_id} className="border-b border-border/40 hover:bg-secondary/30">
+                <tr key={r.user_id} className={cn("border-b border-border/40 hover:bg-secondary/30", r.archived_at && "opacity-60")}>
                   <td className="py-2 px-2">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">{r.character_name ?? <span className="italic text-muted-foreground">unnamed</span>}</span>
                       {r.is_admin && <span title="Admin"><Shield className="h-3.5 w-3.5 text-legendary" /></span>}
+                      {r.archived_at && (
+                        <span
+                          title={`Archived ${new Date(r.archived_at).toLocaleString()} — hidden from leaderboard`}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-[10px] uppercase tracking-wider font-bold text-muted-foreground border border-border"
+                        >
+                          <Archive className="h-3 w-3" /> Archived
+                        </span>
+                      )}
                     </div>
                     {r.display_name && r.display_name !== r.character_name && (
                       <div className="text-[11px] text-muted-foreground">{r.display_name}</div>
@@ -1169,18 +1177,29 @@ function UsersAdmin() {
                   <td className="py-2 px-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
                   <td className="py-2 px-2 text-right">
                     {r.user_id !== user?.id && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Delete user"
-                        disabled={deleting === r.user_id}
-                        onClick={() => { setTarget(r); setConfirmText(""); }}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title={r.archived_at ? "Restore user (show on leaderboard)" : "Archive user (hide from leaderboard)"}
+                          onClick={() => toggleArchive(r)}
+                        >
+                          <Archive className={cn("h-4 w-4", r.archived_at ? "text-legendary" : "text-muted-foreground")} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Delete user"
+                          disabled={deleting === r.user_id}
+                          onClick={() => { setTarget(r); setConfirmText(""); }}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     )}
                   </td>
                 </tr>
+
               ))}
             </tbody>
           </table>

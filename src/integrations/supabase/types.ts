@@ -459,6 +459,7 @@ export type Database = {
       get_admin_users: {
         Args: never
         Returns: {
+          archived_at: string
           bosses_sent: number
           character_name: string
           created_at: string

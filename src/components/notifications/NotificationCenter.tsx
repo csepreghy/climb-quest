@@ -61,13 +61,6 @@ export function NotificationCenter() {
     setActive(null);
   }
 
-  function onAction() {
-    if (!active?.action_url) return;
-    const url = active.action_url;
-    setActive(null);
-    if (url.startsWith("/")) nav(url);
-    else window.open(url, "_blank", "noopener,noreferrer");
-  }
 
   const nextQuest = (active?.payload as any)?.next_quest as string | undefined;
 

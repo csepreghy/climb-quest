@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.get_climber_charts(uuid) TO anon;

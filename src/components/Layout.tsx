@@ -42,6 +42,7 @@ export default function Layout() {
   const { user, isAdmin, signOut } = useAuth();
   const nav = useNavigate();
   const NAV = isAdmin ? [...NAV_BASE, NAV_ADMIN] : NAV_BASE;
+  const [isIosStandalone, setIsIosStandalone] = useState(false);
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [confirmLvOpen, setConfirmLvOpen] = useState(false);
@@ -51,6 +52,20 @@ export default function Layout() {
   const showOnboarding = !!user && hydrated && !s.onboardedAt;
   const [dailyLoginOpen, setDailyLoginOpen] = useState(false);
   useLoadCharacterName(user?.id ?? null);
+
+  useEffect(() => {
+    const standaloneQuery = window.matchMedia("(display-mode: standalone)");
+    const nav = window.navigator as Navigator & { standalone?: boolean; platform?: string; maxTouchPoints?: number };
+    const isIos = /iPad|iPhone|iPod/.test(nav.userAgent) || (nav.platform === "MacIntel" && (nav.maxTouchPoints ?? 0) > 1);
+
+    const updateStandaloneState = () => {
+      setIsIosStandalone(isIos && (standaloneQuery.matches || nav.standalone === true));
+    };
+
+    updateStandaloneState();
+    standaloneQuery.addEventListener("change", updateStandaloneState);
+    return () => standaloneQuery.removeEventListener("change", updateStandaloneState);
+  }, []);
 
   useEffect(() => {
     if (!user || !hydrated || !s.onboardedAt) return;
@@ -105,7 +120,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={cn("min-h-screen flex flex-col", isIosStandalone && "cq-ios-standalone")}> 
       <LevelsModal
         open={levelsOpen}
         onOpenChange={setLevelsOpen}
@@ -284,7 +299,7 @@ export default function Layout() {
         </nav>
       </header>
 
-      <main className="flex-1 container py-6 sm:py-8 pb-28 md:pb-10" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom))" }}>
+      <main className="cq-main flex-1 container py-6 sm:py-8 pb-28 md:pb-10">
         <Outlet />
       </main>
 
@@ -292,8 +307,7 @@ export default function Layout() {
 
       {/* Bottom nav (mobile) */}
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="cq-bottom-nav md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border"
       >
         <div className="grid" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           {NAV.map(n => (

@@ -109,6 +109,24 @@
 }
 
 @layer components {
+  .cq-main {
+    padding-bottom: 7rem;
+  }
+
+  .cq-ios-standalone .cq-main {
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom) + 1rem);
+  }
+
+  .cq-ios-standalone .cq-bottom-nav {
+    bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+  }
+
+  @media (min-width: 768px) {
+    .cq-main {
+      padding-bottom: 2.5rem;
+    }
+  }
+
   .rpg-panel {
     background: hsl(var(--panel-fill));
     box-shadow: var(--shadow-panel);

@@ -284,14 +284,17 @@ export default function Layout() {
         </nav>
       </header>
 
-      <main className="flex-1 container py-6 sm:py-8 pb-28 md:pb-10">
+      <main className="flex-1 container py-6 sm:py-8 pb-28 md:pb-10" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom))" }}>
         <Outlet />
       </main>
 
       <FeedbackButton />
 
       {/* Bottom nav (mobile) */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border">
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="grid" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           {NAV.map(n => (
             <NavLink key={n.to} to={n.to} end={n.to === "/"}

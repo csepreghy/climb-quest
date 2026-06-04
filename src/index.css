@@ -118,7 +118,8 @@
   }
 
   .cq-ios-standalone .cq-bottom-nav {
-    bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+    bottom: 0;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
   }
 
   @media (min-width: 768px) {

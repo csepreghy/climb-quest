@@ -122,6 +122,10 @@
     padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
   }
 
+  .cq-ios-standalone .cq-header {
+    padding-top: env(safe-area-inset-top);
+  }
+
   @media (min-width: 768px) {
     .cq-main {
       padding-bottom: 2.5rem;

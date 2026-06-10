@@ -8,6 +8,11 @@ import { getItem } from "./customItems";
 import { getActivityReward } from "./activityRewards";
 import { resolvedLevel } from "./levelOverrides";
 import { applyDailyCap, chalkUsedOnDate, computeDailyCap, currentStreak, getDailyCapConfig } from "./dailyCap";
+import {
+  activeChalkBuffPct, activeCritBuffPct, activeCapBuffPct,
+  cleanExpiredBuffs, emitStreakEvent, getStreakConfig, streakDayBonusPct,
+  streakRewardsFor, withBuffs, cycleDay,
+} from "./streak";
 
 // ----- Types -----
 export type AttemptType = "flash" | "send" | "project" | "repeat";

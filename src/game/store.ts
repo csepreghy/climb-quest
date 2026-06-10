@@ -750,7 +750,7 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
       bonuses.push({ source: `Boss bonus (+${bossPct}%)`, amount: amt });
       running += amt;
     }
-    const flat = getActivityReward("strength_boss_send");
+    const flat = scaledActivityReward("strength_boss_send");
     if (flat > 0) {
       bonuses.push({ source: "Strength boss send", amount: flat });
       running += flat;
@@ -765,7 +765,22 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
       running += amt;
     }
   }
-  // Crit
+  // ----- Daily streak day-bonus -----
+  const streak = currentStreak(state);
+  const streakPct = streakDayBonusPct(streak);
+  if (streakPct > 0 && running > 0) {
+    const amt = Math.round(running * streakPct / 100);
+    bonuses.push({ source: `Streak Day ${cycleDay(streak)} (+${streakPct}%)`, amount: amt });
+    running += amt;
+  }
+  // ----- Active chalk buffs -----
+  const chalkBuff = activeChalkBuffPct(state);
+  if (chalkBuff > 0 && running > 0) {
+    const amt = Math.round(running * chalkBuff / 100);
+    bonuses.push({ source: `Streak buff (+${chalkBuff}%)`, amount: amt });
+    running += amt;
+  }
+  // Crit (with active crit buff folded in)
   let critProb = 0;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
     const id = eq[slotKey]; if (!id) continue;
@@ -775,16 +790,22 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
       critProb = 1 - (1 - critProb) * (1 - p);
     }
   }
+  const critBuff = activeCritBuffPct(state);
+  if (critBuff > 0) {
+    critProb = 1 - (1 - critProb) * (1 - Math.min(100, critBuff) / 100);
+  }
   if (critProb > 0 && Math.random() < critProb) {
     bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
     running *= 2;
   }
-  // Daily cap
+  // Daily cap (cap-buff scales the cap up)
   const cfg = getDailyCapConfig();
   let capInfo: ChalkBreakdown["capInfo"] | undefined;
   if (cfg.enabled) {
     const used = chalkUsedOnDate(state, dateISO);
-    const cap = computeDailyCap(state.level, cfg);
+    const capBase = computeDailyCap(state.level, cfg);
+    const capBuff = activeCapBuffPct(state);
+    const cap = Math.round(capBase * (1 + capBuff / 100));
     const capped = applyDailyCap(running, used, cap, cfg);
     if (capped.reduced) {
       bonuses.push({ source: capped.label ?? "Daily cap", amount: capped.granted - running });

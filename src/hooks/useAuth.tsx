@@ -31,9 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
         setSession(null);
         setHasAdminRole(false);
-        toast.error("Your account is unavailable", {
-          description: "Please contact an administrator if you believe this is a mistake.",
-        });
+        toast.error("Your account is unavailable.");
         return true;
       }
       return false;

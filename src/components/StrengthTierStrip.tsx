@@ -28,7 +28,7 @@ export function StrengthTierStrip({
             <Dumbbell className={cn("h-3.5 w-3.5", TIER_TEXT[tier])} />
             <span className="uppercase tracking-wider text-muted-foreground">Strength tier</span>
             <span className={cn("font-bold", TIER_TEXT[tier])}>{TIER_LABEL[tier]}</span>
-            <span className="tabular-nums text-muted-foreground">· {qualifiedDays}/7d</span>
+            <span className="tabular-nums text-muted-foreground">· {qualifiedDays} of 7 days</span>
           </div>
           {pct > 0 && (
             <span className={cn("tabular-nums font-bold", TIER_TEXT[tier])}>+{pct}% chalk</span>

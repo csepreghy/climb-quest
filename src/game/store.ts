@@ -419,6 +419,15 @@ export interface ChalkBreakdown {
   total: number;
   capInfo?: { cap: number; used: number; reduced: boolean };
 }
+/** Per-activity reward grows with player level: +15% per level above 1. */
+export function activityLevelMult(level: number): number {
+  return 1 + Math.max(0, level - 1) * 0.15;
+}
+/** Level-scaled, admin-tunable per-activity reward. */
+export function scaledActivityReward(activity: ActivityType, level: number = state.level): number {
+  return Math.max(1, Math.round(getActivityReward(activity) * activityLevelMult(level)));
+}
+
 export function computeChalk(
   activity: ActivityType,
   styles: Style[],
@@ -428,7 +437,7 @@ export function computeChalk(
   dateISO?: string,
   repeat = false,
 ): ChalkBreakdown {
-  const baseRaw = getActivityReward(activity);
+  const baseRaw = scaledActivityReward(activity);
   const base = Math.max(1, Math.round(baseRaw * difficultyMult));
   const bonuses: { source: string; amount: number }[] = [];
   let running = base;
@@ -444,7 +453,7 @@ export function computeChalk(
 
   // Send flat bonus first (additive, not stacked %)
   if (sentLike && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder" || activity === "project_boulder")) {
-    const amt = Math.round(getActivityReward("boulder_send") * difficultyMult);
+    const amt = Math.round(scaledActivityReward("boulder_send") * difficultyMult);
     bonuses.push({ source: "Send", amount: amt });
     running += amt;
   }
@@ -498,6 +507,23 @@ export function computeChalk(
     }
   }
 
+  // ----- Daily streak day-bonus (1..7-day cycle) -----
+  const streak = currentStreak(state);
+  const streakPct = streakDayBonusPct(streak);
+  if (streakPct > 0 && running > 0) {
+    const amt = Math.round(running * streakPct / 100);
+    bonuses.push({ source: `Streak Day ${cycleDay(streak)} (+${streakPct}%)`, amount: amt });
+    running += amt;
+  }
+
+  // ----- Active chalk buffs (post-streak / milestone rewards) -----
+  const chalkBuff = activeChalkBuffPct(state);
+  if (chalkBuff > 0 && running > 0) {
+    const amt = Math.round(running * chalkBuff / 100);
+    bonuses.push({ source: `Streak buff (+${chalkBuff}%)`, amount: amt });
+    running += amt;
+  }
+
   // Repeat — done it before, half the chalk.
   if (repeat) {
     const reduced = Math.round(running * 0.5);
@@ -515,17 +541,24 @@ export function computeChalk(
       critProb = 1 - (1 - critProb) * (1 - p);
     }
   }
+  // Active crit buff folds into the combined crit probability.
+  const critBuff = activeCritBuffPct(state);
+  if (critBuff > 0) {
+    critProb = 1 - (1 - critProb) * (1 - Math.min(100, critBuff) / 100);
+  }
   if (critProb > 0 && Math.random() < critProb) {
     bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
     running *= 2;
   }
 
-  // Daily cap — soft, with diminishing returns. Applied last.
+  // Daily cap — soft, with diminishing returns. Applied last. Active cap-buff scales the cap up.
   const dateForCap = dateISO ?? new Date().toISOString();
   const cfg = getDailyCapConfig();
   if (cfg.enabled) {
     const used = chalkUsedOnDate(state, dateForCap);
-    const cap = computeDailyCap(state.level, cfg);
+    const capBase = computeDailyCap(state.level, cfg);
+    const capBuff = activeCapBuffPct(state);
+    const cap = Math.round(capBase * (1 + capBuff / 100));
     const cappedAmount = applyDailyCap(running, used, cap, cfg);
     if (cappedAmount.reduced) {
       bonuses.push({

@@ -208,6 +208,35 @@ export function streakRewardsFor(
   return out;
 }
 
+/** Rewards for a single specific day, ignoring "already awarded" tracking. Use for admin triggers / previews. */
+export function rewardsForDay(
+  day: number,
+  currentDailyCap: number,
+  cfg: StreakConfig = config,
+): { addedBuffs: ActiveBuff[]; chalkCache: number; bannerLabel: string } {
+  const out = { addedBuffs: [] as ActiveBuff[], chalkCache: 0, bannerLabel: `Day ${day} streak!` };
+  if (day > 0 && day % 7 === 0) {
+    if (cfg.post7ChalkPct > 0 && cfg.post7ChalkDays > 0) {
+      out.addedBuffs.push(makeBuff("chalk", cfg.post7ChalkPct, cfg.post7ChalkDays, `Day ${day} streak`));
+    }
+    if (cfg.post7CritPct > 0 && cfg.post7CritDays > 0) {
+      out.addedBuffs.push(makeBuff("crit", cfg.post7CritPct, cfg.post7CritDays, `Day ${day} streak`));
+    }
+    out.bannerLabel = `Day ${day} streak complete!`;
+  }
+  const milestone = cfg.milestones.find(m => m.day === day);
+  if (milestone) {
+    for (const b of milestone.buffs) {
+      out.addedBuffs.push(makeBuff(b.kind, b.pct, b.days, milestone.label));
+    }
+    if (milestone.chalkCacheMult && currentDailyCap > 0) {
+      out.chalkCache = Math.round(currentDailyCap * milestone.chalkCacheMult);
+    }
+    out.bannerLabel = `${milestone.label} — Day ${day}!`;
+  }
+  return out;
+}
+
 // ---------- Listeners for celebratory banners ----------
 
 const eventListeners = new Set<(label: string) => void>();

@@ -58,7 +58,10 @@ export default function Dashboard() {
             {characterName && (
               <div className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1">{characterName}</div>
             )}
-            <div className="menu-label">Level {s.level} · {cur.title}</div>
+            <div className="menu-label flex items-center gap-2 justify-center sm:justify-start flex-wrap">
+              <span>Level {s.level} · {cur.title}</span>
+              <StrengthTierChip sessions={s.strengthSessions ?? []} onClick={() => setTierModalOpen(true)} />
+            </div>
             <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
             <div className="mt-4 text-xs text-muted-foreground">

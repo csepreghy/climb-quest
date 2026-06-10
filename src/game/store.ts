@@ -8,6 +8,11 @@ import { getItem } from "./customItems";
 import { getActivityReward } from "./activityRewards";
 import { resolvedLevel } from "./levelOverrides";
 import { applyDailyCap, chalkUsedOnDate, computeDailyCap, currentStreak, getDailyCapConfig } from "./dailyCap";
+import {
+  activeChalkBuffPct, activeCritBuffPct, activeCapBuffPct,
+  cleanExpiredBuffs, emitStreakEvent, getStreakConfig, streakDayBonusPct,
+  streakRewardsFor, withBuffs, cycleDay,
+} from "./streak";
 
 // ----- Types -----
 export type AttemptType = "flash" | "send" | "project" | "repeat";
@@ -138,8 +143,9 @@ export function strengthBossTargetReps(_nextLevel?: number, _workout?: StrengthW
  * Top tier (max or boss attempt above max) = full reward; one below = 70%; two below = 50%; lower = 30%.
  * The admin "strength_rep" reward acts as the top-tier per-rep value (default 5).
  */
-export function strengthRepChalk(level: number, maxUnlocked: number): number {
-  const top = Math.max(1, getActivityReward("strength_rep"));
+export function strengthRepChalk(level: number, maxUnlocked: number, playerLevel?: number): number {
+  const pLvl = playerLevel ?? state.level;
+  const top = Math.max(1, Math.round(getActivityReward("strength_rep") * activityLevelMult(pLvl)));
   const diff = maxUnlocked - level;
   if (diff <= 0) return top;
   if (diff === 1) return Math.max(1, Math.round(top * 0.7));
@@ -184,6 +190,10 @@ export interface State {
   onboardedAt?: string | null;
   /** ISO date (YYYY-MM-DD) of the most recent daily-login chalk grant. */
   lastDailyLoginAt?: string | null;
+  /** Active temporary buffs (chalk/crit/cap %). Pruned lazily as they expire. */
+  activeBuffs?: import("./streak").ActiveBuff[];
+  /** Streak-milestone day numbers (14/21/30/…) already awarded. */
+  streakMilestonesAwarded?: number[];
 }
 
 const STORAGE_KEY = "climbquest:v1";
@@ -208,6 +218,8 @@ const initialState = (): State => ({
   ignoreLevelReq: false,
   onboardedAt: null,
   lastDailyLoginAt: null,
+  activeBuffs: [],
+  streakMilestonesAwarded: [],
 });
 
 function spawnBoss(t: BossTemplate): Boss {
@@ -408,6 +420,15 @@ export interface ChalkBreakdown {
   total: number;
   capInfo?: { cap: number; used: number; reduced: boolean };
 }
+/** Per-activity reward grows with player level: +15% per level above 1. */
+export function activityLevelMult(level: number): number {
+  return 1 + Math.max(0, level - 1) * 0.15;
+}
+/** Level-scaled, admin-tunable per-activity reward. */
+export function scaledActivityReward(activity: ActivityType, level: number = state.level): number {
+  return Math.max(1, Math.round(getActivityReward(activity) * activityLevelMult(level)));
+}
+
 export function computeChalk(
   activity: ActivityType,
   styles: Style[],
@@ -417,7 +438,7 @@ export function computeChalk(
   dateISO?: string,
   repeat = false,
 ): ChalkBreakdown {
-  const baseRaw = getActivityReward(activity);
+  const baseRaw = scaledActivityReward(activity);
   const base = Math.max(1, Math.round(baseRaw * difficultyMult));
   const bonuses: { source: string; amount: number }[] = [];
   let running = base;
@@ -433,7 +454,7 @@ export function computeChalk(
 
   // Send flat bonus first (additive, not stacked %)
   if (sentLike && (activity === "warmup_boulder" || activity === "boulder" || activity === "hard_boulder" || activity === "project_boulder")) {
-    const amt = Math.round(getActivityReward("boulder_send") * difficultyMult);
+    const amt = Math.round(scaledActivityReward("boulder_send") * difficultyMult);
     bonuses.push({ source: "Send", amount: amt });
     running += amt;
   }
@@ -487,6 +508,23 @@ export function computeChalk(
     }
   }
 
+  // ----- Daily streak day-bonus (1..7-day cycle) -----
+  const streak = currentStreak(state);
+  const streakPct = streakDayBonusPct(streak);
+  if (streakPct > 0 && running > 0) {
+    const amt = Math.round(running * streakPct / 100);
+    bonuses.push({ source: `Streak Day ${cycleDay(streak)} (+${streakPct}%)`, amount: amt });
+    running += amt;
+  }
+
+  // ----- Active chalk buffs (post-streak / milestone rewards) -----
+  const chalkBuff = activeChalkBuffPct(state);
+  if (chalkBuff > 0 && running > 0) {
+    const amt = Math.round(running * chalkBuff / 100);
+    bonuses.push({ source: `Streak buff (+${chalkBuff}%)`, amount: amt });
+    running += amt;
+  }
+
   // Repeat — done it before, half the chalk.
   if (repeat) {
     const reduced = Math.round(running * 0.5);
@@ -504,17 +542,24 @@ export function computeChalk(
       critProb = 1 - (1 - critProb) * (1 - p);
     }
   }
+  // Active crit buff folds into the combined crit probability.
+  const critBuff = activeCritBuffPct(state);
+  if (critBuff > 0) {
+    critProb = 1 - (1 - critProb) * (1 - Math.min(100, critBuff) / 100);
+  }
   if (critProb > 0 && Math.random() < critProb) {
     bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
     running *= 2;
   }
 
-  // Daily cap — soft, with diminishing returns. Applied last.
+  // Daily cap — soft, with diminishing returns. Applied last. Active cap-buff scales the cap up.
   const dateForCap = dateISO ?? new Date().toISOString();
   const cfg = getDailyCapConfig();
   if (cfg.enabled) {
     const used = chalkUsedOnDate(state, dateForCap);
-    const cap = computeDailyCap(state.level, cfg);
+    const capBase = computeDailyCap(state.level, cfg);
+    const capBuff = activeCapBuffPct(state);
+    const cap = Math.round(capBase * (1 + capBuff / 100));
     const cappedAmount = applyDailyCap(running, used, cap, cfg);
     if (cappedAmount.reduced) {
       bonuses.push({
@@ -551,6 +596,29 @@ export interface LogInput {
   chalkMultiplier?: number;
   /** Pre-computed difficulty multiplier (climb grade vs player ceiling). Default 1. */
   difficultyMult?: number;
+}
+
+/** Apply streak-progression rewards (post-cycle buffs + 14/21/30 milestones) to `next`. */
+function applyStreakProgress(prev: State, next: State): State {
+  const cfg = getStreakConfig();
+  if (!cfg.enabled) return next;
+  const prevStreak = currentStreak(prev);
+  const nextStreak = currentStreak(next);
+  if (nextStreak <= prevStreak) {
+    // Still prune expired buffs so the state stays tidy.
+    return { ...next, activeBuffs: cleanExpiredBuffs(next.activeBuffs) };
+  }
+  const dailyCap = computeDailyCap(next.level, getDailyCapConfig());
+  const result = streakRewardsFor(prevStreak, nextStreak, next, dailyCap, cfg);
+  let out: State = withBuffs(next, result.addedBuffs);
+  if (result.chalkCache > 0) {
+    out = { ...out, chalk: out.chalk + result.chalkCache, totalChalkEarned: out.totalChalkEarned + result.chalkCache };
+  }
+  if (result.awardedMilestoneDays.length) {
+    out = { ...out, streakMilestonesAwarded: [...(out.streakMilestonesAwarded ?? []), ...result.awardedMilestoneDays] };
+  }
+  if (result.bannerLabel) emitStreakEvent(result.bannerLabel);
+  return out;
 }
 
 export function logBoulder(input: LogInput) {
@@ -600,7 +668,7 @@ export function logBoulder(input: LogInput) {
         bossesSent: s.stats.bossesSent + (input.isBoss && (input.attemptType === "flash" || input.attemptType === "send") ? 1 : 0),
       },
     };
-    return applyBadges(next, newBadges);
+    return applyStreakProgress(s, applyBadges(next, newBadges));
   });
   return { log, breakdown, newBadges: computeNewBadgesAfter() };
 }
@@ -682,7 +750,7 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
       bonuses.push({ source: `Boss bonus (+${bossPct}%)`, amount: amt });
       running += amt;
     }
-    const flat = getActivityReward("strength_boss_send");
+    const flat = scaledActivityReward("strength_boss_send");
     if (flat > 0) {
       bonuses.push({ source: "Strength boss send", amount: flat });
       running += flat;
@@ -697,7 +765,22 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
       running += amt;
     }
   }
-  // Crit
+  // ----- Daily streak day-bonus -----
+  const streak = currentStreak(state);
+  const streakPct = streakDayBonusPct(streak);
+  if (streakPct > 0 && running > 0) {
+    const amt = Math.round(running * streakPct / 100);
+    bonuses.push({ source: `Streak Day ${cycleDay(streak)} (+${streakPct}%)`, amount: amt });
+    running += amt;
+  }
+  // ----- Active chalk buffs -----
+  const chalkBuff = activeChalkBuffPct(state);
+  if (chalkBuff > 0 && running > 0) {
+    const amt = Math.round(running * chalkBuff / 100);
+    bonuses.push({ source: `Streak buff (+${chalkBuff}%)`, amount: amt });
+    running += amt;
+  }
+  // Crit (with active crit buff folded in)
   let critProb = 0;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
     const id = eq[slotKey]; if (!id) continue;
@@ -707,16 +790,22 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
       critProb = 1 - (1 - critProb) * (1 - p);
     }
   }
+  const critBuff = activeCritBuffPct(state);
+  if (critBuff > 0) {
+    critProb = 1 - (1 - critProb) * (1 - Math.min(100, critBuff) / 100);
+  }
   if (critProb > 0 && Math.random() < critProb) {
     bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
     running *= 2;
   }
-  // Daily cap
+  // Daily cap (cap-buff scales the cap up)
   const cfg = getDailyCapConfig();
   let capInfo: ChalkBreakdown["capInfo"] | undefined;
   if (cfg.enabled) {
     const used = chalkUsedOnDate(state, dateISO);
-    const cap = computeDailyCap(state.level, cfg);
+    const capBase = computeDailyCap(state.level, cfg);
+    const capBuff = activeCapBuffPct(state);
+    const cap = Math.round(capBase * (1 + capBuff / 100));
     const capped = applyDailyCap(running, used, cap, cfg);
     if (capped.reduced) {
       bonuses.push({ source: capped.label ?? "Daily cap", amount: capped.granted - running });
@@ -752,7 +841,7 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     const add: string[] = [];
     if (input.bossSend) add.push("first_strength_boss");
     if (Object.values(next.strengthLevels ?? {}).some(v => (v ?? 0) >= 3)) add.push("strength_tier_3");
-    return applyBadges(next, add);
+    return applyStreakProgress(s, applyBadges(next, add));
   });
   return { session, chalk, breakdown };
 }
@@ -791,7 +880,7 @@ export function logStrengthHold(input: HoldInput): {
 
   let baseOverride: number;
   if (input.bossSend) {
-    baseOverride = getActivityReward("strength_boss_send");
+    baseOverride = scaledActivityReward("strength_boss_send");
   } else if (isFirstEver) {
     baseOverride = HOLD_REWARDS.FIRST_EVER;
   } else if (seconds > prevRecord) {
@@ -1246,7 +1335,7 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
       pendingConsumable: null,
       stats: { ...s.stats, bossesSent, totalSends: s.stats.totalSends + (sentNow ? 1 : 0), totalFlashes: s.stats.totalFlashes + (outcome === "flash" ? 1 : 0) },
     };
-    return applyBadges(next, add);
+    return applyStreakProgress(s, applyBadges(next, add));
   });
   return { attempt: att, breakdown };
 }

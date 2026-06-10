@@ -409,6 +409,45 @@ export type Database = {
         }
         Relationships: []
       }
+      streak_config: {
+        Row: {
+          day_bonus_pcts: Json
+          enabled: boolean
+          id: string
+          milestones: Json
+          post7_chalk_days: number
+          post7_chalk_pct: number
+          post7_crit_days: number
+          post7_crit_pct: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          day_bonus_pcts?: Json
+          enabled?: boolean
+          id?: string
+          milestones?: Json
+          post7_chalk_days?: number
+          post7_chalk_pct?: number
+          post7_crit_days?: number
+          post7_crit_pct?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          day_bonus_pcts?: Json
+          enabled?: boolean
+          id?: string
+          milestones?: Json
+          post7_chalk_days?: number
+          post7_chalk_pct?: number
+          post7_crit_days?: number
+          post7_crit_pct?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_game_state: {
         Row: {
           created_at: string

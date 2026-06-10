@@ -526,6 +526,15 @@ export function computeChalk(
     running += amt;
   }
 
+  // ----- Strength tier (rolling 7-day) chalk bonus -----
+  const stTier = tierFor(state.strengthSessions ?? []).tier;
+  const stPct = tierChalkPct(stTier);
+  if (stPct > 0 && running > 0) {
+    const amt = Math.round(running * stPct / 100);
+    bonuses.push({ source: `Strength ${TIER_LABEL[stTier]} (+${stPct}%)`, amount: amt });
+    running += amt;
+  }
+
   // Repeat — done it before, half the chalk.
   if (repeat) {
     const reduced = Math.round(running * 0.5);

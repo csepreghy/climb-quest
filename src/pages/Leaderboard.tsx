@@ -13,6 +13,7 @@ import chalkBagImg from "@/assets/chalk-bag.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChalkOverTimeChart, StrengthRepsHoldChart } from "@/pages/Dashboard";
 import { useAllGyms as useGyms } from "@/game/allGyms";
+import { tierFor, TIER_LABEL, TIER_TEXT, tierChalkPct } from "@/game/strengthTier";
 
 interface Row {
   user_id: string;

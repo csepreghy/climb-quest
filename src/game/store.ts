@@ -1455,7 +1455,6 @@ export function adminSetIgnoreLevelReq(value: boolean) {
 
 /** Admin: trigger a streak milestone reward (7/14/21/30) immediately for self. Ignores "already awarded". */
 export function adminTriggerStreakReward(day: number): { chalkCache: number; bannerLabel: string } {
-  const { rewardsForDay, withBuffs, emitStreakEvent } = require("./streak") as typeof import("./streak");
   const cap = computeDailyCap(state.level, getDailyCapConfig());
   const r = rewardsForDay(day, cap, getStreakConfig());
   set(s => {

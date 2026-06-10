@@ -478,6 +478,76 @@ function ChalkChip({ value }: { value: number }) {
                 </p>
               </div>
 
+              {/* ---- Daily streak bonus ---- */}
+              {streakCfg.enabled && (
+                <div>
+                  <div className="menu-label mb-2">🔥 Daily streak bonus</div>
+                  <div className="rounded-lg border border-border overflow-hidden text-sm">
+                    <div className="px-3 py-2 border-b border-border/60 text-xs text-muted-foreground">
+                      Log any activity each day to keep the streak alive. Miss a day and it resets to 0.
+                    </div>
+                    <div className="grid grid-cols-7 text-center text-[11px]">
+                      {streakCfg.dayBonusPcts.map((pct, i) => {
+                        const day = i + 1;
+                        const isToday = cycleDay(s.activeBuffs ? 0 : 0) === day; // visual reference only
+                        return (
+                          <div
+                            key={i}
+                            className={cn(
+                              "py-2 border-r border-border/60 last:border-r-0",
+                              day === 7 && "bg-[hsl(var(--btn-orange))]/15 font-bold",
+                            )}
+                          >
+                            <div className="text-muted-foreground">D{day}</div>
+                            <div className={cn("tabular-nums font-bold", day === 7 ? "text-[hsl(var(--btn-orange))]" : "gradient-chalk-text")}>+{pct}%</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1.5">
+                    Day 7 caps the cycle and grants <span className="text-chalk-glow font-semibold">+{streakCfg.post7ChalkPct}% chalk for {streakCfg.post7ChalkDays}d</span> and <span className="text-chalk-glow font-semibold">+{streakCfg.post7CritPct}% crit for {streakCfg.post7CritDays}d</span>. The cycle then restarts; the streak counter keeps climbing.
+                  </p>
+                </div>
+              )}
+
+              {/* ---- Streak milestones ---- */}
+              {streakCfg.enabled && streakCfg.milestones.length > 0 && (
+                <div>
+                  <div className="menu-label mb-2">🏆 Streak milestones</div>
+                  <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden text-sm">
+                    {streakCfg.milestones.map(m => (
+                      <div key={m.day} className="px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold">Day {m.day} · {m.label}</div>
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {m.buffs.map((b, i) => (
+                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full border border-chalk-glow/40 bg-chalk-glow/10 text-chalk-glow">
+                              +{b.pct}% {b.kind} · {b.days}d
+                            </span>
+                          ))}
+                          {m.chalkCacheMult && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full border border-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/10 text-[hsl(var(--btn-orange))]">
+                              Chalk cache · {m.chalkCacheMult}× daily cap
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ---- Level scaling note ---- */}
+              <div className="rounded-lg border border-border/60 bg-secondary/30 px-3 py-2 text-xs">
+                <div className="font-semibold mb-0.5">📈 Level scaling</div>
+                <p className="text-muted-foreground">
+                  Every activity earns +15% more chalk per climber level. You're at Lv {s.level} → all base rewards ×{(activityLevelMult(s.level)).toFixed(2)} ({levelMultPct >= 0 ? "+" : ""}{levelMultPct}%).
+                </p>
+              </div>
+
+
               <div>
                 <div className="menu-label mb-2">Bonuses from equipped gear</div>
                 <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden text-sm">

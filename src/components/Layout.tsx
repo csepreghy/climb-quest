@@ -103,14 +103,8 @@ export default function Layout() {
     });
   }, []);
 
-  // Toast on streak milestones / 7-day cycle completion.
-  useEffect(() => {
-    let cancel: (() => void) | undefined;
-    import("@/game/streak").then(mod => {
-      cancel = mod.onStreakEvent(label => toast.success("🔥 " + label, { duration: 5000 }));
-    });
-    return () => { cancel?.(); };
-  }, []);
+  // Streak milestones — the StreakMilestoneBanner listens to onStreakEvent directly,
+  // so no extra wiring needed here.
   const cur = currentLevel(s);
   const nxt = nextLevel(s);
   const canLevel = !!nxt && s.chalk >= nxt.cost;

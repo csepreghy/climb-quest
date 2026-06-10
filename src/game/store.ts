@@ -841,7 +841,7 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     const add: string[] = [];
     if (input.bossSend) add.push("first_strength_boss");
     if (Object.values(next.strengthLevels ?? {}).some(v => (v ?? 0) >= 3)) add.push("strength_tier_3");
-    return applyBadges(next, add);
+    return applyStreakProgress(s, applyBadges(next, add));
   });
   return { session, chalk, breakdown };
 }
@@ -880,7 +880,7 @@ export function logStrengthHold(input: HoldInput): {
 
   let baseOverride: number;
   if (input.bossSend) {
-    baseOverride = getActivityReward("strength_boss_send");
+    baseOverride = scaledActivityReward("strength_boss_send");
   } else if (isFirstEver) {
     baseOverride = HOLD_REWARDS.FIRST_EVER;
   } else if (seconds > prevRecord) {

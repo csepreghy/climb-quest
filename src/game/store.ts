@@ -212,6 +212,8 @@ const initialState = (): State => ({
   ignoreLevelReq: false,
   onboardedAt: null,
   lastDailyLoginAt: null,
+  activeBuffs: [],
+  streakMilestonesAwarded: [],
 });
 
 function spawnBoss(t: BossTemplate): Boss {

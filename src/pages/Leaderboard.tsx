@@ -331,7 +331,7 @@ function StrengthTierTile({ sessions }: { sessions: StrengthSession[] | null }) 
         {TIER_LABEL[tier]}
       </div>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
-        <Dumbbell className="h-3 w-3" /> {qualifiedDays}/7d{pct > 0 ? ` · +${pct}%` : ""}
+        <Dumbbell className="h-3 w-3" /> {qualifiedDays} of 7 days{pct > 0 ? ` · +${pct}%` : ""}
       </div>
     </div>
   );

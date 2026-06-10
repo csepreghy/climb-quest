@@ -336,6 +336,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          archived_at: string | null
           character_name: string | null
           created_at: string
           display_name: string | null
@@ -343,6 +344,7 @@ export type Database = {
           id: string
         }
         Insert: {
+          archived_at?: string | null
           character_name?: string | null
           created_at?: string
           display_name?: string | null
@@ -350,6 +352,7 @@ export type Database = {
           id: string
         }
         Update: {
+          archived_at?: string | null
           character_name?: string | null
           created_at?: string
           display_name?: string | null
@@ -594,6 +597,10 @@ export type Database = {
         Returns: boolean
       }
       set_character_name: { Args: { p_name: string }; Returns: string }
+      set_user_archived: {
+        Args: { archived: boolean; target_user: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

@@ -181,6 +181,13 @@ export default function Dashboard() {
           </div>
         )}
       </GameCard>
+
+      <StrengthTierModal
+        open={tierModalOpen}
+        onOpenChange={setTierModalOpen}
+        tier={strengthTierInfo.tier}
+        qualifiedDays={strengthTierInfo.qualifiedDays}
+      />
     </div>
   );
 }

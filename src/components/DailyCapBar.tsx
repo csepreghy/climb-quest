@@ -2,6 +2,7 @@ import { GameCard } from "@/components/ui/game-card";
 import { useGame } from "@/game/store";
 import { useDailyCapConfig, computeDailyCap, chalkUsedOnDate, currentStreak } from "@/game/dailyCap";
 import { useStreakConfig, streakDayBonusPct, cycleDay, activeBuffs, activeCapBuffPct } from "@/game/streak";
+import { StrengthTierStrip } from "@/components/StrengthTierStrip";
 import { cn } from "@/lib/utils";
 import { Flame, Zap, Target, ShieldPlus } from "lucide-react";
 

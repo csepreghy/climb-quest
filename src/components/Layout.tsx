@@ -3,11 +3,12 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ScrollText, Store, Backpack, Settings, LogOut, Building2, Plus, ArrowUp, Trophy } from "lucide-react";
 import { useLoadCharacterName } from "@/game/characterName";
 import { GameButton } from "@/components/ui/game-button";
-import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD, onBadgesAwarded, BADGE_CHALK_REWARD, strengthRepChalk, type StrengthWorkout } from "@/game/store";
+import { useGame, nextLevel, levelUp, currentLevel, grantFreeItems, useRemoteHydrated, claimDailyLoginIfNeeded, DAILY_LOGIN_REWARD, onBadgesAwarded, BADGE_CHALK_REWARD, strengthRepChalk, activityLevelMult, type StrengthWorkout } from "@/game/store";
 import { useLevelOverrides } from "@/game/levelOverrides";
 import { useAllItems, useCatalogLoaded } from "@/game/customItems";
 import { BASE_CHALK, ACTIVITY_LABELS, ActivityType, BADGE_BY_ID } from "@/game/data";
 import { useDailyCapConfig, computeDailyCap, chalkUsedOnDate } from "@/game/dailyCap";
+import { useStreakConfig, cycleDay } from "@/game/streak";
 import { cn } from "@/lib/utils";
 import { ThemeButton } from "@/components/ThemeSwitcher";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -103,14 +104,8 @@ export default function Layout() {
     });
   }, []);
 
-  // Toast on streak milestones / 7-day cycle completion.
-  useEffect(() => {
-    let cancel: (() => void) | undefined;
-    import("@/game/streak").then(mod => {
-      cancel = mod.onStreakEvent(label => toast.success("🔥 " + label, { duration: 5000 }));
-    });
-    return () => { cancel?.(); };
-  }, []);
+  // Streak milestones — the StreakMilestoneBanner listens to onStreakEvent directly,
+  // so no extra wiring needed here.
   const cur = currentLevel(s);
   const nxt = nextLevel(s);
   const canLevel = !!nxt && s.chalk >= nxt.cost;
@@ -348,19 +343,21 @@ function ChalkChip({ value }: { value: number }) {
   const dailyCap = computeDailyCap(s.level, dailyCapCfg);
   const usedToday = chalkUsedOnDate(s, new Date().toISOString());
   const showCap = dailyCapCfg.enabled && dailyCap > 0;
+  const streakCfg = useStreakConfig();
+  const levelMultPct = Math.round((activityLevelMult(s.level) - 1) * 100);
 
-  // Activity rows sorted ascending by points
+  // Activity rows sorted ascending by points — base shown is the level-scaled value the player actually earns.
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
     .filter(a => a !== "boulder_send" && a !== "project_boulder")
-    .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
+    .map(a => ({ label: ACTIVITY_LABELS[a], chalk: Math.round(BASE_CHALK[a] * activityLevelMult(s.level)) }))
     .sort((a, b) => a.chalk - b.chalk);
 
   // Strength: general per-rep tier explanation (independent of user's unlocked levels).
   const strengthTiers = [
-    { name: "Max level", chalk: strengthRepChalk(10, 10) },
-    { name: "Max level − 1", chalk: strengthRepChalk(9, 10) },
-    { name: "Max level − 2", chalk: strengthRepChalk(8, 10) },
-    { name: "Lower levels", chalk: strengthRepChalk(1, 10) },
+    { name: "Max level", chalk: strengthRepChalk(10, 10, s.level) },
+    { name: "Max level − 1", chalk: strengthRepChalk(9, 10, s.level) },
+    { name: "Max level − 2", chalk: strengthRepChalk(8, 10, s.level) },
+    { name: "Lower levels", chalk: strengthRepChalk(1, 10, s.level) },
   ];
 
   return (
@@ -480,6 +477,76 @@ function ChalkChip({ value }: { value: number }) {
                     : "Earn as much chalk as you want — no diminishing returns today."}
                 </p>
               </div>
+
+              {/* ---- Daily streak bonus ---- */}
+              {streakCfg.enabled && (
+                <div>
+                  <div className="menu-label mb-2">🔥 Daily streak bonus</div>
+                  <div className="rounded-lg border border-border overflow-hidden text-sm">
+                    <div className="px-3 py-2 border-b border-border/60 text-xs text-muted-foreground">
+                      Log any activity each day to keep the streak alive. Miss a day and it resets to 0.
+                    </div>
+                    <div className="grid grid-cols-7 text-center text-[11px]">
+                      {streakCfg.dayBonusPcts.map((pct, i) => {
+                        const day = i + 1;
+                        const isToday = cycleDay(s.activeBuffs ? 0 : 0) === day; // visual reference only
+                        return (
+                          <div
+                            key={i}
+                            className={cn(
+                              "py-2 border-r border-border/60 last:border-r-0",
+                              day === 7 && "bg-[hsl(var(--btn-orange))]/15 font-bold",
+                            )}
+                          >
+                            <div className="text-muted-foreground">D{day}</div>
+                            <div className={cn("tabular-nums font-bold", day === 7 ? "text-[hsl(var(--btn-orange))]" : "gradient-chalk-text")}>+{pct}%</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1.5">
+                    Day 7 caps the cycle and grants <span className="text-chalk-glow font-semibold">+{streakCfg.post7ChalkPct}% chalk for {streakCfg.post7ChalkDays}d</span> and <span className="text-chalk-glow font-semibold">+{streakCfg.post7CritPct}% crit for {streakCfg.post7CritDays}d</span>. The cycle then restarts; the streak counter keeps climbing.
+                  </p>
+                </div>
+              )}
+
+              {/* ---- Streak milestones ---- */}
+              {streakCfg.enabled && streakCfg.milestones.length > 0 && (
+                <div>
+                  <div className="menu-label mb-2">🏆 Streak milestones</div>
+                  <div className="rounded-lg border border-border divide-y divide-border/60 overflow-hidden text-sm">
+                    {streakCfg.milestones.map(m => (
+                      <div key={m.day} className="px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold">Day {m.day} · {m.label}</div>
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {m.buffs.map((b, i) => (
+                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full border border-chalk-glow/40 bg-chalk-glow/10 text-chalk-glow">
+                              +{b.pct}% {b.kind} · {b.days}d
+                            </span>
+                          ))}
+                          {m.chalkCacheMult && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full border border-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/10 text-[hsl(var(--btn-orange))]">
+                              Chalk cache · {m.chalkCacheMult}× daily cap
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ---- Level scaling note ---- */}
+              <div className="rounded-lg border border-border/60 bg-secondary/30 px-3 py-2 text-xs">
+                <div className="font-semibold mb-0.5">📈 Level scaling</div>
+                <p className="text-muted-foreground">
+                  Every activity earns +15% more chalk per climber level. You're at Lv {s.level} → all base rewards ×{(activityLevelMult(s.level)).toFixed(2)} ({levelMultPct >= 0 ? "+" : ""}{levelMultPct}%).
+                </p>
+              </div>
+
 
               <div>
                 <div className="menu-label mb-2">Bonuses from equipped gear</div>

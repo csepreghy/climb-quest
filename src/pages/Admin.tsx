@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, resetGame, resetOnboarding, resetStrengthLevels, useGame } from "@/game/store";
+import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockData, resetGame, resetOnboarding, resetStrengthLevels, adminTriggerStreakReward, useGame } from "@/game/store";
 import { useAuth } from "@/hooks/useAuth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
@@ -125,6 +125,28 @@ export default function Admin() {
           <RebalanceCard />
           <DailyCapCard />
           <StrengthRewardsCard />
+
+          <GameCard tone="accent" className="p-5">
+            <div className="menu-label mb-3">Admin · Trigger Streak Milestone</div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Instantly fire any streak reward for yourself (banner + buffs + chalk cache where applicable). Useful for testing celebratory flows.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[7, 14, 21, 28, 30].map(day => (
+                <Button
+                  key={day}
+                  variant={day === 7 ? "secondary" : "default"}
+                  onClick={() => {
+                    const r = adminTriggerStreakReward(day);
+                    toast.success(r.bannerLabel + (r.chalkCache > 0 ? ` (+${r.chalkCache} Chalk)` : ""));
+                  }}
+                >
+                  Day {day}
+                </Button>
+              ))}
+            </div>
+          </GameCard>
+
 
           <GameCard tone="legendary" className="p-5">
             <div className="menu-label mb-3">Admin · Reset This Account</div>

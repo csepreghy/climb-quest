@@ -18,6 +18,7 @@ import Leaderboard from "./pages/Leaderboard";
 import { GameBackground } from "./components/pixel/GameBackground";
 import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 import { BadgeUnlockBanner } from "./components/pixel/BadgeUnlockBanner";
+import { StreakMilestoneBanner } from "./components/pixel/StreakMilestoneBanner";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { AuthProvider } from "./hooks/useAuth";
 import { RequireAuth, RequireAdmin } from "./components/RequireAuth";
@@ -32,6 +33,7 @@ const App = () => (
       <GameBackground />
       <LevelUpBanner />
       <BadgeUnlockBanner />
+      <StreakMilestoneBanner />
       <Toaster />
       <Sonner />
       <BrowserRouter>

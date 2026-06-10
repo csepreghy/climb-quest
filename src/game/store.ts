@@ -11,7 +11,7 @@ import { applyDailyCap, chalkUsedOnDate, computeDailyCap, currentStreak, getDail
 import {
   activeChalkBuffPct, activeCritBuffPct, activeCapBuffPct,
   cleanExpiredBuffs, emitStreakEvent, getStreakConfig, streakDayBonusPct,
-  streakRewardsFor, withBuffs, cycleDay,
+  streakRewardsFor, withBuffs, cycleDay, rewardsForDay,
 } from "./streak";
 
 // ----- Types -----
@@ -1451,6 +1451,21 @@ export function adminSetLevel(delta: number) {
 
 export function adminSetIgnoreLevelReq(value: boolean) {
   set(s => ({ ...s, ignoreLevelReq: value }));
+}
+
+/** Admin: trigger a streak milestone reward (7/14/21/30) immediately for self. Ignores "already awarded". */
+export function adminTriggerStreakReward(day: number): { chalkCache: number; bannerLabel: string } {
+  const cap = computeDailyCap(state.level, getDailyCapConfig());
+  const r = rewardsForDay(day, cap, getStreakConfig());
+  set(s => {
+    let next = withBuffs(s, r.addedBuffs);
+    if (r.chalkCache > 0) {
+      next = { ...next, chalk: next.chalk + r.chalkCache, totalChalkEarned: next.totalChalkEarned + r.chalkCache };
+    }
+    return next;
+  });
+  emitStreakEvent(r.bannerLabel);
+  return { chalkCache: r.chalkCache, bannerLabel: r.bannerLabel };
 }
 
 export function adminSeedMockData() {

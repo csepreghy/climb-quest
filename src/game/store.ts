@@ -13,6 +13,7 @@ import {
   cleanExpiredBuffs, emitStreakEvent, getStreakConfig, streakDayBonusPct,
   streakRewardsFor, withBuffs, cycleDay, rewardsForDay,
 } from "./streak";
+import { tierFor, tierChalkPct, tierCritPct, TIER_LABEL } from "./strengthTier";
 
 // ----- Types -----
 export type AttemptType = "flash" | "send" | "project" | "repeat";

@@ -557,6 +557,10 @@ export function computeChalk(
   if (critBuff > 0) {
     critProb = 1 - (1 - critProb) * (1 - Math.min(100, critBuff) / 100);
   }
+  const stCrit = tierCritPct(stTier);
+  if (stCrit > 0) {
+    critProb = 1 - (1 - critProb) * (1 - Math.min(100, stCrit) / 100);
+  }
   if (critProb > 0 && Math.random() < critProb) {
     bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
     running *= 2;

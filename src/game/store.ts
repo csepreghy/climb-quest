@@ -143,8 +143,9 @@ export function strengthBossTargetReps(_nextLevel?: number, _workout?: StrengthW
  * Top tier (max or boss attempt above max) = full reward; one below = 70%; two below = 50%; lower = 30%.
  * The admin "strength_rep" reward acts as the top-tier per-rep value (default 5).
  */
-export function strengthRepChalk(level: number, maxUnlocked: number): number {
-  const top = Math.max(1, getActivityReward("strength_rep"));
+export function strengthRepChalk(level: number, maxUnlocked: number, playerLevel?: number): number {
+  const pLvl = playerLevel ?? state.level;
+  const top = Math.max(1, Math.round(getActivityReward("strength_rep") * activityLevelMult(pLvl)));
   const diff = maxUnlocked - level;
   if (diff <= 0) return top;
   if (diff === 1) return Math.max(1, Math.round(top * 0.7));

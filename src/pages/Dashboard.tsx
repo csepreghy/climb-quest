@@ -13,6 +13,8 @@ import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
 import { useCharacterName } from "@/game/characterName";
+import { StrengthTierChip, StrengthTierModal } from "@/components/StrengthTierStrip";
+import { tierFor } from "@/game/strengthTier";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
@@ -34,8 +36,10 @@ export default function Dashboard() {
   const [logOpen, setLogOpen] = useState(false);
   const [logInitialMode, setLogInitialMode] = useState<"boulder-pick" | "strength">("boulder-pick");
   const [openBadgeId, setOpenBadgeId] = useState<string | null>(null);
+  const [tierModalOpen, setTierModalOpen] = useState(false);
   const openBadge = openBadgeId ? BADGES.find(b => b.id === openBadgeId) ?? null : null;
   const openBadgeHave = openBadge ? s.badges.includes(openBadge.id) : false;
+  const strengthTierInfo = tierFor(s.strengthSessions ?? []);
 
   
 
@@ -54,7 +58,10 @@ export default function Dashboard() {
             {characterName && (
               <div className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1">{characterName}</div>
             )}
-            <div className="menu-label">Level {s.level} · {cur.title}</div>
+            <div className="menu-label flex items-center gap-2 justify-center sm:justify-start flex-wrap">
+              <span>Level {s.level} · {cur.title}</span>
+              <StrengthTierChip sessions={s.strengthSessions ?? []} onClick={() => setTierModalOpen(true)} />
+            </div>
             <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
             <div className="mt-4 text-xs text-muted-foreground">
@@ -174,6 +181,13 @@ export default function Dashboard() {
           </div>
         )}
       </GameCard>
+
+      <StrengthTierModal
+        open={tierModalOpen}
+        onOpenChange={setTierModalOpen}
+        tier={strengthTierInfo.tier}
+        qualifiedDays={strengthTierInfo.qualifiedDays}
+      />
     </div>
   );
 }

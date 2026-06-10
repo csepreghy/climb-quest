@@ -2,6 +2,7 @@ import { GameCard } from "@/components/ui/game-card";
 import { useGame } from "@/game/store";
 import { useDailyCapConfig, computeDailyCap, chalkUsedOnDate, currentStreak } from "@/game/dailyCap";
 import { useStreakConfig, streakDayBonusPct, cycleDay, activeBuffs, activeCapBuffPct } from "@/game/streak";
+import { StrengthTierStrip } from "@/components/StrengthTierStrip";
 import { cn } from "@/lib/utils";
 import { Flame, Zap, Target, ShieldPlus } from "lucide-react";
 
@@ -80,6 +81,11 @@ export function DailyCapBar({ className }: { className?: string }) {
           )}
         </div>
       )}
+
+      {/* Strength tier strip */}
+      <div className="mb-2.5">
+        <StrengthTierStrip sessions={s.strengthSessions ?? []} />
+      </div>
 
       {/* Active buff chips */}
       {buffs.length > 0 && (

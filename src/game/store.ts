@@ -13,6 +13,7 @@ import {
   cleanExpiredBuffs, emitStreakEvent, getStreakConfig, streakDayBonusPct,
   streakRewardsFor, withBuffs, cycleDay, rewardsForDay,
 } from "./streak";
+import { tierFor, tierChalkPct, tierCritPct, TIER_LABEL } from "./strengthTier";
 
 // ----- Types -----
 export type AttemptType = "flash" | "send" | "project" | "repeat";
@@ -525,6 +526,15 @@ export function computeChalk(
     running += amt;
   }
 
+  // ----- Strength tier (rolling 7-day) chalk bonus -----
+  const stTier = tierFor(state.strengthSessions ?? []).tier;
+  const stPct = tierChalkPct(stTier);
+  if (stPct > 0 && running > 0) {
+    const amt = Math.round(running * stPct / 100);
+    bonuses.push({ source: `Strength ${TIER_LABEL[stTier]} (+${stPct}%)`, amount: amt });
+    running += amt;
+  }
+
   // Repeat — done it before, half the chalk.
   if (repeat) {
     const reduced = Math.round(running * 0.5);
@@ -546,6 +556,10 @@ export function computeChalk(
   const critBuff = activeCritBuffPct(state);
   if (critBuff > 0) {
     critProb = 1 - (1 - critProb) * (1 - Math.min(100, critBuff) / 100);
+  }
+  const stCrit = tierCritPct(stTier);
+  if (stCrit > 0) {
+    critProb = 1 - (1 - critProb) * (1 - Math.min(100, stCrit) / 100);
   }
   if (critProb > 0 && Math.random() < critProb) {
     bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
@@ -780,6 +794,19 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     bonuses.push({ source: `Streak buff (+${chalkBuff}%)`, amount: amt });
     running += amt;
   }
+  // ----- Strength tier (rolling 7-day) chalk bonus -----
+  // Include the session-in-progress so the bonus reflects today's qualifier.
+  const sessionsForTier = [
+    { id: "_preview", date: dateISO, workout: input.workout, level: input.level, sets: input.sets, totalReps } as StrengthSession,
+    ...(state.strengthSessions ?? []),
+  ];
+  const stTier = tierFor(sessionsForTier).tier;
+  const stPct = tierChalkPct(stTier);
+  if (stPct > 0 && running > 0) {
+    const amt = Math.round(running * stPct / 100);
+    bonuses.push({ source: `Strength ${TIER_LABEL[stTier]} (+${stPct}%)`, amount: amt });
+    running += amt;
+  }
   // Crit (with active crit buff folded in)
   let critProb = 0;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
@@ -793,6 +820,10 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
   const critBuff = activeCritBuffPct(state);
   if (critBuff > 0) {
     critProb = 1 - (1 - critProb) * (1 - Math.min(100, critBuff) / 100);
+  }
+  const stCrit = tierCritPct(stTier);
+  if (stCrit > 0) {
+    critProb = 1 - (1 - critProb) * (1 - Math.min(100, stCrit) / 100);
   }
   if (critProb > 0 && Math.random() < critProb) {
     bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });

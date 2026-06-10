@@ -13,6 +13,7 @@ import chalkBagImg from "@/assets/chalk-bag.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChalkOverTimeChart, StrengthRepsHoldChart } from "@/pages/Dashboard";
 import { useAllGyms as useGyms } from "@/game/allGyms";
+import { tierFor, TIER_LABEL, TIER_TEXT, tierChalkPct } from "@/game/strengthTier";
 
 interface Row {
   user_id: string;
@@ -269,10 +270,11 @@ function ClimberDetailsDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <StatTile icon={<ScrollText className="h-3.5 w-3.5" />} label="Logs" value={row.total_logs} />
               <StatTile icon={<Swords className="h-3.5 w-3.5" />} label="Bosses" value={row.bosses_sent} />
               <StatTile icon={<Dumbbell className="h-3.5 w-3.5" />} label="Strength" value={row.strength_sessions ?? 0} />
+              <StrengthTierTile sessions={charts?.strengthSessions ?? null} />
             </div>
 
             {chartsLoading && (
@@ -307,6 +309,29 @@ function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string
       <div className="text-base font-bold tabular-nums leading-none">{value.toLocaleString()}</div>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
         {icon} {label}
+      </div>
+    </div>
+  );
+}
+
+function StrengthTierTile({ sessions }: { sessions: StrengthSession[] | null }) {
+  if (!sessions) {
+    return (
+      <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+        <div className="text-base font-bold tabular-nums leading-none text-muted-foreground">—</div>
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Tier</div>
+      </div>
+    );
+  }
+  const { tier, qualifiedDays } = tierFor(sessions);
+  const pct = tierChalkPct(tier);
+  return (
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+      <div className={cn("text-base font-bold leading-none", TIER_TEXT[tier])}>
+        {TIER_LABEL[tier]}
+      </div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+        <Dumbbell className="h-3 w-3" /> {qualifiedDays}/7d{pct > 0 ? ` · +${pct}%` : ""}
       </div>
     </div>
   );

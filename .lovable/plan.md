@@ -1,80 +1,73 @@
+## Strength Tier system (recap)
+- Daily qualifier: ≥10 combined reps OR ≥30s combined holds in a day.
+- Rolling 7-day window: count qualifying days → Bronze (3–4) / Silver (5–6) / Gold (7).
+- Bonus: Bronze +5% / Silver +10% / Gold +15% chalk on every earning (climbing + strength). Gold adds +5% crit.
+- No streak reset cliff — tier just recalculates daily.
 
-# Daily streak revamp + level-scaled chalk
+## Where to show it
 
-Based on your picks:
-- **Streak cycle (weekly):** Days 1–6 → +10% chalk on all earnings that day. Day 7 → +50%.
-- **Post-7-day reward:** +20% chalk for 3 days AND +20% crit chance for 7 days (stacked buffs).
-- **Counter:** keeps climbing to 30 days. Milestone rewards at 14 / 21 / 30 days (proposed below).
-- **Break rule:** miss one day → streak resets to 0. (Today + yesterday safety window stays — the streak ticks at the first log of a new day.)
-- **Level-scaled activity chalk:** base reward × level multiplier instead of flat values.
+### 1. Primary: `DailyCapBar` (Home + Logs)
+Add a second strip directly under the existing chalk Streak strip, mirroring its look so the two systems read as siblings.
 
-## Streak day bonus (applies to all chalk earned that day)
-
-| Day in 7-cycle | Bonus |
-|---|---|
-| 1 | +10% |
-| 2 | +10% |
-| 3 | +10% |
-| 4 | +10% |
-| 5 | +10% |
-| 6 | +10% |
-| 7 | +50% |
-
-Day-of-cycle = `((streak - 1) mod 7) + 1`, so Day 7, 14, 21, 28 all hit the +50% payout.
-
-## Milestone rewards (one-shot, when streak first hits the number)
-
-- **Day 14** — "Two-Week Tenacity": +25% chalk buff for 5 days
-- **Day 21** — "Three-Week Titan": exclusive cosmetic badge + 1-day cap × 1.5 for a week
-- **Day 30** — "Monthly Monk": large Chalk Cache (≈ 2× current daily cap) + permanent leaderboard flair until streak breaks
-
-(All numbers are admin-tunable, same pattern as `daily_cap_config`.)
-
-## Active buffs system
-
-A small `state.activeBuffs[]` array on the game state:
-```
-{ kind: 'chalk' | 'crit' | 'cap', pct: number, expiresAt: ISO }
-```
-- Applied inside `computeChalk` (chalk/crit) and `computeDailyCap` (cap).
-- Stack additively within a kind, multiplicatively across kinds for chalk.
-- Cleaned up lazily on read + on each log.
-
-## Level-scaled activity chalk
-
-Replace flat `BASE_CHALK[activity]` with `BASE_CHALK[activity] × levelMult(level)`:
-
-```
-levelMult(level) = 1 + (level - 1) × 0.15   // L1=1.0, L5=1.6, L10=2.35
+```text
+[Streak strip — already exists]
+[Strength Tier strip — NEW]
+  💪  STRENGTH TIER · Silver           +10% chalk
+  ▣ ▣ ▣ ▣ ▣ ▢ ▢      (5/7 qualifying days, rolling)
+  Bronze 3 · Silver 5 · Gold 7
+[Daily cap bar — already exists]
 ```
 
-So an L10 climber earns ~2.35× per activity vs L1. Daily cap already scales with level, so this stays balanced. Admin override per-activity stays flat (`activity_rewards` table); the level multiplier is applied on top.
+- 7 segment dots = last 7 calendar days (oldest left → today right). Filled = qualified, hollow = didn't.
+- Tier label color: Bronze `hsl(28 70% 55%)`, Silver `hsl(0 0% 82%)`, Gold `hsl(var(--legendary))`.
+- Today's segment pulses if not yet qualified, to nudge action.
+- Tap the strip → opens "Strength Tier" info modal explaining qualifier, thresholds, and current bonus (reuses the pattern of the existing chalk-streak modal).
 
-## UI surface
+This is the main always-visible surface, appearing on Dashboard and Logs page (both already render `DailyCapBar`).
 
-- `DailyCapBar` gets a streak strip above it: 7 day-pips, the current day-bonus %, and any active buffs (with countdown).
-- Toast on streak-day rollover ("Day 3! +10% chalk today").
-- Toast + small banner on Day 7 completion listing the buffs granted.
-- Milestone reaches show a celebratory banner (reuse `LevelUpBanner` styling).
+### 2. Dashboard hero — tier chip
+Small chip next to the level title in the hero card:
+```text
+Level 12 · Crimp Master   [💪 Silver +10%]
+```
+Subtle, but ties the climber identity to current strength form. Tap → same info modal.
 
-## Technical changes
+### 3. Log Strength flow
+Inside the strength `LogModal`, show a one-line tier preview above the submit button:
+```text
+After today: Silver → Gold  (+5% chalk on next sends)
+```
+Only shows when logging would actually advance the tier. Pure motivation, no new mechanic.
 
-**DB migration (1 new table, 1 new config column-set):**
-- `streak_config` (id='default'): enabled, day_bonus_pcts (jsonb of 7 values), post7_chalk_pct, post7_chalk_days, post7_crit_pct, post7_crit_days, milestone rewards jsonb. RLS: read all-authenticated, write admin-only.
-- `user_streak_state` is **not** needed — streak is derived from logs (already is). Active buffs go on existing `user_game_state.game.activeBuffs` (no migration needed).
+### 4. Leaderboard
+- **Row**: add a tiny tier dot next to the strength sessions stat (uses the tier color, no label, to stay compact). Hover/tap title shows "Strength tier: Gold".
+- **Climber details dialog**: add a "Strength Tier" stat tile alongside Logs/Bosses/Strength, showing tier label + 7-day fill (Bronze/Silver/Gold/—).
+- Requires `get_leaderboard` and `get_climber_charts` RPCs to compute & return the tier (rolling 7-day qualifier count from each user's strength sessions).
 
-**Files:**
-- `src/game/streak.ts` (new): `streakDayBonusPct(streak, cfg)`, `applyStreakAndBuffs(amount, state)`, `addBuff(state, buff)`, `activeBuffs(state)`, `tickMilestones(state, prevStreak, newStreak)`.
-- `src/game/store.ts`: integrate streak bonus + buffs into `computeChalk`; on every successful log, recompute streak before/after and dispatch milestone rewards into `state.activeBuffs` / `state.chalk`.
-- `src/game/dailyCap.ts`: factor cap buffs into `computeDailyCap`.
-- `src/game/activityRewards.ts` + `data.ts`: add `levelMult(level)` and wire into `getActivityReward(activity, level)`. Update call sites in `store.ts`.
-- `src/components/DailyCapBar.tsx`: new streak strip + buff chips.
-- `src/components/LogModal.tsx`: preview shows streak bonus + active buffs.
-- Admin panel: add a "Streak & Buffs" tab matching the existing daily-cap admin UI.
+### 5. Strength chart on Dashboard
+On `StrengthRepsHoldChart`, draw faint horizontal threshold lines at the 10-reps / 30s qualifier and color each day's bar by whether it qualified. Quick visual feedback on consistency.
 
-## What stays the same
-- Daily soft cap with diminishing returns (just gets buff-aware).
-- Existing admin `activity_rewards` overrides (level mult applies on top).
-- Mobile browser / standalone layout work from earlier turns.
+## Implementation outline
 
-Approve and I'll ship it.
+**New module** `src/game/strengthTier.ts`:
+- `qualifiesForDay(sessions, dayISO): boolean` — sum reps + sum hold seconds for that calendar day, check ≥10 reps OR ≥30s.
+- `rolling7(sessions, today): { qualifiedDays: number; daysMask: boolean[] }`.
+- `tierFor(qualifiedDays): "none" | "bronze" | "silver" | "gold"`.
+- `tierBonusPct(tier): number` and `tierCritPct(tier): number`.
+- `useStrengthTierConfig()` hook backed by a `strength_tier_config` row (admin-tunable thresholds, same pattern as `useStreakConfig`).
+
+**Wire bonuses into chalk math**: extend the existing chalk multiplier path (same place streak `dayBonus` is applied to log/strength chalk) to also add `tierBonusPct`. Crit chance picks up `tierCritPct` for Gold.
+
+**New component** `src/components/StrengthTierStrip.tsx` — rendered inside `DailyCapBar` below the existing streak strip.
+
+**New component** `src/components/StrengthTierModal.tsx` — info modal.
+
+**Backend**:
+- Migration adding `strength_tier_config` (admin-tunable rep/sec qualifiers, percentages).
+- Update `get_leaderboard` and `get_climber_charts` SQL functions to return `strength_tier` + `strength_tier_days` per climber, computed from the last 7 days of their strength sessions.
+
+**Admin page** (small): add controls to tune qualifier thresholds and bonus percentages, and a "Trigger Gold tier preview" button for testing (mirrors existing milestone trigger pattern).
+
+## Out of scope (this round)
+- Milestone unlocks (Iron title, flex emote) — skipped per your call.
+- Reset/grace day passes — tier already degrades gracefully.

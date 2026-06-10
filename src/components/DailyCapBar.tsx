@@ -82,6 +82,11 @@ export function DailyCapBar({ className }: { className?: string }) {
         </div>
       )}
 
+      {/* Strength tier strip */}
+      <div className="mb-2.5">
+        <StrengthTierStrip sessions={s.strengthSessions ?? []} />
+      </div>
+
       {/* Active buff chips */}
       {buffs.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1">

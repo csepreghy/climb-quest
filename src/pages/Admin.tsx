@@ -1208,15 +1208,6 @@ function UsersAdmin() {
                         >
                           <Archive className={cn("h-4 w-4", r.archived_at ? "text-legendary" : "text-muted-foreground")} />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Delete user"
-                          disabled={deleting === r.user_id}
-                          onClick={() => { setTarget(r); setConfirmText(""); }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
                       </div>
                     )}
                   </td>

@@ -11,7 +11,7 @@ import { applyDailyCap, chalkUsedOnDate, computeDailyCap, currentStreak, getDail
 import {
   activeChalkBuffPct, activeCritBuffPct, activeCapBuffPct,
   cleanExpiredBuffs, emitStreakEvent, getStreakConfig, streakDayBonusPct,
-  streakRewardsFor, withBuffs, cycleDay,
+  streakRewardsFor, withBuffs, cycleDay, rewardsForDay,
 } from "./streak";
 
 // ----- Types -----

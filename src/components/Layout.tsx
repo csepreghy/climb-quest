@@ -342,19 +342,21 @@ function ChalkChip({ value }: { value: number }) {
   const dailyCap = computeDailyCap(s.level, dailyCapCfg);
   const usedToday = chalkUsedOnDate(s, new Date().toISOString());
   const showCap = dailyCapCfg.enabled && dailyCap > 0;
+  const streakCfg = useStreakConfig();
+  const levelMultPct = Math.round((activityLevelMult(s.level) - 1) * 100);
 
-  // Activity rows sorted ascending by points
+  // Activity rows sorted ascending by points — base shown is the level-scaled value the player actually earns.
   const activities = (Object.keys(BASE_CHALK) as ActivityType[])
     .filter(a => a !== "boulder_send" && a !== "project_boulder")
-    .map(a => ({ label: ACTIVITY_LABELS[a], chalk: BASE_CHALK[a] }))
+    .map(a => ({ label: ACTIVITY_LABELS[a], chalk: Math.round(BASE_CHALK[a] * activityLevelMult(s.level)) }))
     .sort((a, b) => a.chalk - b.chalk);
 
   // Strength: general per-rep tier explanation (independent of user's unlocked levels).
   const strengthTiers = [
-    { name: "Max level", chalk: strengthRepChalk(10, 10) },
-    { name: "Max level − 1", chalk: strengthRepChalk(9, 10) },
-    { name: "Max level − 2", chalk: strengthRepChalk(8, 10) },
-    { name: "Lower levels", chalk: strengthRepChalk(1, 10) },
+    { name: "Max level", chalk: strengthRepChalk(10, 10, s.level) },
+    { name: "Max level − 1", chalk: strengthRepChalk(9, 10, s.level) },
+    { name: "Max level − 2", chalk: strengthRepChalk(8, 10, s.level) },
+    { name: "Lower levels", chalk: strengthRepChalk(1, 10, s.level) },
   ];
 
   return (

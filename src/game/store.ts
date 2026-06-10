@@ -1453,6 +1453,22 @@ export function adminSetIgnoreLevelReq(value: boolean) {
   set(s => ({ ...s, ignoreLevelReq: value }));
 }
 
+/** Admin: trigger a streak milestone reward (7/14/21/30) immediately for self. Ignores "already awarded". */
+export function adminTriggerStreakReward(day: number): { chalkCache: number; bannerLabel: string } {
+  const { rewardsForDay, withBuffs, emitStreakEvent } = require("./streak") as typeof import("./streak");
+  const cap = computeDailyCap(state.level, getDailyCapConfig());
+  const r = rewardsForDay(day, cap, getStreakConfig());
+  set(s => {
+    let next = withBuffs(s, r.addedBuffs);
+    if (r.chalkCache > 0) {
+      next = { ...next, chalk: next.chalk + r.chalkCache, totalChalkEarned: next.totalChalkEarned + r.chalkCache };
+    }
+    return next;
+  });
+  emitStreakEvent(r.bannerLabel);
+  return { chalkCache: r.chalkCache, bannerLabel: r.bannerLabel };
+}
+
 export function adminSeedMockData() {
   const styles: Style[] = ["slab","vertical","overhang","crimp","sloper","compression","coordination","dyno","mantle","cave"];
   const grades = ["V1","V2","V3","V4","V5","V6","V7"];

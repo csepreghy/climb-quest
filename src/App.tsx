@@ -15,6 +15,9 @@ import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import Leaderboard from "./pages/Leaderboard";
+import Hangboard from "./pages/Hangboard";
+import HangboardBuilder from "./pages/HangboardBuilder";
+import HangboardRunner from "./pages/HangboardRunner";
 import { GameBackground } from "./components/pixel/GameBackground";
 import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 import { BadgeUnlockBanner } from "./components/pixel/BadgeUnlockBanner";
@@ -51,6 +54,10 @@ const App = () => (
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/gym" element={<MyGym />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/hangboard" element={<Hangboard />} />
+                <Route path="/hangboard/new" element={<HangboardBuilder />} />
+                <Route path="/hangboard/edit/:id" element={<HangboardBuilder />} />
+                <Route path="/hangboard/run/:id" element={<HangboardRunner />} />
                 <Route element={<RequireAdmin />}>
                   <Route path="/admin" element={<Admin />} />
                 </Route>

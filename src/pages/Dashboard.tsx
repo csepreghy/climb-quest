@@ -14,6 +14,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
 import { useCharacterName } from "@/game/characterName";
 import { StrengthTierChip, StrengthTierModal } from "@/components/StrengthTierStrip";
+import { HangboardChart } from "@/components/hangboard/HangboardChart";
 import { tierFor } from "@/game/strengthTier";
 import { cn } from "@/lib/utils";
 
@@ -108,6 +109,10 @@ export default function Dashboard() {
       <StrengthRepsHoldChart sessions={s.strengthSessions ?? []} />
 
       <StrengthVolumeChart sessions={s.strengthSessions ?? []} />
+
+      <HangboardChart />
+
+
 
 
       {/* All Badges */}

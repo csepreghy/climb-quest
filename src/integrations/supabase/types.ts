@@ -152,6 +152,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hangboard_workouts: {
+        Row: {
+          board: string
+          created_at: string
+          description: string | null
+          id: string
+          is_template: boolean
+          name: string
+          steps: Json
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          board?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_template?: boolean
+          name: string
+          steps?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          board?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_template?: boolean
+          name?: string
+          steps?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       hidden_builtin_items: {
         Row: {
           hidden_at: string

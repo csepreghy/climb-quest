@@ -877,6 +877,55 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
   return { session, chalk, breakdown };
 }
 
+// ----- Hangboard sessions -----
+/** Extra metadata appended to a hangboard StrengthSession. */
+export interface HangboardMeta {
+  workoutId: string;
+  workoutName: string;
+  holds: { holdId: string; seconds: number }[];
+}
+export interface HangboardInput {
+  workoutId: string;
+  workoutName: string;
+  totalHangSeconds: number;
+  holds: { holdId: string; seconds: number }[];
+  date?: string;
+}
+/**
+ * Persist a completed hangboard session. We write it into `strengthSessions`
+ * shaped like a hold-style strength session (sets = [{reps: seconds, mode:"hold"}])
+ * so the existing 7-day rolling holds tier picks it up automatically. The
+ * `hangboard` field tags it so the dashboard chart can filter it separately.
+ */
+export function logHangboardSession(input: HangboardInput): { chalk: number; session: StrengthSession } {
+  const dateISO = input.date ?? new Date().toISOString();
+  const seconds = Math.max(0, Math.round(input.totalHangSeconds));
+  const base = Math.max(0, Math.round(seconds * getActivityReward("strength_rep") * activityLevelMult(state.level)));
+  const session: StrengthSession & { hangboard?: HangboardMeta } = {
+    id: crypto.randomUUID(),
+    date: dateISO,
+    workout: "hangboard" as unknown as StrengthWorkout,
+    level: 1,
+    sets: [{ reps: seconds, mode: "hold" }],
+    totalReps: seconds,
+    chalkTotal: base,
+    hangboard: {
+      workoutId: input.workoutId,
+      workoutName: input.workoutName,
+      holds: input.holds,
+    },
+  };
+  set(s => ({
+    ...s,
+    chalk: s.chalk + base,
+    totalChalkEarned: s.totalChalkEarned + base,
+    strengthSessions: [session, ...(s.strengthSessions ?? [])].slice(0, 500),
+  }));
+  return { chalk: base, session };
+}
+
+
+
 // ----- Hold-style strength (timer-based) -----
 function holdRecordKey(workout: StrengthWorkout, level: number, mode?: "hold" | "pushup"): string {
   return `${strengthKey(workout, mode)}:${level}`;

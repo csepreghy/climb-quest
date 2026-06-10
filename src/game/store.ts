@@ -597,6 +597,29 @@ export interface LogInput {
   difficultyMult?: number;
 }
 
+/** Apply streak-progression rewards (post-cycle buffs + 14/21/30 milestones) to `next`. */
+function applyStreakProgress(prev: State, next: State): State {
+  const cfg = getStreakConfig();
+  if (!cfg.enabled) return next;
+  const prevStreak = currentStreak(prev);
+  const nextStreak = currentStreak(next);
+  if (nextStreak <= prevStreak) {
+    // Still prune expired buffs so the state stays tidy.
+    return { ...next, activeBuffs: cleanExpiredBuffs(next.activeBuffs) };
+  }
+  const dailyCap = computeDailyCap(next.level, getDailyCapConfig());
+  const result = streakRewardsFor(prevStreak, nextStreak, next, dailyCap, cfg);
+  let out: State = withBuffs(next, result.addedBuffs);
+  if (result.chalkCache > 0) {
+    out = { ...out, chalk: out.chalk + result.chalkCache, totalChalkEarned: out.totalChalkEarned + result.chalkCache };
+  }
+  if (result.awardedMilestoneDays.length) {
+    out = { ...out, streakMilestonesAwarded: [...(out.streakMilestonesAwarded ?? []), ...result.awardedMilestoneDays] };
+  }
+  if (result.bannerLabel) emitStreakEvent(result.bannerLabel);
+  return out;
+}
+
 export function logBoulder(input: LogInput) {
   const raw = computeChalk(input.activity, input.styles, input.sent, input.attemptType === "flash", input.difficultyMult ?? 1, input.date, input.attemptType === "repeat");
   const mult = input.chalkMultiplier ?? 1;
@@ -644,7 +667,7 @@ export function logBoulder(input: LogInput) {
         bossesSent: s.stats.bossesSent + (input.isBoss && (input.attemptType === "flash" || input.attemptType === "send") ? 1 : 0),
       },
     };
-    return applyBadges(next, newBadges);
+    return applyStreakProgress(s, applyBadges(next, newBadges));
   });
   return { log, breakdown, newBadges: computeNewBadgesAfter() };
 }

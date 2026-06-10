@@ -1219,28 +1219,6 @@ function UsersAdmin() {
         </div>
       )}
 
-      <AlertDialog open={!!target} onOpenChange={(o) => { if (!o) { setTarget(null); setConfirmText(""); } }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Permanently delete this user?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This deletes <strong>{target?.character_name ?? target?.email}</strong> and all of their data:
-              profile, game state (both slots), feedback, and login. This cannot be undone.
-              Type <code>DELETE</code> to confirm.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="DELETE" />
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={confirmText !== "DELETE" || !!deleting}
-              onClick={performDelete}
-            >
-              {deleting ? "Deleting…" : "Delete user"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </GameCard>
   );
 }

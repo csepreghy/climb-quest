@@ -108,8 +108,6 @@ export default function Dashboard() {
 
       <StrengthRepsHoldChart sessions={s.strengthSessions ?? []} />
 
-      <StrengthVolumeChart sessions={s.strengthSessions ?? []} />
-
       <HangboardChart />
 
 

@@ -1102,9 +1102,6 @@ function UsersAdmin() {
   const { user } = useAuth();
   const [rows, setRows] = useState<AdminUserRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
-  const [confirmText, setConfirmText] = useState("");
-  const [target, setTarget] = useState<AdminUserRow | null>(null);
 
   async function load() {
     const { data, error } = await supabase.rpc("get_admin_users");
@@ -1113,25 +1110,6 @@ function UsersAdmin() {
   }
   useEffect(() => { load(); }, []);
 
-  async function performDelete() {
-    if (!target) return;
-    setDeleting(target.user_id);
-    try {
-      const { data, error } = await supabase.functions.invoke("admin-delete-user", {
-        body: { user_id: target.user_id },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      toast.success(`Deleted ${target.character_name ?? target.email ?? "user"}`);
-      setRows(prev => prev?.filter(r => r.user_id !== target.user_id) ?? null);
-      setTarget(null);
-      setConfirmText("");
-    } catch (e: any) {
-      toast.error("Delete failed: " + (e?.message ?? String(e)));
-    } finally {
-      setDeleting(null);
-    }
-  }
 
   async function toggleArchive(row: AdminUserRow) {
     const archive = !row.archived_at;

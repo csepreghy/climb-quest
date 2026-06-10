@@ -314,6 +314,29 @@ function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
+function StrengthTierTile({ sessions }: { sessions: StrengthSession[] | null }) {
+  if (!sessions) {
+    return (
+      <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+        <div className="text-base font-bold tabular-nums leading-none text-muted-foreground">—</div>
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Tier</div>
+      </div>
+    );
+  }
+  const { tier, qualifiedDays } = tierFor(sessions);
+  const pct = tierChalkPct(tier);
+  return (
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+      <div className={cn("text-base font-bold leading-none", TIER_TEXT[tier])}>
+        {TIER_LABEL[tier]}
+      </div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+        <Dumbbell className="h-3 w-3" /> {qualifiedDays}/7d{pct > 0 ? ` · +${pct}%` : ""}
+      </div>
+    </div>
+  );
+}
+
 function EquippedList({ equipped, lookup }: { equipped: Equipped; lookup: Map<string, ShopItem> }) {
   const entries = SLOT_ORDER
     .map(slot => ({ slot, item: equipped[slot] ? lookup.get(equipped[slot]!) : undefined }))

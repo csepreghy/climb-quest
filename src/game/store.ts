@@ -794,13 +794,6 @@ export function logStrength(input: StrengthInput): { session: StrengthSession; c
     bonuses.push({ source: `Streak buff (+${chalkBuff}%)`, amount: amt });
     running += amt;
   }
-  // ----- Active chalk buffs -----
-  const chalkBuff = activeChalkBuffPct(state);
-  if (chalkBuff > 0 && running > 0) {
-    const amt = Math.round(running * chalkBuff / 100);
-    bonuses.push({ source: `Streak buff (+${chalkBuff}%)`, amount: amt });
-    running += amt;
-  }
   // ----- Strength tier (rolling 7-day) chalk bonus -----
   // Include the session-in-progress so the bonus reflects today's qualifier.
   const sessionsForTier = [

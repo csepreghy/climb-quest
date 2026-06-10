@@ -13,6 +13,8 @@ import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
 import { useCharacterName } from "@/game/characterName";
+import { StrengthTierChip, StrengthTierModal } from "@/components/StrengthTierStrip";
+import { tierFor } from "@/game/strengthTier";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";

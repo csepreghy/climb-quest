@@ -1335,7 +1335,7 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
       pendingConsumable: null,
       stats: { ...s.stats, bossesSent, totalSends: s.stats.totalSends + (sentNow ? 1 : 0), totalFlashes: s.stats.totalFlashes + (outcome === "flash" ? 1 : 0) },
     };
-    return applyBadges(next, add);
+    return applyStreakProgress(s, applyBadges(next, add));
   });
   return { attempt: att, breakdown };
 }

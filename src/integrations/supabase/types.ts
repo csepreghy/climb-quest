@@ -152,6 +152,27 @@ export type Database = {
         }
         Relationships: []
       }
+      hangboard_calibration: {
+        Row: {
+          holds: Json
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          holds: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          holds?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       hangboard_workouts: {
         Row: {
           board: string

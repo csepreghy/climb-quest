@@ -24,6 +24,7 @@ interface Props {
 }
 
 export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) {
+  const holdLabel = useHoldLabel();
   const [workout, setWorkout] = useState<HangboardWorkout | null>(null);
   const [phase, setPhase] = useState<Phase>("ready");
   const [stepIdx, setStepIdx] = useState(0);

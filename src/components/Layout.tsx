@@ -138,24 +138,7 @@ export default function Layout() {
       />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <OnboardingModal open={showOnboarding} onClose={() => { /* completion handled inside */ }} />
-      <Dialog open={dailyLoginOpen} onOpenChange={setDailyLoginOpen}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <img src={chalkBagImg} alt="" className="h-7 w-7 object-contain" />
-              Daily login bonus!
-            </DialogTitle>
-            <DialogDescription>
-              Welcome back, climber. You earned <span className="font-bold gradient-chalk-text">+{DAILY_LOGIN_REWARD} Chalk</span> just for showing up today. Come back every day to keep the chalk flowing.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <GameButton variant="primary" size="sm" onClick={() => setDailyLoginOpen(false)}>
-              Start Climbing
-            </GameButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DailyLoginDialog open={dailyLoginOpen} onOpenChange={setDailyLoginOpen} />
       <Dialog open={needGymOpen} onOpenChange={setNeedGymOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>

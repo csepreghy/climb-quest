@@ -321,7 +321,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
           if (!o) onOpenChange(false);
         }}
       >
-        <DialogContent className="max-w-sm text-center">
+        <DialogContent hideCloseButton className="max-w-sm text-center">
           <VisuallyHidden><DialogTitle>Workout complete</DialogTitle></VisuallyHidden>
           {celebration && (
             <div className="flex flex-col items-center gap-3 py-4">

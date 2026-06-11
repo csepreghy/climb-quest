@@ -26,7 +26,7 @@ export default function Landing() {
   const goAuth = () => nav("/auth");
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[hsl(var(--background))]" style={{ backgroundImage: "radial-gradient(ellipse at top, hsl(var(--background)) 0%, hsl(0 0% 4%) 100%)" }}>
+    <div className="relative min-h-screen overflow-x-hidden bg-[hsl(var(--background))] pt-[env(safe-area-inset-top)]" style={{ backgroundImage: "radial-gradient(ellipse at top, hsl(var(--background)) 0%, hsl(0 0% 4%) 100%)" }}>
       <BackgroundOrbs />
 
       {/* Top bar */}

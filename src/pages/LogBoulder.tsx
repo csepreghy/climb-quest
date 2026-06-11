@@ -262,7 +262,7 @@ export default function BoulderLogs() {
             )}
           </GameCard>
         </>
-      ) : (
+      ) : tab === "strength" ? (
         <GameCard className="p-0 overflow-hidden">
           {strengthSessions.length === 0 ? (
             <div className="text-sm text-muted-foreground py-12 text-center">
@@ -322,6 +322,8 @@ export default function BoulderLogs() {
             </div>
           )}
         </GameCard>
+      ) : (
+        <Hangboard />
       )}
     </div>
   );

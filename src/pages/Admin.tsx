@@ -11,6 +11,7 @@ import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockD
 import { useAuth } from "@/hooks/useAuth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import chalkBagImg from "@/assets/chalk-bag.png";
 import { Plus, Minus, Upload, Trash2, Pencil, Copy, X, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive, Bell } from "lucide-react";
 import { AdminNotificationsPanel } from "@/components/notifications/AdminNotificationsPanel";
 import { SnapshotsAdmin } from "@/components/admin/SnapshotsAdmin";

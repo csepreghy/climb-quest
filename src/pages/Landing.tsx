@@ -30,7 +30,7 @@ export default function Landing() {
       <BackgroundOrbs />
 
       {/* Top bar */}
-      <header className="relative z-10">
+      <header className="relative z-10" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="container flex items-center justify-between gap-4 py-5">
           <Link to="/" className="flex items-center gap-3 group">
             <img

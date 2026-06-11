@@ -131,30 +131,57 @@ export default function HangboardBuilder() {
             <p className="text-sm text-muted-foreground">No steps yet. Tap a hold on the board.</p>
           )}
           <ol className="space-y-2">
-            {steps.map((st, i) => (
-              <li key={i} className="flex items-center gap-2 bg-secondary/40 rounded-md border border-border p-2">
-                <span className="w-6 text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
-                <span className="flex-1 text-sm">
-                  {st.kind === "hang" ? (
-                    <><b>Hang</b> · {holdLabel(st.holdId)}</>
-                  ) : (
-                    <span className="text-muted-foreground"><b>Rest</b></span>
-                  )}
-                </span>
-                <Input
-                  type="number"
-                  min={1}
-                  max={600}
-                  value={st.seconds}
-                  onChange={e => updateStep(i, { seconds: Math.max(1, Number(e.target.value) || 0) } as Partial<HangStep>)}
-                  className="w-20 h-8"
-                />
-                <span className="text-xs text-muted-foreground">s</span>
-                <button onClick={() => move(i, -1)} className="text-muted-foreground hover:text-foreground" aria-label="Move up"><ArrowUp className="h-4 w-4" /></button>
-                <button onClick={() => move(i, 1)} className="text-muted-foreground hover:text-foreground" aria-label="Move down"><ArrowDown className="h-4 w-4" /></button>
-                <button onClick={() => removeStep(i)} className="text-destructive hover:brightness-125" aria-label="Remove"><Trash2 className="h-4 w-4" /></button>
-              </li>
-            ))}
+            {steps.map((st, i) => {
+              const isHang = st.kind === "hang";
+              return (
+                <li key={i} className="flex items-center gap-2 bg-secondary/40 rounded-md border border-border p-2">
+                  <span className="w-6 text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
+                  <span className="flex-1 text-sm min-w-0 truncate">
+                    {isHang ? (
+                      <><b className="text-[hsl(var(--btn-orange))]">Hang</b> · {holdLabel((st as Extract<HangStep, {kind:"hang"}>).holdId)}</>
+                    ) : (
+                      <b className="text-[hsl(var(--sky))]">Rest</b>
+                    )}
+                  </span>
+
+                  <label className={`flex items-center gap-1 text-xs ${isHang ? "text-[hsl(var(--btn-orange))]" : "text-muted-foreground/50"}`}>
+                    <span className="font-semibold uppercase tracking-wider">Hang</span>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={600}
+                      value={isHang ? st.seconds : ""}
+                      disabled={!isHang}
+                      placeholder="—"
+                      onChange={e => updateStep(i, { seconds: Math.max(1, Number(e.target.value) || 0) } as Partial<HangStep>)}
+                      className="w-16 h-8"
+                      aria-label={`Hang seconds for step ${i + 1}`}
+                    />
+                    <span>s</span>
+                  </label>
+
+                  <label className={`flex items-center gap-1 text-xs ${!isHang ? "text-[hsl(var(--sky))]" : "text-muted-foreground/50"}`}>
+                    <span className="font-semibold uppercase tracking-wider">Rest</span>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={600}
+                      value={!isHang ? st.seconds : ""}
+                      disabled={isHang}
+                      placeholder="—"
+                      onChange={e => updateStep(i, { seconds: Math.max(1, Number(e.target.value) || 0) } as Partial<HangStep>)}
+                      className="w-16 h-8"
+                      aria-label={`Rest seconds for step ${i + 1}`}
+                    />
+                    <span>s</span>
+                  </label>
+
+                  <button onClick={() => move(i, -1)} className="text-muted-foreground hover:text-foreground" aria-label="Move up"><ArrowUp className="h-4 w-4" /></button>
+                  <button onClick={() => move(i, 1)} className="text-muted-foreground hover:text-foreground" aria-label="Move down"><ArrowDown className="h-4 w-4" /></button>
+                  <button onClick={() => removeStep(i)} className="text-destructive hover:brightness-125" aria-label="Remove"><Trash2 className="h-4 w-4" /></button>
+                </li>
+              );
+            })}
           </ol>
           <div className="flex gap-2 pt-2">
             <GameButton variant="primary" size="sm" onClick={onSave}>

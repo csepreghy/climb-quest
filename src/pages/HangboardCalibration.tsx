@@ -135,6 +135,7 @@ export default function HangboardCalibration() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <GameButton variant="ghost" size="sm" onClick={addHold}><Plus className="h-4 w-4" /> Add hold</GameButton>
           <GameButton variant="ghost" size="sm" onClick={onReset}><RotateCcw className="h-4 w-4" /> Reset</GameButton>
           <GameButton variant="primary" size="sm" onClick={onSave} disabled={saver.isPending}>
             <Save className="h-4 w-4" /> {saver.isPending ? "Saving…" : "Save"}

@@ -83,6 +83,9 @@ export default function Dashboard() {
                   <ArrowUp className="h-4 w-4" /> Level Up
                 </GameButton>
               )}
+              <Link to="/hangboard">
+                <GameButton variant="ghost"><Dumbbell className="h-4 w-4" /> Hangboard</GameButton>
+              </Link>
               <Link to="/inventory">
                 <GameButton variant="ghost"><Backpack className="h-4 w-4" /> Inventory</GameButton>
               </Link>

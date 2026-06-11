@@ -238,7 +238,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-3xl font-extrabold tabular-nums">
+                        <div className="text-2xl sm:text-3xl font-extrabold tabular-nums">
                           {phase === "finished" ? "✓" : remaining}
                         </div>
                       </div>

@@ -25,6 +25,7 @@ function summarise(steps: HangStep[]): { hangs: number; rest: number; holds: num
 
 export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
   const nav = useNavigate();
+  const holdLabel = useHoldLabel();
   const [runOpen, setRunOpen] = useState(false);
   const [holdsOpen, setHoldsOpen] = useState(false);
   const s = summarise(workout.steps);

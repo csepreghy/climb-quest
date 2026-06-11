@@ -4,7 +4,7 @@ import { GameButton } from "@/components/ui/game-button";
 import { GameCard } from "@/components/ui/game-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, RotateCcw, ArrowLeft } from "lucide-react";
+import { Save, RotateCcw, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { BEASTMAKER_1000_HOLDS, type HangboardHold } from "@/game/hangboard/beastmaker1000";
 import {
   holdsToCalibrationDoc,

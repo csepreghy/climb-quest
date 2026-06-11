@@ -32,6 +32,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
   const tickedRef = useRef<Set<number>>(new Set());
   const completedHangSecRef = useRef(0);
   const perHoldSecRef = useRef<Record<string, number>>({});
+  const transitioningRef = useRef(false);
 
   // Load / reset whenever the dialog opens for a workout.
   useEffect(() => {

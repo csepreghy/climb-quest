@@ -8,12 +8,14 @@ import { HangboardOverlay } from "@/components/hangboard/HangboardOverlay";
 import { holdLabel } from "@/game/hangboard/beastmaker1000";
 import { fetchWorkout } from "@/game/hangboard/api";
 import type { HangboardWorkout } from "@/game/hangboard/types";
-import { commitHangboardSession, CHALK_PER_HANG_SECOND } from "@/game/hangboard/rewards";
+import { commitHangboardSession } from "@/game/hangboard/rewards";
 import { primeAudio, tickBeep, transitionBeep, finishBeep, isMuted, setMuted } from "@/game/hangboard/audio";
 import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
-type Phase = "ready" | "running" | "paused" | "finished";
+type Phase = "ready" | "countdown" | "running" | "paused" | "finished";
+
+const READY_SECONDS = 3;
 
 interface Props {
   workoutId: string | null;
@@ -87,6 +89,29 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
     if (s) setRemaining(s.seconds);
   }, [stepIdx, workout]);
 
+  // "Get ready" countdown before the workout actually starts.
+  useEffect(() => {
+    if (phase !== "countdown") return;
+    const iv = setInterval(() => {
+      setRemaining(prev => {
+        const nv = prev - 1;
+        if (nv === 2 || nv === 1) {
+          if (!tickedRef.current.has(nv)) { tickedRef.current.add(nv); tickBeep(); }
+        }
+        if (nv <= 0) {
+          tickedRef.current.clear();
+          transitionBeep();
+          if (workout) setRemaining(workout.steps[0].seconds);
+          setPhase("running");
+          return 0;
+        }
+        return nv;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [phase, workout]);
+
+
   // Commit on finish.
   useEffect(() => {
     if (phase !== "finished" || !workout) return;
@@ -109,13 +134,14 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
   function start() {
     primeAudio();
     if (!workout || workout.steps.length === 0) return;
-    setPhase("running");
     setStepIdx(0);
-    setRemaining(workout.steps[0].seconds);
     tickedRef.current.clear();
     completedHangSecRef.current = 0;
     perHoldSecRef.current = {};
+    setRemaining(READY_SECONDS);
+    setPhase("countdown");
   }
+
   function pause() { setPhase("paused"); }
   function resume() { setPhase("running"); }
   function skip() {
@@ -160,54 +186,61 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
             </div>
 
             <GameCard tone="accent" className="p-5 text-center">
-              <div className={`text-xs uppercase tracking-wider ${phaseColor}`}>
-                {phase === "ready" ? "Ready" : phase === "finished" ? "Finished" : current?.kind === "hang" ? "HANG" : "REST"}
+              <div className={`text-xs uppercase tracking-wider ${phase === "countdown" ? "text-foreground" : phaseColor}`}>
+                {phase === "ready" ? "Ready"
+                  : phase === "countdown" ? "Get ready"
+                  : phase === "finished" ? "Finished"
+                  : current?.kind === "hang" ? "HANG" : "REST"}
               </div>
               <div className="text-7xl font-extrabold tabular-nums my-2">
                 {phase === "finished" ? "✓" : remaining}
               </div>
-              {phase !== "finished" && current?.kind === "hang" && (
+              {phase === "countdown" && (
+                <div className="text-sm text-muted-foreground">
+                  Starting: {workout.steps[0].kind === "hang" ? `Hang · ${holdLabel((workout.steps[0] as Extract<typeof workout.steps[0], {kind:"hang"}>).holdId)}` : "Rest"}
+                </div>
+              )}
+              {phase !== "finished" && phase !== "countdown" && current?.kind === "hang" && (
                 <div className="text-lg font-semibold">{holdLabel(current.holdId)}</div>
               )}
-              {phase !== "finished" && current?.kind === "rest" && (
+              {phase !== "finished" && phase !== "countdown" && current?.kind === "rest" && (
                 <div className="text-sm text-muted-foreground">Catch your breath</div>
               )}
-              {next && phase !== "finished" && (
+              {next && phase !== "finished" && phase !== "countdown" && (
                 <div className="text-xs text-muted-foreground mt-2">
                   Next: {next.kind === "hang" ? `Hang · ${holdLabel(next.holdId)}` : "Rest"} · {next.seconds}s
                 </div>
               )}
-              <div className="text-xs text-muted-foreground mt-1">
-                Step {Math.min(stepIdx + 1, workout.steps.length)} / {workout.steps.length}
-              </div>
+              {phase !== "countdown" && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  Step {Math.min(stepIdx + 1, workout.steps.length)} / {workout.steps.length}
+                </div>
+              )}
 
               <div className="flex justify-center gap-2 mt-4">
                 {phase === "ready" && (
-                  <GameButton variant="primary" size="md" onClick={start}><Play className="h-4 w-4" /> Start</GameButton>
+                  <GameButton variant="primary" size="lg" onClick={start}><Play className="h-5 w-5" /> Start</GameButton>
                 )}
-                {phase === "running" && (
+                {(phase === "running" || phase === "countdown") && (
                   <>
-                    <GameButton variant="ghost" size="sm" onClick={pause}><Pause className="h-4 w-4" /> Pause</GameButton>
-                    <GameButton variant="ghost" size="sm" onClick={skip}><SkipForward className="h-4 w-4" /> Skip</GameButton>
+                    <GameButton variant="primary" size="lg" onClick={pause}><Pause className="h-5 w-5" /> Pause</GameButton>
+                    <GameButton variant="primary" size="lg" onClick={skip}><SkipForward className="h-5 w-5" /> Skip</GameButton>
                   </>
                 )}
                 {phase === "paused" && (
                   <>
-                    <GameButton variant="primary" size="sm" onClick={resume}><Play className="h-4 w-4" /> Resume</GameButton>
-                    <GameButton variant="danger" size="sm" onClick={stop}>Stop</GameButton>
+                    <GameButton variant="primary" size="lg" onClick={resume}><Play className="h-5 w-5" /> Resume</GameButton>
+                    <GameButton variant="danger" size="lg" onClick={stop}>Stop</GameButton>
                   </>
                 )}
                 {phase === "finished" && (
-                  <GameButton variant="primary" size="sm" onClick={() => onOpenChange(false)}>Done</GameButton>
+                  <GameButton variant="primary" size="md" onClick={() => onOpenChange(false)}>Done</GameButton>
                 )}
               </div>
             </GameCard>
 
-            <HangboardOverlay activeHoldId={current?.kind === "hang" ? current.holdId : null} />
+            <HangboardOverlay activeHoldId={current?.kind === "hang" ? current.holdId : (phase === "countdown" && workout.steps[0].kind === "hang" ? (workout.steps[0] as Extract<typeof workout.steps[0], {kind:"hang"}>).holdId : null)} />
 
-            <p className="text-xs text-muted-foreground text-center">
-              {CHALK_PER_HANG_SECOND} Chalk per second of completed hang. Keep this dialog open for audio cues.
-            </p>
           </div>
         )}
       </DialogContent>

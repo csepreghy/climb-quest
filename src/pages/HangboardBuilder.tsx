@@ -98,11 +98,11 @@ export default function HangboardBuilder() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Default hang (s)</Label>
+                <Label>Hang</Label>
                 <Input type="number" min={1} max={120} value={defaultHang} onChange={e => setDefaultHang(Math.max(1, Number(e.target.value) || 0))} />
               </div>
               <div>
-                <Label>Default rest (s)</Label>
+                <Label>Rest</Label>
                 <Input type="number" min={1} max={600} value={defaultRest} onChange={e => setDefaultRest(Math.max(1, Number(e.target.value) || 0))} />
               </div>
             </div>
@@ -116,10 +116,10 @@ export default function HangboardBuilder() {
 
           <GameCard className="p-3">
             <HangboardOverlay onSelect={h => addHang(h.id)} />
-            <div className="flex items-center justify-between mt-3 px-1">
+            <div className="flex items-center justify-between gap-2 mt-3 px-1">
               <p className="text-xs text-muted-foreground">Tap a hold to add a {defaultHang}s hang.</p>
-              <GameButton variant="ghost" size="sm" onClick={addRest}>
-                <Plus className="h-4 w-4" /> Rest {defaultRest}s
+              <GameButton variant="primary" size="md" onClick={addRest}>
+                <Plus className="h-4 w-4" /> Add Rest ({defaultRest}s)
               </GameButton>
             </div>
           </GameCard>
@@ -130,110 +130,38 @@ export default function HangboardBuilder() {
           {steps.length === 0 && (
             <p className="text-sm text-muted-foreground">No steps yet. Tap a hold on the board.</p>
           )}
-          {(() => {
-            // Group steps into rows. A hang absorbs the rest step immediately after it.
-            type Row = { hangIdx: number; restIdx: number | null } | { restIdx: number; hangIdx: null };
-            const rows: Row[] = [];
-            const consumed = new Set<number>();
-            steps.forEach((s, i) => {
-              if (consumed.has(i)) return;
-              if (s.kind === "hang") {
-                const nxt = steps[i + 1];
-                const restIdx = nxt && nxt.kind === "rest" ? i + 1 : null;
-                if (restIdx !== null) consumed.add(restIdx);
-                rows.push({ hangIdx: i, restIdx });
-              } else {
-                rows.push({ restIdx: i, hangIdx: null });
-              }
-            });
+          <ol className="space-y-2">
+            {steps.map((s, idx) => (
+              <li key={idx} className="flex items-center gap-2 bg-secondary/40 rounded-md border border-border p-2">
+                <span className="w-6 text-xs text-muted-foreground tabular-nums">{idx + 1}.</span>
+                <span className="flex-1 text-sm min-w-0 truncate">
+                  {s.kind === "hang" ? (
+                    <><b className="text-[hsl(var(--btn-orange))]">Hang</b> · {holdLabel(s.holdId)}</>
+                  ) : (
+                    <b className="text-[hsl(var(--sky))]">Rest</b>
+                  )}
+                </span>
+                <label className={`flex items-center gap-1 text-xs ${s.kind === "hang" ? "text-[hsl(var(--btn-orange))]" : "text-[hsl(var(--sky))]"}`}>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={600}
+                    value={s.seconds}
+                    onChange={e => updateStep(idx, { seconds: Math.max(1, Number(e.target.value) || 0) } as Partial<HangStep>)}
+                    className="w-16 h-8"
+                    aria-label={`${s.kind} seconds for step ${idx + 1}`}
+                  />
+                  <span>s</span>
+                </label>
+                <button onClick={() => move(idx, -1)} className="text-muted-foreground hover:text-foreground" aria-label="Move up"><ArrowUp className="h-4 w-4" /></button>
+                <button onClick={() => move(idx, 1)} className="text-muted-foreground hover:text-foreground" aria-label="Move down"><ArrowDown className="h-4 w-4" /></button>
+                <button onClick={() => removeStep(idx)} className="text-destructive hover:brightness-125" aria-label="Remove">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </li>
+            ))}
+          </ol>
 
-            function addRestAfter(hangIdx: number, seconds: number) {
-              setSteps(prev => {
-                const next = prev.slice();
-                next.splice(hangIdx + 1, 0, { kind: "rest", seconds });
-                return next;
-              });
-            }
-            function removeIdx(idx: number) {
-              setSteps(prev => prev.filter((_, k) => k !== idx));
-            }
-
-            return (
-              <ol className="space-y-2">
-                {rows.map((row, rIdx) => {
-                  const hang = row.hangIdx !== null ? steps[row.hangIdx] as Extract<HangStep, {kind:"hang"}> : null;
-                  const rest = row.restIdx !== null ? steps[row.restIdx] as Extract<HangStep, {kind:"rest"}> : null;
-                  const primaryIdx = row.hangIdx ?? row.restIdx!;
-                  return (
-                    <li key={rIdx} className="flex items-center gap-2 bg-secondary/40 rounded-md border border-border p-2">
-                      <span className="w-6 text-xs text-muted-foreground tabular-nums">{rIdx + 1}.</span>
-                      <span className="flex-1 text-sm min-w-0 truncate">
-                        {hang ? (
-                          <><b className="text-[hsl(var(--btn-orange))]">Hang</b> · {holdLabel(hang.holdId)}</>
-                        ) : (
-                          <b className="text-[hsl(var(--sky))]">Rest only</b>
-                        )}
-                      </span>
-
-                      {hang && (
-                        <label className="flex items-center gap-1 text-xs text-[hsl(var(--btn-orange))]">
-                          <span className="font-semibold uppercase tracking-wider">Hang</span>
-                          <Input
-                            type="number"
-                            min={1}
-                            max={600}
-                            value={hang.seconds}
-                            onChange={e => updateStep(row.hangIdx!, { seconds: Math.max(1, Number(e.target.value) || 0) } as Partial<HangStep>)}
-                            className="w-16 h-8"
-                            aria-label={`Hang seconds for step ${rIdx + 1}`}
-                          />
-                          <span>s</span>
-                        </label>
-                      )}
-
-                      <label className="flex items-center gap-1 text-xs text-[hsl(var(--sky))]">
-                        <span className="font-semibold uppercase tracking-wider">Rest</span>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={600}
-                          value={rest ? rest.seconds : defaultRest}
-                          placeholder={String(defaultRest)}
-                          onChange={e => {
-                            const v = Math.max(0, Number(e.target.value) || 0);
-                            if (rest) {
-                              if (v === 0) removeIdx(row.restIdx!);
-                              else updateStep(row.restIdx!, { seconds: v } as Partial<HangStep>);
-                            } else if (hang && v > 0) {
-                              addRestAfter(row.hangIdx!, v);
-                            }
-                          }}
-                          className="w-16 h-8"
-                          aria-label={`Rest seconds after step ${rIdx + 1}`}
-                        />
-                        <span>s</span>
-                      </label>
-
-                      <button onClick={() => move(primaryIdx, -1)} className="text-muted-foreground hover:text-foreground" aria-label="Move up"><ArrowUp className="h-4 w-4" /></button>
-                      <button onClick={() => move(primaryIdx, 1)} className="text-muted-foreground hover:text-foreground" aria-label="Move down"><ArrowDown className="h-4 w-4" /></button>
-                      <button
-                        onClick={() => {
-                          // Remove rest first (higher index) to keep hangIdx valid.
-                          if (row.restIdx !== null) removeIdx(row.restIdx);
-                          if (row.hangIdx !== null) removeIdx(row.hangIdx);
-                          else if (row.restIdx !== null) {/* already removed */}
-                        }}
-                        className="text-destructive hover:brightness-125"
-                        aria-label="Remove"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </li>
-                  );
-                })}
-              </ol>
-            );
-          })()}
           <div className="flex gap-2 pt-2">
             <GameButton variant="primary" size="sm" onClick={onSave}>
               <Save className="h-4 w-4" /> Save

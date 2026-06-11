@@ -67,7 +67,7 @@ export function HangboardOverlay({
                   "absolute rounded-full transition-all flex items-center justify-center",
                   interactive && "cursor-pointer",
                   isActive
-                    ? "ring-4 ring-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/30 animate-pulse"
+                    ? "ring-[6px] ring-fuchsia-500 bg-fuchsia-500/50 shadow-[0_0_24px_8px_rgba(217,70,239,0.7)] animate-pulse"
                     : isHover && interactive
                       ? "ring-2 ring-white/90 bg-white/15"
                       : debug
@@ -81,17 +81,13 @@ export function HangboardOverlay({
                   height: `${p.h}%`,
                 }}
               >
-                {showLabels && (isActive || (isHover && interactive) || debug) && (
-                  <span className="text-sm sm:text-base font-extrabold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] tabular-nums">
-                    {h.number}
-                  </span>
-                )}
                 {showLabels && showLabelHere && (
                   <span className="absolute inset-x-0 -bottom-5 text-[10px] sm:text-xs font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] text-center whitespace-nowrap">
                     {h.label}
                   </span>
                 )}
               </button>
+
             );
           });
         })}

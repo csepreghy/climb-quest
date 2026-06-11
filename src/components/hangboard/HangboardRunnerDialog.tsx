@@ -263,7 +263,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                     </div>
 
                     {currentHangLabel ? (
-                      <div className="text-xl sm:text-2xl font-extrabold leading-tight text-fuchsia-500 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)] truncate">
+                      <div className="text-base sm:text-2xl font-extrabold leading-tight text-fuchsia-500 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)] truncate">
                         {currentHangLabel}
                       </div>
                     ) : current?.kind === "rest" ? (

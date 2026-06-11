@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useGame, deleteLog, deleteStrengthSession, BoulderLog } from "@/game/store";
 import { ACTIVITY_LABELS } from "@/game/data";
 import { useAllGyms as useGyms } from "@/game/allGyms";
@@ -12,13 +13,15 @@ import { Plus, Swords, Sparkles, Filter, Pencil, Trash2, Dumbbell } from "lucide
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import Hangboard from "@/pages/Hangboard";
 
 type EntryFilter = "all" | "boulder" | "boss";
-type Tab = "boulders" | "strength";
+type Tab = "boulders" | "strength" | "hangboard";
 
 export default function BoulderLogs() {
   const s = useGame();
   const { gyms } = useGyms();
+  const nav = useNavigate();
   const [tab, setTab] = useState<Tab>("boulders");
   const [open, setOpen] = useState(false);
   const [editLog, setEditLog] = useState<BoulderLog | null>(null);
@@ -105,18 +108,25 @@ export default function BoulderLogs() {
           <h1 className="font-display font-bold text-2xl">Logs</h1>
           <p className="text-sm text-muted-foreground">Every problem, project and rep you've logged.</p>
         </div>
-        <GameButton variant="success" onClick={() => setOpen(true)}>
-          <Plus className="h-4 w-4" /> Log
-        </GameButton>
+        {tab === "hangboard" ? (
+          <GameButton variant="success" onClick={() => nav("/hangboard/new")}>
+            <Plus className="h-4 w-4" /> New workout
+          </GameButton>
+        ) : (
+          <GameButton variant="success" onClick={() => setOpen(true)}>
+            <Plus className="h-4 w-4" /> Log
+          </GameButton>
+        )}
       </div>
 
-      <DailyCapBar />
+      {tab !== "hangboard" && <DailyCapBar />}
 
       {/* Tab selector */}
       <div className="flex gap-1 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-1 w-fit">
         {([
           { v: "boulders", label: "Boulders", icon: Sparkles },
           { v: "strength", label: "Strength", icon: Dumbbell },
+          { v: "hangboard", label: "Hangboard", icon: Dumbbell },
         ] as { v: Tab; label: string; icon: typeof Sparkles }[]).map(t => (
           <button
             key={t.v}
@@ -134,6 +144,7 @@ export default function BoulderLogs() {
       </div>
 
       {tab === "boulders" ? (
+
         <>
           <GameCard className="p-4">
             <div className="flex flex-wrap items-center gap-2">
@@ -251,7 +262,7 @@ export default function BoulderLogs() {
             )}
           </GameCard>
         </>
-      ) : (
+      ) : tab === "strength" ? (
         <GameCard className="p-0 overflow-hidden">
           {strengthSessions.length === 0 ? (
             <div className="text-sm text-muted-foreground py-12 text-center">
@@ -311,6 +322,8 @@ export default function BoulderLogs() {
             </div>
           )}
         </GameCard>
+      ) : (
+        <Hangboard />
       )}
     </div>
   );

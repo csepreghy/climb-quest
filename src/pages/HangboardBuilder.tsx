@@ -197,8 +197,8 @@ export default function HangboardBuilder() {
                           type="number"
                           min={0}
                           max={600}
-                          value={rest ? rest.seconds : 0}
-                          placeholder="0"
+                          value={rest ? rest.seconds : defaultRest}
+                          placeholder={String(defaultRest)}
                           onChange={e => {
                             const v = Math.max(0, Number(e.target.value) || 0);
                             if (rest) {

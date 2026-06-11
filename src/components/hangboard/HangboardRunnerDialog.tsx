@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard } from "@/components/ui/game-card";
-import { Pause, Play, SkipForward, Volume2, VolumeX, X } from "lucide-react";
+import { Pause, Play, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { HangboardOverlay } from "@/components/hangboard/HangboardOverlay";
 import { holdLabel } from "@/game/hangboard/beastmaker1000";
 import { fetchWorkout } from "@/game/hangboard/api";
@@ -192,9 +192,6 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
               <div className="flex items-center gap-1 shrink-0">
                 <GameButton variant="ghost" size="sm" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
                   {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </GameButton>
-                <GameButton variant="ghost" size="sm" onClick={() => onOpenChange(false)} aria-label="Close">
-                  <X className="h-4 w-4" />
                 </GameButton>
               </div>
             </div>

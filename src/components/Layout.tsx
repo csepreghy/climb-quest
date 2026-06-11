@@ -576,3 +576,62 @@ function ChalkChip({ value }: { value: number }) {
     </>
   );
 }
+
+function DailyLoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const s = useGame();
+  const streakCfg = useStreakConfig();
+  const streak = currentStreak(s);
+  // Today's streak day in the cycle. After claiming today, streak >= 1.
+  const day = cycleDay(Math.max(1, streak));
+  const todayPct = streakDayBonusPct(Math.max(1, streak), streakCfg);
+  const nextMilestone = streakCfg.enabled
+    ? streakCfg.milestones.filter(m => m.day > streak).sort((a, b) => a.day - b.day)[0]
+    : undefined;
+  const daysToMilestone = nextMilestone ? nextMilestone.day - streak : 0;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <img src={chalkBagImg} alt="" className="h-7 w-7 object-contain" />
+            Welcome back, climber!
+          </DialogTitle>
+          <DialogDescription asChild>
+            <div className="space-y-3 pt-1">
+              <div>
+                You earned <span className="font-bold gradient-chalk-text">+{DAILY_LOGIN_REWARD} Chalk</span> just for showing up today.
+              </div>
+
+              {streakCfg.enabled && (
+                <div className="rounded-lg border border-border bg-card/60 p-3 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-foreground/90">🔥 Current streak</span>
+                    <span className="font-bold tabular-nums">{streak} day{streak === 1 ? "" : "s"}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-foreground/90">Today's chalk bonus (Day {day}/7)</span>
+                    <span className="font-bold tabular-nums gradient-chalk-text">+{todayPct}%</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Log any activity today to keep your streak — Day 7 caps the cycle with a big bonus and unlocks multi-day buffs.
+                  </p>
+                  {nextMilestone && (
+                    <p className="text-[11px] text-[hsl(var(--btn-orange))]">
+                      🏆 {daysToMilestone} day{daysToMilestone === 1 ? "" : "s"} to <strong>{nextMilestone.label}</strong> (Day {nextMilestone.day}).
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <GameButton variant="primary" size="sm" onClick={() => onOpenChange(false)}>
+            Start Climbing
+          </GameButton>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

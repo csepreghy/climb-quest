@@ -230,20 +230,39 @@ export default function HangboardCalibration() {
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">Selected</div>
                 <div className="font-bold">#{selectedHold.number} · {selectedHold.label} · pos {selected!.posIndex + 1} / {selectedHold.positions.length}</div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {selectedHold.positions.length > 1 && (
                   <GameButton variant="ghost" size="sm" onClick={() => setSelected(s => s ? { ...s, posIndex: (s.posIndex + 1) % selectedHold.positions.length } : s)}>
                     Switch side
                   </GameButton>
                 )}
+                <GameButton variant="ghost" size="sm" onClick={addPositionToSelected}>
+                  <Plus className="h-4 w-4" /> Add position
+                </GameButton>
+                {selectedHold.positions.length > 1 && (
+                  <GameButton variant="ghost" size="sm" onClick={removeSelectedPosition}>
+                    <Trash2 className="h-4 w-4" /> Remove position
+                  </GameButton>
+                )}
                 {!BEASTMAKER_1000_HOLDS.some(b => b.id === selectedHold.id) && (
-                  <GameButton variant="danger" size="sm" onClick={deleteSelected}><Trash2 className="h-4 w-4" /> Delete</GameButton>
+                  <GameButton variant="danger" size="sm" onClick={deleteSelected}><Trash2 className="h-4 w-4" /> Delete hold</GameButton>
                 )}
               </div>
             </div>
-            <div>
-              <Label className="text-xs">Hold name</Label>
-              <Input value={selectedHold.label} onChange={e => renameSelected(e.target.value)} />
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-3">
+              <div>
+                <Label className="text-xs">Hold name</Label>
+                <Input value={selectedHold.label} onChange={e => renameSelected(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Number</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={selectedHold.number}
+                  onChange={e => setSelectedNumber(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <NumField label="x %" value={selectedPos.x} onChange={v => updateSelected({ x: v })} />

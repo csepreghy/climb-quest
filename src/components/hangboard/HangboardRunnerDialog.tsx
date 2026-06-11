@@ -182,32 +182,20 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[98vw] max-h-[95vh] overflow-y-auto p-3 sm:p-5">
+      <DialogContent className="max-w-3xl w-[96vw] max-h-[95vh] overflow-y-auto p-3 sm:p-4">
         <VisuallyHidden><DialogTitle>{workout?.name ?? "Hangboard workout"}</DialogTitle></VisuallyHidden>
 
         {!workout ? (
           <p className="text-sm text-muted-foreground p-8 text-center">Loading workout…</p>
         ) : (
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0 flex items-center gap-2">
-                <div className="min-w-0">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Hangboard</div>
-                  <h2 className="text-lg sm:text-2xl font-bold tracking-tight truncate">{workout.name}</h2>
-                </div>
-                <GameButton variant="ghost" size="sm" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
-                  {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </GameButton>
-              </div>
-            </div>
-
             {(() => {
               const total = phase === "countdown"
                 ? READY_SECONDS
                 : current?.seconds ?? 1;
               const pct = Math.max(0, Math.min(1, remaining / Math.max(1, total)));
-              const size = 130;
-              const stroke = 10;
+              const size = 110;
+              const stroke = 9;
               const r = (size - stroke) / 2;
               const c = 2 * Math.PI * r;
               const ringColor = phase === "countdown"
@@ -233,9 +221,9 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                 : phase === "finished" ? "Finished"
                 : current?.kind === "hang" ? "HANG" : "REST";
               return (
-                <div className="flex items-center gap-3 sm:gap-5">
+                <div className="flex items-center gap-3 sm:gap-4">
                   {/* Left: shrinking ring inside its own compact card */}
-                  <GameCard tone="accent" className="p-2 sm:p-3 shrink-0">
+                  <GameCard tone="accent" className="p-2 shrink-0">
                     <div className="relative" style={{ width: size, height: size }}>
                       <svg width={size} height={size} className="-rotate-90">
                         <circle cx={size/2} cy={size/2} r={r} stroke="hsl(var(--muted))" strokeWidth={stroke} fill="none" opacity={0.3} />
@@ -250,15 +238,21 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-4xl font-extrabold tabular-nums">
+                        <div className="text-3xl font-extrabold tabular-nums">
                           {phase === "finished" ? "✓" : remaining}
                         </div>
                       </div>
                     </div>
                   </GameCard>
 
-                  {/* Right: phase, current hang, next, buttons */}
-                  <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                  {/* Middle: title, phase, current hang, next */}
+                  <div className="flex-1 min-w-0 flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <h2 className="text-base sm:text-lg font-bold tracking-tight truncate">{workout.name}</h2>
+                      <GameButton variant="ghost" size="sm" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
+                        {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                      </GameButton>
+                    </div>
                     <div className={`text-[10px] uppercase tracking-wider ${phase === "countdown" ? "text-foreground" : phaseColor}`}>
                       {phaseLabel}
                       {phase !== "countdown" && phase !== "finished" && (
@@ -269,42 +263,43 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                     </div>
 
                     {currentHangLabel ? (
-                      <div className="text-2xl sm:text-3xl font-extrabold leading-tight text-fuchsia-500 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+                      <div className="text-xl sm:text-2xl font-extrabold leading-tight text-fuchsia-500 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)] truncate">
                         {currentHangLabel}
                       </div>
                     ) : current?.kind === "rest" ? (
-                      <div className="text-xl sm:text-2xl font-bold text-[hsl(var(--sky))]">Catch your breath</div>
+                      <div className="text-lg sm:text-xl font-bold text-[hsl(var(--sky))]">Catch your breath</div>
                     ) : null}
 
                     {nextHang && phase !== "finished" && (
-                      <div className="text-xs sm:text-sm text-muted-foreground truncate">
+                      <div className="text-xs text-muted-foreground truncate">
                         Next: <span className="font-semibold text-foreground">{holdLabel(nextHang.holdId)}</span>
                       </div>
                     )}
+                  </div>
 
-                    <div className="flex flex-nowrap gap-2 mt-1">
-                      {phase === "ready" && (
-                        <GameButton variant="primary" size="md" onClick={start}><Play className="h-4 w-4" /> Start</GameButton>
-                      )}
-                      {(phase === "running" || phase === "countdown") && (
-                        <>
-                          <GameButton variant="primary" size="sm" onClick={pause}><Pause className="h-4 w-4" /> Pause</GameButton>
-                          <GameButton variant="primary" size="sm" onClick={skip}><SkipForward className="h-4 w-4" /> Skip</GameButton>
-                        </>
-                      )}
-                      {phase === "paused" && (
-                        <>
-                          <GameButton variant="primary" size="sm" onClick={resume}><Play className="h-4 w-4" /> Resume</GameButton>
-                          <GameButton variant="danger" size="sm" onClick={stop}>Stop</GameButton>
-                        </>
-                      )}
-                      {phase === "finished" && (
-                        <GameButton variant="primary" size="md" onClick={() => {
-                          if (celebration) setCelebrationOpen(true);
-                          else onOpenChange(false);
-                        }}>Done</GameButton>
-                      )}
-                    </div>
+                  {/* Right: buttons stacked vertically to keep the row compact */}
+                  <div className="flex flex-col gap-2 shrink-0">
+                    {phase === "ready" && (
+                      <GameButton variant="primary" size="md" onClick={start}><Play className="h-4 w-4" /> Start</GameButton>
+                    )}
+                    {(phase === "running" || phase === "countdown") && (
+                      <>
+                        <GameButton variant="primary" size="sm" onClick={pause}><Pause className="h-4 w-4" /> Pause</GameButton>
+                        <GameButton variant="primary" size="sm" onClick={skip}><SkipForward className="h-4 w-4" /> Skip</GameButton>
+                      </>
+                    )}
+                    {phase === "paused" && (
+                      <>
+                        <GameButton variant="primary" size="sm" onClick={resume}><Play className="h-4 w-4" /> Resume</GameButton>
+                        <GameButton variant="danger" size="sm" onClick={stop}>Stop</GameButton>
+                      </>
+                    )}
+                    {phase === "finished" && (
+                      <GameButton variant="primary" size="md" onClick={() => {
+                        if (celebration) setCelebrationOpen(true);
+                        else onOpenChange(false);
+                      }}>Done</GameButton>
+                    )}
                   </div>
                 </div>
               );

@@ -130,6 +130,8 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
   // Commit on finish.
   useEffect(() => {
     if (phase !== "finished" || !workout) return;
+    if (committedRef.current) return;
+    committedRef.current = true;
     finishBeep();
     const total = completedHangSecRef.current;
     if (total > 0) {
@@ -140,9 +142,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
         totalHangSeconds: total,
         holds,
       });
-      toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />Workout done! +{chalk} Chalk · {total}s of hang</div>);
-    } else {
-      toast.info("Workout ended");
+      setCelebration({ chalk, totalSec: total });
     }
   }, [phase, workout]);
 

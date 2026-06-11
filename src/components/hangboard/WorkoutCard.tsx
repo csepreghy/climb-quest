@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
 import { Play, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { holdLabel } from "@/game/hangboard/beastmaker1000";
 import type { HangStep, HangboardWorkout } from "@/game/hangboard/types";
+import { HangboardRunnerDialog } from "@/components/hangboard/HangboardRunnerDialog";
 
 interface Props {
   workout: HangboardWorkout;
@@ -23,6 +25,7 @@ function summarise(steps: HangStep[]): { hangs: number; rest: number; holds: num
 
 export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
   const nav = useNavigate();
+  const [runOpen, setRunOpen] = useState(false);
   const s = summarise(workout.steps);
   const totalSec = s.hangs + s.rest;
   const minutes = Math.floor(totalSec / 60);
@@ -52,7 +55,7 @@ export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
         {preview && <div className="truncate">{preview}{workout.steps.filter(x => x.kind === "hang").length > 3 ? "…" : ""}</div>}
       </div>
       <div className="flex items-center gap-2 mt-auto">
-        <GameButton variant="primary" size="sm" onClick={() => nav(`/hangboard/run/${workout.id}`)}>
+        <GameButton variant="primary" size="sm" onClick={() => setRunOpen(true)}>
           <Play className="h-4 w-4" /> Start
         </GameButton>
         {canEdit && (
@@ -68,6 +71,7 @@ export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
           </>
         )}
       </div>
+      <HangboardRunnerDialog workoutId={runOpen ? workout.id : null} open={runOpen} onOpenChange={setRunOpen} />
     </GameCard>
   );
 }

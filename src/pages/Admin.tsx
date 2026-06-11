@@ -71,12 +71,19 @@ export default function Admin() {
   const [amount, setAmount] = useState(100);
   return (
     <div className="space-y-6 animate-float-up max-w-5xl">
-      <div className="flex items-center gap-2 mb-2">
-        <Shield className="h-6 w-6 text-primary" />
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Admin</h1>
-          <p className="text-xs text-muted-foreground">Manage game data, users, and presentation.</p>
+      <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Shield className="h-6 w-6 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Admin</h1>
+            <p className="text-xs text-muted-foreground">Manage game data, users, and presentation.</p>
+          </div>
         </div>
+        <a href="/admin/hangboard-calibration">
+          <GameButton variant="ghost" size="sm">
+            <Dumbbell className="h-4 w-4" /> Hangboard calibration
+          </GameButton>
+        </a>
       </div>
 
       <Tabs defaultValue="general" className="w-full">

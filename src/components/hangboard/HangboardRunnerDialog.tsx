@@ -81,7 +81,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
               if (!workout || ni >= workout.steps.length) { setPhase("finished"); return i; }
               return ni;
             });
-          }, 500);
+          }, 1050);
           return 0;
         }
         return nv;
@@ -114,7 +114,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
             transitioningRef.current = false;
             setPhase("running");
             setRemaining(workout ? workout.steps[0].seconds : 0);
-          }, 500);
+          }, 1050);
           return 0;
         }
         return nv;
@@ -237,10 +237,10 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                         <circle
                           cx={size/2} cy={size/2} r={r}
                           stroke={ringColor} strokeWidth={stroke} fill="none"
-                          strokeLinecap="round"
+                          strokeLinecap={pct < 0.05 ? "butt" : "round"}
                           strokeDasharray={c}
-                          strokeDashoffset={c * (1 - pct)}
-                          style={{ transition: "stroke-dashoffset 1s linear" }}
+                          strokeDashoffset={pct <= 0 ? c : c * (1 - pct)}
+                          style={{ transition: pct <= 0 ? "stroke-dashoffset 0.25s ease-out" : "stroke-dashoffset 1s linear" }}
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">

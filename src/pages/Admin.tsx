@@ -139,7 +139,7 @@ export default function Admin() {
                   variant={day === 7 ? "secondary" : "default"}
                   onClick={() => {
                     const r = adminTriggerStreakReward(day);
-                    toast.success(r.bannerLabel + (r.chalkCache > 0 ? ` (+${r.chalkCache} Chalk)` : ""));
+                    toast.success(<div className="flex items-center gap-1.5">{r.bannerLabel}{r.chalkCache > 0 ? <><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />(+{r.chalkCache} Chalk)</> : ""}</div>);
                   }}
                 >
                   Day {day}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { BEASTMAKER_1000_HOLDS, resolveHoldId, type HangboardHold } from "@/game/hangboard/beastmaker1000";
+import { resolveHoldId, type HangboardHold } from "@/game/hangboard/beastmaker1000";
+import { useEffectiveHolds } from "@/game/hangboard/calibration";
 import boardAsset from "@/assets/hangboard-beastmaker1000.webp.asset.json";
 
 interface Props {
@@ -19,13 +20,15 @@ interface Props {
 }
 
 export function HangboardOverlay({
-  holds = BEASTMAKER_1000_HOLDS,
+  holds: holdsProp,
   activeHoldId,
   onSelect,
   className,
   showLabels = true,
   debug = false,
 }: Props) {
+  const effective = useEffectiveHolds();
+  const holds = holdsProp ?? effective;
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [hoverPos, setHoverPos] = useState<string | null>(null);
   const interactive = !!onSelect;

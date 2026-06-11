@@ -38,7 +38,7 @@ export function useHangboardCalibration() {
         console.warn("[hangboard] calibration fetch failed", error.message);
         return null;
       }
-      return (data?.holds as CalibrationDoc) ?? null;
+      return ((data?.holds as unknown) as CalibrationDoc) ?? null;
     },
   });
 }
@@ -55,7 +55,7 @@ export function useSaveCalibration() {
       const userId = (await supabase.auth.getUser()).data.user?.id ?? null;
       const { error } = await supabase
         .from("hangboard_calibration")
-        .upsert({ id: CALIBRATION_ID, holds: doc, updated_at: new Date().toISOString(), updated_by: userId });
+        .upsert({ id: CALIBRATION_ID, holds: doc as never, updated_at: new Date().toISOString(), updated_by: userId });
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {

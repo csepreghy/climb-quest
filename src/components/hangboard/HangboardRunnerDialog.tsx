@@ -184,59 +184,102 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
               </div>
             </div>
 
-            <GameCard tone="accent" className="p-5 text-center">
-              <div className={`text-xs uppercase tracking-wider ${phase === "countdown" ? "text-foreground" : phaseColor}`}>
-                {phase === "ready" ? "Ready"
-                  : phase === "countdown" ? "Get ready"
-                  : phase === "finished" ? "Finished"
-                  : current?.kind === "hang" ? "HANG" : "REST"}
-              </div>
-              <div className="text-7xl font-extrabold tabular-nums my-2">
-                {phase === "finished" ? "✓" : remaining}
-              </div>
-              {phase === "countdown" && (
-                <div className="text-sm text-muted-foreground">
-                  Starting: {workout.steps[0].kind === "hang" ? `Hang · ${holdLabel((workout.steps[0] as Extract<typeof workout.steps[0], {kind:"hang"}>).holdId)}` : "Rest"}
-                </div>
-              )}
-              {phase !== "finished" && phase !== "countdown" && current?.kind === "hang" && (
-                <div className="text-lg font-semibold">{holdLabel(current.holdId)}</div>
-              )}
-              {phase !== "finished" && phase !== "countdown" && current?.kind === "rest" && (
-                <div className="text-sm text-muted-foreground">Catch your breath</div>
-              )}
-              {next && phase !== "finished" && phase !== "countdown" && (
-                <div className="text-xs text-muted-foreground mt-2">
-                  Next: {next.kind === "hang" ? `Hang · ${holdLabel(next.holdId)}` : "Rest"} · {next.seconds}s
-                </div>
-              )}
-              {phase !== "countdown" && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  Step {Math.min(stepIdx + 1, workout.steps.length)} / {workout.steps.length}
-                </div>
-              )}
+            {(() => {
+              const total = phase === "countdown"
+                ? READY_SECONDS
+                : current?.seconds ?? 1;
+              const pct = Math.max(0, Math.min(1, remaining / Math.max(1, total)));
+              const size = 220;
+              const stroke = 14;
+              const r = (size - stroke) / 2;
+              const c = 2 * Math.PI * r;
+              const ringColor = phase === "countdown"
+                ? "hsl(var(--foreground))"
+                : current?.kind === "hang"
+                  ? "hsl(var(--btn-orange))"
+                  : "hsl(var(--sky))";
+              // Find next HANG (skip rests).
+              let nextHang: { holdId: string } | null = null;
+              if (workout) {
+                for (let i = stepIdx + 1; i < workout.steps.length; i++) {
+                  const s = workout.steps[i];
+                  if (s.kind === "hang") { nextHang = { holdId: s.holdId }; break; }
+                }
+              }
+              return (
+                <GameCard tone="accent" className="p-5 text-center">
+                  <div className={`text-xs uppercase tracking-wider ${phase === "countdown" ? "text-foreground" : phaseColor}`}>
+                    {phase === "ready" ? "Ready"
+                      : phase === "countdown" ? "Get ready"
+                      : phase === "finished" ? "Finished"
+                      : current?.kind === "hang" ? "HANG" : "REST"}
+                  </div>
 
-              <div className="flex justify-center gap-2 mt-4">
-                {phase === "ready" && (
-                  <GameButton variant="primary" size="lg" onClick={start}><Play className="h-5 w-5" /> Start</GameButton>
-                )}
-                {(phase === "running" || phase === "countdown") && (
-                  <>
-                    <GameButton variant="primary" size="lg" onClick={pause}><Pause className="h-5 w-5" /> Pause</GameButton>
-                    <GameButton variant="primary" size="lg" onClick={skip}><SkipForward className="h-5 w-5" /> Skip</GameButton>
-                  </>
-                )}
-                {phase === "paused" && (
-                  <>
-                    <GameButton variant="primary" size="lg" onClick={resume}><Play className="h-5 w-5" /> Resume</GameButton>
-                    <GameButton variant="danger" size="lg" onClick={stop}>Stop</GameButton>
-                  </>
-                )}
-                {phase === "finished" && (
-                  <GameButton variant="primary" size="md" onClick={() => onOpenChange(false)}>Done</GameButton>
-                )}
-              </div>
-            </GameCard>
+                  <div className="relative mx-auto my-3" style={{ width: size, height: size }}>
+                    <svg width={size} height={size} className="-rotate-90">
+                      <circle cx={size/2} cy={size/2} r={r} stroke="hsl(var(--muted))" strokeWidth={stroke} fill="none" opacity={0.3} />
+                      <circle
+                        cx={size/2} cy={size/2} r={r}
+                        stroke={ringColor} strokeWidth={stroke} fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray={c}
+                        strokeDashoffset={c * (1 - pct)}
+                        style={{ transition: "stroke-dashoffset 1s linear" }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-6xl font-extrabold tabular-nums">
+                        {phase === "finished" ? "✓" : remaining}
+                      </div>
+                    </div>
+                  </div>
+
+                  {phase !== "finished" && phase !== "countdown" && current?.kind === "hang" && (
+                    <div className="text-lg font-semibold">{holdLabel(current.holdId)}</div>
+                  )}
+                  {phase !== "finished" && phase !== "countdown" && current?.kind === "rest" && (
+                    <div className="text-sm text-muted-foreground">Catch your breath</div>
+                  )}
+                  {phase === "countdown" && workout.steps[0].kind === "hang" && (
+                    <div className="text-lg font-semibold">
+                      Starting: {holdLabel((workout.steps[0] as Extract<typeof workout.steps[0], {kind:"hang"}>).holdId)}
+                    </div>
+                  )}
+                  {nextHang && phase !== "finished" && phase !== "countdown" && (
+                    <div className="text-base sm:text-lg font-semibold mt-2">
+                      Next: <span className="text-[hsl(var(--btn-orange))]">{holdLabel(nextHang.holdId)}</span>
+                    </div>
+                  )}
+                  {phase !== "countdown" && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Step {Math.min(stepIdx + 1, workout.steps.length)} / {workout.steps.length}
+                    </div>
+                  )}
+                </GameCard>
+              );
+            })()}
+
+            <div className="flex justify-center gap-2">
+              {phase === "ready" && (
+                <GameButton variant="primary" size="lg" onClick={start}><Play className="h-5 w-5" /> Start</GameButton>
+              )}
+              {(phase === "running" || phase === "countdown") && (
+                <>
+                  <GameButton variant="primary" size="lg" onClick={pause}><Pause className="h-5 w-5" /> Pause</GameButton>
+                  <GameButton variant="primary" size="lg" onClick={skip}><SkipForward className="h-5 w-5" /> Skip</GameButton>
+                </>
+              )}
+              {phase === "paused" && (
+                <>
+                  <GameButton variant="primary" size="lg" onClick={resume}><Play className="h-5 w-5" /> Resume</GameButton>
+                  <GameButton variant="danger" size="lg" onClick={stop}>Stop</GameButton>
+                </>
+              )}
+              {phase === "finished" && (
+                <GameButton variant="primary" size="md" onClick={() => onOpenChange(false)}>Done</GameButton>
+              )}
+            </div>
+
 
             <HangboardOverlay activeHoldId={current?.kind === "hang" ? current.holdId : (phase === "countdown" && workout.steps[0].kind === "hang" ? (workout.steps[0] as Extract<typeof workout.steps[0], {kind:"hang"}>).holdId : null)} />
 

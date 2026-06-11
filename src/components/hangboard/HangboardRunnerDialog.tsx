@@ -101,9 +101,8 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
         if (nv <= 0) {
           tickedRef.current.clear();
           transitionBeep();
-          if (workout) setRemaining(workout.steps[0].seconds);
           setPhase("running");
-          return 0;
+          return workout ? workout.steps[0].seconds : 0;
         }
         return nv;
       });

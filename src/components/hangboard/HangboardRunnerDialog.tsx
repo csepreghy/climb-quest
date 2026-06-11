@@ -29,10 +29,12 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
   const [stepIdx, setStepIdx] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const [muted, setMutedState] = useState(isMuted());
+  const [celebration, setCelebration] = useState<{ chalk: number; totalSec: number } | null>(null);
   const tickedRef = useRef<Set<number>>(new Set());
   const completedHangSecRef = useRef(0);
   const perHoldSecRef = useRef<Record<string, number>>({});
   const transitioningRef = useRef(false);
+  const committedRef = useRef(false);
 
   // Load / reset whenever the dialog opens for a workout.
   useEffect(() => {

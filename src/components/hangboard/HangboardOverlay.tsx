@@ -17,6 +17,8 @@ interface Props {
   showLabels?: boolean;
   /** Admin/dev: outline every hold so positions are easy to tune. */
   debug?: boolean;
+  /** Crop ~5% padding off the image edges (scales contents up). */
+  crop?: boolean;
 }
 
 export function HangboardOverlay({

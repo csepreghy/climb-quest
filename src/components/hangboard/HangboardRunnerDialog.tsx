@@ -182,7 +182,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl w-[96vw] max-h-[95vh] overflow-y-auto overflow-x-hidden p-2 sm:p-4">
+      <DialogContent hideCloseButton className="max-w-3xl w-[96vw] max-h-[95vh] overflow-y-auto overflow-x-hidden p-2 sm:p-4">
         <VisuallyHidden><DialogTitle>{workout?.name ?? "Hangboard workout"}</DialogTitle></VisuallyHidden>
 
         {!workout ? (

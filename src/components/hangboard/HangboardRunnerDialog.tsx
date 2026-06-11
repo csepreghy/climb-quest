@@ -317,6 +317,34 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
           </div>
         )}
       </DialogContent>
+
+      <Dialog
+        open={celebrationOpen}
+        onOpenChange={(o) => {
+          setCelebrationOpen(o);
+          if (!o) onOpenChange(false);
+        }}
+      >
+        <DialogContent className="max-w-sm text-center">
+          <VisuallyHidden><DialogTitle>Workout complete</DialogTitle></VisuallyHidden>
+          {celebration && (
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="text-5xl animate-bounce">🎉</div>
+              <h2 className="text-2xl font-extrabold tracking-tight">Workout Complete!</h2>
+              <img src={chalkBagImg} alt="" className="h-20 w-20 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]" />
+              <div className="text-4xl font-extrabold tabular-nums text-[hsl(var(--btn-orange))]">
+                +{celebration.chalk} Chalk
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {celebration.totalSec}s of hang time
+              </div>
+              <GameButton variant="primary" size="md" onClick={() => { setCelebrationOpen(false); onOpenChange(false); }}>
+                Awesome!
+              </GameButton>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

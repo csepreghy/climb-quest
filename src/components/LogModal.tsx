@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import { ArrowLeft, Info, Swords, Trophy, Dumbbell, Timer, ChevronDown, Skull, P
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
 import pickBoulderImg from "@/assets/log-pick-boulder.webp";
+import hangboardPickImg from "@/assets/log-hangboard.webp.asset.json";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import bossImg from "@/assets/log-boss.webp";
 import strengthImg from "@/assets/log-strength.webp";
@@ -66,6 +68,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
   const [selectedBoss, setSelectedBoss] = useState<Boss | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (open) {
@@ -100,7 +103,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
             <DialogHeader>
               <DialogTitle>What are you logging?</DialogTitle>
             </DialogHeader>
-            <div className="grid sm:grid-cols-2 gap-3 mt-2">
+            <div className="grid sm:grid-cols-3 gap-3 mt-2">
               <PickCard
                 image={pickBoulderImg}
                 title="Boulder"
@@ -114,6 +117,13 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
                 desc="Core or pull-ups — track sets, reps, and rest."
                 onClick={() => setMode("strength")}
                 ring="ring-[hsl(var(--sky))]/60"
+              />
+              <PickCard
+                image={hangboardPickImg.url}
+                title="Hangboard"
+                desc="Beastmaker workouts — hangs count toward your Strength Tier."
+                onClick={() => { onOpenChange(false); navigate("/hangboard"); }}
+                ring="ring-[hsl(270_80%_65%)]/60"
               />
             </div>
           </>

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard } from "@/components/ui/game-card";
-import { Pause, Play, SkipForward, Volume2, VolumeX, X } from "lucide-react";
+import { Pause, Play, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { HangboardOverlay } from "@/components/hangboard/HangboardOverlay";
 import { holdLabel } from "@/game/hangboard/beastmaker1000";
 import { fetchWorkout } from "@/game/hangboard/api";

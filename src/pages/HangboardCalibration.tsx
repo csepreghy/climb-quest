@@ -49,6 +49,33 @@ export default function HangboardCalibration() {
     setHolds(prev => prev.map(h => h.id === selected.holdId ? { ...h, label } : h));
   }
 
+  function setSelectedNumber(num: number) {
+    if (!selected) return;
+    setHolds(prev => prev.map(h => h.id === selected.holdId ? { ...h, number: num } : h));
+  }
+
+  function addPositionToSelected() {
+    if (!selected) return;
+    setHolds(prev => prev.map(h => {
+      if (h.id !== selected.holdId) return h;
+      const last = h.positions[h.positions.length - 1] ?? { x: 45, y: 45, w: 10, h: 10 };
+      // Mirror horizontally around 50%
+      const mirroredX = clamp(100 - last.x - last.w, 0, 100 - last.w);
+      const newPos = { ...last, x: mirroredX };
+      return { ...h, positions: [...h.positions, newPos] };
+    }));
+    const h = holds.find(x => x.id === selected.holdId);
+    if (h) setSelected({ holdId: h.id, posIndex: h.positions.length });
+  }
+
+  function removeSelectedPosition() {
+    if (!selected) return;
+    const h = holds.find(x => x.id === selected.holdId);
+    if (!h || h.positions.length <= 1) return;
+    setHolds(prev => prev.map(x => x.id === h.id ? { ...x, positions: x.positions.filter((_, i) => i !== selected.posIndex) } : x));
+    setSelected({ holdId: h.id, posIndex: 0 });
+  }
+
   function addHold() {
     const nextNum = Math.max(0, ...holds.map(h => h.number)) + 1;
     const id = `custom_${Date.now().toString(36)}`;
@@ -203,20 +230,39 @@ export default function HangboardCalibration() {
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">Selected</div>
                 <div className="font-bold">#{selectedHold.number} · {selectedHold.label} · pos {selected!.posIndex + 1} / {selectedHold.positions.length}</div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {selectedHold.positions.length > 1 && (
                   <GameButton variant="ghost" size="sm" onClick={() => setSelected(s => s ? { ...s, posIndex: (s.posIndex + 1) % selectedHold.positions.length } : s)}>
                     Switch side
                   </GameButton>
                 )}
+                <GameButton variant="ghost" size="sm" onClick={addPositionToSelected}>
+                  <Plus className="h-4 w-4" /> Add position
+                </GameButton>
+                {selectedHold.positions.length > 1 && (
+                  <GameButton variant="ghost" size="sm" onClick={removeSelectedPosition}>
+                    <Trash2 className="h-4 w-4" /> Remove position
+                  </GameButton>
+                )}
                 {!BEASTMAKER_1000_HOLDS.some(b => b.id === selectedHold.id) && (
-                  <GameButton variant="danger" size="sm" onClick={deleteSelected}><Trash2 className="h-4 w-4" /> Delete</GameButton>
+                  <GameButton variant="danger" size="sm" onClick={deleteSelected}><Trash2 className="h-4 w-4" /> Delete hold</GameButton>
                 )}
               </div>
             </div>
-            <div>
-              <Label className="text-xs">Hold name</Label>
-              <Input value={selectedHold.label} onChange={e => renameSelected(e.target.value)} />
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-3">
+              <div>
+                <Label className="text-xs">Hold name</Label>
+                <Input value={selectedHold.label} onChange={e => renameSelected(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Number</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={selectedHold.number}
+                  onChange={e => setSelectedNumber(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <NumField label="x %" value={selectedPos.x} onChange={v => updateSelected({ x: v })} />

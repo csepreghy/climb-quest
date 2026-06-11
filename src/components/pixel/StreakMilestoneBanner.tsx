@@ -74,38 +74,38 @@ export function StreakMilestoneBanner() {
           {data.label}
         </div>
 
-        {data.chalkCache != null && data.chalkCache > 0 && (
-          <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-chalk-glow/50 bg-chalk-glow/10">
-            <img src={chalkBagImg} alt="" className="h-5 w-5 object-contain" />
-            <span className="font-bold tabular-nums gradient-chalk-text">+{data.chalkCache.toLocaleString()}</span>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk Cache</span>
-          </div>
-        )}
-
-        {data.buffs && data.buffs.length > 0 && (
-          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-            {data.buffs.map((b, i) => {
-              const Icon = b.kind === "chalk" ? Zap : b.kind === "crit" ? Target : ShieldPlus;
-              const label = b.kind === "chalk" ? "Chalk" : b.kind === "crit" ? "Crit" : "Daily cap";
-              return (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border border-chalk-glow/50 bg-chalk-glow/10 text-chalk-glow"
-                >
-                  <Icon className="h-3 w-3" />
-                  +{b.pct}% {label} · {b.days}d
+        {(data.chalkCache || (data.buffs && data.buffs.length > 0)) && (
+          <>
+            <div className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">You earned</div>
+            <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5">
+              {data.chalkCache != null && data.chalkCache > 0 && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-chalk-glow/50 bg-chalk-glow/10">
+                  <img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />
+                  <span className="font-bold tabular-nums gradient-chalk-text">+{data.chalkCache.toLocaleString()}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Chalk</span>
                 </span>
-              );
-            })}
-          </div>
+              )}
+              {data.buffs?.map((b, i) => {
+                const Icon = b.kind === "chalk" ? Zap : b.kind === "crit" ? Target : ShieldPlus;
+                const label = b.kind === "chalk" ? "Chalk" : b.kind === "crit" ? "Crit" : "Daily cap";
+                return (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border border-chalk-glow/50 bg-chalk-glow/10 text-chalk-glow"
+                  >
+                    <Icon className="h-3 w-3" />
+                    +{b.pct}% {label} · {b.days}d
+                  </span>
+                );
+              })}
+            </div>
+          </>
         )}
 
-        {(!data.buffs || data.buffs.length === 0) && !data.chalkCache && (
-          <div className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--btn-orange))]" />
-            Keep climbing to stack rewards.
-          </div>
-        )}
+        <div className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--btn-orange))]" />
+          Keep climbing — bigger rewards ahead!
+        </div>
       </div>
     </div>
   );

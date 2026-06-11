@@ -49,6 +49,33 @@ export default function HangboardCalibration() {
     setHolds(prev => prev.map(h => h.id === selected.holdId ? { ...h, label } : h));
   }
 
+  function setSelectedNumber(num: number) {
+    if (!selected) return;
+    setHolds(prev => prev.map(h => h.id === selected.holdId ? { ...h, number: num } : h));
+  }
+
+  function addPositionToSelected() {
+    if (!selected) return;
+    setHolds(prev => prev.map(h => {
+      if (h.id !== selected.holdId) return h;
+      const last = h.positions[h.positions.length - 1] ?? { x: 45, y: 45, w: 10, h: 10 };
+      // Mirror horizontally around 50%
+      const mirroredX = clamp(100 - last.x - last.w, 0, 100 - last.w);
+      const newPos = { ...last, x: mirroredX };
+      return { ...h, positions: [...h.positions, newPos] };
+    }));
+    const h = holds.find(x => x.id === selected.holdId);
+    if (h) setSelected({ holdId: h.id, posIndex: h.positions.length });
+  }
+
+  function removeSelectedPosition() {
+    if (!selected) return;
+    const h = holds.find(x => x.id === selected.holdId);
+    if (!h || h.positions.length <= 1) return;
+    setHolds(prev => prev.map(x => x.id === h.id ? { ...x, positions: x.positions.filter((_, i) => i !== selected.posIndex) } : x));
+    setSelected({ holdId: h.id, posIndex: 0 });
+  }
+
   function addHold() {
     const nextNum = Math.max(0, ...holds.map(h => h.number)) + 1;
     const id = `custom_${Date.now().toString(36)}`;

@@ -71,6 +71,7 @@ export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
           </>
         )}
       </div>
+      <HangboardRunnerDialog workoutId={runOpen ? workout.id : null} open={runOpen} onOpenChange={setRunOpen} />
     </GameCard>
   );
 }

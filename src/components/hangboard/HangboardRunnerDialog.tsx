@@ -299,7 +299,8 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                       )}
                       {phase === "finished" && (
                         <GameButton variant="primary" size="md" onClick={() => {
-                          if (!celebration) onOpenChange(false);
+                          if (celebration) setCelebrationOpen(true);
+                          else onOpenChange(false);
                         }}>Done</GameButton>
                       )}
                     </div>

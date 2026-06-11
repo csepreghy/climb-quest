@@ -193,9 +193,6 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                 <GameButton variant="ghost" size="sm" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
                   {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </GameButton>
-                <GameButton variant="ghost" size="sm" onClick={() => onOpenChange(false)} aria-label="Close">
-                  <X className="h-4 w-4" />
-                </GameButton>
               </div>
             </div>
 

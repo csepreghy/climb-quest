@@ -26,15 +26,12 @@ function summarise(steps: HangStep[]): { hangs: number; rest: number; holds: num
 export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
   const nav = useNavigate();
   const [runOpen, setRunOpen] = useState(false);
+  const [holdsOpen, setHoldsOpen] = useState(false);
   const s = summarise(workout.steps);
   const totalSec = s.hangs + s.rest;
   const minutes = Math.floor(totalSec / 60);
   const seconds = totalSec % 60;
-  const preview = workout.steps
-    .filter(st => st.kind === "hang")
-    .slice(0, 3)
-    .map(st => st.kind === "hang" ? holdLabel(st.holdId) : "")
-    .join(" • ");
+  const hangSteps = workout.steps.filter(st => st.kind === "hang") as Extract<HangStep, { kind: "hang" }>[];
 
   return (
     <GameCard className="p-4 flex flex-col gap-3">
@@ -52,9 +49,28 @@ export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
       <div className="text-xs text-muted-foreground space-y-0.5">
         <div>{workout.steps.length} steps · {s.holds} hold{s.holds === 1 ? "" : "s"} · {minutes}:{seconds.toString().padStart(2, "0")}</div>
         <div>Hang {s.hangs}s · Rest {s.rest}s</div>
-        {preview && <div className="truncate">{preview}{workout.steps.filter(x => x.kind === "hang").length > 3 ? "…" : ""}</div>}
       </div>
-      <div className="flex items-center gap-2 mt-auto">
+      {hangSteps.length > 0 && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setHoldsOpen(o => !o)}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            aria-expanded={holdsOpen}
+          >
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${holdsOpen ? "rotate-180" : ""}`} />
+            {holdsOpen ? "Hide holds" : `Show holds (${hangSteps.length})`}
+          </button>
+          {holdsOpen && (
+            <ul className="mt-1.5 text-xs text-muted-foreground space-y-0.5 pl-4 list-disc">
+              {hangSteps.map((st, i) => (
+                <li key={i}>{holdLabel(st.holdId)} · {st.seconds}s</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      <div className="flex items-center gap-2 mt-4">
         <GameButton variant="primary" size="sm" onClick={() => setRunOpen(true)}>
           <Play className="h-4 w-4" /> Start
         </GameButton>

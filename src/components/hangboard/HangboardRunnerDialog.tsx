@@ -60,6 +60,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
     if (phase !== "running" || !current) return;
     const iv = setInterval(() => {
       setRemaining(prev => {
+        if (transitioningRef.current || prev <= 0) return prev;
         const nv = prev - 1;
         if (current.kind === "hang") {
           completedHangSecRef.current += 1;
@@ -69,13 +70,17 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
           if (!tickedRef.current.has(nv)) { tickedRef.current.add(nv); tickBeep(); }
         }
         if (nv <= 0) {
-          tickedRef.current.clear();
-          transitionBeep();
-          setStepIdx(i => {
-            const ni = i + 1;
-            if (!workout || ni >= workout.steps.length) { setPhase("finished"); return i; }
-            return ni;
-          });
+          transitioningRef.current = true;
+          setTimeout(() => {
+            transitionBeep();
+            tickedRef.current.clear();
+            transitioningRef.current = false;
+            setStepIdx(i => {
+              const ni = i + 1;
+              if (!workout || ni >= workout.steps.length) { setPhase("finished"); return i; }
+              return ni;
+            });
+          }, 500);
           return 0;
         }
         return nv;
@@ -95,15 +100,21 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
     if (phase !== "countdown") return;
     const iv = setInterval(() => {
       setRemaining(prev => {
+        if (transitioningRef.current || prev <= 0) return prev;
         const nv = prev - 1;
         if (nv === 2 || nv === 1) {
           if (!tickedRef.current.has(nv)) { tickedRef.current.add(nv); tickBeep(); }
         }
         if (nv <= 0) {
-          tickedRef.current.clear();
-          transitionBeep();
-          setPhase("running");
-          return workout ? workout.steps[0].seconds : 0;
+          transitioningRef.current = true;
+          setTimeout(() => {
+            transitionBeep();
+            tickedRef.current.clear();
+            transitioningRef.current = false;
+            setPhase("running");
+            setRemaining(workout ? workout.steps[0].seconds : 0);
+          }, 500);
+          return 0;
         }
         return nv;
       });

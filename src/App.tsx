@@ -17,7 +17,7 @@ import Landing from "./pages/Landing";
 import Leaderboard from "./pages/Leaderboard";
 import Hangboard from "./pages/Hangboard";
 import HangboardBuilder from "./pages/HangboardBuilder";
-import HangboardRunner from "./pages/HangboardRunner";
+import HangboardCalibration from "./pages/HangboardCalibration";
 import { GameBackground } from "./components/pixel/GameBackground";
 import { LevelUpBanner } from "./components/pixel/LevelUpBanner";
 import { BadgeUnlockBanner } from "./components/pixel/BadgeUnlockBanner";
@@ -57,9 +57,10 @@ const App = () => (
                 <Route path="/hangboard" element={<Hangboard />} />
                 <Route path="/hangboard/new" element={<HangboardBuilder />} />
                 <Route path="/hangboard/edit/:id" element={<HangboardBuilder />} />
-                <Route path="/hangboard/run/:id" element={<HangboardRunner />} />
+                <Route path="/hangboard/run/:id" element={<Hangboard />} />
                 <Route element={<RequireAdmin />}>
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/admin/hangboard-calibration" element={<HangboardCalibration />} />
                 </Route>
               </Route>
             </Route>

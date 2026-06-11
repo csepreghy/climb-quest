@@ -17,6 +17,7 @@ export default function HangboardBuilder() {
   const { id } = useParams();
   const { user, isAdmin } = useAuth();
   const nav = useNavigate();
+  const holdLabel = useHoldLabel();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isTemplate, setIsTemplate] = useState(false);

@@ -188,11 +188,11 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Hangboard</div>
-                <h2 className="text-lg sm:text-2xl font-bold tracking-tight truncate">{workout.name}</h2>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="min-w-0 flex items-center gap-2">
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Hangboard</div>
+                  <h2 className="text-lg sm:text-2xl font-bold tracking-tight truncate">{workout.name}</h2>
+                </div>
                 <GameButton variant="ghost" size="sm" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
                   {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </GameButton>

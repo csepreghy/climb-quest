@@ -278,24 +278,24 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                   </div>
 
                   {/* Right: buttons stacked vertically to keep the row compact */}
-                  <div className="flex flex-col gap-2 shrink-0">
+                  <div className="flex flex-col gap-1.5 shrink-0">
                     {phase === "ready" && (
-                      <GameButton variant="primary" size="md" onClick={start}><Play className="h-4 w-4" /> Start</GameButton>
+                      <GameButton variant="primary" size="sm" onClick={start} aria-label="Start"><Play className="h-4 w-4" /><span className="hidden sm:inline ml-1">Start</span></GameButton>
                     )}
                     {(phase === "running" || phase === "countdown") && (
                       <>
-                        <GameButton variant="primary" size="sm" onClick={pause}><Pause className="h-4 w-4" /> Pause</GameButton>
-                        <GameButton variant="primary" size="sm" onClick={skip}><SkipForward className="h-4 w-4" /> Skip</GameButton>
+                        <GameButton variant="primary" size="sm" onClick={pause} aria-label="Pause"><Pause className="h-4 w-4" /><span className="hidden sm:inline ml-1">Pause</span></GameButton>
+                        <GameButton variant="primary" size="sm" onClick={skip} aria-label="Skip"><SkipForward className="h-4 w-4" /><span className="hidden sm:inline ml-1">Skip</span></GameButton>
                       </>
                     )}
                     {phase === "paused" && (
                       <>
-                        <GameButton variant="primary" size="sm" onClick={resume}><Play className="h-4 w-4" /> Resume</GameButton>
+                        <GameButton variant="primary" size="sm" onClick={resume} aria-label="Resume"><Play className="h-4 w-4" /><span className="hidden sm:inline ml-1">Resume</span></GameButton>
                         <GameButton variant="danger" size="sm" onClick={stop}>Stop</GameButton>
                       </>
                     )}
                     {phase === "finished" && (
-                      <GameButton variant="primary" size="md" onClick={() => {
+                      <GameButton variant="primary" size="sm" onClick={() => {
                         if (celebration) setCelebrationOpen(true);
                         else onOpenChange(false);
                       }}>Done</GameButton>

@@ -10,6 +10,7 @@ import type { HangStep, HangboardWorkout } from "@/game/hangboard/types";
 import { commitHangboardSession, CHALK_PER_HANG_SECOND } from "@/game/hangboard/rewards";
 import { primeAudio, tickBeep, transitionBeep, finishBeep, isMuted, setMuted } from "@/game/hangboard/audio";
 import { toast } from "sonner";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 type Phase = "ready" | "running" | "paused" | "finished";
 
@@ -94,7 +95,7 @@ export default function HangboardRunner() {
         totalHangSeconds: total,
         holds,
       });
-      toast.success(`Workout done! +${chalk} Chalk · ${total}s of hang`);
+      toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />Workout done! +{chalk} Chalk · {total}s of hang</div>);
     } else {
       toast.info("Workout ended");
     }

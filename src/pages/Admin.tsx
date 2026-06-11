@@ -11,6 +11,7 @@ import { adminAdjustChalk, adminSetLevel, adminSetIgnoreLevelReq, adminSeedMockD
 import { useAuth } from "@/hooks/useAuth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import chalkBagImg from "@/assets/chalk-bag.png";
 import { Plus, Minus, Upload, Trash2, Pencil, Copy, X, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive, Bell } from "lucide-react";
 import { AdminNotificationsPanel } from "@/components/notifications/AdminNotificationsPanel";
 import { SnapshotsAdmin } from "@/components/admin/SnapshotsAdmin";
@@ -138,7 +139,7 @@ export default function Admin() {
                   variant={day === 7 ? "secondary" : "default"}
                   onClick={() => {
                     const r = adminTriggerStreakReward(day);
-                    toast.success(r.bannerLabel + (r.chalkCache > 0 ? ` (+${r.chalkCache} Chalk)` : ""));
+                    toast.success(<div className="flex items-center gap-1.5">{r.bannerLabel}{r.chalkCache > 0 ? <><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />(+{r.chalkCache} Chalk)</> : ""}</div>);
                   }}
                 >
                   Day {day}
@@ -179,10 +180,10 @@ export default function Admin() {
             <div className="text-sm text-muted-foreground mb-3">Current balance: <span className="gradient-chalk-text font-bold tabular-nums">{s.chalk.toLocaleString()}</span></div>
             <div className="flex gap-2">
               <Input type="number" value={amount} min={1} onChange={e => setAmount(parseInt(e.target.value) || 0)} className="max-w-32" />
-              <Button variant="default" onClick={() => { adminAdjustChalk(amount); toast.success(`+${amount} Chalk`); }}>
+              <Button variant="default" onClick={() => { adminAdjustChalk(amount); toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{amount} Chalk</div>); }}>
                 <Plus className="h-4 w-4" /> Add
               </Button>
-              <Button variant="secondary" onClick={() => { adminAdjustChalk(-amount); toast.info(`-${amount} Chalk`); }}>
+              <Button variant="secondary" onClick={() => { adminAdjustChalk(-amount); toast.info(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />-{amount} Chalk</div>); }}>
                 <Minus className="h-4 w-4" /> Subtract
               </Button>
             </div>

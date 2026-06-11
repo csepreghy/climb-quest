@@ -150,6 +150,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
     tickedRef.current.clear();
     completedHangSecRef.current = 0;
     perHoldSecRef.current = {};
+    transitioningRef.current = false;
     setRemaining(READY_SECONDS);
     setPhase("countdown");
   }
@@ -157,6 +158,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
   function pause() { setPhase("paused"); }
   function resume() { setPhase("running"); }
   function skip() {
+    transitioningRef.current = false;
     setStepIdx(i => {
       const ni = i + 1;
       if (!workout || ni >= workout.steps.length) { setPhase("finished"); return i; }

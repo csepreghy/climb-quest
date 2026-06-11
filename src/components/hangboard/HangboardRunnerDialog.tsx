@@ -30,6 +30,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
   const [remaining, setRemaining] = useState(0);
   const [muted, setMutedState] = useState(isMuted());
   const [celebration, setCelebration] = useState<{ chalk: number; totalSec: number } | null>(null);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
   const tickedRef = useRef<Set<number>>(new Set());
   const completedHangSecRef = useRef(0);
   const perHoldSecRef = useRef<Record<string, number>>({});

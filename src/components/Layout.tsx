@@ -600,7 +600,7 @@ function DailyLoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
           <DialogDescription asChild>
             <div className="space-y-3 pt-1">
               <div>
-                You earned <span className="font-bold gradient-chalk-text">+{DAILY_LOGIN_REWARD} Chalk</span> just for showing up today.
+                You earned <span className="inline-flex items-center gap-1 font-bold gradient-chalk-text"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{DAILY_LOGIN_REWARD} Chalk</span> just for showing up today.
               </div>
 
               {streakCfg.enabled && (

@@ -28,6 +28,7 @@ export function HangboardOverlay({
   className,
   showLabels = true,
   debug = false,
+  crop = false,
 }: Props) {
   const effective = useEffectiveHolds();
   const holds = holdsProp ?? effective;

@@ -101,6 +101,7 @@ export function HangboardOverlay({
             );
           });
         })}
+        </div>
       </div>
     </div>
   );

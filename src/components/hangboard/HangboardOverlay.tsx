@@ -27,6 +27,7 @@ export function HangboardOverlay({
   debug = false,
 }: Props) {
   const [hoverId, setHoverId] = useState<string | null>(null);
+  const [hoverPos, setHoverPos] = useState<string | null>(null);
   const interactive = !!onSelect;
   const resolvedActiveId = activeHoldId ? resolveHoldId(activeHoldId) : null;
 

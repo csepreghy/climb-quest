@@ -47,6 +47,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
       completedHangSecRef.current = 0;
       perHoldSecRef.current = {};
       transitioningRef.current = false;
+      committedRef.current = false;
       return;
     }
     fetchWorkout(workoutId).then(w => {

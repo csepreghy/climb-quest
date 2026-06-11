@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { BEASTMAKER_1000_HOLDS, resolveHoldId, type HangboardHold } from "@/game/hangboard/beastmaker1000";
-import boardAsset from "@/assets/hangboard-beastmaker1000.png.asset.json";
+import boardAsset from "@/assets/hangboard-beastmaker1000.webp.asset.json";
 
 interface Props {
   /** Holds to render — defaults to the Beastmaker 1000 set. */

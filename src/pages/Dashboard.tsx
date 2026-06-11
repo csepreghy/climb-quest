@@ -19,7 +19,7 @@ import { tierFor } from "@/game/strengthTier";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
-import { Plus, ArrowUp, Trophy, TrendingUp, Backpack, ShoppingBag, ChevronRight, Dumbbell } from "lucide-react";
+import { Plus, ArrowUp, Trophy, TrendingUp, ChevronRight, Dumbbell } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";

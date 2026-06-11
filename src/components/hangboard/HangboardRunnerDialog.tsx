@@ -10,7 +10,7 @@ import { fetchWorkout } from "@/game/hangboard/api";
 import type { HangboardWorkout } from "@/game/hangboard/types";
 import { commitHangboardSession } from "@/game/hangboard/rewards";
 import { primeAudio, tickBeep, transitionBeep, finishBeep, isMuted, setMuted } from "@/game/hangboard/audio";
-import { toast } from "sonner";
+
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 type Phase = "ready" | "countdown" | "running" | "paused" | "finished";

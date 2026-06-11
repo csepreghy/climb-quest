@@ -44,6 +44,36 @@ export default function HangboardCalibration() {
     }));
   }
 
+  function renameSelected(label: string) {
+    if (!selected) return;
+    setHolds(prev => prev.map(h => h.id === selected.holdId ? { ...h, label } : h));
+  }
+
+  function addHold() {
+    const nextNum = Math.max(0, ...holds.map(h => h.number)) + 1;
+    const id = `custom_${Date.now().toString(36)}`;
+    const newHold: HangboardHold = {
+      id, number: nextNum, label: `New hold ${nextNum}`, type: "edge",
+      positions: [{ x: 45, y: 45, w: 10, h: 10 }],
+    };
+    setHolds(prev => [...prev, newHold]);
+    setSelected({ holdId: id, posIndex: 0 });
+  }
+
+  function deleteSelected() {
+    if (!selected) return;
+    const h = holds.find(x => x.id === selected.holdId);
+    if (!h) return;
+    const isBase = BEASTMAKER_1000_HOLDS.some(b => b.id === h.id);
+    if (isBase) {
+      toast.error("Built-in holds can't be deleted. You can rename or reposition them.");
+      return;
+    }
+    if (!confirm(`Delete "${h.label}"?`)) return;
+    setHolds(prev => prev.filter(x => x.id !== h.id));
+    setSelected(null);
+  }
+
   function startDrag(e: React.PointerEvent, mode: DragMode) {
     if (!selectedPos || !boardRef.current) return;
     e.preventDefault();

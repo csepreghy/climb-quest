@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useGame, deleteLog, deleteStrengthSession, BoulderLog } from "@/game/store";
 import { ACTIVITY_LABELS } from "@/game/data";
 import { useAllGyms as useGyms } from "@/game/allGyms";
@@ -12,9 +13,10 @@ import { Plus, Swords, Sparkles, Filter, Pencil, Trash2, Dumbbell } from "lucide
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import Hangboard from "@/pages/Hangboard";
 
 type EntryFilter = "all" | "boulder" | "boss";
-type Tab = "boulders" | "strength";
+type Tab = "boulders" | "strength" | "hangboard";
 
 export default function BoulderLogs() {
   const s = useGame();

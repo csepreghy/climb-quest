@@ -33,9 +33,7 @@ const NAV_BASE = [
   { to: "/inventory", label: "Inventory", icon: Backpack },
   { to: "/shop", label: "Shop", icon: Store },
   { to: "/log", label: "Logs", icon: ScrollText },
-  
   { to: "/gym", label: "My Gym", mobileLabel: "Gym", icon: Building2 },
-  { to: "/hangboard", label: "Hangboard", mobileLabel: "Board", icon: Dumbbell },
   { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
 const NAV_ADMIN = { to: "/admin", label: "Admin", icon: Settings };

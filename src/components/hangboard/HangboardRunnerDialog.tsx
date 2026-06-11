@@ -228,10 +228,10 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                 : phase === "finished" ? "Finished"
                 : current?.kind === "hang" ? "HANG" : "REST";
               return (
-                <GameCard tone="accent" className="p-3 sm:p-4">
-                  <div className="flex items-center gap-3 sm:gap-5">
-                    {/* Left: shrinking ring */}
-                    <div className="relative shrink-0" style={{ width: size, height: size }}>
+                <div className="flex items-center gap-3 sm:gap-5">
+                  {/* Left: shrinking ring inside its own compact card */}
+                  <GameCard tone="accent" className="p-2 sm:p-3 shrink-0">
+                    <div className="relative" style={{ width: size, height: size }}>
                       <svg width={size} height={size} className="-rotate-90">
                         <circle cx={size/2} cy={size/2} r={r} stroke="hsl(var(--muted))" strokeWidth={stroke} fill="none" opacity={0.3} />
                         <circle
@@ -250,55 +250,55 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                         </div>
                       </div>
                     </div>
+                  </GameCard>
 
-                    {/* Right: phase, current hang, next, buttons */}
-                    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-                      <div className={`text-[10px] uppercase tracking-wider ${phase === "countdown" ? "text-foreground" : phaseColor}`}>
-                        {phaseLabel}
-                        {phase !== "countdown" && phase !== "finished" && (
-                          <span className="ml-2 text-muted-foreground normal-case tracking-normal">
-                            {Math.min(stepIdx + 1, workout.steps.length)}/{workout.steps.length}
-                          </span>
-                        )}
-                      </div>
-
-                      {currentHangLabel ? (
-                        <div className="text-2xl sm:text-3xl font-extrabold leading-tight text-fuchsia-500 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-                          {currentHangLabel}
-                        </div>
-                      ) : current?.kind === "rest" ? (
-                        <div className="text-xl sm:text-2xl font-bold text-[hsl(var(--sky))]">Catch your breath</div>
-                      ) : null}
-
-                      {nextHang && phase !== "finished" && (
-                        <div className="text-xs sm:text-sm text-muted-foreground truncate">
-                          Next: <span className="font-semibold text-foreground">{holdLabel(nextHang.holdId)}</span>
-                        </div>
+                  {/* Right: phase, current hang, next, buttons */}
+                  <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                    <div className={`text-[10px] uppercase tracking-wider ${phase === "countdown" ? "text-foreground" : phaseColor}`}>
+                      {phaseLabel}
+                      {phase !== "countdown" && phase !== "finished" && (
+                        <span className="ml-2 text-muted-foreground normal-case tracking-normal">
+                          {Math.min(stepIdx + 1, workout.steps.length)}/{workout.steps.length}
+                        </span>
                       )}
+                    </div>
 
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {phase === "ready" && (
-                          <GameButton variant="primary" size="lg" onClick={start}><Play className="h-5 w-5" /> Start</GameButton>
-                        )}
-                        {(phase === "running" || phase === "countdown") && (
-                          <>
-                            <GameButton variant="primary" size="lg" onClick={pause}><Pause className="h-5 w-5" /> Pause</GameButton>
-                            <GameButton variant="primary" size="lg" onClick={skip}><SkipForward className="h-5 w-5" /> Skip</GameButton>
-                          </>
-                        )}
-                        {phase === "paused" && (
-                          <>
-                            <GameButton variant="primary" size="lg" onClick={resume}><Play className="h-5 w-5" /> Resume</GameButton>
-                            <GameButton variant="danger" size="lg" onClick={stop}>Stop</GameButton>
-                          </>
-                        )}
-                        {phase === "finished" && (
-                          <GameButton variant="primary" size="md" onClick={() => onOpenChange(false)}>Done</GameButton>
-                        )}
+                    {currentHangLabel ? (
+                      <div className="text-2xl sm:text-3xl font-extrabold leading-tight text-fuchsia-500 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+                        {currentHangLabel}
                       </div>
+                    ) : current?.kind === "rest" ? (
+                      <div className="text-xl sm:text-2xl font-bold text-[hsl(var(--sky))]">Catch your breath</div>
+                    ) : null}
+
+                    {nextHang && phase !== "finished" && (
+                      <div className="text-xs sm:text-sm text-muted-foreground truncate">
+                        Next: <span className="font-semibold text-foreground">{holdLabel(nextHang.holdId)}</span>
+                      </div>
+                    )}
+
+                    <div className="flex flex-nowrap gap-2 mt-1">
+                      {phase === "ready" && (
+                        <GameButton variant="primary" size="md" onClick={start}><Play className="h-4 w-4" /> Start</GameButton>
+                      )}
+                      {(phase === "running" || phase === "countdown") && (
+                        <>
+                          <GameButton variant="primary" size="sm" onClick={pause}><Pause className="h-4 w-4" /> Pause</GameButton>
+                          <GameButton variant="primary" size="sm" onClick={skip}><SkipForward className="h-4 w-4" /> Skip</GameButton>
+                        </>
+                      )}
+                      {phase === "paused" && (
+                        <>
+                          <GameButton variant="primary" size="sm" onClick={resume}><Play className="h-4 w-4" /> Resume</GameButton>
+                          <GameButton variant="danger" size="sm" onClick={stop}>Stop</GameButton>
+                        </>
+                      )}
+                      {phase === "finished" && (
+                        <GameButton variant="primary" size="md" onClick={() => onOpenChange(false)}>Done</GameButton>
+                      )}
                     </div>
                   </div>
-                </GameCard>
+                </div>
               );
             })()}
 

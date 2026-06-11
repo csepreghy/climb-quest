@@ -98,11 +98,11 @@ export default function HangboardBuilder() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Default hang (s)</Label>
+                <Label>Hang</Label>
                 <Input type="number" min={1} max={120} value={defaultHang} onChange={e => setDefaultHang(Math.max(1, Number(e.target.value) || 0))} />
               </div>
               <div>
-                <Label>Default rest (s)</Label>
+                <Label>Rest</Label>
                 <Input type="number" min={1} max={600} value={defaultRest} onChange={e => setDefaultRest(Math.max(1, Number(e.target.value) || 0))} />
               </div>
             </div>
@@ -116,10 +116,10 @@ export default function HangboardBuilder() {
 
           <GameCard className="p-3">
             <HangboardOverlay onSelect={h => addHang(h.id)} />
-            <div className="flex items-center justify-between mt-3 px-1">
+            <div className="flex items-center justify-between gap-2 mt-3 px-1">
               <p className="text-xs text-muted-foreground">Tap a hold to add a {defaultHang}s hang.</p>
-              <GameButton variant="ghost" size="sm" onClick={addRest}>
-                <Plus className="h-4 w-4" /> Rest {defaultRest}s
+              <GameButton variant="primary" size="md" onClick={addRest}>
+                <Plus className="h-4 w-4" /> Add Rest ({defaultRest}s)
               </GameButton>
             </div>
           </GameCard>
@@ -191,28 +191,21 @@ export default function HangboardBuilder() {
                         </label>
                       )}
 
-                      <label className="flex items-center gap-1 text-xs text-[hsl(var(--sky))]">
-                        <span className="font-semibold uppercase tracking-wider">Rest</span>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={600}
-                          value={rest ? rest.seconds : defaultRest}
-                          placeholder={String(defaultRest)}
-                          onChange={e => {
-                            const v = Math.max(0, Number(e.target.value) || 0);
-                            if (rest) {
-                              if (v === 0) removeIdx(row.restIdx!);
-                              else updateStep(row.restIdx!, { seconds: v } as Partial<HangStep>);
-                            } else if (hang && v > 0) {
-                              addRestAfter(row.hangIdx!, v);
-                            }
-                          }}
-                          className="w-16 h-8"
-                          aria-label={`Rest seconds after step ${rIdx + 1}`}
-                        />
-                        <span>s</span>
-                      </label>
+                      {!hang && rest && (
+                        <label className="flex items-center gap-1 text-xs text-[hsl(var(--sky))]">
+                          <span className="font-semibold uppercase tracking-wider">Rest</span>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={600}
+                            value={rest.seconds}
+                            onChange={e => updateStep(row.restIdx!, { seconds: Math.max(1, Number(e.target.value) || 0) } as Partial<HangStep>)}
+                            className="w-16 h-8"
+                            aria-label={`Rest seconds for step ${rIdx + 1}`}
+                          />
+                          <span>s</span>
+                        </label>
+                      )}
 
                       <button onClick={() => move(primaryIdx, -1)} className="text-muted-foreground hover:text-foreground" aria-label="Move up"><ArrowUp className="h-4 w-4" /></button>
                       <button onClick={() => move(primaryIdx, 1)} className="text-muted-foreground hover:text-foreground" aria-label="Move down"><ArrowDown className="h-4 w-4" /></button>

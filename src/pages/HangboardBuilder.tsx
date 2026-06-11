@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, ArrowUp, ArrowDown, Save } from "lucide-react";
 import { HangboardOverlay } from "@/components/hangboard/HangboardOverlay";
-import { holdLabel } from "@/game/hangboard/beastmaker1000";
+import { useHoldLabel } from "@/game/hangboard/calibration";
 import type { HangStep } from "@/game/hangboard/types";
 import { fetchWorkout, saveWorkout } from "@/game/hangboard/api";
 import { useAuth } from "@/hooks/useAuth";

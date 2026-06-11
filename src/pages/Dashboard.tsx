@@ -73,19 +73,19 @@ export default function Dashboard() {
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
               <GameButton variant="success" onClick={() => { setLogInitialMode("boulder-pick"); setLogOpen(true); }}>
-                <Plus className="h-4 w-4" /> Log boulder
+                <Plus className="h-4 w-4" /> Boulder
               </GameButton>
               <GameButton variant="success" onClick={() => { setLogInitialMode("strength"); setLogOpen(true); }}>
-                <Dumbbell className="h-4 w-4" /> Log strength
+                <Plus className="h-4 w-4" /> Strength
               </GameButton>
+              <Link to="/hangboard">
+                <GameButton variant="success"><Plus className="h-4 w-4" /> Hangboard</GameButton>
+              </Link>
               {next && s.chalk >= next.cost && (
                 <GameButton variant="primary" onClick={onLevelUp}>
                   <ArrowUp className="h-4 w-4" /> Level Up
                 </GameButton>
               )}
-              <Link to="/hangboard">
-                <GameButton variant="success"><Dumbbell className="h-4 w-4" /> Log hangboard</GameButton>
-              </Link>
             </div>
           </div>
         </div>

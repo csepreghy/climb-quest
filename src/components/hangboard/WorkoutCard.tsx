@@ -91,8 +91,8 @@ export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
       )}
 
       <div className="flex items-center gap-2 mt-auto pt-2">
-        <GameButton variant="primary" size="sm" onClick={() => setRunOpen(true)}>
-          <Play className="h-4 w-4" /> Start
+        <GameButton variant="success" size="sm" className="w-9 px-0" onClick={() => setRunOpen(true)} aria-label="Start">
+          <Play className="h-4 w-4" />
         </GameButton>
         {canEdit && (
           <>

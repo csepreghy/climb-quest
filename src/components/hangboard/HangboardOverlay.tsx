@@ -45,48 +45,52 @@ export function HangboardOverlay({
         {holds.flatMap(h => {
           const isActive = h.id === resolvedActiveId;
           const isHover = h.id === hoverId;
-          return h.positions.map((p, i) => (
-            <button
-              key={`${h.id}-${i}`}
-              type="button"
-              disabled={!interactive}
-              onMouseEnter={() => setHoverId(h.id)}
-              onMouseLeave={() => setHoverId(null)}
-              onFocus={() => setHoverId(h.id)}
-              onBlur={() => setHoverId(null)}
-              onClick={() => onSelect?.(h)}
-              aria-label={h.label}
-              title={h.label}
-              className={cn(
-                "absolute rounded-full transition-all flex items-center justify-center",
-                interactive && "cursor-pointer",
-                isActive
-                  ? "ring-4 ring-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/30 animate-pulse"
-                  : isHover && interactive
-                    ? "ring-2 ring-white/90 bg-white/15"
-                    : debug
-                      ? "ring-1 ring-cyan-400/70 bg-cyan-400/10"
-                      : "ring-2 ring-white/0 hover:ring-white/60 bg-transparent",
-              )}
-              style={{
-                left: `${p.x}%`,
-                top: `${p.y}%`,
-                width: `${p.w}%`,
-                height: `${p.h}%`,
-              }}
-            >
-              {showLabels && (isActive || (isHover && interactive) || debug) && (
-                <>
+          return h.positions.map((p, i) => {
+            const posKey = `${h.id}-${i}`;
+            const showLabelHere = (isActive && i === 0) || hoverPos === posKey || (debug && i === 0);
+            return (
+              <button
+                key={posKey}
+                type="button"
+                disabled={!interactive}
+                onMouseEnter={() => { setHoverId(h.id); setHoverPos(posKey); }}
+                onMouseLeave={() => { setHoverId(null); setHoverPos(null); }}
+                onFocus={() => { setHoverId(h.id); setHoverPos(posKey); }}
+                onBlur={() => { setHoverId(null); setHoverPos(null); }}
+                onClick={() => onSelect?.(h)}
+                aria-label={h.label}
+                title={h.label}
+                className={cn(
+                  "absolute rounded-full transition-all flex items-center justify-center",
+                  interactive && "cursor-pointer",
+                  isActive
+                    ? "ring-4 ring-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/30 animate-pulse"
+                    : isHover && interactive
+                      ? "ring-2 ring-white/90 bg-white/15"
+                      : debug
+                        ? "ring-1 ring-cyan-400/70 bg-cyan-400/10"
+                        : "ring-2 ring-white/0 hover:ring-white/60 bg-transparent",
+                )}
+                style={{
+                  left: `${p.x}%`,
+                  top: `${p.y}%`,
+                  width: `${p.w}%`,
+                  height: `${p.h}%`,
+                }}
+              >
+                {showLabels && (isActive || (isHover && interactive) || debug) && (
                   <span className="text-sm sm:text-base font-extrabold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] tabular-nums">
                     {h.number}
                   </span>
+                )}
+                {showLabels && showLabelHere && (
                   <span className="absolute inset-x-0 -bottom-5 text-[10px] sm:text-xs font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] text-center whitespace-nowrap">
                     {h.label}
                   </span>
-                </>
-              )}
-            </button>
-          ));
+                )}
+              </button>
+            );
+          });
         })}
       </div>
     </div>

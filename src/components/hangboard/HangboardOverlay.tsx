@@ -17,6 +17,8 @@ interface Props {
   showLabels?: boolean;
   /** Admin/dev: outline every hold so positions are easy to tune. */
   debug?: boolean;
+  /** Crop ~5% padding off the image edges (scales contents up). */
+  crop?: boolean;
 }
 
 export function HangboardOverlay({
@@ -26,6 +28,7 @@ export function HangboardOverlay({
   className,
   showLabels = true,
   debug = false,
+  crop = false,
 }: Props) {
   const effective = useEffectiveHolds();
   const holds = holdsProp ?? effective;
@@ -35,16 +38,23 @@ export function HangboardOverlay({
   const resolvedActiveId = activeHoldId ? resolveHoldId(activeHoldId) : null;
 
   return (
-    <div className={cn("relative w-full max-w-3xl mx-auto select-none", className)}>
-      <img
-        src={boardAsset.url}
-        alt="Beastmaker 1000 hangboard"
-        width={1920}
-        height={640}
-        className="block w-full h-auto rounded-xl border-2 border-[hsl(var(--panel-frame))] shadow-lg"
-        draggable={false}
-      />
-      <div className="absolute inset-0">
+    <div
+      className={cn(
+        "relative w-full max-w-3xl mx-auto select-none rounded-xl border-2 border-[hsl(var(--panel-frame))] shadow-lg",
+        crop && "overflow-hidden",
+        className,
+      )}
+    >
+      <div className={cn("relative", crop && "scale-[1.06] origin-center")}>
+        <img
+          src={boardAsset.url}
+          alt="Beastmaker 1000 hangboard"
+          width={1920}
+          height={640}
+          className={cn("block w-full h-auto", !crop && "rounded-[10px]")}
+          draggable={false}
+        />
+        <div className="absolute inset-0">
         {holds.flatMap(h => {
           const isActive = h.id === resolvedActiveId;
           const isHover = h.id === hoverId;
@@ -91,6 +101,7 @@ export function HangboardOverlay({
             );
           });
         })}
+        </div>
       </div>
     </div>
   );

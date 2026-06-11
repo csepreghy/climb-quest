@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
-import { Play, Pencil, Trash2 } from "lucide-react";
+import { Play, Pencil, Trash2, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { holdLabel } from "@/game/hangboard/beastmaker1000";
 import type { HangStep, HangboardWorkout } from "@/game/hangboard/types";

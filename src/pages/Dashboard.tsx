@@ -84,13 +84,7 @@ export default function Dashboard() {
                 </GameButton>
               )}
               <Link to="/hangboard">
-                <GameButton variant="ghost"><Dumbbell className="h-4 w-4" /> Hangboard</GameButton>
-              </Link>
-              <Link to="/inventory">
-                <GameButton variant="ghost"><Backpack className="h-4 w-4" /> Inventory</GameButton>
-              </Link>
-              <Link to="/shop">
-                <GameButton variant="ghost"><ShoppingBag className="h-4 w-4" /> Shop</GameButton>
+                <GameButton variant="success"><Dumbbell className="h-4 w-4" /> Log hangboard</GameButton>
               </Link>
             </div>
           </div>

@@ -221,7 +221,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                 : phase === "finished" ? "Finished"
                 : current?.kind === "hang" ? "HANG" : "REST";
               return (
-                <div className="flex items-center gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                   {/* Left: shrinking ring inside its own compact card */}
                   <GameCard tone="accent" className="p-2 shrink-0">
                     <div className="relative" style={{ width: size, height: size }}>

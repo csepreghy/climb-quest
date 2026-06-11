@@ -5,7 +5,7 @@ import { GameButton } from "@/components/ui/game-button";
 import { GameCard } from "@/components/ui/game-card";
 import { Pause, Play, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { HangboardOverlay } from "@/components/hangboard/HangboardOverlay";
-import { holdLabel } from "@/game/hangboard/beastmaker1000";
+import { useHoldLabel } from "@/game/hangboard/calibration";
 import { fetchWorkout } from "@/game/hangboard/api";
 import type { HangboardWorkout } from "@/game/hangboard/types";
 import { commitHangboardSession } from "@/game/hangboard/rewards";

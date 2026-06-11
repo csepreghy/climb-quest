@@ -35,10 +35,10 @@ export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
   const hangSteps = workout.steps.filter(st => st.kind === "hang") as Extract<HangStep, { kind: "hang" }>[];
 
   return (
-    <GameCard className="p-4 flex flex-col gap-3">
+    <GameCard className="p-4 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="font-bold truncate">{workout.name}</div>
+          <div className="font-bold truncate text-base">{workout.name}</div>
           {workout.isTemplate && (
             <span className="inline-block text-[10px] uppercase tracking-wider text-[hsl(var(--btn-orange))]">Template</span>
           )}
@@ -47,31 +47,50 @@ export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
           )}
         </div>
       </div>
-      <div className="text-xs text-muted-foreground space-y-0.5">
-        <div>{workout.steps.length} steps · {s.holds} hold{s.holds === 1 ? "" : "s"} · {minutes}:{seconds.toString().padStart(2, "0")}</div>
-        <div>Hang {s.hangs}s · Rest {s.rest}s</div>
+
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+        <span className="font-semibold tabular-nums text-foreground">
+          {minutes}:{seconds.toString().padStart(2, "0")}
+        </span>
+        <span className="text-muted-foreground">·</span>
+        <span className="text-muted-foreground">{workout.steps.length} steps</span>
+        <span className="text-muted-foreground">·</span>
+        <span className="text-muted-foreground">{s.holds} hold{s.holds === 1 ? "" : "s"}</span>
       </div>
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] font-semibold tabular-nums">
+          Hang {s.hangs}s
+        </span>
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--sky))]/15 text-[hsl(var(--sky))] font-semibold tabular-nums">
+          Rest {s.rest}s
+        </span>
+      </div>
+
       {hangSteps.length > 0 && (
-        <div>
+        <div className="mt-2 pt-3 border-t border-border/60">
           <button
             type="button"
             onClick={() => setHoldsOpen(o => !o)}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
             aria-expanded={holdsOpen}
           >
             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${holdsOpen ? "rotate-180" : ""}`} />
             {holdsOpen ? "Hide holds" : `Show holds (${hangSteps.length})`}
           </button>
           {holdsOpen && (
-            <ul className="mt-1.5 text-xs text-muted-foreground space-y-0.5 pl-4 list-disc">
+            <ul className="mt-2 text-xs space-y-1 pl-4 list-disc marker:text-muted-foreground/60">
               {hangSteps.map((st, i) => (
-                <li key={i}>{holdLabel(st.holdId)} · {st.seconds}s</li>
+                <li key={i}>
+                  <span className="text-foreground">{holdLabel(st.holdId)}</span>
+                  <span className="text-muted-foreground"> · {st.seconds}s</span>
+                </li>
               ))}
             </ul>
           )}
         </div>
       )}
-      <div className="flex items-center gap-2 mt-4">
+
+      <div className="flex items-center gap-2 mt-auto pt-2">
         <GameButton variant="primary" size="sm" onClick={() => setRunOpen(true)}>
           <Play className="h-4 w-4" /> Start
         </GameButton>

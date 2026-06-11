@@ -48,26 +48,28 @@ export function WorkoutCard({ workout, onDelete, canEdit = false }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-        <span className="font-semibold tabular-nums text-foreground">
-          {minutes}:{seconds.toString().padStart(2, "0")}
-        </span>
-        <span className="text-muted-foreground">·</span>
-        <span className="text-muted-foreground">{workout.steps.length} steps</span>
-        <span className="text-muted-foreground">·</span>
-        <span className="text-muted-foreground">{s.holds} hold{s.holds === 1 ? "" : "s"}</span>
-      </div>
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] font-semibold tabular-nums">
-          Hang {s.hangs}s
-        </span>
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--sky))]/15 text-[hsl(var(--sky))] font-semibold tabular-nums">
-          Rest {s.rest}s
-        </span>
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+          <span className="font-semibold tabular-nums text-foreground">
+            {minutes}:{seconds.toString().padStart(2, "0")}
+          </span>
+          <span className="text-muted-foreground">·</span>
+          <span className="text-muted-foreground">{workout.steps.length} steps</span>
+          <span className="text-muted-foreground">·</span>
+          <span className="text-muted-foreground">{s.holds} hold{s.holds === 1 ? "" : "s"}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] font-semibold tabular-nums">
+            Hang {s.hangs}s
+          </span>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--sky))]/15 text-[hsl(var(--sky))] font-semibold tabular-nums">
+            Rest {s.rest}s
+          </span>
+        </div>
       </div>
 
       {hangSteps.length > 0 && (
-        <div className="mt-2 pt-3 border-t border-border/60">
+        <div className="pt-2 border-t border-border/60">
           <button
             type="button"
             onClick={() => setHoldsOpen(o => !o)}

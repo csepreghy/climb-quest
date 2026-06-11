@@ -4,7 +4,7 @@ import { GameButton } from "@/components/ui/game-button";
 import { GameCard } from "@/components/ui/game-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, RotateCcw, ArrowLeft } from "lucide-react";
+import { Save, RotateCcw, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { BEASTMAKER_1000_HOLDS, type HangboardHold } from "@/game/hangboard/beastmaker1000";
 import {
   holdsToCalibrationDoc,
@@ -42,6 +42,36 @@ export default function HangboardCalibration() {
       const positions = h.positions.map((p, i) => i === selected.posIndex ? { ...p, ...patch } : p);
       return { ...h, positions };
     }));
+  }
+
+  function renameSelected(label: string) {
+    if (!selected) return;
+    setHolds(prev => prev.map(h => h.id === selected.holdId ? { ...h, label } : h));
+  }
+
+  function addHold() {
+    const nextNum = Math.max(0, ...holds.map(h => h.number)) + 1;
+    const id = `custom_${Date.now().toString(36)}`;
+    const newHold: HangboardHold = {
+      id, number: nextNum, label: `New hold ${nextNum}`, type: "edge",
+      positions: [{ x: 45, y: 45, w: 10, h: 10 }],
+    };
+    setHolds(prev => [...prev, newHold]);
+    setSelected({ holdId: id, posIndex: 0 });
+  }
+
+  function deleteSelected() {
+    if (!selected) return;
+    const h = holds.find(x => x.id === selected.holdId);
+    if (!h) return;
+    const isBase = BEASTMAKER_1000_HOLDS.some(b => b.id === h.id);
+    if (isBase) {
+      toast.error("Built-in holds can't be deleted. You can rename or reposition them.");
+      return;
+    }
+    if (!confirm(`Delete "${h.label}"?`)) return;
+    setHolds(prev => prev.filter(x => x.id !== h.id));
+    setSelected(null);
   }
 
   function startDrag(e: React.PointerEvent, mode: DragMode) {
@@ -105,6 +135,7 @@ export default function HangboardCalibration() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <GameButton variant="ghost" size="sm" onClick={addHold}><Plus className="h-4 w-4" /> Add hold</GameButton>
           <GameButton variant="ghost" size="sm" onClick={onReset}><RotateCcw className="h-4 w-4" /> Reset</GameButton>
           <GameButton variant="primary" size="sm" onClick={onSave} disabled={saver.isPending}>
             <Save className="h-4 w-4" /> {saver.isPending ? "Saving…" : "Save"}
@@ -167,16 +198,25 @@ export default function HangboardCalibration() {
           <p className="text-sm text-muted-foreground">Click any hold on the board above to select it.</p>
         ) : (
           <>
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">Selected</div>
                 <div className="font-bold">#{selectedHold.number} · {selectedHold.label} · pos {selected!.posIndex + 1} / {selectedHold.positions.length}</div>
               </div>
-              {selectedHold.positions.length > 1 && (
-                <GameButton variant="ghost" size="sm" onClick={() => setSelected(s => s ? { ...s, posIndex: (s.posIndex + 1) % selectedHold.positions.length } : s)}>
-                  Switch side
-                </GameButton>
-              )}
+              <div className="flex items-center gap-2">
+                {selectedHold.positions.length > 1 && (
+                  <GameButton variant="ghost" size="sm" onClick={() => setSelected(s => s ? { ...s, posIndex: (s.posIndex + 1) % selectedHold.positions.length } : s)}>
+                    Switch side
+                  </GameButton>
+                )}
+                {!BEASTMAKER_1000_HOLDS.some(b => b.id === selectedHold.id) && (
+                  <GameButton variant="danger" size="sm" onClick={deleteSelected}><Trash2 className="h-4 w-4" /> Delete</GameButton>
+                )}
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">Hold name</Label>
+              <Input value={selectedHold.label} onChange={e => renameSelected(e.target.value)} />
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <NumField label="x %" value={selectedPos.x} onChange={v => updateSelected({ x: v })} />

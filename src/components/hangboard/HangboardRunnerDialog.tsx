@@ -5,12 +5,12 @@ import { GameButton } from "@/components/ui/game-button";
 import { GameCard } from "@/components/ui/game-card";
 import { Pause, Play, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { HangboardOverlay } from "@/components/hangboard/HangboardOverlay";
-import { holdLabel } from "@/game/hangboard/beastmaker1000";
+import { useHoldLabel } from "@/game/hangboard/calibration";
 import { fetchWorkout } from "@/game/hangboard/api";
 import type { HangboardWorkout } from "@/game/hangboard/types";
 import { commitHangboardSession } from "@/game/hangboard/rewards";
 import { primeAudio, tickBeep, transitionBeep, finishBeep, isMuted, setMuted } from "@/game/hangboard/audio";
-import { toast } from "sonner";
+
 import chalkBagImg from "@/assets/chalk-bag.png";
 
 type Phase = "ready" | "countdown" | "running" | "paused" | "finished";
@@ -24,15 +24,19 @@ interface Props {
 }
 
 export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) {
+  const holdLabel = useHoldLabel();
   const [workout, setWorkout] = useState<HangboardWorkout | null>(null);
   const [phase, setPhase] = useState<Phase>("ready");
   const [stepIdx, setStepIdx] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const [muted, setMutedState] = useState(isMuted());
+  const [celebration, setCelebration] = useState<{ chalk: number; totalSec: number } | null>(null);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
   const tickedRef = useRef<Set<number>>(new Set());
   const completedHangSecRef = useRef(0);
   const perHoldSecRef = useRef<Record<string, number>>({});
   const transitioningRef = useRef(false);
+  const committedRef = useRef(false);
 
   // Load / reset whenever the dialog opens for a workout.
   useEffect(() => {
@@ -45,6 +49,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
       completedHangSecRef.current = 0;
       perHoldSecRef.current = {};
       transitioningRef.current = false;
+      committedRef.current = false;
       return;
     }
     fetchWorkout(workoutId).then(w => {
@@ -127,6 +132,8 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
   // Commit on finish.
   useEffect(() => {
     if (phase !== "finished" || !workout) return;
+    if (committedRef.current) return;
+    committedRef.current = true;
     finishBeep();
     const total = completedHangSecRef.current;
     if (total > 0) {
@@ -137,9 +144,7 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
         totalHangSeconds: total,
         holds,
       });
-      toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />Workout done! +{chalk} Chalk · {total}s of hang</div>);
-    } else {
-      toast.info("Workout ended");
+      setCelebration({ chalk, totalSec: total });
     }
   }, [phase, workout]);
 
@@ -185,11 +190,11 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Hangboard</div>
-                <h2 className="text-lg sm:text-2xl font-bold tracking-tight truncate">{workout.name}</h2>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="min-w-0 flex items-center gap-2">
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Hangboard</div>
+                  <h2 className="text-lg sm:text-2xl font-bold tracking-tight truncate">{workout.name}</h2>
+                </div>
                 <GameButton variant="ghost" size="sm" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
                   {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </GameButton>
@@ -294,7 +299,10 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                         </>
                       )}
                       {phase === "finished" && (
-                        <GameButton variant="primary" size="md" onClick={() => onOpenChange(false)}>Done</GameButton>
+                        <GameButton variant="primary" size="md" onClick={() => {
+                          if (celebration) setCelebrationOpen(true);
+                          else onOpenChange(false);
+                        }}>Done</GameButton>
                       )}
                     </div>
                   </div>
@@ -310,6 +318,34 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
           </div>
         )}
       </DialogContent>
+
+      <Dialog
+        open={celebrationOpen}
+        onOpenChange={(o) => {
+          setCelebrationOpen(o);
+          if (!o) onOpenChange(false);
+        }}
+      >
+        <DialogContent className="max-w-sm text-center">
+          <VisuallyHidden><DialogTitle>Workout complete</DialogTitle></VisuallyHidden>
+          {celebration && (
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="text-5xl animate-bounce">🎉</div>
+              <h2 className="text-2xl font-extrabold tracking-tight">Workout Complete!</h2>
+              <img src={chalkBagImg} alt="" className="h-20 w-20 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]" />
+              <div className="text-4xl font-extrabold tabular-nums text-[hsl(var(--btn-orange))]">
+                +{celebration.chalk} Chalk
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {celebration.totalSec}s of hang time
+              </div>
+              <GameButton variant="primary" size="md" onClick={() => { setCelebrationOpen(false); onOpenChange(false); }}>
+                Awesome!
+              </GameButton>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

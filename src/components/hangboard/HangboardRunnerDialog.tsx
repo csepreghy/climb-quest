@@ -235,12 +235,13 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                       <svg width={size} height={size} className="-rotate-90">
                         <circle cx={size/2} cy={size/2} r={r} stroke="hsl(var(--muted))" strokeWidth={stroke} fill="none" opacity={0.3} />
                         <circle
+                          key={`${phase}-${stepIdx}`}
                           cx={size/2} cy={size/2} r={r}
                           stroke={ringColor} strokeWidth={stroke} fill="none"
                           strokeLinecap={pct < 0.05 ? "butt" : "round"}
                           strokeDasharray={c}
-                          strokeDashoffset={pct <= 0 ? c : c * (1 - pct)}
-                          style={{ transition: pct <= 0 ? "stroke-dashoffset 0.25s ease-out" : "stroke-dashoffset 1s linear" }}
+                          strokeDashoffset={c * (1 - pct)}
+                          style={{ transition: "stroke-dashoffset 1s linear" }}
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">

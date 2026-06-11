@@ -13,7 +13,9 @@ import { primeAudio, tickBeep, transitionBeep, finishBeep, isMuted, setMuted } f
 import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
-type Phase = "ready" | "running" | "paused" | "finished";
+type Phase = "ready" | "countdown" | "running" | "paused" | "finished";
+
+const READY_SECONDS = 3;
 
 interface Props {
   workoutId: string | null;

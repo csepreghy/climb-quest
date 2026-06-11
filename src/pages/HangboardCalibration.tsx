@@ -198,16 +198,25 @@ export default function HangboardCalibration() {
           <p className="text-sm text-muted-foreground">Click any hold on the board above to select it.</p>
         ) : (
           <>
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">Selected</div>
                 <div className="font-bold">#{selectedHold.number} · {selectedHold.label} · pos {selected!.posIndex + 1} / {selectedHold.positions.length}</div>
               </div>
-              {selectedHold.positions.length > 1 && (
-                <GameButton variant="ghost" size="sm" onClick={() => setSelected(s => s ? { ...s, posIndex: (s.posIndex + 1) % selectedHold.positions.length } : s)}>
-                  Switch side
-                </GameButton>
-              )}
+              <div className="flex items-center gap-2">
+                {selectedHold.positions.length > 1 && (
+                  <GameButton variant="ghost" size="sm" onClick={() => setSelected(s => s ? { ...s, posIndex: (s.posIndex + 1) % selectedHold.positions.length } : s)}>
+                    Switch side
+                  </GameButton>
+                )}
+                {!BEASTMAKER_1000_HOLDS.some(b => b.id === selectedHold.id) && (
+                  <GameButton variant="danger" size="sm" onClick={deleteSelected}><Trash2 className="h-4 w-4" /> Delete</GameButton>
+                )}
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">Hold name</Label>
+              <Input value={selectedHold.label} onChange={e => renameSelected(e.target.value)} />
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <NumField label="x %" value={selectedPos.x} onChange={v => updateSelected({ x: v })} />

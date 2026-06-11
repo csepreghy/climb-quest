@@ -194,8 +194,8 @@ export function HangboardRunnerDialog({ workoutId, open, onOpenChange }: Props) 
                 ? READY_SECONDS
                 : current?.seconds ?? 1;
               const pct = Math.max(0, Math.min(1, remaining / Math.max(1, total)));
-              const size = 110;
-              const stroke = 9;
+              const size = typeof window !== "undefined" && window.innerWidth < 480 ? 78 : 110;
+              const stroke = size < 90 ? 7 : 9;
               const r = (size - stroke) / 2;
               const c = 2 * Math.PI * r;
               const ringColor = phase === "countdown"

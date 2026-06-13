@@ -284,75 +284,83 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
   const axisTitle = dominantGs ? dominantGs.name : "V Scale";
 
   const data = useMemo(() => {
+    const DAYS = 90; // ~3 months of daily points
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const dayIdx = (today.getDay() + 6) % 7;
-    const currentMonday = new Date(today);
-    currentMonday.setDate(today.getDate() - dayIdx);
 
-    const WEEKS = 13; // ~3 months
-    const buckets = new Map<string, { ts: number; chalk: number; strength: number; gradeRank: number | null }>();
-    for (let i = WEEKS - 1; i >= 0; i--) {
-      const m = new Date(currentMonday);
-      m.setDate(currentMonday.getDate() - i * 7);
-      buckets.set(m.toISOString().slice(0, 10), { ts: m.getTime(), chalk: 0, strength: 0, gradeRank: null });
+    type Day = { ts: number; key: string; chalk: number; strength: number; gradeRank: number | null };
+    const days: Day[] = [];
+    const byKey = new Map<string, Day>();
+    // Include 6 extra leading days so the first visible point has a full 7-day window.
+    for (let i = DAYS - 1 + 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const row: Day = { ts: d.getTime(), key, chalk: 0, strength: 0, gradeRank: null };
+      days.push(row);
+      byKey.set(key, row);
     }
-    const earliest = Array.from(buckets.values())[0]?.ts ?? 0;
+    const earliest = days[0].ts;
 
     const upperLabels = scaleLabels.map(l => l.toUpperCase());
 
     for (const l of logs) {
       const d = new Date(l.date);
-      const day = (d.getDay() + 6) % 7;
-      const monday = new Date(d);
-      monday.setDate(d.getDate() - day);
-      monday.setHours(0, 0, 0, 0);
-      if (monday.getTime() < earliest || monday.getTime() > currentMonday.getTime()) continue;
-      const key = monday.toISOString().slice(0, 10);
-      const existing = buckets.get(key);
-      if (!existing) continue;
-      existing.chalk += l.chalkTotal;
+      d.setHours(0, 0, 0, 0);
+      if (d.getTime() < earliest || d.getTime() > today.getTime()) continue;
+      const row = byKey.get(d.toISOString().slice(0, 10));
+      if (!row) continue;
+      row.chalk += l.chalkTotal;
       const gLabel = l.gradeMax || l.grade;
       if (gLabel) {
-        // Prefer exact index in dominant scale; fall back to V-rank approximation.
         let rank: number;
         const idx = upperLabels.indexOf(gLabel.toUpperCase());
         if (idx >= 0) rank = idx;
         else if (!dominantGs || dominantGs.kind === "v" || dominantGs.kind === "french") {
           rank = gradeToVRank(gLabel, dominantGs ?? undefined);
         } else {
-          // Skip non-matching grades for number/color systems.
           rank = NaN;
         }
-        if (!isNaN(rank) && (existing.gradeRank === null || rank > existing.gradeRank)) {
-          existing.gradeRank = rank;
+        if (!isNaN(rank) && (row.gradeRank === null || rank > row.gradeRank)) {
+          row.gradeRank = rank;
         }
       }
     }
     for (const sess of strengthSessions) {
       const d = new Date(sess.date);
-      const day = (d.getDay() + 6) % 7;
-      const monday = new Date(d);
-      monday.setDate(d.getDate() - day);
-      monday.setHours(0, 0, 0, 0);
-      if (monday.getTime() < earliest || monday.getTime() > currentMonday.getTime()) continue;
-      const key = monday.toISOString().slice(0, 10);
-      const existing = buckets.get(key);
-      if (!existing) continue;
-      existing.strength += sess.chalkTotal ?? 0;
+      d.setHours(0, 0, 0, 0);
+      if (d.getTime() < earliest || d.getTime() > today.getTime()) continue;
+      const row = byKey.get(d.toISOString().slice(0, 10));
+      if (!row) continue;
+      row.strength += sess.chalkTotal ?? 0;
     }
-    return Array.from(buckets.values())
-      .sort((a, b) => a.ts - b.ts)
-      .map(b => ({
-        ...b,
-        label: new Date(b.ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
-      }));
+
+    // 7-day rolling average for chalk/strength; 7-day rolling max for top grade.
+    const out: { ts: number; label: string; chalk: number; strength: number; gradeRank: number | null }[] = [];
+    for (let i = 6; i < days.length; i++) {
+      let chalkSum = 0, strengthSum = 0;
+      let gradeMax: number | null = null;
+      for (let j = i - 6; j <= i; j++) {
+        chalkSum += days[j].chalk;
+        strengthSum += days[j].strength;
+        const g = days[j].gradeRank;
+        if (g !== null && (gradeMax === null || g > gradeMax)) gradeMax = g;
+      }
+      out.push({
+        ts: days[i].ts,
+        label: new Date(days[i].ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+        chalk: Math.round((chalkSum / 7) * 10) / 10,
+        strength: Math.round((strengthSum / 7) * 10) / 10,
+        gradeRank: gradeMax,
+      });
+    }
+    return out;
   }, [logs, strengthSessions, scaleLabels, dominantGs]);
 
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade per Week
+        <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade · 7-day Avg
         <span className="ml-2 text-[10px] font-normal text-muted-foreground normal-case tracking-normal">({axisTitle})</span>
       </h3>
       {data.length === 0 ? (
@@ -424,14 +432,15 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     type Row = { ts: number; key: string; label: string; core: number; pullup: number; pushup: number; squat: number; handstand_pushup: number; hold_sec: number };
-    const buckets: Row[] = [];
+    // Include 6 leading days so the first visible point has a full 7-day window.
+    const raw: Row[] = [];
     const byKey = new Map<string, Row>();
-    for (let i = DAYS - 1; i >= 0; i--) {
+    for (let i = DAYS - 1 + 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const key = d.toISOString().slice(0, 10);
       const row: Row = { ts: d.getTime(), key, label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }), core: 0, pullup: 0, pushup: 0, squat: 0, handstand_pushup: 0, hold_sec: 0 };
-      buckets.push(row);
+      raw.push(row);
       byKey.set(key, row);
     }
     for (const sess of sessions) {
@@ -451,7 +460,25 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
       else if (sess.workout === "pushup") row.pushup += sess.totalReps;
       else if (sess.workout === "squat") row.squat += sess.totalReps;
     }
-    return buckets;
+    // Convert to 7-day rolling averages.
+    const avg = (n: number) => Math.round((n / 7) * 10) / 10;
+    const out: Row[] = [];
+    for (let i = 6; i < raw.length; i++) {
+      const win = raw.slice(i - 6, i + 1);
+      const sum = (k: keyof Row) => win.reduce((a, r) => a + (r[k] as number), 0);
+      out.push({
+        ts: raw[i].ts,
+        key: raw[i].key,
+        label: raw[i].label,
+        core: avg(sum("core")),
+        pullup: avg(sum("pullup")),
+        pushup: avg(sum("pushup")),
+        squat: avg(sum("squat")),
+        handstand_pushup: avg(sum("handstand_pushup")),
+        hold_sec: avg(sum("hold_sec")),
+      });
+    }
+    return out;
   }, [sessions, isMobile]);
 
   const hasAny = data.some(d => d.core || d.pullup || d.pushup || d.squat || d.handstand_pushup || d.hold_sec);
@@ -459,10 +486,10 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-1 flex items-center gap-1.5">
-        <Dumbbell className="h-3 w-3" /> Strength Reps & Holds · Daily
+        <Dumbbell className="h-3 w-3" /> Strength Reps & Holds · 7-day Avg
       </h3>
       <p className="text-[10px] text-muted-foreground mb-3 normal-case tracking-normal">
-        Bars: total reps per category (all levels). Line: seconds held (plank + handstand hold).
+        Bars: avg daily reps per category (7-day rolling). Line: avg daily seconds held (plank + handstand hold).
       </p>
       {!hasAny ? (
         <div className="text-sm text-muted-foreground py-8 text-center">

@@ -360,7 +360,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade per Week
+        <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade · 7-day Avg
         <span className="ml-2 text-[10px] font-normal text-muted-foreground normal-case tracking-normal">({axisTitle})</span>
       </h3>
       {data.length === 0 ? (

@@ -486,10 +486,10 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-1 flex items-center gap-1.5">
-        <Dumbbell className="h-3 w-3" /> Strength Reps & Holds · Daily
+        <Dumbbell className="h-3 w-3" /> Strength Reps & Holds · 7-day Avg
       </h3>
       <p className="text-[10px] text-muted-foreground mb-3 normal-case tracking-normal">
-        Bars: total reps per category (all levels). Line: seconds held (plank + handstand hold).
+        Bars: avg daily reps per category (7-day rolling). Line: avg daily seconds held (plank + handstand hold).
       </p>
       {!hasAny ? (
         <div className="text-sm text-muted-foreground py-8 text-center">

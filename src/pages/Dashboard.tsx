@@ -432,14 +432,15 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     type Row = { ts: number; key: string; label: string; core: number; pullup: number; pushup: number; squat: number; handstand_pushup: number; hold_sec: number };
-    const buckets: Row[] = [];
+    // Include 6 leading days so the first visible point has a full 7-day window.
+    const raw: Row[] = [];
     const byKey = new Map<string, Row>();
-    for (let i = DAYS - 1; i >= 0; i--) {
+    for (let i = DAYS - 1 + 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const key = d.toISOString().slice(0, 10);
       const row: Row = { ts: d.getTime(), key, label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }), core: 0, pullup: 0, pushup: 0, squat: 0, handstand_pushup: 0, hold_sec: 0 };
-      buckets.push(row);
+      raw.push(row);
       byKey.set(key, row);
     }
     for (const sess of sessions) {
@@ -459,7 +460,25 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
       else if (sess.workout === "pushup") row.pushup += sess.totalReps;
       else if (sess.workout === "squat") row.squat += sess.totalReps;
     }
-    return buckets;
+    // Convert to 7-day rolling averages.
+    const avg = (n: number) => Math.round((n / 7) * 10) / 10;
+    const out: Row[] = [];
+    for (let i = 6; i < raw.length; i++) {
+      const win = raw.slice(i - 6, i + 1);
+      const sum = (k: keyof Row) => win.reduce((a, r) => a + (r[k] as number), 0);
+      out.push({
+        ts: raw[i].ts,
+        key: raw[i].key,
+        label: raw[i].label,
+        core: avg(sum("core")),
+        pullup: avg(sum("pullup")),
+        pushup: avg(sum("pushup")),
+        squat: avg(sum("squat")),
+        handstand_pushup: avg(sum("handstand_pushup")),
+        hold_sec: avg(sum("hold_sec")),
+      });
+    }
+    return out;
   }, [sessions, isMobile]);
 
   const hasAny = data.some(d => d.core || d.pullup || d.pushup || d.squat || d.handstand_pushup || d.hold_sec);

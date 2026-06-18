@@ -191,6 +191,8 @@ export interface State {
   onboardedAt?: string | null;
   /** ISO date (YYYY-MM-DD) of the most recent daily-login chalk grant. */
   lastDailyLoginAt?: string | null;
+  /** All YYYY-MM-DD dates the user claimed the daily-login chalk. Counts toward streak. */
+  loginDays?: string[];
   /** Active temporary buffs (chalk/crit/cap %). Pruned lazily as they expire. */
   activeBuffs?: import("./streak").ActiveBuff[];
   /** Streak-milestone day numbers (14/21/30/…) already awarded. */

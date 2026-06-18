@@ -52,6 +52,7 @@ export default function Layout() {
   const hydrated = useRemoteHydrated();
   const showOnboarding = !!user && hydrated && !s.onboardedAt;
   const [dailyLoginOpen, setDailyLoginOpen] = useState(false);
+  const [dailyLoginReward, setDailyLoginReward] = useState(0);
   useLoadCharacterName(user?.id ?? null);
 
   useEffect(() => {
@@ -70,7 +71,11 @@ export default function Layout() {
 
   useEffect(() => {
     if (!user || !hydrated || !s.onboardedAt) return;
-    if (claimDailyLoginIfNeeded()) setDailyLoginOpen(true);
+    const granted = claimDailyLoginIfNeeded();
+    if (granted > 0) {
+      setDailyLoginReward(granted);
+      setDailyLoginOpen(true);
+    }
   }, [user, hydrated, s.onboardedAt]);
 
   function tryOpenLog() {
@@ -136,7 +141,7 @@ export default function Layout() {
       />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <OnboardingModal open={showOnboarding} onClose={() => { /* completion handled inside */ }} />
-      <DailyLoginDialog open={dailyLoginOpen} onOpenChange={setDailyLoginOpen} />
+      <DailyLoginDialog open={dailyLoginOpen} onOpenChange={setDailyLoginOpen} reward={dailyLoginReward} />
       <Dialog open={needGymOpen} onOpenChange={setNeedGymOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -575,7 +580,7 @@ function ChalkChip({ value }: { value: number }) {
   );
 }
 
-function DailyLoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+function DailyLoginDialog({ open, onOpenChange, reward }: { open: boolean; onOpenChange: (o: boolean) => void; reward: number }) {
   const s = useGame();
   const streakCfg = useStreakConfig();
   const streak = currentStreak(s);
@@ -586,6 +591,7 @@ function DailyLoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     ? streakCfg.milestones.filter(m => m.day > streak).sort((a, b) => a.day - b.day)[0]
     : undefined;
   const daysToMilestone = nextMilestone ? nextMilestone.day - streak : 0;
+  const shown = reward > 0 ? reward : DAILY_LOGIN_REWARD;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -598,7 +604,10 @@ function DailyLoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
           <DialogDescription asChild>
             <div className="space-y-3 pt-1">
               <div>
-                You earned <span className="inline-flex items-center gap-1 font-bold gradient-chalk-text"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{DAILY_LOGIN_REWARD} Chalk</span> just for showing up today.
+                You earned <span className="inline-flex items-center gap-1 font-bold gradient-chalk-text"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{shown} Chalk</span> just for showing up today.
+                <div className="text-[11px] text-muted-foreground mt-1">
+                  Base {DAILY_LOGIN_REWARD} × Level {s.level} bonus × Day {day} streak bonus (+{todayPct}%).
+                </div>
               </div>
 
               {streakCfg.enabled && (

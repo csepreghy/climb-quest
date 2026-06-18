@@ -191,6 +191,8 @@ export interface State {
   onboardedAt?: string | null;
   /** ISO date (YYYY-MM-DD) of the most recent daily-login chalk grant. */
   lastDailyLoginAt?: string | null;
+  /** All YYYY-MM-DD dates the user claimed the daily-login chalk. Counts toward streak. */
+  loginDays?: string[];
   /** Active temporary buffs (chalk/crit/cap %). Pruned lazily as they expire. */
   activeBuffs?: import("./streak").ActiveBuff[];
   /** Streak-milestone day numbers (14/21/30/…) already awarded. */
@@ -219,6 +221,7 @@ const initialState = (): State => ({
   ignoreLevelReq: false,
   onboardedAt: null,
   lastDailyLoginAt: null,
+  loginDays: [],
   activeBuffs: [],
   streakMilestonesAwarded: [],
 });
@@ -1259,18 +1262,37 @@ export function resetOnboarding() {
   set(s => ({ ...s, onboardedAt: null }));
 }
 
+/** Base "show up" chalk before level/streak multipliers. */
 export const DAILY_LOGIN_REWARD = 50;
-/** Grants 50 chalk if user hasn't claimed today. Returns true if granted. */
-export function claimDailyLoginIfNeeded(): boolean {
+export const BASE_DAILY_LOGIN_REWARD = DAILY_LOGIN_REWARD;
+
+/** Dynamic daily-login reward = base × level multiplier × (1 + streak day bonus %). */
+export function computeDailyLoginReward(s: State = state): number {
+  const cfg = getStreakConfig();
+  const streakAfterClaim = Math.max(1, currentStreak(s));
+  const streakPct = streakDayBonusPct(streakAfterClaim, cfg);
+  const lvlMult = activityLevelMult(s.level);
+  return Math.max(1, Math.round(BASE_DAILY_LOGIN_REWARD * lvlMult * (1 + streakPct / 100)));
+}
+
+/** Grants dynamic chalk if user hasn't claimed today. Returns granted amount (0 if already claimed). */
+export function claimDailyLoginIfNeeded(): number {
   const today = new Date().toISOString().slice(0, 10);
-  if (state.lastDailyLoginAt === today) return false;
-  set(s => ({
-    ...s,
-    chalk: s.chalk + DAILY_LOGIN_REWARD,
-    totalChalkEarned: s.totalChalkEarned + DAILY_LOGIN_REWARD,
-    lastDailyLoginAt: today,
-  }));
-  return true;
+  if (state.lastDailyLoginAt === today) return 0;
+  let granted = 0;
+  set(s => {
+    const loginDays = Array.from(new Set([...(s.loginDays ?? []), today]));
+    const withLogin: State = { ...s, loginDays, lastDailyLoginAt: today };
+    const reward = computeDailyLoginReward(withLogin);
+    granted = reward;
+    const next: State = {
+      ...withLogin,
+      chalk: withLogin.chalk + reward,
+      totalChalkEarned: withLogin.totalChalkEarned + reward,
+    };
+    return applyStreakProgress(s, next);
+  });
+  return granted;
 }
 
 // ===== Badge rewards =====

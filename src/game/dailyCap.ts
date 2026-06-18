@@ -165,6 +165,11 @@ export function currentStreak(s: State): number {
   for (const l of s.logs) days.add(dayKey(l.date));
   for (const b of s.bosses) for (const a of (b.attempts ?? [])) days.add(dayKey(a.date));
   for (const ss of s.strengthSessions ?? []) days.add(dayKey(ss.date));
+  for (const d of s.loginDays ?? []) {
+    // loginDays are stored as YYYY-MM-DD; convert to local toDateString for parity.
+    const [y, m, dd] = d.split("-").map(Number);
+    if (y && m && dd) days.add(new Date(y, m - 1, dd).toDateString());
+  }
   if (days.size === 0) return 0;
 
   const today = new Date();

@@ -71,7 +71,11 @@ export default function Layout() {
 
   useEffect(() => {
     if (!user || !hydrated || !s.onboardedAt) return;
-    if (claimDailyLoginIfNeeded()) setDailyLoginOpen(true);
+    const granted = claimDailyLoginIfNeeded();
+    if (granted > 0) {
+      setDailyLoginReward(granted);
+      setDailyLoginOpen(true);
+    }
   }, [user, hydrated, s.onboardedAt]);
 
   function tryOpenLog() {

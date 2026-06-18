@@ -52,6 +52,7 @@ export default function Layout() {
   const hydrated = useRemoteHydrated();
   const showOnboarding = !!user && hydrated && !s.onboardedAt;
   const [dailyLoginOpen, setDailyLoginOpen] = useState(false);
+  const [dailyLoginReward, setDailyLoginReward] = useState(0);
   useLoadCharacterName(user?.id ?? null);
 
   useEffect(() => {

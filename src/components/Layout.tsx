@@ -141,7 +141,7 @@ export default function Layout() {
       />
       <LogModal open={logOpen} onOpenChange={setLogOpen} />
       <OnboardingModal open={showOnboarding} onClose={() => { /* completion handled inside */ }} />
-      <DailyLoginDialog open={dailyLoginOpen} onOpenChange={setDailyLoginOpen} />
+      <DailyLoginDialog open={dailyLoginOpen} onOpenChange={setDailyLoginOpen} reward={dailyLoginReward} />
       <Dialog open={needGymOpen} onOpenChange={setNeedGymOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>

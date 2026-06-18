@@ -221,6 +221,7 @@ const initialState = (): State => ({
   ignoreLevelReq: false,
   onboardedAt: null,
   lastDailyLoginAt: null,
+  loginDays: [],
   activeBuffs: [],
   streakMilestonesAwarded: [],
 });

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { ShopItem, RARITY_COLOR, RARITY_BORDER, ItemGroup } from "@/game/data";
+import { useMemo, useRef, useState } from "react";
+import { ShopItem, RARITY_COLOR, ItemGroup } from "@/game/data";
 import { useAllItems, useCatalogLoaded, isImageEmoji } from "@/game/customItems";
 import { buyItem, useGame, effectivePrice } from "@/game/store";
 import { toast } from "sonner";
@@ -120,8 +120,8 @@ function ShopTile({
   const canAfford = chalk >= price;
   const isConsumable = !!item.consumableBonus;
   const ownAlready = owned && !isConsumable;
-  
-  const isBuddy = item.group === "buddy";
+
+
 
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
   const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
@@ -151,13 +151,47 @@ function ShopTile({
   };
   const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 
+  // Flip preview to the left when the tile sits near the right viewport edge.
+  const tileRef = useRef<HTMLDivElement | null>(null);
+  const [flipped, setFlipped] = useState(false);
+
+  // Layout constants for the hover preview.
+  const IMG = 256;          // doubled image (w-64 / h-64)
+  const GAP = 8;            // space between image and details
+  const DETAILS_W = 288;    // w-72
+  const TOTAL = IMG + GAP + DETAILS_W; // 552
+
+  function handleEnter() {
+    const r = tileRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const tileCenter = r.left + r.width / 2;
+    // If unflipped, preview extends to tileCenter + (TOTAL - IMG/2). Flip if it would overflow.
+    setFlipped(tileCenter + (TOTAL - IMG / 2) > window.innerWidth - 12);
+  }
+
+  // Image-center always lands on the tile center.
+  // Unflipped (image left):  shift container left by IMG/2.
+  // Flipped   (image right): shift container left by (TOTAL - IMG/2).
+  const shiftX = flipped ? -(TOTAL - IMG / 2) : -(IMG / 2);
+
+  const renderImage = (sizeCls: string, padCls = "") => {
+    if (isImageEmoji(item.emoji)) {
+      return <SmartImage src={item.emoji} alt={item.name} loaderSize={40} wrapperClassName={cn(sizeCls)} className={cn("h-full w-full object-cover", padCls)} />;
+    }
+    if (item.emoji) {
+      return <div className={cn(sizeCls, "flex items-center justify-center text-6xl")}>{item.emoji}</div>;
+    }
+    return <div className={cn(sizeCls, "flex items-center justify-center")}><ChalkBagLoader size={36} /></div>;
+  };
+
   return (
-    <div className="group relative">
+    <div className="group relative" onMouseEnter={handleEnter}>
       {/* Fixed page-wide dark backdrop while hovered (desktop only) */}
       <div className="hidden md:block pointer-events-none fixed inset-0 z-40 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
       {/* Compact tile */}
       <div
+        ref={tileRef}
         onClick={onClick}
         title={item.name}
         aria-label={item.name}
@@ -166,7 +200,8 @@ function ShopTile({
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
         className={cn(
           "relative aspect-square w-full overflow-hidden rounded-md cursor-pointer",
-          "border-[3px] transition-transform duration-200 md:group-hover:opacity-0",
+          "border-4 transition-opacity duration-200 md:group-hover:opacity-0",
+          "shadow-[0_6px_14px_-4px_rgba(0,0,0,0.55)]",
           rarityBorder[item.rarity],
         )}
       >
@@ -180,7 +215,6 @@ function ShopTile({
           </div>
         )}
 
-        {/* Price - bottom left over image */}
         {!locked && (
           <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1 px-1.5 py-1 bg-gradient-to-t from-black/80 via-black/50 to-transparent pointer-events-none">
             <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain drop-shadow" />
@@ -196,13 +230,7 @@ function ShopTile({
         {badges.length > 0 && (
           <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">
             {badges.map((b, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm",
-                  b.cls,
-                )}
-              >
+              <span key={i} className={cn("text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm", b.cls)}>
                 {b.text}
               </span>
             ))}
@@ -225,24 +253,86 @@ function ShopTile({
         )}
       </div>
 
-      {/* Expanded hover preview (desktop only): centered on the tile, much larger, glowing */}
+      {/* Expanded hover preview (desktop only): image anchored on tile, details panel docked beside it */}
       <div
         className={cn(
-          "hidden md:block pointer-events-none absolute left-1/2 top-1/2 z-50",
-          "-translate-x-1/2 -translate-y-1/2 origin-center",
-          "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100",
-          "transition-all duration-200",
+          "hidden md:flex pointer-events-none absolute left-1/2 top-1/2 z-50",
+          "opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100",
+          "transition-all duration-200 items-stretch",
+          flipped ? "flex-row" : "flex-row",
         )}
-        style={{ ["--glow-color" as string]: glowColor }}
+        style={{
+          transform: `translate(${shiftX}px, -50%)`,
+          gap: `${GAP}px`,
+          width: `${TOTAL}px`,
+          ["--glow-color" as string]: glowColor,
+        }}
       >
+        {/* Image block (left when unflipped, right when flipped) */}
         <div
           className={cn(
-            "rounded-xl border-[3px] animate-rarity-glow text-base",
-            isBuddy ? "w-[460px]" : "w-[380px]",
+            "relative overflow-hidden rounded-lg border-4 animate-rarity-glow shrink-0",
             rarityBorder[item.rarity],
+            flipped ? "order-2" : "order-1",
           )}
+          style={{ width: IMG, height: IMG }}
         >
-          {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
+          {renderImage("h-full w-full")}
+
+          {badges.length > 0 && (
+            <div className="absolute top-2 right-2 flex flex-col items-end gap-1 max-w-[80%]">
+              {badges.map((b, i) => (
+                <span key={i} className={cn("text-[11px] leading-none font-bold tabular-nums px-1.5 py-1 rounded border whitespace-nowrap shadow-sm", b.cls)}>
+                  {b.text}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {!locked && (
+            <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-t from-black/85 via-black/55 to-transparent">
+              <img src={chalkBagImg} alt="" className="h-5 w-5 object-contain drop-shadow" />
+              <span className={cn(
+                "text-[16px] leading-none font-extrabold tabular-nums text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]",
+                !canAfford && !ownAlready && "text-destructive",
+              )}>
+                {price.toLocaleString()}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Details panel */}
+        <div
+          className={cn(
+            "rounded-lg border-4 bg-[hsl(var(--panel-fill))] p-4 flex flex-col gap-3 animate-rarity-glow",
+            rarityBorder[item.rarity],
+            flipped ? "order-1" : "order-2",
+          )}
+          style={{ width: DETAILS_W, height: IMG }}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className="text-base font-bold leading-snug break-words">{item.name}</div>
+              <div className={cn("text-[11px] uppercase tracking-wider inline-block mt-1.5 px-2 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
+                {item.rarity}
+              </div>
+            </div>
+            {ownAlready && (
+              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-foreground text-background shrink-0">Owned</span>
+            )}
+            {locked && (
+              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-muted text-muted-foreground shrink-0 inline-flex items-center gap-1">
+                <Lock className="h-3 w-3" /> Lv {item.levelReq}
+              </span>
+            )}
+          </div>
+          {item.desc && (
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1 overflow-hidden">{item.desc}</p>
+          )}
+          {item.category && (
+            <div className="text-[11px] uppercase tracking-wider text-muted-foreground/80">{item.category}</div>
+          )}
         </div>
       </div>
     </div>

@@ -284,10 +284,8 @@ function ShopTile({
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTileClick(); } }}
         className={cn(
-          "relative aspect-square w-full overflow-hidden rounded-md cursor-pointer",
-          "border-4 transition-opacity duration-200 md:group-hover:opacity-0",
-          "shadow-[0_6px_14px_-4px_rgba(0,0,0,0.55)]",
-          rarityBorder[item.rarity],
+          "tile-3d relative aspect-square w-full overflow-hidden cursor-pointer",
+          "transition-opacity duration-200 md:group-hover:opacity-0",
         )}
       >
         {isImageEmoji(item.emoji) ? (

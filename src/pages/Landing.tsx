@@ -19,13 +19,18 @@ import bossImg from "@/assets/log-boss.webp";
 import crystalCaveImg from "@/assets/boss-crystal-cave.png";
 import chalkBagImg from "@/assets/chalk-bag.png";
 
+import { LoadingScreen } from "@/components/LoadingScreen";
+
 export default function Landing() {
   const { user, loading } = useAuth();
   const nav = useNavigate();
-  if (!loading && user) return <Navigate to="/home" replace />;
-  const goAuth = () => nav("/auth");
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  if (loading) return <LoadingScreen />;
+  if (user) return <Navigate to="/home" replace />;
+  const goAuth = () => nav("/auth");
+
 
   return (
     <div className="relative min-h-[100dvh] overflow-x-hidden bg-[hsl(var(--background))]" style={{ backgroundImage: "radial-gradient(ellipse at top, hsl(var(--background)) 0%, hsl(0 0% 4%) 100%)" }}>

@@ -165,20 +165,18 @@ function ShopTile({
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Desktop hover-preview layout.
-  const IMG = 186;
-  const GAP = 12;
-  const DETAILS_W = 236;
-  const PAD = 12;
-  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD;     // 446
-  const CARD_H = PAD * 2 + IMG;                         // 210
+  // Desktop hover-preview layout. Edge-to-edge image, no outer padding on the card.
+  const IMG = 200;
+  const DETAILS_W = 244;
+  const TOTAL = IMG + DETAILS_W;     // 444
+  const CARD_H = IMG;                 // 200
 
   function handleEnter() {
     const r = tileRef.current?.getBoundingClientRect();
     if (!r) return;
     const tileCx = r.left + r.width / 2;
     const tileCy = r.top + r.height / 2;
-    const desiredLeft = tileCx - (PAD + IMG / 2);
+    const desiredLeft = tileCx - IMG / 2;
     const desiredTop = tileCy - CARD_H / 2;
     const left = Math.max(12, Math.min(desiredLeft, window.innerWidth - TOTAL - 12));
     const top = Math.max(12, Math.min(desiredTop, window.innerHeight - CARD_H - 12));
@@ -245,10 +243,10 @@ function ShopTile({
 
       <div className={cn("mt-auto flex items-center justify-end gap-2 border-t border-border/50", compact ? "pt-1.5" : "pt-2")}>
         <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Price</span>
-        <img src={chalkBagImg} alt="" className={compact ? "h-4 w-4 object-contain" : "h-6 w-6 object-contain"} />
+        <img src={chalkBagImg} alt="" className={compact ? "h-4 w-4 object-contain" : "h-5 w-5 object-contain"} />
         <span className={cn(
           "font-extrabold tabular-nums",
-          compact ? "text-base" : "text-2xl",
+          compact ? "text-base" : "text-xl",
           !canAfford && !ownAlready && !locked && "text-destructive",
         )}>
           {price.toLocaleString()}
@@ -256,13 +254,13 @@ function ShopTile({
       </div>
 
       {withBuy && (
-        <div className="mt-1">
+        <div className="mt-1.5 flex justify-end">
           {ownAlready ? (
-            <GameButton variant="ghost" disabled size="sm" className="w-full"><Check className="h-3.5 w-3.5" /> {isBuddy ? "Recruited" : "Owned"}</GameButton>
+            <GameButton variant="ghost" disabled size="sm"><Check className="h-3.5 w-3.5" /> {isBuddy ? "Recruited" : "Owned"}</GameButton>
           ) : locked ? (
-            <GameButton variant="ghost" disabled size="sm" className="w-full"><Lock className="h-3.5 w-3.5" /> Lv {item.levelReq}</GameButton>
+            <GameButton variant="ghost" disabled size="sm"><Lock className="h-3.5 w-3.5" /> Lv {item.levelReq}</GameButton>
           ) : (
-            <GameButton variant={canAfford ? "primary" : "secondary"} disabled={!canAfford} onClick={buy} size="sm" className="w-full">
+            <GameButton variant={canAfford ? "primary" : "secondary"} disabled={!canAfford} onClick={buy} size="sm" className="px-6">
               {canAfford ? (isBuddy ? "Recruit" : "Buy") : "Not enough Chalk"}
             </GameButton>
           )}
@@ -340,11 +338,11 @@ function ShopTile({
         )}
       </div>
 
-      {/* Desktop hover preview — fixed position, clamped within viewport so it never overflows */}
+      {/* Desktop hover preview — fixed, clamped within viewport. Interactive (Buy clickable). */}
       <div
         className={cn(
-          "hidden md:block pointer-events-none fixed z-50",
-          "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+          "hidden md:block fixed z-50",
+          "opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200",
         )}
         style={{
           left: pos?.left ?? -9999,
@@ -354,10 +352,9 @@ function ShopTile({
         }}
       >
         <div
-          className={cn("rounded-xl border-4 bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
-          style={{ padding: PAD, gap: GAP }}
+          className={cn("rounded-xl border-4 overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
         >
-          <div className="relative overflow-hidden rounded-lg shrink-0" style={{ width: IMG, height: IMG }}>
+          <div className="relative shrink-0 self-stretch bg-black/40" style={{ width: IMG, height: IMG }}>
             {renderImage()}
             {locked && (
               <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
@@ -365,7 +362,7 @@ function ShopTile({
               </div>
             )}
           </div>
-          <DetailsCol />
+          <DetailsCol compact withBuy />
         </div>
       </div>
 

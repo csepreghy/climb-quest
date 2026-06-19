@@ -64,16 +64,16 @@ export function InventoryTile({
   };
   const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 
-  const IMG = 186, GAP = 12, DETAILS_W = 236, PAD = 12;
-  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD;
-  const CARD_H = PAD * 2 + IMG;
+  const IMG = 200, DETAILS_W = 244;
+  const TOTAL = IMG + DETAILS_W;
+  const CARD_H = IMG;
 
   function handleEnter() {
     const r = tileRef.current?.getBoundingClientRect();
     if (!r) return;
     const tileCx = r.left + r.width / 2;
     const tileCy = r.top + r.height / 2;
-    const desiredLeft = tileCx - (PAD + IMG / 2);
+    const desiredLeft = tileCx - IMG / 2;
     const desiredTop = tileCy - CARD_H / 2;
     const left = Math.max(12, Math.min(desiredLeft, window.innerWidth - TOTAL - 12));
     const top = Math.max(12, Math.min(desiredTop, window.innerHeight - CARD_H - 12));
@@ -140,10 +140,7 @@ export function InventoryTile({
       )}
 
       {withAction && (
-        <div className="mt-1 flex items-center gap-2">
-          <GameButton variant="primary" size="sm" onClick={() => { setMobileOpen(false); onClick?.(); }} className="flex-1">
-            {equipped ? "Manage" : "Equip"}
-          </GameButton>
+        <div className="mt-1.5 flex items-center justify-end gap-2">
           {onRemove && (
             <button
               type="button"
@@ -154,6 +151,9 @@ export function InventoryTile({
               <Trash2 className="h-4 w-4" />
             </button>
           )}
+          <GameButton variant="primary" size="sm" onClick={() => { setMobileOpen(false); onClick?.(); }} className="px-6">
+            {equipped ? "Manage" : "Equip"}
+          </GameButton>
         </div>
       )}
     </div>
@@ -225,11 +225,11 @@ export function InventoryTile({
         )}
       </div>
 
-      {/* Desktop hover preview — fixed, clamped within viewport */}
+      {/* Desktop hover preview — fixed, clamped, interactive */}
       <div
         className={cn(
-          "hidden md:block pointer-events-none fixed z-50",
-          "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+          "hidden md:block fixed z-50",
+          "opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200",
         )}
         style={{
           left: pos?.left ?? -9999,
@@ -239,13 +239,12 @@ export function InventoryTile({
         }}
       >
         <div
-          className={cn("rounded-xl border-4 bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
-          style={{ padding: PAD, gap: GAP }}
+          className={cn("rounded-xl border-4 overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
         >
-          <div className="relative overflow-hidden rounded-lg shrink-0" style={{ width: IMG, height: IMG }}>
+          <div className="relative shrink-0 self-stretch bg-black/40" style={{ width: IMG, height: IMG }}>
             {renderImage()}
           </div>
-          <DetailsCol />
+          <DetailsCol compact withAction />
         </div>
       </div>
 

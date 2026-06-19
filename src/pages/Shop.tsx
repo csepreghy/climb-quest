@@ -5,7 +5,7 @@ import { buyItem, useGame, effectivePrice } from "@/game/store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Lock, Check } from "lucide-react";
-import { GameCard } from "@/components/ui/game-card";
+
 import { GameButton } from "@/components/ui/game-button";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";

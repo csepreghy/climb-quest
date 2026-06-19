@@ -104,7 +104,7 @@
     font-feature-settings: "ss01", "cv11";
     background: linear-gradient(135deg, hsl(var(--bg-from, 351 38% 41%)) 0%, hsl(var(--bg-to, 40 75% 69%)) 100%);
     background-attachment: fixed;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 }
 
@@ -115,6 +115,18 @@
 
   .cq-ios-standalone .cq-main {
     padding-bottom: calc(7rem + env(safe-area-inset-bottom) + 1rem);
+  }
+
+  .cq-bottom-nav {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Pin to the true bottom even when iOS address bar shows/hides */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   .cq-ios-standalone .cq-bottom-nav {

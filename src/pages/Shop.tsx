@@ -120,8 +120,8 @@ function ShopTile({
   const canAfford = chalk >= price;
   const isConsumable = !!item.consumableBonus;
   const ownAlready = owned && !isConsumable;
-  
-  const isBuddy = item.group === "buddy";
+
+
 
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
   const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;

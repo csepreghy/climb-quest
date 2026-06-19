@@ -105,6 +105,8 @@ export default function Dashboard() {
 
       <StrengthRepsHoldChart sessions={s.strengthSessions ?? []} />
 
+      <StrengthRolling7Chart sessions={s.strengthSessions ?? []} />
+
       <HangboardChart />
 
 

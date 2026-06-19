@@ -64,7 +64,7 @@ export function InventoryTile({
   };
   const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 
-  const IMG = 207, GAP = 16, DETAILS_W = 252, PAD = 16;
+  const IMG = 186, GAP = 12, DETAILS_W = 236, PAD = 12;
   const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD;
   const CARD_H = PAD * 2 + IMG;
 

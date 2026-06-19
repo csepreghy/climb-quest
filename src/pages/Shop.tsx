@@ -135,6 +135,14 @@ function ShopTile({
   if (critPct > 0) badges.push({ text: `${critPct}%c`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
 
+  // Verbose, colored bonus rows for the hover preview.
+  const bonusRows: { label: string; value: string; cls: string }[] = [];
+  if (chalkPct > 0) bonusRows.push({ label: "Chalk Bonus", value: `+${chalkPct}%`, cls: "text-chalk-glow" });
+  if (discountPct > 0) bonusRows.push({ label: "Shop Discount", value: `−${discountPct}%`, cls: "text-[hsl(var(--btn-orange))]" });
+  if (critPct > 0) bonusRows.push({ label: "Critical Chance", value: `${critPct}%`, cls: "text-[hsl(var(--epic))]" });
+  if (bossPct > 0) bonusRows.push({ label: "Boss Bonus", value: `+${bossPct}%`, cls: "text-legendary" });
+
+
   const rarityHsl: Record<string, string> = {
     common: "hsl(0 0% 100% / 0.85)",
     uncommon: "hsl(var(--uncommon))",

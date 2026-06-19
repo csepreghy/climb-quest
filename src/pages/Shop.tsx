@@ -166,12 +166,12 @@ function ShopTile({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Desktop hover-preview layout.
-  const IMG = 207;
-  const GAP = 16;
-  const DETAILS_W = 252;
-  const PAD = 16;
-  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD;     // 507
-  const CARD_H = PAD * 2 + IMG;                         // 239
+  const IMG = 186;
+  const GAP = 12;
+  const DETAILS_W = 236;
+  const PAD = 12;
+  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD;     // 446
+  const CARD_H = PAD * 2 + IMG;                         // 210
 
   function handleEnter() {
     const r = tileRef.current?.getBoundingClientRect();

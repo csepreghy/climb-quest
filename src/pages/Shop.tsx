@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ShopItem, RARITY_COLOR, RARITY_BORDER, ItemGroup } from "@/game/data";
 import { useAllItems, useCatalogLoaded, isImageEmoji } from "@/game/customItems";
 import { buyItem, useGame, effectivePrice } from "@/game/store";

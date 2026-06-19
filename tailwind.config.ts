@@ -48,11 +48,16 @@ export default {
           "0%, 100%": { transform: "translateY(0) rotate(-3deg)" },
           "50%": { transform: "translateY(-12%) rotate(3deg)" },
         },
+        "rarity-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 0 var(--glow-color, hsl(var(--primary))), 0 0 22px 2px var(--glow-color, hsl(var(--primary)))" },
+          "50%":      { boxShadow: "0 0 0 4px var(--glow-color, hsl(var(--primary))), 0 0 48px 10px var(--glow-color, hsl(var(--primary)))" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "chalk-bounce": "chalk-bounce 1.1s ease-in-out infinite",
+        "rarity-glow": "rarity-glow 1.8s ease-in-out infinite",
       },
     },
   },

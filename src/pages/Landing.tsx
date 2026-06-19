@@ -25,12 +25,14 @@ export default function Landing() {
   if (!loading && user) return <Navigate to="/home" replace />;
   const goAuth = () => nav("/auth");
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[hsl(var(--background))] pt-[env(safe-area-inset-top)]" style={{ backgroundImage: "radial-gradient(ellipse at top, hsl(var(--background)) 0%, hsl(0 0% 4%) 100%)" }}>
+    <div className="relative min-h-[100dvh] overflow-x-hidden bg-[hsl(var(--background))]" style={{ backgroundImage: "radial-gradient(ellipse at top, hsl(var(--background)) 0%, hsl(0 0% 4%) 100%)" }}>
       <BackgroundOrbs />
 
       {/* Top bar */}
-      <header className="relative z-10" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+      <header className="relative z-10" style={{ paddingTop: "max(env(safe-area-inset-top), 12px)" }}>
         <div className="container flex items-center justify-between gap-4 py-5">
           <Link to="/" className="flex items-center gap-3 group">
             <img

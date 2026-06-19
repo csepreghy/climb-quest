@@ -160,40 +160,149 @@ function ShopTile({
   const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 
 
-  // Flip preview to the left when the tile sits near the right viewport edge.
+  const isBuddy = item.group === "buddy";
   const tileRef = useRef<HTMLDivElement | null>(null);
   const [flipped, setFlipped] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Layout constants for the unified hover preview card.
-  const IMG = 230;          // ~10% smaller than previous 256
+  // Desktop hover-preview layout (10% smaller than before).
+  const IMG = 207;
   const GAP = 16;
-  const DETAILS_W = 280;
-  const PAD = 16;           // card padding (p-4)
-  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD; // 542
+  const DETAILS_W = 252;
+  const PAD = 16;
+  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD; // 507
+
+  // Mobile tap-preview layout (further sized down to fit narrow screens).
+  const M_IMG = 128;
+  const M_GAP = 12;
+  const M_DETAILS_W = 176;
+  const M_PAD = 12;
+  const M_TOTAL = M_PAD + M_IMG + M_GAP + M_DETAILS_W + M_PAD; // 340
 
   function handleEnter() {
     const r = tileRef.current?.getBoundingClientRect();
     if (!r) return;
     const tileCenter = r.left + r.width / 2;
-    // Image-center when unflipped sits at PAD + IMG/2 from card-left.
-    // Card spans tileCenter - (PAD + IMG/2) to that + TOTAL. Flip if right edge overflows viewport.
     const rightEdge = tileCenter - (PAD + IMG / 2) + TOTAL;
     setFlipped(rightEdge > window.innerWidth - 12);
   }
 
-  // Translate so the image-center always lands on the tile-center.
-  const shiftX = flipped
-    ? -(PAD + GAP + DETAILS_W + IMG / 2) // image is on the right side of the card
-    : -(PAD + IMG / 2);                  // image is on the left side of the card
+  function handleTileClick() {
+    // On mobile, open the in-place preview with a Buy button.
+    // On desktop, fall back to the existing buy dialog.
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+      setMobileOpen(true);
+    } else {
+      onClick();
+    }
+  }
 
-  const renderImage = (sizeCls: string, padCls = "") => {
+  function buy() {
+    const r = buyItem(item.id);
+    if (!r.ok) { toast.error(r.reason ?? "Cannot buy"); return; }
+    if (isBuddy) toast.success(`Recruited ${item.name}`, { description: "Equip your buddy from the Inventory." });
+    else toast.success(`Looted ${item.name}`, { description: isConsumable ? "Equip it to use on your next log." : "Equip it from your Inventory." });
+    setMobileOpen(false);
+  }
+
+  const shiftX = flipped
+    ? -(PAD + GAP + DETAILS_W + IMG / 2)
+    : -(PAD + IMG / 2);
+
+  const renderImage = (sizeCls: string) => {
     if (isImageEmoji(item.emoji)) {
-      return <SmartImage src={item.emoji} alt={item.name} loaderSize={40} wrapperClassName={cn(sizeCls)} className={cn("h-full w-full object-cover", padCls)} />;
+      return <SmartImage src={item.emoji} alt={item.name} loaderSize={40} wrapperClassName={cn(sizeCls)} className="h-full w-full object-cover" />;
     }
     if (item.emoji) {
       return <div className={cn(sizeCls, "flex items-center justify-center text-6xl")}>{item.emoji}</div>;
     }
     return <div className={cn(sizeCls, "flex items-center justify-center")}><ChalkBagLoader size={36} /></div>;
+  };
+
+  // Shared body for both desktop hover preview and mobile tap preview.
+  const PreviewBody = ({ compact, withBuy }: { compact?: boolean; withBuy?: boolean }) => {
+    const imgSize = compact ? M_IMG : IMG;
+    const detailsW = compact ? M_DETAILS_W : DETAILS_W;
+    return (
+      <>
+        {/* Image (no colored edge — only the outer card carries the rarity border + glow) */}
+        <div
+          className={cn("relative overflow-hidden rounded-lg shrink-0", flipped ? "order-2" : "order-1")}
+          style={{ width: imgSize, height: imgSize }}
+        >
+          {renderImage("h-full w-full")}
+          {locked && (
+            <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
+              <div className="flex flex-col items-center gap-1">
+                <Lock className={compact ? "h-5 w-5" : "h-6 w-6"} />
+                <span className="text-xs font-bold">Lv {item.levelReq}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Details */}
+        <div
+          className={cn("flex flex-col min-w-0", flipped ? "order-1" : "order-2")}
+          style={{ width: detailsW, height: compact ? "auto" : imgSize }}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className={cn("font-bold leading-snug break-words", compact ? "text-base" : "text-xl")}>{item.name}</div>
+              <div className={cn("uppercase tracking-wider inline-block mt-1.5 px-2 py-0.5 rounded border", compact ? "text-[10px]" : "text-xs", RARITY_COLOR[item.rarity])}>
+                {item.rarity}
+              </div>
+            </div>
+            {ownAlready && (
+              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-foreground text-background shrink-0">Owned</span>
+            )}
+          </div>
+
+          {bonusRows.length > 0 && (
+            <ul className={cn("space-y-1", compact ? "mt-2" : "mt-3")}>
+              {bonusRows.map((b, i) => (
+                <li key={i} className={cn("flex items-center justify-between gap-3", compact ? "text-xs" : "text-base")}>
+                  <span className="text-muted-foreground">{b.label}</span>
+                  <span className={cn("font-extrabold tabular-nums", b.cls)}>{b.value}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {item.desc && (
+            <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "mt-2 text-[12px]" : "mt-3 text-sm")}>
+              {item.desc}
+            </p>
+          )}
+
+          <div className={cn("mt-auto flex items-center justify-end gap-2 border-t border-border/50", compact ? "pt-2" : "pt-3")}>
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Price</span>
+            <img src={chalkBagImg} alt="" className={compact ? "h-4 w-4 object-contain" : "h-6 w-6 object-contain"} />
+            <span className={cn(
+              "font-extrabold tabular-nums",
+              compact ? "text-base" : "text-2xl",
+              !canAfford && !ownAlready && !locked && "text-destructive",
+            )}>
+              {price.toLocaleString()}
+            </span>
+          </div>
+
+          {withBuy && (
+            <div className="mt-2">
+              {ownAlready ? (
+                <GameButton variant="ghost" disabled className="w-full"><Check className="h-4 w-4" /> {isBuddy ? "Recruited" : "Owned"}</GameButton>
+              ) : locked ? (
+                <GameButton variant="ghost" disabled className="w-full"><Lock className="h-4 w-4" /> Lv {item.levelReq}</GameButton>
+              ) : (
+                <GameButton variant={canAfford ? "primary" : "secondary"} disabled={!canAfford} onClick={buy} className="w-full">
+                  {canAfford ? (isBuddy ? "Recruit" : "Buy") : "Not enough Chalk"}
+                </GameButton>
+              )}
+            </div>
+          )}
+        </div>
+      </>
+    );
   };
 
   return (
@@ -204,12 +313,12 @@ function ShopTile({
       {/* Compact tile */}
       <div
         ref={tileRef}
-        onClick={onClick}
+        onClick={handleTileClick}
         title={item.name}
         aria-label={item.name}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTileClick(); } }}
         className={cn(
           "relative aspect-square w-full overflow-hidden rounded-md cursor-pointer",
           "border-4 transition-opacity duration-200 md:group-hover:opacity-0",
@@ -265,7 +374,7 @@ function ShopTile({
         )}
       </div>
 
-      {/* Expanded hover preview (desktop only): single unified card, image left, details right */}
+      {/* Desktop hover preview */}
       <div
         className={cn(
           "hidden md:block pointer-events-none absolute left-1/2 top-1/2 z-50",
@@ -279,83 +388,33 @@ function ShopTile({
         }}
       >
         <div
-          className={cn(
-            "rounded-xl border-4 bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow",
-            rarityBorder[item.rarity],
-          )}
+          className={cn("rounded-xl border-4 bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
           style={{ padding: PAD, gap: GAP }}
         >
-          {/* Image */}
-          <div
-            className={cn(
-              "relative overflow-hidden rounded-lg border-2 shrink-0",
-              rarityBorder[item.rarity],
-              flipped ? "order-2" : "order-1",
-            )}
-            style={{ width: IMG, height: IMG }}
-          >
-            {renderImage("h-full w-full")}
-            {locked && (
-              <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
-                <div className="flex flex-col items-center gap-1">
-                  <Lock className="h-6 w-6" />
-                  <span className="text-xs font-bold">Lv {item.levelReq}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Details */}
-          <div
-            className={cn(
-              "flex flex-col min-w-0",
-              flipped ? "order-1" : "order-2",
-            )}
-            style={{ width: DETAILS_W, height: IMG }}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-lg font-bold leading-snug break-words">{item.name}</div>
-                <div className={cn("text-[11px] uppercase tracking-wider inline-block mt-1.5 px-2 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
-                  {item.rarity}
-                </div>
-              </div>
-              {ownAlready && (
-                <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-foreground text-background shrink-0">Owned</span>
-              )}
-            </div>
-
-            {bonusRows.length > 0 && (
-              <ul className="mt-3 space-y-1">
-                {bonusRows.map((b, i) => (
-                  <li key={i} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-muted-foreground">{b.label}</span>
-                    <span className={cn("font-extrabold tabular-nums", b.cls)}>{b.value}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {item.desc && (
-              <p className="mt-3 text-[13px] text-muted-foreground leading-relaxed flex-1 overflow-hidden">
-                {item.desc}
-              </p>
-            )}
-
-            {/* Price pinned to bottom-right of details */}
-            <div className="mt-auto pt-3 flex items-center justify-end gap-2 border-t border-border/50">
-              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Price</span>
-              <img src={chalkBagImg} alt="" className="h-5 w-5 object-contain" />
-              <span className={cn(
-                "text-lg font-extrabold tabular-nums",
-                !canAfford && !ownAlready && !locked && "text-destructive",
-              )}>
-                {price.toLocaleString()}
-              </span>
-            </div>
-          </div>
+          <PreviewBody />
         </div>
       </div>
+
+      {/* Mobile tap preview (with Buy button, replaces the old buy modal on phones) */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50 grid place-items-center p-3">
+          <div
+            className="absolute inset-0 bg-black/75 animate-in fade-in duration-150"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div
+            className={cn("relative rounded-xl border-4 bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
+            style={{
+              padding: M_PAD,
+              gap: M_GAP,
+              width: `min(${M_TOTAL}px, 100%)`,
+              ["--glow-color" as string]: glowColor,
+            }}
+          >
+            <PreviewBody compact withBuy />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

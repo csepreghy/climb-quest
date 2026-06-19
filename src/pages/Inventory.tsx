@@ -469,7 +469,18 @@ export default function Inventory() {
                   </div>
                 )}
               </div>
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-between gap-2 pt-2 flex-wrap">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    unequipSlot(slotPicker.slot);
+                    toast.success(`Unequipped ${slotPicker.name}`);
+                    setSlotPicker(null);
+                  }}
+                  className="bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/30"
+                >
+                  Unequip
+                </Button>
                 <Button variant="ghost" onClick={() => setSlotPicker(null)} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Close</Button>
               </div>
             </>

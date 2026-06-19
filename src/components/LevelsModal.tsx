@@ -106,8 +106,10 @@ export function LevelsModal({
                   {(() => {
                     const slotUnlocks = l.unlocks.filter(isSlotUnlock);
                     const dailyCap = computeDailyCap(l.level, capCfg, capOverrides);
+                    const chalkBonusPct = Math.max(0, l.level - 1) * 15;
                     const chips: { key: string; label: React.ReactNode }[] = [
                       ...slotUnlocks.map(u => ({ key: u, label: <>{u}</> })),
+                      { key: "__chalk", label: <>Chalk bonus: +{chalkBonusPct}%</> },
                       { key: "__cap", label: <>Daily cap: {dailyCap.toLocaleString()}</> },
                     ];
                     return (

@@ -104,7 +104,7 @@
     font-feature-settings: "ss01", "cv11";
     background: linear-gradient(135deg, hsl(var(--bg-from, 351 38% 41%)) 0%, hsl(var(--bg-to, 40 75% 69%)) 100%);
     background-attachment: fixed;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 }
 

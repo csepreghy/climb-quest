@@ -265,86 +265,95 @@ function ShopTile({
         )}
       </div>
 
-      {/* Expanded hover preview (desktop only): image anchored on tile, details panel docked beside it */}
+      {/* Expanded hover preview (desktop only): single unified card, image left, details right */}
       <div
         className={cn(
-          "hidden md:flex pointer-events-none absolute left-1/2 top-1/2 z-50",
+          "hidden md:block pointer-events-none absolute left-1/2 top-1/2 z-50",
           "opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100",
-          "transition-all duration-200 items-stretch",
-          flipped ? "flex-row" : "flex-row",
+          "transition-all duration-200",
         )}
         style={{
           transform: `translate(${shiftX}px, -50%)`,
-          gap: `${GAP}px`,
           width: `${TOTAL}px`,
           ["--glow-color" as string]: glowColor,
         }}
       >
-        {/* Image block (left when unflipped, right when flipped) */}
         <div
           className={cn(
-            "relative overflow-hidden rounded-lg border-4 animate-rarity-glow shrink-0",
+            "rounded-xl border-4 bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow",
             rarityBorder[item.rarity],
-            flipped ? "order-2" : "order-1",
           )}
-          style={{ width: IMG, height: IMG }}
+          style={{ padding: PAD, gap: GAP }}
         >
-          {renderImage("h-full w-full")}
+          {/* Image */}
+          <div
+            className={cn(
+              "relative overflow-hidden rounded-lg border-2 shrink-0",
+              rarityBorder[item.rarity],
+              flipped ? "order-2" : "order-1",
+            )}
+            style={{ width: IMG, height: IMG }}
+          >
+            {renderImage("h-full w-full")}
+            {locked && (
+              <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
+                <div className="flex flex-col items-center gap-1">
+                  <Lock className="h-6 w-6" />
+                  <span className="text-xs font-bold">Lv {item.levelReq}</span>
+                </div>
+              </div>
+            )}
+          </div>
 
-          {badges.length > 0 && (
-            <div className="absolute top-2 right-2 flex flex-col items-end gap-1 max-w-[80%]">
-              {badges.map((b, i) => (
-                <span key={i} className={cn("text-[11px] leading-none font-bold tabular-nums px-1.5 py-1 rounded border whitespace-nowrap shadow-sm", b.cls)}>
-                  {b.text}
-                </span>
-              ))}
+          {/* Details */}
+          <div
+            className={cn(
+              "flex flex-col min-w-0",
+              flipped ? "order-1" : "order-2",
+            )}
+            style={{ width: DETAILS_W, height: IMG }}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-lg font-bold leading-snug break-words">{item.name}</div>
+                <div className={cn("text-[11px] uppercase tracking-wider inline-block mt-1.5 px-2 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
+                  {item.rarity}
+                </div>
+              </div>
+              {ownAlready && (
+                <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-foreground text-background shrink-0">Owned</span>
+              )}
             </div>
-          )}
 
-          {!locked && (
-            <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-t from-black/85 via-black/55 to-transparent">
-              <img src={chalkBagImg} alt="" className="h-5 w-5 object-contain drop-shadow" />
+            {bonusRows.length > 0 && (
+              <ul className="mt-3 space-y-1">
+                {bonusRows.map((b, i) => (
+                  <li key={i} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-muted-foreground">{b.label}</span>
+                    <span className={cn("font-extrabold tabular-nums", b.cls)}>{b.value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {item.desc && (
+              <p className="mt-3 text-[13px] text-muted-foreground leading-relaxed flex-1 overflow-hidden">
+                {item.desc}
+              </p>
+            )}
+
+            {/* Price pinned to bottom-right of details */}
+            <div className="mt-auto pt-3 flex items-center justify-end gap-2 border-t border-border/50">
+              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Price</span>
+              <img src={chalkBagImg} alt="" className="h-5 w-5 object-contain" />
               <span className={cn(
-                "text-[16px] leading-none font-extrabold tabular-nums text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]",
-                !canAfford && !ownAlready && "text-destructive",
+                "text-lg font-extrabold tabular-nums",
+                !canAfford && !ownAlready && !locked && "text-destructive",
               )}>
                 {price.toLocaleString()}
               </span>
             </div>
-          )}
-        </div>
-
-        {/* Details panel */}
-        <div
-          className={cn(
-            "rounded-lg border-4 bg-[hsl(var(--panel-fill))] p-4 flex flex-col gap-3 animate-rarity-glow",
-            rarityBorder[item.rarity],
-            flipped ? "order-1" : "order-2",
-          )}
-          style={{ width: DETAILS_W, height: IMG }}
-        >
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <div className="text-base font-bold leading-snug break-words">{item.name}</div>
-              <div className={cn("text-[11px] uppercase tracking-wider inline-block mt-1.5 px-2 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
-                {item.rarity}
-              </div>
-            </div>
-            {ownAlready && (
-              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-foreground text-background shrink-0">Owned</span>
-            )}
-            {locked && (
-              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-muted text-muted-foreground shrink-0 inline-flex items-center gap-1">
-                <Lock className="h-3 w-3" /> Lv {item.levelReq}
-              </span>
-            )}
           </div>
-          {item.desc && (
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1 overflow-hidden">{item.desc}</p>
-          )}
-          {item.category && (
-            <div className="text-[11px] uppercase tracking-wider text-muted-foreground/80">{item.category}</div>
-          )}
         </div>
       </div>
     </div>

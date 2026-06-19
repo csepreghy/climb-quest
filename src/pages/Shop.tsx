@@ -244,7 +244,7 @@ function ShopTile({
         {/* Details */}
         <div
           className={cn("flex flex-col min-w-0", flipped ? "order-1" : "order-2")}
-          style={{ width: detailsW, height: imgSize }}
+          style={{ width: detailsW, height: compact ? "auto" : imgSize }}
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">

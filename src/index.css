@@ -117,6 +117,18 @@
     padding-bottom: calc(7rem + env(safe-area-inset-bottom) + 1rem);
   }
 
+  .cq-bottom-nav {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Pin to the true bottom even when iOS address bar shows/hides */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
   .cq-ios-standalone .cq-bottom-nav {
     bottom: 0;
     padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);

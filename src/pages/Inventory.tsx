@@ -286,18 +286,12 @@ export default function Inventory() {
                       );
                     })}
                     {Array.from({ length: emptyCount }).map((_, i) => (
-                      <div key={`empty-${i}`} className="flex flex-col">
-                        <div className="flex-1"><EmptySlotCard label="Gear" onClick={() => setEmptyGearPicker(true)} /></div>
-                        <div className="h-7 mt-1.5" aria-hidden />
-                      </div>
+                      <EmptySlotCard key={`empty-${i}`} label="Gear" onClick={() => setEmptyGearPicker(true)} />
                     ))}
                     {Array.from({ length: lockedCount }).map((_, i) => {
                       const slotIndex = max + i;
                       return (
-                        <div key={`locked-${i}`} className="flex flex-col">
-                          <div className="flex-1"><LockedSlotCard unlocksAt={gearUnlockLevel(slotIndex)} onClick={() => setLevelsOpen(true)} /></div>
-                          <div className="h-7 mt-1.5" aria-hidden />
-                        </div>
+                        <LockedSlotCard key={`locked-${i}`} unlocksAt={gearUnlockLevel(slotIndex)} onClick={() => setLevelsOpen(true)} />
                       );
                     })}
                   </div>
@@ -320,19 +314,11 @@ export default function Inventory() {
                         setCompareItem(slotOwned[0]);
                       };
                       return (
-                        <div key={slot} className="flex flex-col">
-                          <div className="flex-1"><EmptySlotCard label={SLOT_LABEL[slot]} onClick={onEmptyClick} /></div>
-                          <div className="h-7 mt-1.5" aria-hidden />
-                        </div>
+                        <EmptySlotCard key={slot} label={SLOT_LABEL[slot]} onClick={onEmptyClick} />
                       );
                     }
                     return (
-                      <div key={slot} className="flex flex-col">
-                        <div className="flex-1"><ItemCard item={it} onClick={() => setSlotPicker(it)} /></div>
-                        <div className="flex justify-end mt-1.5">
-                          <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot(slot)}>Unequip</Button>
-                        </div>
-                      </div>
+                      <ItemCard key={slot} item={it} onClick={() => setSlotPicker(it)} />
                     );
                   })}
                 </div>

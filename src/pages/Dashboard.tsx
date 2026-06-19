@@ -400,8 +400,8 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
                   return [`${v.toLocaleString()} chalk`, name];
                 }}
               />
-              <Area yAxisId="chalk" type="monotone" dataKey="chalk" stackId="chalk" name="Climbing" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
-              <Area yAxisId="chalk" type="monotone" dataKey="strength" stackId="chalk" name="Strength" stroke="hsl(var(--sky))" strokeWidth={2} fill="url(#strengthGrad)" />
+              <Area yAxisId="chalk" type="monotone" dataKey="chalk" name="Climbing" stroke="hsl(var(--btn-orange))" strokeWidth={2} fill="url(#chalkGrad)" />
+              <Area yAxisId="chalk" type="monotone" dataKey="strength" name="Strength" stroke="hsl(var(--sky))" strokeWidth={2} fill="url(#strengthGrad)" />
               <Line yAxisId="grade" type="monotone" dataKey="gradeRank" name="Top grade" stroke="hsl(270 80% 65%)" strokeWidth={2} dot={{ r: 3, fill: "hsl(270 80% 65%)" }} connectNulls />
             </ComposedChart>
           </ResponsiveContainer>

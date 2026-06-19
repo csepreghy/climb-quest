@@ -169,18 +169,31 @@ function ShopTile({
   const DETAILS_W = 288;    // w-72
   const TOTAL = IMG + GAP + DETAILS_W; // 552
 
+  // Flip preview to the left when the tile sits near the right viewport edge.
+  const tileRef = useRef<HTMLDivElement | null>(null);
+  const [flipped, setFlipped] = useState(false);
+
+  // Layout constants for the unified hover preview card.
+  const IMG = 230;          // ~10% smaller than previous 256
+  const GAP = 16;
+  const DETAILS_W = 280;
+  const PAD = 16;           // card padding (p-4)
+  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD; // 542
+
   function handleEnter() {
     const r = tileRef.current?.getBoundingClientRect();
     if (!r) return;
     const tileCenter = r.left + r.width / 2;
-    // If unflipped, preview extends to tileCenter + (TOTAL - IMG/2). Flip if it would overflow.
-    setFlipped(tileCenter + (TOTAL - IMG / 2) > window.innerWidth - 12);
+    // Image-center when unflipped sits at PAD + IMG/2 from card-left.
+    // Card spans tileCenter - (PAD + IMG/2) to that + TOTAL. Flip if right edge overflows viewport.
+    const rightEdge = tileCenter - (PAD + IMG / 2) + TOTAL;
+    setFlipped(rightEdge > window.innerWidth - 12);
   }
 
-  // Image-center always lands on the tile center.
-  // Unflipped (image left):  shift container left by IMG/2.
-  // Flipped   (image right): shift container left by (TOTAL - IMG/2).
-  const shiftX = flipped ? -(TOTAL - IMG / 2) : -(IMG / 2);
+  // Translate so the image-center always lands on the tile-center.
+  const shiftX = flipped
+    ? -(PAD + GAP + DETAILS_W + IMG / 2) // image is on the right side of the card
+    : -(PAD + IMG / 2);                  // image is on the left side of the card
 
   const renderImage = (sizeCls: string, padCls = "") => {
     if (isImageEmoji(item.emoji)) {

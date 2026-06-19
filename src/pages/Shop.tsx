@@ -338,11 +338,11 @@ function ShopTile({
         )}
       </div>
 
-      {/* Desktop hover preview — fixed position, clamped within viewport so it never overflows */}
+      {/* Desktop hover preview — fixed, clamped within viewport. Interactive (Buy clickable). */}
       <div
         className={cn(
-          "hidden md:block pointer-events-none fixed z-50",
-          "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+          "hidden md:block fixed z-50",
+          "opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200",
         )}
         style={{
           left: pos?.left ?? -9999,
@@ -352,10 +352,9 @@ function ShopTile({
         }}
       >
         <div
-          className={cn("rounded-xl border-4 bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
-          style={{ padding: PAD, gap: GAP }}
+          className={cn("rounded-xl border-4 overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
         >
-          <div className="relative overflow-hidden rounded-lg shrink-0" style={{ width: IMG, height: IMG }}>
+          <div className="relative shrink-0 self-stretch bg-black/40" style={{ width: IMG, height: IMG }}>
             {renderImage()}
             {locked && (
               <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
@@ -363,7 +362,7 @@ function ShopTile({
               </div>
             )}
           </div>
-          <DetailsCol />
+          <DetailsCol compact withBuy />
         </div>
       </div>
 

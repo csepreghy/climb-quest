@@ -150,33 +150,28 @@
       inset 0 1px 0 hsl(40 30% 92% / 0.10),
       inset 0 -2px 0 hsl(20 50% 2% / 0.9),
       inset 0 0 0 1px hsl(20 20% 22% / 0.55),
-      0 2px 0 hsl(28 22% 24%),
-      0 4px 0 hsl(20 28% 12%),
+      0 3px 0 hsl(20 22% 14%),
       0 8px 12px -4px hsl(0 0% 0% / 0.6),
       0 16px 24px -10px hsl(0 0% 0% / 0.5);
     transition: transform 160ms ease, box-shadow 160ms ease;
   }
-  /* Glossy glass shine across the top of the tile artwork */
+  /* Glossy glass shine that is inset: doesn't touch top edge or top-left corner, feels rolled down */
   .tile-3d::before {
     content: "";
     position: absolute;
-    inset: 0;
+    top: 8%;
+    left: 12%;
+    right: 8%;
+    height: 32%;
     pointer-events: none;
-    border-radius: inherit;
     z-index: 2;
-    background:
-      linear-gradient(
-        to bottom,
-        hsl(0 0% 100% / 0.38) 0%,
-        hsl(0 0% 100% / 0.18) 8%,
-        hsl(0 0% 100% / 0.06) 22%,
-        hsl(0 0% 100% / 0) 38%
-      ),
-      radial-gradient(
-        120% 40% at 50% -10%,
-        hsl(0 0% 100% / 0.32) 0%,
-        hsl(0 0% 100% / 0) 60%
-      );
+    background: linear-gradient(
+      135deg,
+      hsl(0 0% 100% / 0.36) 0%,
+      hsl(0 0% 100% / 0.12) 35%,
+      hsl(0 0% 100% / 0) 75%
+    );
+    border-radius: 0.3rem;
     mix-blend-mode: screen;
   }
   .tile-3d::after {

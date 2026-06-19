@@ -49,8 +49,8 @@ export default {
           "50%": { transform: "translateY(-12%) rotate(3deg)" },
         },
         "rarity-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 0 var(--glow-color, hsl(var(--primary))), 0 0 22px 2px var(--glow-color, hsl(var(--primary)))" },
-          "50%":      { boxShadow: "0 0 0 4px var(--glow-color, hsl(var(--primary))), 0 0 48px 10px var(--glow-color, hsl(var(--primary)))" },
+          "0%, 100%": { boxShadow: "0 0 15px var(--glow-color, hsl(var(--primary))), 0 0 30px var(--glow-color, hsl(var(--primary)))" },
+          "50%":      { boxShadow: "0 0 25px var(--glow-color, hsl(var(--primary))), 0 0 50px var(--glow-color, hsl(var(--primary)))" },
         },
       },
       animation: {

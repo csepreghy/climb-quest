@@ -64,7 +64,7 @@ export function InventoryTile({
   };
   const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 
-  const IMG = 207, GAP = 16, DETAILS_W = 252, PAD = 16;
+  const IMG = 186, GAP = 12, DETAILS_W = 236, PAD = 12;
   const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD;
   const CARD_H = PAD * 2 + IMG;
 
@@ -105,11 +105,11 @@ export function InventoryTile({
     : null;
 
   const DetailsCol = ({ compact, withAction }: { compact?: boolean; withAction?: boolean }) => (
-    <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-3 gap-2" : "")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
+    <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-2.5 gap-1.5" : "")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className={cn("font-bold leading-snug break-words", compact ? "text-lg" : "text-xl")}>{item.name}</div>
-          <div className={cn("uppercase tracking-wider inline-block mt-1.5 px-2 py-0.5 rounded border", compact ? "text-[10px]" : "text-xs", RARITY_COLOR[item.rarity])}>
+          <div className={cn("font-bold leading-snug break-words", compact ? "text-base" : "text-xl")}>{item.name}</div>
+          <div className={cn("uppercase tracking-wider inline-block mt-1 px-2 py-0.5 rounded border", compact ? "text-[10px]" : "text-xs", RARITY_COLOR[item.rarity])}>
             {item.rarity}
           </div>
         </div>
@@ -117,9 +117,9 @@ export function InventoryTile({
       </div>
 
       {bonusRows.length > 0 && (
-        <ul className={cn("space-y-1", compact ? "mt-1" : "mt-3")}>
+        <ul className={cn("space-y-1", compact ? "mt-0.5" : "mt-2")}>
           {bonusRows.map((b, i) => (
-            <li key={i} className={cn("flex items-center justify-between gap-3", compact ? "text-sm" : "text-base")}>
+            <li key={i} className={cn("flex items-center justify-between gap-3", compact ? "text-xs" : "text-base")}>
               <span className="text-muted-foreground">{b.label}</span>
               <span className={cn("font-extrabold tabular-nums", b.cls)}>{b.value}</span>
             </li>
@@ -128,20 +128,20 @@ export function InventoryTile({
       )}
 
       {item.desc && (
-        <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "mt-1 text-[13px]" : "mt-3 text-sm")}>
+        <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "mt-0.5 text-xs" : "mt-2 text-sm")}>
           {item.desc}
         </p>
       )}
 
       {item.category && (
-        <div className={cn("text-[11px] uppercase tracking-wider text-muted-foreground/80", compact ? "mt-1" : "mt-2")}>
+        <div className={cn("text-[11px] uppercase tracking-wider text-muted-foreground/80", compact ? "mt-0.5" : "mt-1.5")}>
           {item.category}
         </div>
       )}
 
       {withAction && (
-        <div className="mt-2 flex items-center gap-2">
-          <GameButton variant="primary" onClick={() => { setMobileOpen(false); onClick?.(); }} className="flex-1">
+        <div className="mt-1 flex items-center gap-2">
+          <GameButton variant="primary" size="sm" onClick={() => { setMobileOpen(false); onClick?.(); }} className="flex-1">
             {equipped ? "Manage" : "Equip"}
           </GameButton>
           {onRemove && (
@@ -149,7 +149,7 @@ export function InventoryTile({
               type="button"
               onClick={(e) => { e.stopPropagation(); setMobileOpen(false); onRemove(); }}
               aria-label="Remove from inventory"
-              className="h-10 w-10 grid place-items-center rounded-md border border-destructive/60 text-destructive bg-background/70 hover:bg-destructive hover:text-destructive-foreground transition"
+              className="h-9 w-9 grid place-items-center rounded-md border border-destructive/60 text-destructive bg-background/70 hover:bg-destructive hover:text-destructive-foreground transition"
             >
               <Trash2 className="h-4 w-4" />
             </button>

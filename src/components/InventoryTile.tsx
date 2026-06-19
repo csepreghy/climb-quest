@@ -1,18 +1,17 @@
-import { GameCard } from "@/components/ui/game-card";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { RARITY_BORDER, ShopItem } from "@/game/data";
+import { useRef, useState } from "react";
+import { RARITY_COLOR, ShopItem } from "@/game/data";
 import { isImageEmoji } from "@/game/customItems";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
-import { ItemCard } from "@/components/ItemCard";
-import { BuddyCard } from "@/components/BuddyCard";
+import { GameButton } from "@/components/ui/game-button";
 import { cn } from "@/lib/utils";
 import { Check, Trash2 } from "lucide-react";
 
 /**
- * Super-compact, image-only tile for the Inventory "Owned" grid.
- * No name, no description, no per-tile action buttons — click to open the
- * existing compare/equip modal for full details.
+ * Super-compact inventory tile with the same hover/tap preview pattern as the
+ * Shop: full rarity-glow card on desktop hover (fixed, clamped within the
+ * viewport), edge-to-edge image card on mobile tap. The preview's primary
+ * action calls `onClick`, which the parent uses to open the slot picker.
  */
 export function InventoryTile({
   item,
@@ -27,7 +26,9 @@ export function InventoryTile({
   primed?: boolean;
   onRemove?: () => void;
 }) {
-  const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
+  const tileRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
   const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
@@ -41,24 +42,146 @@ export function InventoryTile({
   if (critPct > 0) badges.push({ text: `${critPct}%c`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
 
-  const isBuddy = item.group === "buddy";
+  const bonusRows: { label: string; value: string; cls: string }[] = [];
+  if (chalkPct > 0) bonusRows.push({ label: "Chalk Bonus", value: `+${chalkPct}%`, cls: "text-chalk-glow" });
+  if (discountPct > 0) bonusRows.push({ label: "Shop Discount", value: `−${discountPct}%`, cls: "text-[hsl(var(--btn-orange))]" });
+  if (critPct > 0) bonusRows.push({ label: "Critical Chance", value: `${critPct}%`, cls: "text-[hsl(var(--epic))]" });
+  if (bossPct > 0) bonusRows.push({ label: "Boss Bonus", value: `+${bossPct}%`, cls: "text-legendary" });
 
-  const tile = (
-    <GameCard
-      tone={tone as "default"}
-      shimmer={item.rarity === "legendary"}
-      interactive={!!onClick}
-      className={cn(
-        "p-1.5 relative overflow-hidden transition-transform duration-200",
-        onClick && "cursor-pointer hover:-translate-y-0.5 hover:ring-2 hover:ring-[hsl(var(--btn-orange))]/60",
+  const rarityHsl: Record<string, string> = {
+    common: "hsl(0 0% 100% / 0.85)",
+    uncommon: "hsl(var(--uncommon))",
+    rare: "hsl(var(--rare))",
+    epic: "hsl(var(--epic))",
+    legendary: "hsl(var(--legendary))",
+  };
+  const rarityBorder: Record<string, string> = {
+    common: "border-white/80",
+    uncommon: "border-uncommon",
+    rare: "border-rare",
+    epic: "border-epic",
+    legendary: "border-legendary",
+  };
+  const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
+
+  const IMG = 207, GAP = 16, DETAILS_W = 252, PAD = 16;
+  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD;
+  const CARD_H = PAD * 2 + IMG;
+
+  function handleEnter() {
+    const r = tileRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const tileCx = r.left + r.width / 2;
+    const tileCy = r.top + r.height / 2;
+    const desiredLeft = tileCx - (PAD + IMG / 2);
+    const desiredTop = tileCy - CARD_H / 2;
+    const left = Math.max(12, Math.min(desiredLeft, window.innerWidth - TOTAL - 12));
+    const top = Math.max(12, Math.min(desiredTop, window.innerHeight - CARD_H - 12));
+    setPos({ left, top });
+  }
+
+  function handleTileClick() {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+      setMobileOpen(true);
+    } else {
+      onClick?.();
+    }
+  }
+
+  const renderImage = () => {
+    if (isImageEmoji(item.emoji)) {
+      return <SmartImage src={item.emoji} alt={item.name} loaderSize={40} wrapperClassName="h-full w-full" className="h-full w-full object-cover" />;
+    }
+    if (item.emoji) {
+      return <div className="h-full w-full flex items-center justify-center text-6xl">{item.emoji}</div>;
+    }
+    return <div className="h-full w-full flex items-center justify-center"><ChalkBagLoader size={36} /></div>;
+  };
+
+  const stateBadge = primed
+    ? <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-chalk-glow text-background shrink-0">Primed</span>
+    : equipped
+    ? <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-foreground text-background shrink-0">Equipped</span>
+    : null;
+
+  const DetailsCol = ({ compact, withAction }: { compact?: boolean; withAction?: boolean }) => (
+    <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-3 gap-2" : "")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className={cn("font-bold leading-snug break-words", compact ? "text-lg" : "text-xl")}>{item.name}</div>
+          <div className={cn("uppercase tracking-wider inline-block mt-1.5 px-2 py-0.5 rounded border", compact ? "text-[10px]" : "text-xs", RARITY_COLOR[item.rarity])}>
+            {item.rarity}
+          </div>
+        </div>
+        {stateBadge}
+      </div>
+
+      {bonusRows.length > 0 && (
+        <ul className={cn("space-y-1", compact ? "mt-1" : "mt-3")}>
+          {bonusRows.map((b, i) => (
+            <li key={i} className={cn("flex items-center justify-between gap-3", compact ? "text-sm" : "text-base")}>
+              <span className="text-muted-foreground">{b.label}</span>
+              <span className={cn("font-extrabold tabular-nums", b.cls)}>{b.value}</span>
+            </li>
+          ))}
+        </ul>
       )}
-      onClick={onClick}
-      title={item.name}
-      aria-label={item.name}
-    >
-      <div className={cn("relative aspect-square w-full overflow-hidden rounded-md bg-background/40", RARITY_BORDER[item.rarity])}>
+
+      {item.desc && (
+        <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "mt-1 text-[13px]" : "mt-3 text-sm")}>
+          {item.desc}
+        </p>
+      )}
+
+      {item.category && (
+        <div className={cn("text-[11px] uppercase tracking-wider text-muted-foreground/80", compact ? "mt-1" : "mt-2")}>
+          {item.category}
+        </div>
+      )}
+
+      {withAction && (
+        <div className="mt-2 flex items-center gap-2">
+          <GameButton variant="primary" onClick={() => { setMobileOpen(false); onClick?.(); }} className="flex-1">
+            {equipped ? "Manage" : "Equip"}
+          </GameButton>
+          {onRemove && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setMobileOpen(false); onRemove(); }}
+              aria-label="Remove from inventory"
+              className="h-10 w-10 grid place-items-center rounded-md border border-destructive/60 text-destructive bg-background/70 hover:bg-destructive hover:text-destructive-foreground transition"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="group relative" onMouseEnter={handleEnter}>
+      {/* Page-wide dark backdrop while hovered (desktop) */}
+      <div className="hidden md:block pointer-events-none fixed inset-0 z-40 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+      {/* Compact tile */}
+      <div
+        ref={tileRef}
+        onClick={handleTileClick}
+        title={item.name}
+        aria-label={item.name}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTileClick(); } }}
+        className={cn(
+          "relative aspect-square w-full overflow-hidden rounded-md cursor-pointer",
+          "border-4 transition-opacity duration-200 md:group-hover:opacity-0",
+          "shadow-[0_6px_14px_-4px_rgba(0,0,0,0.55)]",
+          rarityBorder[item.rarity],
+        )}
+      >
         {isImageEmoji(item.emoji) ? (
-          <SmartImage src={item.emoji} alt={item.name} loaderSize={24} wrapperClassName="h-full w-full" className="h-full w-full object-contain p-1" />
+          <SmartImage src={item.emoji} alt={item.name} loaderSize={24} wrapperClassName="h-full w-full" className="h-full w-full object-cover" />
         ) : item.emoji ? (
           <div className="h-full w-full flex items-center justify-center text-3xl sm:text-4xl">{item.emoji}</div>
         ) : (
@@ -70,13 +193,7 @@ export function InventoryTile({
         {badges.length > 0 && (
           <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">
             {badges.map((b, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm",
-                  b.cls,
-                )}
-              >
+              <span key={i} className={cn("text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm", b.cls)}>
                 {b.text}
               </span>
             ))}
@@ -107,20 +224,47 @@ export function InventoryTile({
           </button>
         )}
       </div>
-    </GameCard>
-  );
 
-  return (
-    <HoverCard openDelay={120} closeDelay={60}>
-      <HoverCardTrigger asChild>{tile}</HoverCardTrigger>
-      <HoverCardContent
-        side="top"
-        align="center"
-        sideOffset={8}
-        className={cn("p-0 border-0 bg-transparent shadow-none hidden md:block", isBuddy ? "w-[420px]" : "w-72")}
+      {/* Desktop hover preview — fixed, clamped within viewport */}
+      <div
+        className={cn(
+          "hidden md:block pointer-events-none fixed z-50",
+          "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+        )}
+        style={{
+          left: pos?.left ?? -9999,
+          top: pos?.top ?? -9999,
+          width: TOTAL,
+          ["--glow-color" as string]: glowColor,
+        }}
       >
-        {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} primed={primed} />}
-      </HoverCardContent>
-    </HoverCard>
+        <div
+          className={cn("rounded-xl border-4 bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow", rarityBorder[item.rarity])}
+          style={{ padding: PAD, gap: GAP }}
+        >
+          <div className="relative overflow-hidden rounded-lg shrink-0" style={{ width: IMG, height: IMG }}>
+            {renderImage()}
+          </div>
+          <DetailsCol />
+        </div>
+      </div>
+
+      {/* Mobile tap preview — edge-to-edge image, horizontal */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50 grid place-items-center p-3">
+          <div className="absolute inset-0 bg-black/75 animate-in fade-in duration-150" onClick={() => setMobileOpen(false)} />
+          <div
+            className={cn(
+              "relative w-full max-w-[420px] rounded-xl border-4 overflow-hidden bg-[hsl(var(--panel-fill))] animate-rarity-glow flex items-stretch",
+              rarityBorder[item.rarity],
+            )}
+            style={{ ["--glow-color" as string]: glowColor }}
+          >
+            <div className="relative w-36 shrink-0 bg-black/40 self-stretch">{renderImage()}</div>
+            <DetailsCol compact withAction />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

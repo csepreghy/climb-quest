@@ -41,7 +41,6 @@ export function InventoryTile({
   if (critPct > 0) badges.push({ text: `${critPct}%c`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
 
-  return (
   const isBuddy = item.group === "buddy";
 
   const tile = (

@@ -146,14 +146,38 @@
     background: hsl(20 18% 8%);
     border-radius: 0.5rem;
     box-shadow:
-      0 0 0 1px hsl(20 40% 3%),
+      0 0 0 1px hsl(20 25% 18%),
       inset 0 1px 0 hsl(40 30% 92% / 0.10),
       inset 0 -2px 0 hsl(20 50% 2% / 0.9),
       inset 0 0 0 1px hsl(20 20% 22% / 0.55),
-      0 2px 0 hsl(20 40% 3%),
-      0 6px 10px -4px hsl(0 0% 0% / 0.65),
-      0 14px 22px -10px hsl(0 0% 0% / 0.55);
+      0 2px 0 hsl(28 22% 24%),
+      0 4px 0 hsl(20 28% 12%),
+      0 8px 12px -4px hsl(0 0% 0% / 0.6),
+      0 16px 24px -10px hsl(0 0% 0% / 0.5);
     transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+  /* Glossy glass shine across the top of the tile artwork */
+  .tile-3d::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 2;
+    background:
+      linear-gradient(
+        to bottom,
+        hsl(0 0% 100% / 0.38) 0%,
+        hsl(0 0% 100% / 0.18) 8%,
+        hsl(0 0% 100% / 0.06) 22%,
+        hsl(0 0% 100% / 0) 38%
+      ),
+      radial-gradient(
+        120% 40% at 50% -10%,
+        hsl(0 0% 100% / 0.32) 0%,
+        hsl(0 0% 100% / 0) 60%
+      );
+    mix-blend-mode: screen;
   }
   .tile-3d::after {
     content: "";
@@ -161,7 +185,8 @@
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
-    background: linear-gradient(160deg, hsl(0 0% 100% / 0.08) 0%, hsl(0 0% 100% / 0) 38%, hsl(0 0% 0% / 0.28) 100%);
+    z-index: 2;
+    background: linear-gradient(160deg, hsl(0 0% 100% / 0.05) 0%, hsl(0 0% 100% / 0) 45%, hsl(0 0% 0% / 0.22) 100%);
     mix-blend-mode: overlay;
   }
   .rpg-rivets::before,

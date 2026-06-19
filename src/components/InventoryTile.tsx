@@ -140,10 +140,7 @@ export function InventoryTile({
       )}
 
       {withAction && (
-        <div className="mt-1 flex items-center gap-2">
-          <GameButton variant="primary" size="sm" onClick={() => { setMobileOpen(false); onClick?.(); }} className="flex-1">
-            {equipped ? "Manage" : "Equip"}
-          </GameButton>
+        <div className="mt-1.5 flex items-center justify-end gap-2">
           {onRemove && (
             <button
               type="button"
@@ -154,6 +151,9 @@ export function InventoryTile({
               <Trash2 className="h-4 w-4" />
             </button>
           )}
+          <GameButton variant="primary" size="sm" onClick={() => { setMobileOpen(false); onClick?.(); }} className="px-6">
+            {equipped ? "Manage" : "Equip"}
+          </GameButton>
         </div>
       )}
     </div>

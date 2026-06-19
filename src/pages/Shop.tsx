@@ -75,7 +75,7 @@ export default function Shop() {
           <ChalkBagLoader size={96} label="Loading shop…" />
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.map(item => item.group === "buddy"
             ? <BuddyShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} state={s} ignoreLevelReq={!!s.ignoreLevelReq} />
             : <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} state={s} ignoreLevelReq={!!s.ignoreLevelReq} />
@@ -115,34 +115,36 @@ function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: 
   if (bossPct > 0) badges.push({ text: `+${bossPct}% boss`, cls: "bg-legendary/15 text-legendary border-legendary/40" });
 
   return (
-    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-4 flex flex-col gap-3 relative">
-      {badges.length > 0 && (
-        <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-0.5">
-          {badges.map((b, i) => (
-            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border whitespace-nowrap", b.cls)}>
-              {b.text}
-            </div>
-          ))}
-        </div>
-      )}
-      <div className={cn("flex items-start gap-3", badges.length > 0 && "pr-[92px]")}>
+    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-3 flex flex-col gap-2 relative overflow-hidden">
+      <div className="flex items-start gap-2.5">
         {isImageEmoji(item.emoji) ? (
-          <SmartImage src={item.emoji} alt={item.name} loaderSize={36} wrapperClassName={cn("h-20 w-20 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
+          <SmartImage src={item.emoji} alt={item.name} loaderSize={32} wrapperClassName={cn("h-16 w-16 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
         ) : item.emoji ? (
-          <div className={cn("text-5xl h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>
+          <div className={cn("text-4xl h-16 w-16 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>
         ) : (
-          <div className={cn("h-20 w-20 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>
-            <ChalkBagLoader size={36} />
+          <div className={cn("h-16 w-16 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>
+            <ChalkBagLoader size={32} />
           </div>
         )}
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium leading-snug">{item.name}</div>
-          <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
-            {item.rarity}
+        <div className="min-w-0 flex-1 flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium leading-snug break-words">{item.name}</div>
+            <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
+              {item.rarity}
+            </div>
           </div>
+          {badges.length > 0 && (
+            <div className="shrink-0 flex flex-col items-end gap-0.5">
+              {badges.map((b, i) => (
+                <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border whitespace-nowrap", b.cls)}>
+                  {b.text}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
+      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed line-clamp-2">{item.desc}</p>}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
         <div className="text-sm">
           {item.price === 0 ? (

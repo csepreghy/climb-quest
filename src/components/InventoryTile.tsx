@@ -1,8 +1,11 @@
 import { GameCard } from "@/components/ui/game-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { RARITY_BORDER, ShopItem } from "@/game/data";
 import { isImageEmoji } from "@/game/customItems";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
+import { ItemCard } from "@/components/ItemCard";
+import { BuddyCard } from "@/components/BuddyCard";
 import { cn } from "@/lib/utils";
 import { Check, Trash2 } from "lucide-react";
 
@@ -38,12 +41,17 @@ export function InventoryTile({
   if (critPct > 0) badges.push({ text: `${critPct}%c`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
 
-  return (
+  const isBuddy = item.group === "buddy";
+
+  const tile = (
     <GameCard
       tone={tone as "default"}
       shimmer={item.rarity === "legendary"}
       interactive={!!onClick}
-      className={cn("p-1.5 relative overflow-hidden", onClick && "cursor-pointer")}
+      className={cn(
+        "p-1.5 relative overflow-hidden transition-transform duration-200",
+        onClick && "cursor-pointer hover:-translate-y-0.5 hover:ring-2 hover:ring-[hsl(var(--btn-orange))]/60",
+      )}
       onClick={onClick}
       title={item.name}
       aria-label={item.name}
@@ -59,7 +67,6 @@ export function InventoryTile({
           </div>
         )}
 
-        {/* Badge stack — top-right, inside the image tile (no text underneath). */}
         {badges.length > 0 && (
           <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">
             {badges.map((b, i) => (
@@ -76,7 +83,6 @@ export function InventoryTile({
           </div>
         )}
 
-        {/* Equipped / primed check — bottom-right */}
         {(equipped || primed) && (
           <div
             className={cn(
@@ -102,5 +108,19 @@ export function InventoryTile({
         )}
       </div>
     </GameCard>
+  );
+
+  return (
+    <HoverCard openDelay={120} closeDelay={60}>
+      <HoverCardTrigger asChild>{tile}</HoverCardTrigger>
+      <HoverCardContent
+        side="top"
+        align="center"
+        sideOffset={8}
+        className={cn("p-0 border-0 bg-transparent shadow-none hidden md:block", isBuddy ? "w-[420px]" : "w-72")}
+      >
+        {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} primed={primed} />}
+      </HoverCardContent>
+    </HoverCard>
   );
 }

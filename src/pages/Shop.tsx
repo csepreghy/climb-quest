@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Lock, Check } from "lucide-react";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import chalkBagImg from "@/assets/chalk-bag.png";

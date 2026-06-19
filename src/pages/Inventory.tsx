@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowRight, Lock, ShoppingBag, Pencil, Check, X } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
+import { InventoryTile } from "@/components/InventoryTile";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import { BuddyCard } from "@/components/BuddyCard";
 import { LevelsModal } from "@/components/LevelsModal";
@@ -363,32 +364,22 @@ export default function Inventory() {
                   <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">
                     {GROUP_LABEL[group]} ({groupItems.length})
                   </div>
-                  <div className={cn("grid gap-4", isBuddy ? "sm:grid-cols-2" : "sm:grid-cols-2")}>
+                  <div
+                    className={cn(
+                      "grid gap-2",
+                      isBuddy
+                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                        : "grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8",
+                    )}
+                  >
                     {groupItems.map(it => {
                       const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
-                      const removeFn = undefined;
-                      const sellPrice = Math.floor((it.price ?? 0) / 2);
-                      const canSell = !it.consumableBonus && sellPrice > 0;
-                      const handleSell = canSell ? () => setSellTarget(it) : undefined;
-                      if (isBuddy) {
-                        return (
-                          <BuddyCard
-                            key={it.id}
-                            item={it}
-                            onClick={() => setCompareItem(it)}
-                            onRemove={removeFn}
-                          />
-                        );
-                      }
                       return (
-                        <ItemCard
+                        <InventoryTile
                           key={it.id}
                           item={it}
                           primed={isPrimed}
                           onClick={() => setCompareItem(it)}
-                          onRemove={removeFn}
-                          onSell={handleSell}
-                          sellPrice={sellPrice}
                         />
                       );
                     })}

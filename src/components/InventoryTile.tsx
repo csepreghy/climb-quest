@@ -39,13 +39,13 @@ export function InventoryTile({
   const badges: { text: string; cls: string }[] = [];
   if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/90 text-background border-chalk-glow" });
   if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/90 text-background border-[hsl(var(--btn-orange))]" });
-  if (critPct > 0) badges.push({ text: `${critPct}%c`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
+  if (critPct > 0) badges.push({ text: `+${critPct}%`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
 
   const bonusRows: { label: string; value: string; cls: string }[] = [];
   if (chalkPct > 0) bonusRows.push({ label: "Chalk Bonus", value: `+${chalkPct}%`, cls: "text-chalk-glow" });
   if (discountPct > 0) bonusRows.push({ label: "Shop Discount", value: `−${discountPct}%`, cls: "text-[hsl(var(--btn-orange))]" });
-  if (critPct > 0) bonusRows.push({ label: "Critical Chance", value: `${critPct}%`, cls: "text-[hsl(var(--epic))]" });
+  if (critPct > 0) bonusRows.push({ label: "Critical Chance", value: `+${critPct}%`, cls: "text-[hsl(var(--epic))]" });
   if (bossPct > 0) bonusRows.push({ label: "Boss Bonus", value: `+${bossPct}%`, cls: "text-legendary" });
 
   const rarityHsl: Record<string, string> = {

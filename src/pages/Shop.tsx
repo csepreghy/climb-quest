@@ -213,11 +213,11 @@ function ShopTile({
 
   // Inner details column, used by both previews.
   const DetailsCol = ({ compact, withBuy }: { compact?: boolean; withBuy?: boolean }) => (
-    <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-3 gap-2" : "")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
+    <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-2.5 gap-1.5" : "")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className={cn("font-bold leading-snug break-words", compact ? "text-lg" : "text-xl")}>{item.name}</div>
-          <div className={cn("uppercase tracking-wider inline-block mt-1.5 px-2 py-0.5 rounded border", compact ? "text-[10px]" : "text-xs", RARITY_COLOR[item.rarity])}>
+          <div className={cn("font-bold leading-snug break-words", compact ? "text-base" : "text-xl")}>{item.name}</div>
+          <div className={cn("uppercase tracking-wider inline-block mt-1 px-2 py-0.5 rounded border", compact ? "text-[10px]" : "text-xs", RARITY_COLOR[item.rarity])}>
             {item.rarity}
           </div>
         </div>
@@ -227,9 +227,9 @@ function ShopTile({
       </div>
 
       {bonusRows.length > 0 && (
-        <ul className={cn("space-y-1", compact ? "mt-1" : "mt-3")}>
+        <ul className={cn("space-y-1", compact ? "mt-0.5" : "mt-2")}>
           {bonusRows.map((b, i) => (
-            <li key={i} className={cn("flex items-center justify-between gap-3", compact ? "text-sm" : "text-base")}>
+            <li key={i} className={cn("flex items-center justify-between gap-3", compact ? "text-xs" : "text-base")}>
               <span className="text-muted-foreground">{b.label}</span>
               <span className={cn("font-extrabold tabular-nums", b.cls)}>{b.value}</span>
             </li>
@@ -238,17 +238,17 @@ function ShopTile({
       )}
 
       {item.desc && (
-        <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "mt-1 text-[13px]" : "mt-3 text-sm")}>
+        <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "mt-0.5 text-xs" : "mt-2 text-sm")}>
           {item.desc}
         </p>
       )}
 
-      <div className={cn("mt-auto flex items-center justify-end gap-2 border-t border-border/50", compact ? "pt-2" : "pt-3")}>
+      <div className={cn("mt-auto flex items-center justify-end gap-2 border-t border-border/50", compact ? "pt-1.5" : "pt-2")}>
         <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Price</span>
-        <img src={chalkBagImg} alt="" className={compact ? "h-5 w-5 object-contain" : "h-6 w-6 object-contain"} />
+        <img src={chalkBagImg} alt="" className={compact ? "h-4 w-4 object-contain" : "h-6 w-6 object-contain"} />
         <span className={cn(
           "font-extrabold tabular-nums",
-          compact ? "text-lg" : "text-2xl",
+          compact ? "text-base" : "text-2xl",
           !canAfford && !ownAlready && !locked && "text-destructive",
         )}>
           {price.toLocaleString()}
@@ -256,13 +256,13 @@ function ShopTile({
       </div>
 
       {withBuy && (
-        <div className="mt-2">
+        <div className="mt-1">
           {ownAlready ? (
-            <GameButton variant="ghost" disabled className="w-full"><Check className="h-4 w-4" /> {isBuddy ? "Recruited" : "Owned"}</GameButton>
+            <GameButton variant="ghost" disabled size="sm" className="w-full"><Check className="h-3.5 w-3.5" /> {isBuddy ? "Recruited" : "Owned"}</GameButton>
           ) : locked ? (
-            <GameButton variant="ghost" disabled className="w-full"><Lock className="h-4 w-4" /> Lv {item.levelReq}</GameButton>
+            <GameButton variant="ghost" disabled size="sm" className="w-full"><Lock className="h-3.5 w-3.5" /> Lv {item.levelReq}</GameButton>
           ) : (
-            <GameButton variant={canAfford ? "primary" : "secondary"} disabled={!canAfford} onClick={buy} className="w-full">
+            <GameButton variant={canAfford ? "primary" : "secondary"} disabled={!canAfford} onClick={buy} size="sm" className="w-full">
               {canAfford ? (isBuddy ? "Recruit" : "Buy") : "Not enough Chalk"}
             </GameButton>
           )}

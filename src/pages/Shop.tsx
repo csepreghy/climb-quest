@@ -136,71 +136,79 @@ function ShopTile({
   if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
 
   const tile = (
-    <GameCard
-      tone={tone as "default"}
-      shimmer={item.rarity === "legendary"}
-      interactive
-      className={cn(
-        "p-1.5 relative overflow-hidden cursor-pointer transition-transform duration-200",
-        "hover:-translate-y-0.5 hover:ring-2 hover:ring-[hsl(var(--btn-orange))]/60",
-      )}
+    <div
       onClick={onClick}
       title={item.name}
       aria-label={item.name}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
+      className={cn(
+        "group relative aspect-square w-full overflow-hidden rounded-md bg-background/40 cursor-pointer",
+        "border-2 transition-transform duration-200 hover:-translate-y-0.5 hover:scale-[1.03]",
+        RARITY_BORDER[item.rarity],
+        item.rarity === "legendary" && "shadow-[0_0_12px_-2px_hsl(var(--legendary)/0.6)]",
+      )}
     >
-      <div className={cn("relative aspect-square w-full overflow-hidden rounded-md bg-background/40", RARITY_BORDER[item.rarity])}>
-        {isImageEmoji(item.emoji) ? (
-          <SmartImage src={item.emoji} alt={item.name} loaderSize={24} wrapperClassName="h-full w-full" className="h-full w-full object-contain p-1" />
-        ) : item.emoji ? (
-          <div className="h-full w-full flex items-center justify-center text-3xl sm:text-4xl">{item.emoji}</div>
-        ) : (
-          <div className="h-full w-full flex items-center justify-center">
-            <ChalkBagLoader size={24} />
-          </div>
-        )}
+      {isImageEmoji(item.emoji) ? (
+        <SmartImage src={item.emoji} alt={item.name} loaderSize={24} wrapperClassName="h-full w-full" className="h-full w-full object-contain p-1" />
+      ) : item.emoji ? (
+        <div className="h-full w-full flex items-center justify-center text-3xl sm:text-4xl">{item.emoji}</div>
+      ) : (
+        <div className="h-full w-full flex items-center justify-center">
+          <ChalkBagLoader size={24} />
+        </div>
+      )}
 
-        {badges.length > 0 && (
-          <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">
-            {badges.map((b, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm",
-                  b.cls,
-                )}
-              >
-                {b.text}
-              </span>
-            ))}
-          </div>
-        )}
+      {/* Dark hover overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-200" />
 
-        {/* Owned check */}
-        {ownAlready && (
-          <div className="absolute bottom-1 right-1 h-5 w-5 grid place-items-center rounded-full border bg-foreground text-background border-foreground shadow" title="Owned">
-            <Check className="h-3 w-3" strokeWidth={3} />
-          </div>
-        )}
+      {/* Price - bottom left over image */}
+      {!locked && (
+        <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1 px-1.5 py-1 bg-gradient-to-t from-black/75 via-black/45 to-transparent pointer-events-none">
+          <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain drop-shadow" />
+          <span className={cn(
+            "text-[12px] leading-none font-extrabold tabular-nums text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]",
+            !canAfford && !ownAlready && "text-destructive",
+          )}>
+            {price.toLocaleString()}
+          </span>
+        </div>
+      )}
 
-        {/* Locked overlay */}
-        {locked && (
-          <div className="absolute inset-0 bg-background/70 grid place-items-center text-muted-foreground">
-            <div className="flex flex-col items-center gap-0.5">
-              <Lock className="h-4 w-4" />
-              <span className="text-[9px] font-bold">Lv {item.levelReq}</span>
-            </div>
-          </div>
-        )}
-      </div>
+      {badges.length > 0 && (
+        <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">
+          {badges.map((b, i) => (
+            <span
+              key={i}
+              className={cn(
+                "text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm",
+                b.cls,
+              )}
+            >
+              {b.text}
+            </span>
+          ))}
+        </div>
+      )}
 
-      {/* Price chip */}
-      <div className="mt-1 flex items-center justify-center gap-1 text-[10px] font-bold tabular-nums">
-        <img src={chalkBagImg} alt="" className="h-3 w-3 object-contain" />
-        <span className={cn(!canAfford && !ownAlready && !locked && "text-destructive")}>
-          {price.toLocaleString()}
-        </span>
-      </div>
-    </GameCard>
+      {/* Owned check */}
+      {ownAlready && (
+        <div className="absolute top-1 left-1 h-5 w-5 grid place-items-center rounded-full border bg-foreground text-background border-foreground shadow" title="Owned">
+          <Check className="h-3 w-3" strokeWidth={3} />
+        </div>
+      )}
+
+      {/* Locked overlay */}
+      {locked && (
+        <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
+          <div className="flex flex-col items-center gap-0.5">
+            <Lock className="h-4 w-4" />
+            <span className="text-[9px] font-bold">Lv {item.levelReq}</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 
   return (
@@ -209,8 +217,8 @@ function ShopTile({
       <HoverCardContent
         side="top"
         align="center"
-        sideOffset={8}
-        className={cn("p-0 border-0 bg-transparent shadow-none hidden md:block", isBuddy ? "w-[420px]" : "w-72")}
+        sideOffset={10}
+        className={cn("p-0 border-0 bg-transparent shadow-none hidden md:block", isBuddy ? "w-[520px]" : "w-96")}
       >
         {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
       </HoverCardContent>

@@ -14,7 +14,7 @@ export function LoadingScreen() {
       <img
         src={chalkBagImg}
         alt=""
-        className="h-20 w-20 object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.4)] animate-chalk-bob"
+        className="h-20 w-20 object-contain drop-shadow-[0_8px_20px_hsl(42_100%_55%/0.4)] animate-chalk-bounce"
       />
       <p className="mt-6 text-sm font-display tracking-widest uppercase text-muted-foreground">
         Chalking up...

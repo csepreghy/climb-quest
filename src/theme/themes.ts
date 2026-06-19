@@ -297,7 +297,7 @@ export const ELEVATION_THEMES: ThemeOption[] = [
 /* -------- DEFAULTS -------- */
 export const DEFAULTS = {
   box: "midnight",
-  bg: "g-sunset",
+  bg: "m-stone",
   header: "h-ink",
   stage: "soft-cream",
   glow: "gold",

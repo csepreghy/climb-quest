@@ -7,9 +7,13 @@ import { cn } from "@/lib/utils";
 import { Lock, Check } from "lucide-react";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
+import { ItemCard } from "@/components/ItemCard";
 import { BuddyCard } from "@/components/BuddyCard";
 
 type GroupKey = ItemGroup | "all";
@@ -27,6 +31,7 @@ export default function Shop() {
   const loaded = useCatalogLoaded();
   const [group, setGroup] = useState<GroupKey>("all");
   const [cat, setCat] = useState<string>("All");
+  const [detail, setDetail] = useState<ShopItem | null>(null);
 
   const activeGroup = GROUPS.find(g => g.key === group)!;
   const items = useMemo(() => {
@@ -75,32 +80,48 @@ export default function Shop() {
           <ChalkBagLoader size={96} label="Loading shop…" />
         </div>
       ) : (
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {items.map(item => item.group === "buddy"
-            ? <BuddyShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} state={s} ignoreLevelReq={!!s.ignoreLevelReq} />
-            : <ShopCard key={item.id} item={item} owned={s.owned.includes(item.id)} chalk={s.chalk} level={s.level} state={s} ignoreLevelReq={!!s.ignoreLevelReq} />
-          )}
+        <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
+          {items.map(item => (
+            <ShopTile
+              key={item.id}
+              item={item}
+              owned={s.owned.includes(item.id)}
+              chalk={s.chalk}
+              level={s.level}
+              state={s}
+              ignoreLevelReq={!!s.ignoreLevelReq}
+              onClick={() => setDetail(item)}
+            />
+          ))}
         </div>
       )}
+
+      <ShopDetailDialog
+        item={detail}
+        onClose={() => setDetail(null)}
+        owned={detail ? s.owned.includes(detail.id) : false}
+        chalk={s.chalk}
+        level={s.level}
+        state={s}
+        ignoreLevelReq={!!s.ignoreLevelReq}
+      />
     </div>
   );
 }
 
-function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: ShopItem; owned: boolean; chalk: number; level: number; state: ReturnType<typeof useGame>; ignoreLevelReq: boolean }) {
+function ShopTile({
+  item, owned, chalk, level, state, ignoreLevelReq, onClick,
+}: {
+  item: ShopItem; owned: boolean; chalk: number; level: number;
+  state: ReturnType<typeof useGame>; ignoreLevelReq: boolean; onClick: () => void;
+}) {
   const locked = !ignoreLevelReq && !!(item.levelReq && level < item.levelReq);
   const price = effectivePrice(state, item.price);
-  const discounted = price < item.price;
   const canAfford = chalk >= price;
   const isConsumable = !!item.consumableBonus;
   const ownAlready = owned && !isConsumable;
-
-  function buy() {
-    const r = buyItem(item.id);
-    if (!r.ok) { toast.error(r.reason ?? "Cannot buy"); return; }
-    toast.success(`Looted ${item.name}`, { description: isConsumable ? "Equip it to use on your next log." : "Equip it from your Inventory." });
-  }
-
   const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
+  const isBuddy = item.group === "buddy";
 
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
   const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
@@ -109,106 +130,152 @@ function ShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: 
   const critPct = item.critChancePct ? Math.round(item.critChancePct) : 0;
   const bossPct = item.bossBonusPct ? Math.round(item.bossBonusPct) : 0;
   const badges: { text: string; cls: string }[] = [];
-  if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40" });
-  if (discountPct > 0) badges.push({ text: `−${discountPct}% shop`, cls: "bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] border-[hsl(var(--btn-orange))]/40" });
-  if (critPct > 0) badges.push({ text: `${critPct}% crit`, cls: "bg-[hsl(var(--epic))]/15 text-[hsl(var(--epic))] border-[hsl(var(--epic))]/50" });
-  if (bossPct > 0) badges.push({ text: `+${bossPct}% boss`, cls: "bg-legendary/15 text-legendary border-legendary/40" });
+  if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/90 text-background border-chalk-glow" });
+  if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/90 text-background border-[hsl(var(--btn-orange))]" });
+  if (critPct > 0) badges.push({ text: `${critPct}%c`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
+  if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
 
-  return (
-    <GameCard tone={tone as "default"} shimmer={item.rarity === "legendary"} className="p-3 flex flex-col gap-2 relative overflow-hidden">
-      <div className="flex items-start gap-2.5">
+  const tile = (
+    <GameCard
+      tone={tone as "default"}
+      shimmer={item.rarity === "legendary"}
+      interactive
+      className={cn(
+        "p-1.5 relative overflow-hidden cursor-pointer transition-transform duration-200",
+        "hover:-translate-y-0.5 hover:ring-2 hover:ring-[hsl(var(--btn-orange))]/60",
+      )}
+      onClick={onClick}
+      title={item.name}
+      aria-label={item.name}
+    >
+      <div className={cn("relative aspect-square w-full overflow-hidden rounded-md bg-background/40", RARITY_BORDER[item.rarity])}>
         {isImageEmoji(item.emoji) ? (
-          <SmartImage src={item.emoji} alt={item.name} loaderSize={32} wrapperClassName={cn("h-16 w-16 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
+          <SmartImage src={item.emoji} alt={item.name} loaderSize={24} wrapperClassName="h-full w-full" className="h-full w-full object-contain p-1" />
         ) : item.emoji ? (
-          <div className={cn("text-4xl h-16 w-16 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>{item.emoji}</div>
+          <div className="h-full w-full flex items-center justify-center text-3xl sm:text-4xl">{item.emoji}</div>
         ) : (
-          <div className={cn("h-16 w-16 flex items-center justify-center rounded-lg bg-background/40 shrink-0", RARITY_BORDER[item.rarity])}>
-            <ChalkBagLoader size={32} />
+          <div className="h-full w-full flex items-center justify-center">
+            <ChalkBagLoader size={24} />
           </div>
         )}
-        <div className="min-w-0 flex-1 flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-medium leading-snug break-words">{item.name}</div>
-            <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
-              {item.rarity}
+
+        {badges.length > 0 && (
+          <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">
+            {badges.map((b, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm",
+                  b.cls,
+                )}
+              >
+                {b.text}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Owned check */}
+        {ownAlready && (
+          <div className="absolute bottom-1 right-1 h-5 w-5 grid place-items-center rounded-full border bg-foreground text-background border-foreground shadow" title="Owned">
+            <Check className="h-3 w-3" strokeWidth={3} />
+          </div>
+        )}
+
+        {/* Locked overlay */}
+        {locked && (
+          <div className="absolute inset-0 bg-background/70 grid place-items-center text-muted-foreground">
+            <div className="flex flex-col items-center gap-0.5">
+              <Lock className="h-4 w-4" />
+              <span className="text-[9px] font-bold">Lv {item.levelReq}</span>
             </div>
           </div>
-          {badges.length > 0 && (
-            <div className="shrink-0 flex flex-col items-end gap-0.5">
-              {badges.map((b, i) => (
-                <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border whitespace-nowrap", b.cls)}>
-                  {b.text}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
-      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed line-clamp-2">{item.desc}</p>}
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
-        <div className="text-sm">
-          {item.price === 0 ? (
-            <span className="text-muted-foreground text-xs">Starter</span>
-          ) : (
-            <span className="font-medium tabular-nums inline-flex items-center gap-1">
-              
-              {price.toLocaleString()}
-              <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" />
-            </span>
-          )}
-        </div>
-        {ownAlready ? (
-          <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Owned</GameButton>
-        ) : locked ? (
-          <GameButton size="sm" variant="ghost" disabled><Lock className="h-3 w-3" /> Lv {item.levelReq}</GameButton>
-        ) : (
-          <GameButton size="sm" variant={!canAfford || item.price === 0 ? "secondary" : "primary"} disabled={!canAfford || item.price === 0} onClick={buy}>
-            {item.price === 0 ? "Free" : canAfford ? "Buy" : "Not enough Chalk"}
-          </GameButton>
-        )}
+
+      {/* Price chip */}
+      <div className="mt-1 flex items-center justify-center gap-1 text-[10px] font-bold tabular-nums">
+        <img src={chalkBagImg} alt="" className="h-3 w-3 object-contain" />
+        <span className={cn(!canAfford && !ownAlready && !locked && "text-destructive")}>
+          {price.toLocaleString()}
+        </span>
       </div>
     </GameCard>
   );
+
+  return (
+    <HoverCard openDelay={120} closeDelay={60}>
+      <HoverCardTrigger asChild>{tile}</HoverCardTrigger>
+      <HoverCardContent
+        side="top"
+        align="center"
+        sideOffset={8}
+        className={cn("p-0 border-0 bg-transparent shadow-none hidden md:block", isBuddy ? "w-[420px]" : "w-72")}
+      >
+        {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
+      </HoverCardContent>
+    </HoverCard>
+  );
 }
 
-function BuddyShopCard({ item, owned, chalk, level, state, ignoreLevelReq }: { item: ShopItem; owned: boolean; chalk: number; level: number; state: ReturnType<typeof useGame>; ignoreLevelReq: boolean }) {
+function ShopDetailDialog({
+  item, onClose, owned, chalk, level, state, ignoreLevelReq,
+}: {
+  item: ShopItem | null; onClose: () => void; owned: boolean; chalk: number; level: number;
+  state: ReturnType<typeof useGame>; ignoreLevelReq: boolean;
+}) {
+  if (!item) return null;
   const locked = !ignoreLevelReq && !!(item.levelReq && level < item.levelReq);
   const price = effectivePrice(state, item.price);
   const canAfford = chalk >= price;
-  const ownAlready = owned;
+  const isConsumable = !!item.consumableBonus;
+  const isBuddy = item.group === "buddy";
+  const ownAlready = owned && !isConsumable && !isBuddy ? true : (owned && isBuddy);
 
   function buy() {
-    const r = buyItem(item.id);
+    const r = buyItem(item!.id);
     if (!r.ok) { toast.error(r.reason ?? "Cannot buy"); return; }
-    toast.success(`Recruited ${item.name}`, { description: "Equip your buddy from the Inventory." });
+    if (isBuddy) {
+      toast.success(`Recruited ${item!.name}`, { description: "Equip your buddy from the Inventory." });
+    } else {
+      toast.success(`Looted ${item!.name}`, { description: isConsumable ? "Equip it to use on your next log." : "Equip it from your Inventory." });
+    }
+    onClose();
   }
 
   return (
-    <BuddyCard
-      item={item}
-      footer={
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-sm">
-            {item.price === 0 ? (
-              <span className="text-muted-foreground text-xs">Starter</span>
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span className="truncate">{item.name}</span>
+            <span className={cn("text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0", RARITY_COLOR[item.rarity])}>
+              {item.rarity}
+            </span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="max-w-sm mx-auto w-full">
+          {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
+        </div>
+        <DialogFooter className="gap-2 sm:gap-2 items-center sm:justify-between flex-wrap">
+          <span className="font-bold tabular-nums inline-flex items-center gap-1.5">
+            <img src={chalkBagImg} alt="Chalk" className="h-5 w-5 object-contain" />
+            {price.toLocaleString()}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={onClose} className="bg-secondary hover:bg-muted-foreground/20 text-foreground">Close</Button>
+            {ownAlready ? (
+              <GameButton variant="ghost" disabled><Check className="h-4 w-4" /> {isBuddy ? "Recruited" : "Owned"}</GameButton>
+            ) : locked ? (
+              <GameButton variant="ghost" disabled><Lock className="h-4 w-4" /> Lv {item.levelReq}</GameButton>
             ) : (
-              <span className="font-medium tabular-nums inline-flex items-center gap-1">
-                {price.toLocaleString()}
-                <img src={chalkBagImg} alt="Chalk" className="h-4 w-4 object-contain" />
-              </span>
+              <GameButton variant={canAfford ? "primary" : "secondary"} disabled={!canAfford} onClick={buy}>
+                {canAfford ? (isBuddy ? "Recruit" : "Buy") : "Not enough Chalk"}
+              </GameButton>
             )}
           </div>
-          {ownAlready ? (
-            <GameButton size="sm" variant="ghost" disabled><Check className="h-3 w-3" /> Recruited</GameButton>
-          ) : locked ? (
-            <GameButton size="sm" variant="ghost" disabled><Lock className="h-3 w-3" /> Lv {item.levelReq}</GameButton>
-          ) : (
-            <GameButton size="sm" variant={!canAfford || item.price === 0 ? "secondary" : "primary"} disabled={!canAfford || item.price === 0} onClick={buy}>
-              {item.price === 0 ? "Free" : canAfford ? "Recruit" : "Not enough Chalk"}
-            </GameButton>
-          )}
-        </div>
-      }
-    />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

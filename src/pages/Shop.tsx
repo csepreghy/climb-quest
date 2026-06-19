@@ -165,20 +165,18 @@ function ShopTile({
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Desktop hover-preview layout.
-  const IMG = 186;
-  const GAP = 12;
-  const DETAILS_W = 236;
-  const PAD = 12;
-  const TOTAL = PAD + IMG + GAP + DETAILS_W + PAD;     // 446
-  const CARD_H = PAD * 2 + IMG;                         // 210
+  // Desktop hover-preview layout. Edge-to-edge image, no outer padding on the card.
+  const IMG = 200;
+  const DETAILS_W = 244;
+  const TOTAL = IMG + DETAILS_W;     // 444
+  const CARD_H = IMG;                 // 200
 
   function handleEnter() {
     const r = tileRef.current?.getBoundingClientRect();
     if (!r) return;
     const tileCx = r.left + r.width / 2;
     const tileCy = r.top + r.height / 2;
-    const desiredLeft = tileCx - (PAD + IMG / 2);
+    const desiredLeft = tileCx - IMG / 2;
     const desiredTop = tileCy - CARD_H / 2;
     const left = Math.max(12, Math.min(desiredLeft, window.innerWidth - TOTAL - 12));
     const top = Math.max(12, Math.min(desiredTop, window.innerHeight - CARD_H - 12));

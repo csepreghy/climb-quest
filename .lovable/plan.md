@@ -1,64 +1,48 @@
-## Goal
+# Densify Inventory & Shop (revised)
 
-Replace the AI-generated hangboard art with the supplied cartoon Beastmaker 1000 illustration, rebuild the clickable hold map against the white reference, and treat mirrored holds as a single logical hold so hovering/selecting/highlighting lights up both sides at once.
+Two different density levels, plus a strict no-overflow/no-overlap pass.
 
-## Holds (from the white reference)
+## Inventory — super compact (no name)
 
-Each numbered hold on the reference exists either as a **symmetric pair** (left + right) or as a single centre hold. We model one logical "hold" per number, and each logical hold owns 1–2 physical positions on the board.
+A new tile variant used only in the Inventory "Owned" section:
 
-Top row:
-- `n1` — 4-finger edge, 15mm — pair (outer corners)
-- `n2` — 3-finger edge, 30mm — pair (inner top)
+- Square thumbnail tile (`aspect-square`), padding `p-1.5`, rarity ring on the tile itself (existing `RARITY_BORDER`).
+- **No name, no description, no rarity pill** — identity comes from the image + rarity ring color.
+- Bonus badges (chalk%, crit, boss, discount) shown as small chips in the **top-right corner of the tile**, stacked vertically, max-width clamped, `whitespace-nowrap`, `text-[9px]`. They sit inside the tile padding so they never overlap a title (there is no title).
+- Tap/click opens the existing compare/equip modal (unchanged behavior), so the name + details remain one tap away.
+- A tiny "Equipped" check overlay (bottom-right) when already equipped; sell/remove stays in the modal — no per-tile action buttons (removes the biggest source of overflow today).
+- Grid: `grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-2`.
+- Buddies in Owned: same tile treatment but `grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5` (bigger so the buddy art still reads).
+- Equipped section stays exactly as it is today.
 
-Middle row:
-- `n3` — 4-finger edge, 45mm — pair (outer)
-- `n4` — deep 2-finger pocket, 50mm — pair
-- `n5` — deep 3-finger pocket, 45mm — pair
-- `n6` — 4-finger edge, 50mm — **single, centre**
+Implementation: add a new lightweight `InventoryTile` component (it does not need to share code with `ItemCard`), used only in the Owned section of `src/pages/Inventory.tsx`.
 
-Bottom row:
-- `n7` — 4-finger edge, 20mm — pair (outer, the ones with the dotted monos in the cartoon)
-- `n8` — 2-finger pocket, 25mm — pair
-- `n9` — 3-finger pocket, 20mm — pair (inner bottom)
+## Shop — slightly more compact
 
-Total: **9 logical holds**, **17 physical positions**. The two decorative "CQ" scoops on the top row stay non-interactive.
+Keep names, descriptions, and the Buy button — just tighten and fix overlap:
 
-## Changes
+- `ShopCard` padding `p-4` → `p-3`, internal gaps `gap-3` → `gap-2`.
+- Thumbnail `h-20 w-20` → `h-16 w-16`; emoji font `text-5xl` → `text-4xl`.
+- Description clamped to **2 lines** (`line-clamp-2`) to keep heights even.
+- **Overlap fix**: badges currently sit absolutely in the top-right and we manually pad the title row with `pr-[92px]`, which fails when there are multiple badges or long names. Replace with a real layout: a header row that is `flex items-start justify-between gap-2`, with the title block on the left (`min-w-0` + `truncate` on the name) and the badge stack on the right (no absolute positioning, `shrink-0`, `flex-col items-end gap-0.5`). This guarantees badges never cover the title.
+- Grid: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3` (one extra column at `xl`).
+- `BuddyShopCard` stays as-is (image-forward sales card), but apply the same header-row fix anywhere a `+xx%` chip is overlaid.
 
-**1. Asset swap**
-- Upload `user-uploads://hangboard_item.png` via `lovable-assets` to `src/assets/hangboard-beastmaker1000.png.asset.json`.
-- Delete the old `src/assets/hangboard-beastmaker1000.jpg` (and its `.asset.json` pointer if present).
-- In `src/components/hangboard/HangboardOverlay.tsx` switch the `import boardImg` to the new pointer (`pointer.url`), and update the `<img>` intrinsic `width`/`height` to 1920×640.
+## Strict no-overflow / no-overlap pass
 
-**2. New hold model in `src/game/hangboard/beastmaker1000.ts`**
-- Change `HangboardHold` so each entry owns an array of `positions: { x, y, w, h }[]` (1 or 2 entries) instead of a single box.
-- Replace `BEASTMAKER_1000_HOLDS` with the 9 entries above. Approximate coordinates (% of 1920×640 image, calibrated by eye against the cartoon; will be nudged after first render):
-  - `n1` (top, y≈24%, h≈14%, w≈11%) — left x≈7, right x≈82
-  - `n2` (top, y≈24%, h≈14%, w≈9%) — left x≈33, right x≈47
-  - `n3` (mid, y≈42%, h≈16%, w≈10%) — left x≈7, right x≈83
-  - `n4` (mid, w≈10%) — left x≈19, right x≈71
-  - `n5` (mid, w≈10%) — left x≈31, right x≈59
-  - `n6` (mid, w≈14%) — single x≈43
-  - `n7` (bottom, y≈63%, h≈16%, w≈11%) — left x≈7, right x≈82
-  - `n8` (bottom, w≈11%) — left x≈19, right x≈58
-  - `n9` (bottom, w≈11%) — left x≈32, right x≈45
-- Labels follow the reference, e.g. `"15mm Edge"`, `"30mm Edge"`, `"45mm Edge"`, `"2-finger 50mm Pocket"`, `"3-finger 45mm Pocket"`, `"50mm Edge"`, `"20mm Edge"`, `"2-finger 25mm Pocket"`, `"3-finger 20mm Pocket"`.
-- Keep `HOLD_BY_ID` and `holdLabel` exports working.
+Applied to `ItemCard`, `BuddyCard`, `ShopCard`, `BuddyShopCard`, and the new `InventoryTile`:
 
-**3. `HangboardOverlay` renders pairs as one unit**
-- Iterate holds, then iterate each hold's `positions`. All buttons for the same hold share `hover`/`active` state, so hovering one lights up its twin and clicking either fires `onSelect(hold)` once. `activeHoldId` already keys by hold id, so the runner's existing highlight call will light up both positions automatically.
-- The numeric/label tooltip and ring style stay the same; just rendered twice for paired holds.
+- Every text node that can grow gets `truncate` or `line-clamp-N` and lives inside a `min-w-0` flex child.
+- Every badge container uses `whitespace-nowrap` and `max-w-full`; the badge stack uses `shrink-0`.
+- Replace remaining absolute-positioned badge overlays that cross other content (title row, action row) with flex siblings. Absolute is fine only when it overlays the **image tile**, where there is no text underneath.
+- `GameCard` wrappers get `overflow-hidden` so shimmer/legendary effects can't bleed past the rounded border.
 
-**4. Runner / Builder side**
-- `HangboardBuilder` and `HangboardRunner` already operate on `holdId`, so no logic change is needed once the data model is per-hold. `holdLabel(step.holdId)` keeps working.
+## Files touched
 
-**5. Legacy data compatibility**
-- Old saved workouts reference ids like `edge_20`, `mono_l`, `jug_l`, etc. Add a small `OLD_TO_NEW_ID` map in `beastmaker1000.ts` and have `HOLD_BY_ID`/`holdLabel` fall through it (e.g. `edge_20 → n7`, `mono_l/mono_r → n9`, `pocket_l/pocket_r → n8`, `edge_45 → n3`, `edge_35 → n2`, `jug_l/jug_r → n1`). No DB migration; old workouts just render with the new labels.
+- `src/components/ItemCard.tsx` — header-layout fix (remove `pr-[92px]` hack, move badges into flex header), `line-clamp-2` on description, `overflow-hidden` on card.
+- `src/components/BuddyCard.tsx` — same header-layout fix for the `+xx%` chip and any other overlays.
+- `src/pages/Shop.tsx` — `ShopCard` slight compaction + header-layout fix; grid columns updated; `BuddyShopCard` overlay fix.
+- `src/pages/Inventory.tsx` — Owned section switches to a new `InventoryTile` grid; Equipped section unchanged.
+- `src/components/InventoryTile.tsx` — new, super-compact tile (image + rarity ring + corner badges + optional equipped check), opens existing modal on click.
 
-## Out of scope
-- Visual restyling of the overlay buttons (rings, hover colours stay as-is).
-- Pixel-perfect calibration — the coordinates above are eyeballed and will be nudged after seeing the first render.
-- Any change to workout builder/runner logic, rewards, or routes.
-
-## Open question
-The two decorative "CQ"-logo scoops on the top row: keep them purely decorative (current plan), or also model them as a 10th "sloper" hold pair?
+Out of scope: backend/game logic changes, search/filter UI, virtualized lists, a Compact/Comfortable user toggle (can revisit if you want it later).

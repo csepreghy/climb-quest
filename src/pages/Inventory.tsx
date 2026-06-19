@@ -248,12 +248,7 @@ export default function Inventory() {
                         return <EmptySlotCard label="Climbing Buddy" onClick={onClick} />;
                       })()
                     ) : (
-                      <div className="flex flex-col">
-                        <BuddyCard item={buddy} onClick={() => setSlotPicker(buddy)} />
-                        <div className="flex justify-end mt-1.5">
-                          <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot("buddy")}>Unequip</Button>
-                        </div>
-                      </div>
+                      <BuddyCard item={buddy} onClick={() => setSlotPicker(buddy)} />
                     )}
                   </div>
                 </div>
@@ -278,12 +273,16 @@ export default function Inventory() {
                       const it = getItem(id);
                       if (!it) return null;
                       return (
-                        <div key={slot} className="flex flex-col">
-                          <div className="flex-1"><ItemCard item={it} onClick={() => setSlotPicker(it)} /></div>
-                          <div className="flex justify-end mt-1.5">
-                            <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => unequipSlot(slot)}>Unequip</Button>
-                          </div>
-                        </div>
+                        <ItemCard key={slot} item={it} onClick={() => setSlotPicker(it)} />
+                      );
+                    })}
+                    {Array.from({ length: emptyCount }).map((_, i) => (
+                      <EmptySlotCard key={`empty-${i}`} label="Gear" onClick={() => setEmptyGearPicker(true)} />
+                    ))}
+                    {Array.from({ length: lockedCount }).map((_, i) => {
+                      const slotIndex = max + i;
+                      return (
+                        <LockedSlotCard key={`locked-${i}`} unlocksAt={gearUnlockLevel(slotIndex)} onClick={() => setLevelsOpen(true)} />
                       );
                     })}
                     {Array.from({ length: emptyCount }).map((_, i) => (

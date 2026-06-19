@@ -159,15 +159,6 @@ function ShopTile({
   };
   const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 
-  // Flip preview to the left when the tile sits near the right viewport edge.
-  const tileRef = useRef<HTMLDivElement | null>(null);
-  const [flipped, setFlipped] = useState(false);
-
-  // Layout constants for the hover preview.
-  const IMG = 256;          // doubled image (w-64 / h-64)
-  const GAP = 8;            // space between image and details
-  const DETAILS_W = 288;    // w-72
-  const TOTAL = IMG + GAP + DETAILS_W; // 552
 
   // Flip preview to the left when the tile sits near the right viewport edge.
   const tileRef = useRef<HTMLDivElement | null>(null);

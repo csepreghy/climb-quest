@@ -284,83 +284,74 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
   const axisTitle = dominantGs ? dominantGs.name : "V Scale";
 
   const data = useMemo(() => {
-    const DAYS = 90; // ~3 months of daily points
+    const WEEKS = 13;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    // Anchor weeks to Monday of the current week.
+    const dow = (today.getDay() + 6) % 7; // 0 = Monday
+    const thisWeekStart = new Date(today);
+    thisWeekStart.setDate(today.getDate() - dow);
 
-    type Day = { ts: number; key: string; chalk: number; strength: number; gradeRank: number | null };
-    const days: Day[] = [];
-    const byKey = new Map<string, Day>();
-    // Include 6 extra leading days so the first visible point has a full 7-day window.
-    for (let i = DAYS - 1 + 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
-      const row: Day = { ts: d.getTime(), key, chalk: 0, strength: 0, gradeRank: null };
-      days.push(row);
-      byKey.set(key, row);
+    type Wk = { ts: number; label: string; chalk: number; strength: number; gradeRank: number | null };
+    const weeks: Wk[] = [];
+    for (let i = WEEKS - 1; i >= 0; i--) {
+      const ws = new Date(thisWeekStart);
+      ws.setDate(thisWeekStart.getDate() - i * 7);
+      weeks.push({
+        ts: ws.getTime(),
+        label: ws.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+        chalk: 0,
+        strength: 0,
+        gradeRank: null,
+      });
     }
-    const earliest = days[0].ts;
-
+    const earliest = weeks[0].ts;
     const upperLabels = scaleLabels.map(l => l.toUpperCase());
 
+    const weekIdxFor = (d: Date) => {
+      const day = new Date(d);
+      day.setHours(0, 0, 0, 0);
+      const t = day.getTime();
+      if (t < earliest) return -1;
+      // Find latest week whose ts <= t.
+      for (let i = weeks.length - 1; i >= 0; i--) {
+        if (weeks[i].ts <= t) return i;
+      }
+      return -1;
+    };
+
     for (const l of logs) {
-      const d = new Date(l.date);
-      d.setHours(0, 0, 0, 0);
-      if (d.getTime() < earliest || d.getTime() > today.getTime()) continue;
-      const row = byKey.get(d.toISOString().slice(0, 10));
-      if (!row) continue;
-      row.chalk += l.chalkTotal;
+      const idx = weekIdxFor(new Date(l.date));
+      if (idx < 0) continue;
+      weeks[idx].chalk += l.chalkTotal;
       const gLabel = l.gradeMax || l.grade;
       if (gLabel) {
         let rank: number;
-        const idx = upperLabels.indexOf(gLabel.toUpperCase());
-        if (idx >= 0) rank = idx;
+        const i = upperLabels.indexOf(gLabel.toUpperCase());
+        if (i >= 0) rank = i;
         else if (!dominantGs || dominantGs.kind === "v" || dominantGs.kind === "french") {
           rank = gradeToVRank(gLabel, dominantGs ?? undefined);
         } else {
           rank = NaN;
         }
-        if (!isNaN(rank) && (row.gradeRank === null || rank > row.gradeRank)) {
-          row.gradeRank = rank;
+        if (!isNaN(rank) && (weeks[idx].gradeRank === null || rank > weeks[idx].gradeRank!)) {
+          weeks[idx].gradeRank = rank;
         }
       }
     }
     for (const sess of strengthSessions) {
-      const d = new Date(sess.date);
-      d.setHours(0, 0, 0, 0);
-      if (d.getTime() < earliest || d.getTime() > today.getTime()) continue;
-      const row = byKey.get(d.toISOString().slice(0, 10));
-      if (!row) continue;
-      row.strength += sess.chalkTotal ?? 0;
+      const idx = weekIdxFor(new Date(sess.date));
+      if (idx < 0) continue;
+      weeks[idx].strength += sess.chalkTotal ?? 0;
     }
 
-    // 7-day rolling average for chalk/strength; 7-day rolling max for top grade.
-    const out: { ts: number; label: string; chalk: number; strength: number; gradeRank: number | null }[] = [];
-    for (let i = 6; i < days.length; i++) {
-      let chalkSum = 0, strengthSum = 0;
-      let gradeMax: number | null = null;
-      for (let j = i - 6; j <= i; j++) {
-        chalkSum += days[j].chalk;
-        strengthSum += days[j].strength;
-        const g = days[j].gradeRank;
-        if (g !== null && (gradeMax === null || g > gradeMax)) gradeMax = g;
-      }
-      out.push({
-        ts: days[i].ts,
-        label: new Date(days[i].ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
-        chalk: Math.round((chalkSum / 7) * 10) / 10,
-        strength: Math.round((strengthSum / 7) * 10) / 10,
-        gradeRank: gradeMax,
-      });
-    }
-    return out;
+    return weeks;
   }, [logs, strengthSessions, scaleLabels, dominantGs]);
 
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade · 7-day Avg
+        <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade per Week
         <span className="ml-2 text-[10px] font-normal text-muted-foreground normal-case tracking-normal">({axisTitle})</span>
       </h3>
       {data.length === 0 ? (

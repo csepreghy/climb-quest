@@ -1,8 +1,11 @@
 import { GameCard } from "@/components/ui/game-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { RARITY_BORDER, ShopItem } from "@/game/data";
 import { isImageEmoji } from "@/game/customItems";
 import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
+import { ItemCard } from "@/components/ItemCard";
+import { BuddyCard } from "@/components/BuddyCard";
 import { cn } from "@/lib/utils";
 import { Check, Trash2 } from "lucide-react";
 

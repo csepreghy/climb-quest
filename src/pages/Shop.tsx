@@ -135,94 +135,117 @@ function ShopTile({
   if (critPct > 0) badges.push({ text: `${critPct}%c`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
 
-  const tile = (
-    <div
-      onClick={onClick}
-      title={item.name}
-      aria-label={item.name}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
-      className={cn(
-        "group relative aspect-square w-full overflow-hidden rounded-md bg-background/40 cursor-pointer",
-        "border-2 transition-transform duration-200 hover:-translate-y-0.5 hover:scale-[1.03]",
-        RARITY_BORDER[item.rarity],
-        item.rarity === "legendary" && "shadow-[0_0_12px_-2px_hsl(var(--legendary)/0.6)]",
-      )}
-    >
-      {isImageEmoji(item.emoji) ? (
-        <SmartImage src={item.emoji} alt={item.name} loaderSize={24} wrapperClassName="h-full w-full" className="h-full w-full object-contain p-1" />
-      ) : item.emoji ? (
-        <div className="h-full w-full flex items-center justify-center text-3xl sm:text-4xl">{item.emoji}</div>
-      ) : (
-        <div className="h-full w-full flex items-center justify-center">
-          <ChalkBagLoader size={24} />
-        </div>
-      )}
-
-      {/* Dark hover overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-200" />
-
-      {/* Price - bottom left over image */}
-      {!locked && (
-        <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1 px-1.5 py-1 bg-gradient-to-t from-black/75 via-black/45 to-transparent pointer-events-none">
-          <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain drop-shadow" />
-          <span className={cn(
-            "text-[12px] leading-none font-extrabold tabular-nums text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]",
-            !canAfford && !ownAlready && "text-destructive",
-          )}>
-            {price.toLocaleString()}
-          </span>
-        </div>
-      )}
-
-      {badges.length > 0 && (
-        <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">
-          {badges.map((b, i) => (
-            <span
-              key={i}
-              className={cn(
-                "text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm",
-                b.cls,
-              )}
-            >
-              {b.text}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Owned check */}
-      {ownAlready && (
-        <div className="absolute top-1 left-1 h-5 w-5 grid place-items-center rounded-full border bg-foreground text-background border-foreground shadow" title="Owned">
-          <Check className="h-3 w-3" strokeWidth={3} />
-        </div>
-      )}
-
-      {/* Locked overlay */}
-      {locked && (
-        <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
-          <div className="flex flex-col items-center gap-0.5">
-            <Lock className="h-4 w-4" />
-            <span className="text-[9px] font-bold">Lv {item.levelReq}</span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const rarityHsl: Record<string, string> = {
+    common: "hsl(0 0% 100% / 0.85)",
+    uncommon: "hsl(var(--uncommon))",
+    rare: "hsl(var(--rare))",
+    epic: "hsl(var(--epic))",
+    legendary: "hsl(var(--legendary))",
+  };
+  const rarityBorder: Record<string, string> = {
+    common: "border-white/80",
+    uncommon: "border-uncommon",
+    rare: "border-rare",
+    epic: "border-epic",
+    legendary: "border-legendary",
+  };
+  const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 
   return (
-    <HoverCard openDelay={120} closeDelay={60}>
-      <HoverCardTrigger asChild>{tile}</HoverCardTrigger>
-      <HoverCardContent
-        side="top"
-        align="center"
-        sideOffset={10}
-        className={cn("p-0 border-0 bg-transparent shadow-none hidden md:block", isBuddy ? "w-[520px]" : "w-96")}
+    <div className="group relative">
+      {/* Fixed page-wide dark backdrop while hovered (desktop only) */}
+      <div className="hidden md:block pointer-events-none fixed inset-0 z-40 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+      {/* Compact tile */}
+      <div
+        onClick={onClick}
+        title={item.name}
+        aria-label={item.name}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
+        className={cn(
+          "relative aspect-square w-full overflow-hidden rounded-md cursor-pointer",
+          "border-[3px] transition-transform duration-200 md:group-hover:opacity-0",
+          rarityBorder[item.rarity],
+        )}
       >
-        {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
-      </HoverCardContent>
-    </HoverCard>
+        {isImageEmoji(item.emoji) ? (
+          <SmartImage src={item.emoji} alt={item.name} loaderSize={24} wrapperClassName="h-full w-full" className="h-full w-full object-cover" />
+        ) : item.emoji ? (
+          <div className="h-full w-full flex items-center justify-center text-3xl sm:text-4xl">{item.emoji}</div>
+        ) : (
+          <div className="h-full w-full flex items-center justify-center">
+            <ChalkBagLoader size={24} />
+          </div>
+        )}
+
+        {/* Price - bottom left over image */}
+        {!locked && (
+          <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1 px-1.5 py-1 bg-gradient-to-t from-black/80 via-black/50 to-transparent pointer-events-none">
+            <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain drop-shadow" />
+            <span className={cn(
+              "text-[12px] leading-none font-extrabold tabular-nums text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]",
+              !canAfford && !ownAlready && "text-destructive",
+            )}>
+              {price.toLocaleString()}
+            </span>
+          </div>
+        )}
+
+        {badges.length > 0 && (
+          <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">
+            {badges.map((b, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "text-[9px] leading-none font-bold tabular-nums px-1 py-0.5 rounded border whitespace-nowrap shadow-sm",
+                  b.cls,
+                )}
+              >
+                {b.text}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {ownAlready && (
+          <div className="absolute top-1 left-1 h-5 w-5 grid place-items-center rounded-full border bg-foreground text-background border-foreground shadow" title="Owned">
+            <Check className="h-3 w-3" strokeWidth={3} />
+          </div>
+        )}
+
+        {locked && (
+          <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
+            <div className="flex flex-col items-center gap-0.5">
+              <Lock className="h-4 w-4" />
+              <span className="text-[9px] font-bold">Lv {item.levelReq}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Expanded hover preview (desktop only): centered on the tile, much larger, glowing */}
+      <div
+        className={cn(
+          "hidden md:block pointer-events-none absolute left-1/2 top-1/2 z-50",
+          "-translate-x-1/2 -translate-y-1/2 origin-center",
+          "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100",
+          "transition-all duration-200",
+        )}
+        style={{ ["--glow-color" as string]: glowColor }}
+      >
+        <div
+          className={cn(
+            "rounded-xl border-[3px] animate-rarity-glow text-base",
+            isBuddy ? "w-[460px]" : "w-[380px]",
+            rarityBorder[item.rarity],
+          )}
+        >
+          {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
+        </div>
+      </div>
+    </div>
   );
 }
 

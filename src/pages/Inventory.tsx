@@ -229,7 +229,7 @@ export default function Inventory() {
               return (
                 <div key={group} className="space-y-2">
                   <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">{GROUP_LABEL[group]}</div>
-                  <div className="grid gap-4 grid-cols-1 sm:max-w-md">
+                  <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
                     {!unlocked ? (
                       <LockedSlotCard unlocksAt={BUDDY_SLOT_UNLOCK_LEVEL} onClick={() => setLevelsOpen(true)} />
                     ) : !buddy ? (
@@ -243,7 +243,7 @@ export default function Inventory() {
                         return <EmptySlotCard label="Climbing Buddy" onClick={onClick} />;
                       })()
                     ) : (
-                      <BuddyCard item={buddy} onClick={() => setSlotPicker(buddy)} />
+                      <InventoryTile item={buddy} equipped onClick={() => setSlotPicker(buddy)} />
                     )}
                   </div>
                 </div>
@@ -251,7 +251,6 @@ export default function Inventory() {
             }
             if (group === "gear") {
               const max = gearSlotsUnlocked(s.level);
-              // Order equipped gear items first, then empty unlocked slots, then locked slots up to 4 total.
               const equippedGear = GEAR_SLOTS
                 .map(sl => ({ slot: sl, id: s.equipped[sl] }))
                 .filter(x => !!x.id && !!getItem(x.id!)) as { slot: Slot; id: string }[];
@@ -263,21 +262,12 @@ export default function Inventory() {
                     <span>{GROUP_LABEL[group]}</span>
                     <span className="text-muted-foreground/70">· {equippedGear.length}/{max} used</span>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
                     {equippedGear.map(({ slot, id }) => {
                       const it = getItem(id);
                       if (!it) return null;
                       return (
-                        <ItemCard key={slot} item={it} onClick={() => setSlotPicker(it)} />
-                      );
-                    })}
-                    {Array.from({ length: emptyCount }).map((_, i) => (
-                      <EmptySlotCard key={`empty-${i}`} label="Gear" onClick={() => setEmptyGearPicker(true)} />
-                    ))}
-                    {Array.from({ length: lockedCount }).map((_, i) => {
-                      const slotIndex = max + i;
-                      return (
-                        <LockedSlotCard key={`locked-${i}`} unlocksAt={gearUnlockLevel(slotIndex)} onClick={() => setLevelsOpen(true)} />
+                        <InventoryTile key={slot} item={it} equipped onClick={() => setSlotPicker(it)} />
                       );
                     })}
                     {Array.from({ length: emptyCount }).map((_, i) => (
@@ -297,7 +287,7 @@ export default function Inventory() {
             return (
               <div key={group} className="space-y-2">
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground pl-1">{GROUP_LABEL[group]}</div>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8">
                   {slots.map(slot => {
                     const id = s.equipped[slot];
                     const it = id ? getItem(id) : null;
@@ -313,7 +303,7 @@ export default function Inventory() {
                       );
                     }
                     return (
-                      <ItemCard key={slot} item={it} onClick={() => setSlotPicker(it)} />
+                      <InventoryTile key={slot} item={it} equipped onClick={() => setSlotPicker(it)} />
                     );
                   })}
                 </div>

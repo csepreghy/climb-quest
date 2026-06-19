@@ -48,30 +48,10 @@ export function ItemCard({
       tone={tone as "default"}
       shimmer={item.rarity === "legendary"}
       interactive={!!onClick}
-      className={cn("p-4 flex flex-col gap-3 relative", onClick && "cursor-pointer", highlight && "ring-2 ring-[hsl(var(--btn-orange))]/60")}
+      className={cn("p-4 flex flex-col gap-3 relative overflow-hidden", onClick && "cursor-pointer", highlight && "ring-2 ring-[hsl(var(--btn-orange))]/60")}
       onClick={onClick}
     >
-      {badges.length > 0 && (
-        <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-0.5">
-          {badges.map((b, i) => (
-            <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border whitespace-nowrap", b.cls)}>
-              {b.text}
-            </div>
-          ))}
-        </div>
-      )}
-      {onRemove && (
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          aria-label="Remove from inventory"
-          title="Remove from inventory (admin)"
-          className="absolute bottom-2 right-2 z-10 h-7 w-7 grid place-items-center rounded-md border border-destructive/40 text-destructive bg-background/70 hover:bg-destructive hover:text-destructive-foreground transition"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      )}
-      <div className={cn("flex items-start gap-3", badges.length > 0 && "pr-[92px]")}>
+      <div className="flex items-start gap-3">
         {isImageEmoji(item.emoji) ? (
           <SmartImage src={item.emoji} alt={item.name} loaderSize={36} wrapperClassName={cn("h-20 w-20 shrink-0 rounded-lg bg-background/40 p-1", RARITY_BORDER[item.rarity])} className="h-full w-full object-contain" />
         ) : item.emoji ? (
@@ -81,17 +61,39 @@ export function ItemCard({
             <ChalkBagLoader size={36} />
           </div>
         )}
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium leading-snug">{item.name}</div>
-          <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
-            {item.rarity}
+        <div className="min-w-0 flex-1 flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium leading-snug break-words">{item.name}</div>
+            <div className={cn("text-[10px] uppercase tracking-wider inline-block mt-1 px-1.5 py-0.5 rounded border", RARITY_COLOR[item.rarity])}>
+              {item.rarity}
+            </div>
+            {primed && <div className="mt-1 text-[10px] uppercase tracking-wider text-chalk-glow">Primed</div>}
           </div>
-          {primed && <div className="mt-1 text-[10px] uppercase tracking-wider text-chalk-glow">Primed</div>}
+          {badges.length > 0 && (
+            <div className="shrink-0 flex flex-col items-end gap-0.5">
+              {badges.map((b, i) => (
+                <div key={i} className={cn("text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md border whitespace-nowrap", b.cls)}>
+                  {b.text}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed">{item.desc}</p>}
-      {(showAction || onSell) && (
+      {item.desc && <p className="text-xs text-muted-foreground flex-1 leading-relaxed line-clamp-3">{item.desc}</p>}
+      {(showAction || onSell || onRemove) && (
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50">
+          {onRemove && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onRemove(); }}
+              aria-label="Remove from inventory"
+              title="Remove from inventory (admin)"
+              className="h-7 w-7 grid place-items-center rounded-md border border-destructive/40 text-destructive bg-background/70 hover:bg-destructive hover:text-destructive-foreground transition shrink-0"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
           {onSell && typeof sellPrice === "number" && sellPrice > 0 && (
             <GameButton size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onSell(); }} title="Sell for half price">
               <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain" /> Sell · {sellPrice.toLocaleString()}

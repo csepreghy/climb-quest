@@ -243,10 +243,10 @@ function ShopTile({
 
       <div className={cn("mt-auto flex items-center justify-end gap-2 border-t border-border/50", compact ? "pt-1.5" : "pt-2")}>
         <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Price</span>
-        <img src={chalkBagImg} alt="" className={compact ? "h-4 w-4 object-contain" : "h-6 w-6 object-contain"} />
+        <img src={chalkBagImg} alt="" className={compact ? "h-4 w-4 object-contain" : "h-5 w-5 object-contain"} />
         <span className={cn(
           "font-extrabold tabular-nums",
-          compact ? "text-base" : "text-2xl",
+          compact ? "text-base" : "text-xl",
           !canAfford && !ownAlready && !locked && "text-destructive",
         )}>
           {price.toLocaleString()}
@@ -254,13 +254,13 @@ function ShopTile({
       </div>
 
       {withBuy && (
-        <div className="mt-1">
+        <div className="mt-1.5 flex justify-end">
           {ownAlready ? (
-            <GameButton variant="ghost" disabled size="sm" className="w-full"><Check className="h-3.5 w-3.5" /> {isBuddy ? "Recruited" : "Owned"}</GameButton>
+            <GameButton variant="ghost" disabled size="sm"><Check className="h-3.5 w-3.5" /> {isBuddy ? "Recruited" : "Owned"}</GameButton>
           ) : locked ? (
-            <GameButton variant="ghost" disabled size="sm" className="w-full"><Lock className="h-3.5 w-3.5" /> Lv {item.levelReq}</GameButton>
+            <GameButton variant="ghost" disabled size="sm"><Lock className="h-3.5 w-3.5" /> Lv {item.levelReq}</GameButton>
           ) : (
-            <GameButton variant={canAfford ? "primary" : "secondary"} disabled={!canAfford} onClick={buy} size="sm" className="w-full">
+            <GameButton variant={canAfford ? "primary" : "secondary"} disabled={!canAfford} onClick={buy} size="sm" className="px-6">
               {canAfford ? (isBuddy ? "Recruit" : "Buy") : "Not enough Chalk"}
             </GameButton>
           )}

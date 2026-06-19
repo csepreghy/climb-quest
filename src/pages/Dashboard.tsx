@@ -105,8 +105,6 @@ export default function Dashboard() {
 
       <StrengthRepsHoldChart sessions={s.strengthSessions ?? []} />
 
-      <StrengthRolling7Chart sessions={s.strengthSessions ?? []} />
-
       <HangboardChart />
 
 
@@ -424,17 +422,20 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
     const DAYS = isMobile ? 14 : 30;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    type Row = { ts: number; key: string; label: string; core: number; pullup: number; pushup: number; squat: number; handstand_pushup: number; hold_sec: number };
+    type Row = { ts: number; key: string; label: string; core: number; pullup: number; pushup: number; squat: number; handstand_pushup: number; hold_sec: number; rollingAvg: number };
     const raw: Row[] = [];
     const byKey = new Map<string, Row>();
-    for (let i = DAYS - 1; i >= 0; i--) {
+    
+    // Generate DAYS + 6 trailing days to calculate rolling average for all visible days
+    for (let i = DAYS - 1 + 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const key = d.toISOString().slice(0, 10);
-      const row: Row = { ts: d.getTime(), key, label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }), core: 0, pullup: 0, pushup: 0, squat: 0, handstand_pushup: 0, hold_sec: 0 };
+      const row: Row = { ts: d.getTime(), key, label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }), core: 0, pullup: 0, pushup: 0, squat: 0, handstand_pushup: 0, hold_sec: 0, rollingAvg: 0 };
       raw.push(row);
       byKey.set(key, row);
     }
+    
     for (const sess of sessions) {
       const d = new Date(sess.date);
       d.setHours(0, 0, 0, 0);
@@ -452,18 +453,31 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
       else if (sess.workout === "pushup") row.pushup += sess.totalReps;
       else if (sess.workout === "squat") row.squat += sess.totalReps;
     }
-    return raw;
+
+    const out: Row[] = [];
+    for (let i = 6; i < raw.length; i++) {
+      let sum = 0;
+      for (let j = i - 6; j <= i; j++) {
+        const r = raw[j];
+        sum += (r.core + r.pullup + r.pushup + r.squat + r.handstand_pushup);
+      }
+      out.push({
+        ...raw[i],
+        rollingAvg: Math.round((sum / 7) * 10) / 10
+      });
+    }
+    return out;
   }, [sessions, isMobile]);
 
-  const hasAny = data.some(d => d.core || d.pullup || d.pushup || d.squat || d.handstand_pushup || d.hold_sec);
+  const hasAny = data.some(d => d.core || d.pullup || d.pushup || d.squat || d.handstand_pushup || d.hold_sec || d.rollingAvg);
 
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-1 flex items-center gap-1.5">
-        <Dumbbell className="h-3 w-3" /> Strength Reps & Holds · Daily
+        <Dumbbell className="h-3 w-3" /> Strength Reps & Holds · Daily & 7-day Avg
       </h3>
       <p className="text-[10px] text-muted-foreground mb-3 normal-case tracking-normal">
-        Bars: total reps per category (all levels). Line: seconds held (plank + handstand hold).
+        Bars: total reps per category. Blue Line: 7-day rolling average of total reps. Pink Line: seconds held (plank + handstand hold).
       </p>
       {!hasAny ? (
         <div className="text-sm text-muted-foreground py-8 text-center">
@@ -480,99 +494,19 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
               <Tooltip
                 contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
                 labelStyle={{ color: "hsl(var(--foreground))" }}
-                formatter={(v: number, name: string) => [name === "Hold" ? `${v}s` : `${v} reps`, name]}
+                formatter={(v: number, name: string) => {
+                  if (name === "Hold") return [`${v}s`, name];
+                  if (name === "7-day Avg") return [`${v} reps`, name];
+                  return [`${v} reps`, name];
+                }}
               />
               <Bar yAxisId="reps" dataKey="core" name="Core" stackId="r" fill="hsl(var(--btn-orange))" />
-              <Bar yAxisId="reps" dataKey="pullup" name="Pull-up" stackId="r" fill="hsl(var(--sky))" />
-              <Bar yAxisId="reps" dataKey="pushup" name="Push-up" stackId="r" fill="hsl(var(--btn-green))" />
-              <Bar yAxisId="reps" dataKey="squat" name="Squat" stackId="r" fill="hsl(var(--btn-yellow, var(--btn-orange)))" />
-              <Bar yAxisId="reps" dataKey="handstand_pushup" name="Handstand Pushup" stackId="r" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+              <Bar yAxisId="reps" dataKey="pullup" name="Pull-up" stackId="r" fill="hsl(var(--sky))" opacity={0.7} />
+              <Bar yAxisId="reps" dataKey="pushup" name="Push-up" stackId="r" fill="hsl(var(--btn-green))" opacity={0.7} />
+              <Bar yAxisId="reps" dataKey="squat" name="Squat" stackId="r" fill="hsl(var(--btn-yellow, var(--btn-orange)))" opacity={0.7} />
+              <Bar yAxisId="reps" dataKey="handstand_pushup" name="Handstand Pushup" stackId="r" fill="hsl(var(--primary))" opacity={0.7} radius={[3, 3, 0, 0]} />
+              <Line yAxisId="reps" type="monotone" dataKey="rollingAvg" name="7-day Avg" stroke="hsl(var(--sky))" strokeWidth={3} dot={false} activeDot={{ r: 4 }} />
               <Line yAxisId="sec" type="monotone" dataKey="hold_sec" name="Hold" stroke="hsl(var(--boss))" strokeWidth={2} dot={{ r: 2 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-    </GameCard>
-  );
-}
-
-/**
- * Single-line 7-day rolling average of total daily strength reps (all categories combined).
- */
-export function StrengthRolling7Chart({ sessions }: { sessions: StrengthSession[] }) {
-  const isMobile = useIsMobile();
-  const data = useMemo(() => {
-    const VISIBLE = isMobile ? 30 : 60;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    type Row = { ts: number; key: string; label: string; reps: number; avg: number };
-    const raw: Row[] = [];
-    const byKey = new Map<string, Row>();
-    for (let i = VISIBLE - 1 + 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
-      const row: Row = { ts: d.getTime(), key, label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }), reps: 0, avg: 0 };
-      raw.push(row);
-      byKey.set(key, row);
-    }
-    for (const sess of sessions) {
-      const d = new Date(sess.date);
-      d.setHours(0, 0, 0, 0);
-      const row = byKey.get(d.toISOString().slice(0, 10));
-      if (!row) continue;
-      if (sess.workout === "handstand") {
-        for (const st of sess.sets) {
-          if (st.mode !== "hold") row.reps += st.reps || 0;
-        }
-      } else if (sess.workout === "plank") {
-        // hold-only, excluded from reps line
-      } else {
-        row.reps += sess.totalReps || 0;
-      }
-    }
-    const out: Row[] = [];
-    for (let i = 6; i < raw.length; i++) {
-      let sum = 0;
-      for (let j = i - 6; j <= i; j++) sum += raw[j].reps;
-      out.push({ ...raw[i], avg: Math.round((sum / 7) * 10) / 10 });
-    }
-    return out;
-  }, [sessions, isMobile]);
-
-  const hasAny = data.some(d => d.avg > 0);
-
-  return (
-    <GameCard className="p-5">
-      <h3 className="menu-label mb-1 flex items-center gap-1.5">
-        <Dumbbell className="h-3 w-3" /> Strength Reps · 7-day Rolling Avg
-      </h3>
-      <p className="text-[10px] text-muted-foreground mb-3 normal-case tracking-normal">
-        Average daily total reps across all categories over the trailing 7 days.
-      </p>
-      {!hasAny ? (
-        <div className="text-sm text-muted-foreground py-8 text-center">
-          No strength sessions yet.
-        </div>
-      ) : (
-        <div className="h-40 -ml-2">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="rollingRepsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--sky))" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="hsl(var(--sky))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
-              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={Math.max(0, Math.floor(data.length / 10))} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={36} />
-              <Tooltip
-                contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
-                labelStyle={{ color: "hsl(var(--foreground))" }}
-                formatter={(v: number) => [`${v} reps/day`, "7-day avg"]}
-              />
-              <Area type="monotone" dataKey="avg" name="7-day avg" stroke="hsl(var(--sky))" strokeWidth={2} fill="url(#rollingRepsGrad)" />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

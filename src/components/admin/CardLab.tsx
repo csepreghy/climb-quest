@@ -178,27 +178,46 @@ export function CardLab() {
                   onChange={(v) => set("bevelLipHeight", v)}
                   suffix="px"
                 />
-                <RadioRow<"auto-dark" | "gold" | "custom">
-                  label="Lip color"
-                  value={config.bevelLipColorType}
-                  stacked={false}
-                  options={[
-                    { v: "auto-dark", l: "Auto dark" },
-                    { v: "gold", l: "Gold" },
-                    { v: "custom", l: "Custom" },
-                  ]}
-                  onChange={(v) => set("bevelLipColorType", v)}
-                />
-                {config.bevelLipColorType === "custom" && (
-                  <div className="space-y-3 p-3 bg-secondary/20 rounded-lg border border-border/40">
-                    <SliderRow label="Hue" value={config.bevelLipHue} min={0} max={360} step={1}
-                      onChange={(v) => set("bevelLipHue", v)} suffix="°" />
-                    <SliderRow label="Saturation" value={config.bevelLipSat} min={0} max={100} step={1}
-                      onChange={(v) => set("bevelLipSat", v)} suffix="%" />
-                    <SliderRow label="Lightness" value={config.bevelLipLight} min={0} max={100} step={1}
-                      onChange={(v) => set("bevelLipLight", v)} suffix="%" />
-                  </div>
+
+                <div className="flex items-center justify-between rounded-md bg-secondary/30 px-3 py-2">
+                  <Label className="text-xs">Match bottom border color</Label>
+                  <Switch
+                    checked={config.linkLipToBottom}
+                    onCheckedChange={(v) => set("linkLipToBottom", v)}
+                  />
+                </div>
+
+                {config.linkLipToBottom ? (
+                  <p className="text-[11px] text-muted-foreground -mt-2">
+                    Lip color is linked to the <strong>Bottom border</strong> color. Edit it there
+                    and the lip follows.
+                  </p>
+                ) : (
+                  <>
+                    <RadioRow<"auto-dark" | "gold" | "custom">
+                      label="Lip color"
+                      value={config.bevelLipColorType}
+                      stacked={false}
+                      options={[
+                        { v: "auto-dark", l: "Auto dark" },
+                        { v: "gold", l: "Gold" },
+                        { v: "custom", l: "Custom" },
+                      ]}
+                      onChange={(v) => set("bevelLipColorType", v)}
+                    />
+                    {config.bevelLipColorType === "custom" && (
+                      <div className="space-y-3 p-3 bg-secondary/20 rounded-lg border border-border/40">
+                        <SliderRow label="Hue" value={config.bevelLipHue} min={0} max={360} step={1}
+                          onChange={(v) => set("bevelLipHue", v)} suffix="°" />
+                        <SliderRow label="Saturation" value={config.bevelLipSat} min={0} max={100} step={1}
+                          onChange={(v) => set("bevelLipSat", v)} suffix="%" />
+                        <SliderRow label="Lightness" value={config.bevelLipLight} min={0} max={100} step={1}
+                          onChange={(v) => set("bevelLipLight", v)} suffix="%" />
+                      </div>
+                    )}
+                  </>
                 )}
+
                 <SliderRow
                   label="Lip opacity"
                   value={Math.round(config.bevelLipOpacity * 100)}

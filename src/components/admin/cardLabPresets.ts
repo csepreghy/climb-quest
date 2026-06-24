@@ -146,6 +146,7 @@ export const PRESETS: Record<string, { label: string; config: CardLabConfig }> =
       bottomHeight: 3,
       radius: 12,
     },
+  },
   buttonBevel: {
     label: "Button bevel (dark)",
     config: {

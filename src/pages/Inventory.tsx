@@ -148,7 +148,7 @@ export default function Inventory() {
   return (
     <div className="grid gap-6 lg:grid-cols-[320px,1fr] animate-float-up">
       <div className="space-y-4">
-        <Card className="gradient-card p-5 text-center">
+        <GameCard className="p-5 text-center">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
           <CharacterNameEditor />
           {adminTools && (
@@ -166,9 +166,9 @@ export default function Inventory() {
               ))}
             </div>
           )}
-        </Card>
+        </GameCard>
 
-        <Card className="gradient-card p-4 space-y-3">
+        <GameCard className="p-4 space-y-3">
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Active bonuses</div>
             {totalBonusByActivity.length === 0 ? (
@@ -214,7 +214,7 @@ export default function Inventory() {
               ⚡ Next log boosted by {getItem(s.pendingConsumable)?.name}
             </div>
           )}
-        </Card>
+        </GameCard>
       </div>
 
       <div className="space-y-8">

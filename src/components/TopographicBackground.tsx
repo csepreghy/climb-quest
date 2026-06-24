@@ -1,12 +1,20 @@
 import { useEffect, useRef } from "react";
+import {
+  DEFAULT_TOPO,
+  TOPO_EVENT,
+  TopoConfig,
+  getTopoConfig,
+  loadTopoLocal,
+} from "@/components/admin/topoPresets";
 
 /**
  * Procedural topographic-contour background over a layered stone texture.
- * Pure CSS + Canvas (no images). Static by default; pass `animated` to
- * slowly evolve the noise field via requestAnimationFrame.
+ * Pure CSS + Canvas. Reads live config from topoPresets so admin tweaks apply
+ * everywhere instantly. `animated` prop is a legacy fallback only.
  */
-export function TopographicBackground({ animated = false }: { animated?: boolean }) {
+export function TopographicBackground({ animated }: { animated?: boolean } = {}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cfgRef = useRef<TopoConfig>(loadTopoLocal());
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -62,6 +70,7 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
 
     /* ---------- render ---------- */
     const render = () => {
+      const cfg = cfgRef.current ?? DEFAULT_TOPO;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -75,33 +84,37 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
       ctx.fillStyle = "hsl(220 35% 3%)";
       ctx.fillRect(0, 0, w, h);
 
+      if (!cfg.enabled) return;
+
+      const texAlpha = Math.max(0, Math.min(1, cfg.textureOpacity));
+
       /* ---------- Pass A: fine monochrome grain ---------- */
-      // Render to a half-resolution offscreen ImageData, then scale up.
-      const gw = Math.max(1, Math.floor(w / 2));
-      const gh = Math.max(1, Math.floor(h / 2));
-      const grain = ctx.createImageData(gw, gh);
-      const gd = grain.data;
-      // Base luminance ~ hsl(220 35% 3%) → approx rgb(5, 6, 10)
-      const baseR = 5, baseG = 6, baseB = 10;
-      for (let i = 0; i < gd.length; i += 4) {
-        const j = (Math.random() - 0.5) * 22; // ±11 jitter — visible grain
-        gd[i]     = Math.max(0, Math.min(255, baseR + j));
-        gd[i + 1] = Math.max(0, Math.min(255, baseG + j));
-        gd[i + 2] = Math.max(0, Math.min(255, baseB + j + (Math.random() - 0.5) * 4));
-        gd[i + 3] = 255;
+      if (texAlpha > 0.01) {
+        const gw = Math.max(1, Math.floor(w / 2));
+        const gh = Math.max(1, Math.floor(h / 2));
+        const grain = ctx.createImageData(gw, gh);
+        const gd = grain.data;
+        const baseR = 5, baseG = 6, baseB = 10;
+        const jitter = 22 * texAlpha;
+        for (let i = 0; i < gd.length; i += 4) {
+          const j = (Math.random() - 0.5) * jitter;
+          gd[i]     = Math.max(0, Math.min(255, baseR + j));
+          gd[i + 1] = Math.max(0, Math.min(255, baseG + j));
+          gd[i + 2] = Math.max(0, Math.min(255, baseB + j + (Math.random() - 0.5) * 4));
+          gd[i + 3] = 255;
+        }
+        const off = document.createElement("canvas");
+        off.width = gw; off.height = gh;
+        off.getContext("2d")!.putImageData(grain, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(off, 0, 0, w, h);
       }
-      // Blit via an offscreen canvas so we can scale.
-      const off = document.createElement("canvas");
-      off.width = gw; off.height = gh;
-      off.getContext("2d")!.putImageData(grain, 0, 0);
-      ctx.imageSmoothingEnabled = true;
-      ctx.drawImage(off, 0, 0, w, h);
 
       /* ---------- Field sampling for contours + mottle ---------- */
       const cell = 5;
       const cols = Math.ceil(w / cell) + 1;
       const rows = Math.ceil(h / cell) + 1;
-      const scale = 0.0035;
+      const scale = cfg.noiseScale;
       const field = new Float32Array(cols * rows);
 
       for (let j = 0; j < rows; j++) {
@@ -114,45 +127,46 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
       }
 
       /* ---------- Pass B: coarse mottle (lightness shifts) ---------- */
-      const mcell = 14;
-      for (let py = 0; py < h; py += mcell) {
-        for (let px = 0; px < w; px += mcell) {
-          const n = fbm(px * 0.0018, py * 0.0018, zOffset + 11.3, 3);
-          const shift = (n - 0.5) * 2; // -1..1
-          const a = 0.22 * Math.abs(shift);
-          if (shift >= 0) {
-            ctx.fillStyle = `hsl(220 22% 22% / ${a.toFixed(3)})`;
-          } else {
-            ctx.fillStyle = `hsl(220 50% 0% / ${(a * 1.3).toFixed(3)})`;
+      if (texAlpha > 0.01) {
+        const mcell = 14;
+        for (let py = 0; py < h; py += mcell) {
+          for (let px = 0; px < w; px += mcell) {
+            const n = fbm(px * 0.0018, py * 0.0018, zOffset + 11.3, 3);
+            const shift = (n - 0.5) * 2;
+            const a = 0.22 * Math.abs(shift) * texAlpha;
+            if (shift >= 0) {
+              ctx.fillStyle = `hsl(220 22% 22% / ${a.toFixed(3)})`;
+            } else {
+              ctx.fillStyle = `hsl(220 50% 0% / ${(a * 1.3).toFixed(3)})`;
+            }
+            ctx.fillRect(px, py, mcell, mcell);
           }
-          ctx.fillRect(px, py, mcell, mcell);
+        }
+
+        /* ---------- Pass C: sparse dark cracks ---------- */
+        const ccell = 2;
+        ctx.fillStyle = `hsl(220 50% 0% / ${(0.9 * texAlpha).toFixed(3)})`;
+        for (let py = 0; py < h; py += ccell) {
+          for (let px = 0; px < w; px += ccell) {
+            const n = fbm(px * 0.012, py * 0.012, zOffset + 42.7, 3);
+            if (Math.abs(n - 0.5) < 0.022) {
+              ctx.fillRect(px, py, ccell, ccell);
+            }
+          }
         }
       }
 
-      /* ---------- Pass C: sparse dark cracks ---------- */
-      const ccell = 2;
-      ctx.fillStyle = "hsl(220 50% 0% / 0.9)";
-      for (let py = 0; py < h; py += ccell) {
-        for (let px = 0; px < w; px += ccell) {
-          const n = fbm(px * 0.012, py * 0.012, zOffset + 42.7, 3);
-          if (Math.abs(n - 0.5) < 0.022) {
-            ctx.fillRect(px, py, ccell, ccell);
-          }
-        }
-      }
-
-
-      /* ---------- Contours (dim, fewer) ---------- */
-      const LEVELS = 8;
+      /* ---------- Contours ---------- */
+      const LEVELS = Math.max(1, Math.min(32, Math.round(cfg.levels)));
       const levelMin = 0.28;
       const levelMax = 0.78;
 
-      ctx.lineWidth = 0.7;
+      ctx.lineWidth = Math.max(0.2, cfg.lineWidth);
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
       for (let li = 0; li < LEVELS; li++) {
-        const t = li / (LEVELS - 1);
+        const t = LEVELS === 1 ? 0.5 : li / (LEVELS - 1);
         const iso = levelMin + (levelMax - levelMin) * t;
 
         ctx.beginPath();
@@ -204,12 +218,16 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
         if (segCount === 0) continue;
 
         const levelAlpha = 0.6 + 0.4 * Math.sin(Math.PI * t);
-        ctx.strokeStyle = `hsl(45 88% 58% / ${(0.4 * levelAlpha).toFixed(3)})`;
+        const a = (cfg.lineOpacity * levelAlpha).toFixed(3);
+        ctx.strokeStyle = `hsl(${cfg.contourHue} ${cfg.contourSat}% ${cfg.contourLight}% / ${a})`;
         ctx.stroke();
       }
 
       /* ---------- Vignette ---------- */
-      const vg = ctx.createRadialGradient(w * 0.5, h * 0.5, Math.min(w, h) * 0.25, w * 0.5, h * 0.5, Math.hypot(w, h) * 0.6);
+      const vg = ctx.createRadialGradient(
+        w * 0.5, h * 0.5, Math.min(w, h) * 0.25,
+        w * 0.5, h * 0.5, Math.hypot(w, h) * 0.6
+      );
       vg.addColorStop(0, "hsl(220 40% 1% / 0)");
       vg.addColorStop(1, "hsl(220 40% 1% / 0.25)");
       ctx.fillStyle = vg;
@@ -217,9 +235,19 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
     };
 
     const loop = () => {
-      zOffset += 0.0015;
+      const cfg = cfgRef.current ?? DEFAULT_TOPO;
+      zOffset += cfg.speed;
       render();
       rafId = requestAnimationFrame(loop);
+    };
+
+    const startLoop = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(loop);
+    };
+    const stopLoop = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = 0;
     };
 
     const onResize = () => {
@@ -227,14 +255,28 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
       resizeTimer = setTimeout(render, 150);
     };
 
+    const onConfig = (e: Event) => {
+      const detail = (e as CustomEvent<TopoConfig>).detail;
+      if (detail) cfgRef.current = detail;
+      render();
+      const isAnimated = (cfgRef.current?.animated ?? false) || !!animated;
+      if (isAnimated) startLoop(); else stopLoop();
+    };
+
+    // Initial paint + loop
+    cfgRef.current = getTopoConfig();
     render();
-    if (animated) rafId = requestAnimationFrame(loop);
+    const isAnimated = (cfgRef.current?.animated ?? false) || !!animated;
+    if (isAnimated) startLoop();
+
     window.addEventListener("resize", onResize);
+    window.addEventListener(TOPO_EVENT, onConfig as EventListener);
 
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
+      stopLoop();
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener(TOPO_EVENT, onConfig as EventListener);
     };
   }, [animated]);
 

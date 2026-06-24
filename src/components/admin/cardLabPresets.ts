@@ -176,8 +176,40 @@ function shadowFor(style: ThreeDStyle): string {
         "inset 0 -2px 0 hsl(220 20% 20% / 0.45)",
         "0 14px 28px -14px hsl(0 0% 0% / 0.7)",
       ].join(", ");
+    case "button-bevel":
+      // Mirrors GameButton: top inner highlight only. Bottom lip + frame + drop
+      // shadow are layered via their own controls so each is independently tunable.
+      return "inset 0 2px 0 hsl(0 0% 100% / 0.18)";
   }
 }
+
+function bevelLipShadow(c: CardLabConfig): string | null {
+  if (!c.bevelLipEnabled) return null;
+  const h = Math.max(1, c.bevelLipHeight | 0);
+  const op = c.bevelLipOpacity.toFixed(2);
+  let color: string;
+  if (c.bevelLipColorType === "auto-dark") {
+    color = `hsl(${c.hue} ${Math.max(40, c.sat)}% ${Math.max(1, c.light - 4)}% / ${op})`;
+  } else if (c.bevelLipColorType === "gold") {
+    color = `hsl(45 85% 45% / ${op})`;
+  } else {
+    color = `hsl(${c.bevelLipHue} ${c.bevelLipSat}% ${c.bevelLipLight}% / ${op})`;
+  }
+  return `inset 0 -${h}px 0 ${color}`;
+}
+
+function frameRingShadow(c: CardLabConfig): string | null {
+  if (!c.frameRingEnabled) return null;
+  const w = Math.max(1, c.frameRingWidth | 0);
+  return `0 0 0 ${w}px hsl(var(--panel-frame))`;
+}
+
+function dropShadow(c: CardLabConfig): string | null {
+  if (!c.dropShadowEnabled) return null;
+  const s = c.dropShadowStrength.toFixed(2);
+  return `0 8px 16px -8px hsl(0 0% 0% / ${s})`;
+}
+
 
 function edgeRule(style: EdgeStyle): { before?: string; extraShadow?: string } {
   switch (style) {

@@ -185,7 +185,11 @@ function ShopTile({
   }
 
   function handleTileClick() {
-    onClick();
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+      setMobileOpen(true);
+    } else {
+      onClick();
+    }
   }
 
   function buy() {

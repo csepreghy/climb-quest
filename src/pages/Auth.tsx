@@ -55,6 +55,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen grid place-items-center p-6 relative pt-[max(1.5rem,env(safe-area-inset-top))]">
+      <TopographicBackground />
       <Link to="/" className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to home
       </Link>

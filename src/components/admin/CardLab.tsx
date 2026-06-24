@@ -37,6 +37,18 @@ export function CardLab() {
     applyGlobalCss(global ? config : null);
   }, [config, global]);
 
+  // When Live apply is on, auto-publish to the DB so every visitor gets the
+  // admin's current state as the default. Debounced so slider drags don't spam.
+  useEffect(() => {
+    if (!global) return;
+    const t = setTimeout(() => {
+      saveRemoteConfig(config).catch(() => {
+        /* non-admin or offline — ignore */
+      });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [config, global]);
+
   // Cleanup on unmount: keep global style if user enabled it; otherwise ensure removed.
   useEffect(() => {
     return () => {
@@ -44,6 +56,7 @@ export function CardLab() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   const set = <K extends keyof CardLabConfig>(k: K, v: CardLabConfig[K]) =>
     setConfig((c) => ({ ...c, [k]: v }));

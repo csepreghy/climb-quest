@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG: CardLabConfig = {
   hue: 220,
   sat: 28,
   light: 5,
-  texOpacity: 0,
+  texOpacity: 0.45,
   texFreq: 0.85,
   texTint: "dark",
   threeD: "inset",
@@ -120,16 +120,31 @@ function bottomRule(style: BottomStyle): { after?: string } {
 
 function textureBg(c: CardLabConfig): string {
   if (c.texOpacity <= 0.001) return "none";
-  const tintColor =
-    c.texTint === "gold"
-      ? "hsl(45, 85%, 55%)"
-      : "hsl(220, 50%, 2%)";
+  // Dual-tone speckle: emit BOTH a highlight pass and a shadow pass so the
+  // grain reads on any base color (dark cards swallow pure-black noise).
+  // We render two turbulence layers with different seeds and tint them
+  // light vs dark; the gold tint replaces the highlight pass with warm gold.
+  const hi =
+    c.texTint === "gold" ? "hsl(45, 85%, 62%)" : "hsl(30, 12%, 78%)";
+  const lo = "hsl(220, 60%, 2%)";
+  const a = c.texOpacity.toFixed(2);
+  // Shadow alpha a bit stronger than highlight to keep weight.
+  const aHi = (c.texOpacity * 0.85).toFixed(2);
+  const f = c.texFreq.toFixed(2);
   const svg =
-    `<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'>` +
-    `<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='${c.texFreq.toFixed(2)}' numOctaves='2' stitchTiles='stitch'/>` +
-    `<feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 ${c.texOpacity.toFixed(2)} 0'/>` +
+    `<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'>` +
+    // shadow pass
+    `<filter id='s'>` +
+    `<feTurbulence type='fractalNoise' baseFrequency='${f}' numOctaves='2' seed='3' stitchTiles='stitch'/>` +
+    `<feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 ${a} -0.35'/>` +
     `</filter>` +
-    `<rect width='100%' height='100%' filter='url(#n)' fill='${tintColor}'/>` +
+    // highlight pass
+    `<filter id='h'>` +
+    `<feTurbulence type='fractalNoise' baseFrequency='${f}' numOctaves='2' seed='11' stitchTiles='stitch'/>` +
+    `<feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 ${aHi} -0.45'/>` +
+    `</filter>` +
+    `<rect width='100%' height='100%' filter='url(#s)' fill='${lo}'/>` +
+    `<rect width='100%' height='100%' filter='url(#h)' fill='${hi}'/>` +
     `</svg>`;
   const encoded = encodeURIComponent(svg)
     .replace(/'/g, "%27")
@@ -152,7 +167,8 @@ export function buildCss(selector: string, c: CardLabConfig): string {
 ${selector} {
   background-color: ${fill} !important;
   background-image: ${tex} !important;
-  background-blend-mode: overlay;
+  background-repeat: repeat;
+  background-blend-mode: normal;
   box-shadow: ${shadow} !important;
   border-radius: ${c.radius}px !important;
   position: relative;

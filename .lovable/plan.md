@@ -1,48 +1,33 @@
-# Densify Inventory & Shop (revised)
+## Goal
 
-Two different density levels, plus a strict no-overflow/no-overlap pass.
+Replace the body gradient background for logged-in users with a CSS+Canvas topographic contour effect — near-black backdrop with thin gold contour lines, denser in two opposite corners and faint through the middle (matching the reference). Static render (no animation).
 
-## Inventory — super compact (no name)
+## Implementation
 
-A new tile variant used only in the Inventory "Owned" section:
+### 1. New component: `src/components/TopographicBackground.tsx`
+- `<canvas>` fixed at `inset-0 -z-10 pointer-events-none`, sized to `window.innerWidth × innerHeight × devicePixelRatio`.
+- Generates a smooth 2D scalar field via value-noise (hashed lattice + smoothstep + 4 octaves of FBM) — pure JS, no images, no libs.
+- Adds a radial gradient bias so the field peaks in the top-right and bottom-left, troughs in the middle — produces the corner-cluster look from the reference.
+- Draws contour lines by sampling the field on a grid and using marching-squares to emit line segments at ~14 iso-levels.
+- Stroke = gold `hsl(42 85% 55%)`, line width 0.75–1px, alpha modulated by local field gradient (lines look brighter where contours bunch, faint elsewhere) and by the corner-bias mask.
+- Background fill: dark base `hsl(220 18% 5%)` with a subtle radial vignette to a slightly bluer black, drawn before the contours.
+- Re-renders on `resize` (debounced). No `requestAnimationFrame` loop.
+- Accepts an `animated?: boolean` prop wired but defaulting to `false`; when true it would advance a `z` offset on rAF. Leaving the hook in place makes the later toggle a one-line flip.
 
-- Square thumbnail tile (`aspect-square`), padding `p-1.5`, rarity ring on the tile itself (existing `RARITY_BORDER`).
-- **No name, no description, no rarity pill** — identity comes from the image + rarity ring color.
-- Bonus badges (chalk%, crit, boss, discount) shown as small chips in the **top-right corner of the tile**, stacked vertically, max-width clamped, `whitespace-nowrap`, `text-[9px]`. They sit inside the tile padding so they never overlap a title (there is no title).
-- Tap/click opens the existing compare/equip modal (unchanged behavior), so the name + details remain one tap away.
-- A tiny "Equipped" check overlay (bottom-right) when already equipped; sell/remove stays in the modal — no per-tile action buttons (removes the biggest source of overflow today).
-- Grid: `grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-2`.
-- Buddies in Owned: same tile treatment but `grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5` (bigger so the buddy art still reads).
-- Equipped section stays exactly as it is today.
+### 2. Mount in `src/components/Layout.tsx`
+- Render `<TopographicBackground />` as the first child of the root `<div>` so it sits behind `header`/`main`/`nav` (which already have their own backgrounds or transparency).
+- Add a class on that root (e.g. `cq-app-shell`) used by CSS below.
 
-Implementation: add a new lightweight `InventoryTile` component (it does not need to share code with `ItemCard`), used only in the Owned section of `src/pages/Inventory.tsx`.
+### 3. `src/index.css`
+- Add a rule: `body:has(.cq-app-shell) { background: hsl(220 18% 5%); }` to neutralize the body gradient on logged-in routes. Landing page is unaffected (it sets its own background on a wrapper and doesn't render `Layout`).
+- No changes to the gradient default for logged-out shells.
 
-## Shop — slightly more compact
+## Technical notes
+- Marching-squares with ~6px cell size at 1× DPR (~3px at 2× DPR) gives clean smooth contours without choppy stair-stepping.
+- Total render cost: one-time, ~50–120 ms on a typical laptop at 1920×1080 — acceptable for a static background.
+- Switching to animated mode later = set `animated` prop to `true`; the component already contains the rAF + z-offset code paths, gated by the prop.
 
-Keep names, descriptions, and the Buy button — just tighten and fix overlap:
-
-- `ShopCard` padding `p-4` → `p-3`, internal gaps `gap-3` → `gap-2`.
-- Thumbnail `h-20 w-20` → `h-16 w-16`; emoji font `text-5xl` → `text-4xl`.
-- Description clamped to **2 lines** (`line-clamp-2`) to keep heights even.
-- **Overlap fix**: badges currently sit absolutely in the top-right and we manually pad the title row with `pr-[92px]`, which fails when there are multiple badges or long names. Replace with a real layout: a header row that is `flex items-start justify-between gap-2`, with the title block on the left (`min-w-0` + `truncate` on the name) and the badge stack on the right (no absolute positioning, `shrink-0`, `flex-col items-end gap-0.5`). This guarantees badges never cover the title.
-- Grid: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3` (one extra column at `xl`).
-- `BuddyShopCard` stays as-is (image-forward sales card), but apply the same header-row fix anywhere a `+xx%` chip is overlaid.
-
-## Strict no-overflow / no-overlap pass
-
-Applied to `ItemCard`, `BuddyCard`, `ShopCard`, `BuddyShopCard`, and the new `InventoryTile`:
-
-- Every text node that can grow gets `truncate` or `line-clamp-N` and lives inside a `min-w-0` flex child.
-- Every badge container uses `whitespace-nowrap` and `max-w-full`; the badge stack uses `shrink-0`.
-- Replace remaining absolute-positioned badge overlays that cross other content (title row, action row) with flex siblings. Absolute is fine only when it overlays the **image tile**, where there is no text underneath.
-- `GameCard` wrappers get `overflow-hidden` so shimmer/legendary effects can't bleed past the rounded border.
-
-## Files touched
-
-- `src/components/ItemCard.tsx` — header-layout fix (remove `pr-[92px]` hack, move badges into flex header), `line-clamp-2` on description, `overflow-hidden` on card.
-- `src/components/BuddyCard.tsx` — same header-layout fix for the `+xx%` chip and any other overlays.
-- `src/pages/Shop.tsx` — `ShopCard` slight compaction + header-layout fix; grid columns updated; `BuddyShopCard` overlay fix.
-- `src/pages/Inventory.tsx` — Owned section switches to a new `InventoryTile` grid; Equipped section unchanged.
-- `src/components/InventoryTile.tsx` — new, super-compact tile (image + rarity ring + corner badges + optional equipped check), opens existing modal on click.
-
-Out of scope: backend/game logic changes, search/filter UI, virtualized lists, a Compact/Comfortable user toggle (can revisit if you want it later).
+## Files
+- create `src/components/TopographicBackground.tsx`
+- edit `src/components/Layout.tsx` (mount component + wrapper class)
+- edit `src/index.css` (neutralize body gradient when shell is present)

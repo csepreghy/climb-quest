@@ -27,6 +27,7 @@ import { LevelPreviewCard } from "@/components/LevelPreviewCard";
 import { useAllGyms } from "@/game/allGyms";
 import { FeedbackButton } from "@/components/FeedbackButton";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { TopographicBackground } from "@/components/TopographicBackground";
 
 const NAV_BASE = [
   { to: "/home", label: "Home", icon: Home },
@@ -129,7 +130,8 @@ export default function Layout() {
   };
 
   return (
-    <div className={cn("min-h-screen flex flex-col", isIosStandalone && "cq-ios-standalone")}> 
+    <div className={cn("cq-app-shell min-h-screen flex flex-col", isIosStandalone && "cq-ios-standalone")}> 
+      <TopographicBackground />
       <LevelsModal
         open={levelsOpen}
         onOpenChange={setLevelsOpen}

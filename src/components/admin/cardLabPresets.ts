@@ -53,24 +53,20 @@ export const PRESETS: Record<string, { label: string; config: CardLabConfig }> =
 };
 
 function shadowFor(style: ThreeDStyle): string {
+  // 3D recipes are pure depth/lift. Rim lines belong to the edge control,
+  // so the user never sees two competing borders.
   switch (style) {
     case "flat":
-      return "0 0 0 1px hsl(220 50% 2%), 0 2px 8px -2px hsl(0 0% 0% / 0.5)";
+      return "0 2px 8px -2px hsl(0 0% 0% / 0.5)";
     case "inset":
       return [
-        "inset 0 0 0 1px hsl(45 85% 55% / 0.18)",
-        "inset 0 2px 6px hsl(220 60% 1% / 0.7)",
-        "inset 0 -1px 0 hsl(45 85% 55% / 0.06)",
-        "0 0 0 1px hsl(220 50% 2%)",
-        "0 1px 0 hsl(220 20% 12% / 0.5)",
+        "inset 0 2px 8px hsl(220 60% 1% / 0.75)",
+        "inset 0 -1px 0 hsl(220 25% 90% / 0.04)",
       ].join(", ");
     case "raised":
       return [
-        "0 0 0 3px hsl(220 50% 2%)",
-        "0 0 0 4px hsl(220 18% 18% / 0.55)",
-        "inset 0 2px 0 hsl(220 25% 90% / 0.06)",
+        "inset 0 2px 0 hsl(220 25% 90% / 0.08)",
         "inset 0 -3px 0 hsl(220 60% 1% / 0.9)",
-        "inset 0 0 0 1px hsl(258 14% 36% / 0.35)",
         "0 6px 0 -1px hsl(220 50% 2%)",
         "0 18px 32px -16px hsl(0 0% 0% / 0.85)",
       ].join(", ");
@@ -78,15 +74,11 @@ function shadowFor(style: ThreeDStyle): string {
       return [
         "0 30px 60px -15px hsl(0 0% 0% / 0.9)",
         "0 12px 24px -10px hsl(0 0% 0% / 0.6)",
-        "0 0 0 1px hsl(45 85% 55% / 0.08)",
-        "inset 0 1px 0 hsl(45 85% 55% / 0.18)",
-        "inset 0 0 0 1px hsl(220 20% 12% / 0.6)",
       ].join(", ");
     case "relief":
       return [
         "inset 0 2px 4px hsl(220 60% 1% / 0.85)",
         "inset 0 -2px 0 hsl(220 20% 20% / 0.45)",
-        "0 0 0 1px hsl(220 50% 2%)",
         "0 14px 28px -14px hsl(0 0% 0% / 0.7)",
       ].join(", ");
   }

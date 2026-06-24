@@ -166,7 +166,7 @@ export default function Inventory() {
               ))}
             </div>
           )}
-        </Card>
+        </GameCard>
 
         <Card className="gradient-card p-4 space-y-3">
           <div>

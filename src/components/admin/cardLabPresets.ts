@@ -1,8 +1,9 @@
-export type ThreeDStyle = "flat" | "inset" | "raised" | "lithograph" | "relief";
+export type ThreeDStyle = "flat" | "inset" | "raised" | "lithograph" | "relief" | "button-bevel";
 export type EdgeStyle = "none" | "gold-top" | "gold-all" | "chiseled";
 export type BottomStyle = "none" | "solid" | "fade";
 export type BottomColorType = "gold" | "dark" | "custom";
 export type TexTint = "dark" | "gold";
+export type BevelLipColorType = "auto-dark" | "gold" | "custom";
 
 export interface CardLabConfig {
   hue: number;
@@ -15,13 +16,27 @@ export interface CardLabConfig {
   edge: EdgeStyle;
   bottom: BottomStyle;
   radius: number;         // px
-  // Bottom Border Customizations
+  // Bottom Border Customizations (::after strip)
   bottomHeight: number;   // 1..12 px
   bottomColorType: BottomColorType;
-  bottomHue: number;      // 0..360
-  bottomSat: number;      // 0..100
-  bottomLight: number;    // 0..100
-  bottomOpacity: number;  // 0..1
+  bottomHue: number;
+  bottomSat: number;
+  bottomLight: number;
+  bottomOpacity: number;
+  // Inner bevel lip — the button-style inset 3D bottom line
+  bevelLipEnabled: boolean;
+  bevelLipHeight: number;       // 1..8 px
+  bevelLipColorType: BevelLipColorType;
+  bevelLipHue: number;
+  bevelLipSat: number;
+  bevelLipLight: number;
+  bevelLipOpacity: number;      // 0..1
+  // Outer frame ring (like button's 2px frame)
+  frameRingEnabled: boolean;
+  frameRingWidth: number;       // 1..4
+  // Drop shadow (lift off background)
+  dropShadowEnabled: boolean;
+  dropShadowStrength: number;   // 0..1
 }
 
 export const DEFAULT_CONFIG: CardLabConfig = {
@@ -41,7 +56,19 @@ export const DEFAULT_CONFIG: CardLabConfig = {
   bottomSat: 85,
   bottomLight: 50,
   bottomOpacity: 1.0,
+  bevelLipEnabled: false,
+  bevelLipHeight: 3,
+  bevelLipColorType: "auto-dark",
+  bevelLipHue: 220,
+  bevelLipSat: 60,
+  bevelLipLight: 2,
+  bevelLipOpacity: 0.9,
+  frameRingEnabled: false,
+  frameRingWidth: 2,
+  dropShadowEnabled: true,
+  dropShadowStrength: 0.55,
 };
+
 
 export const PRESETS: Record<string, { label: string; config: CardLabConfig }> = {
   current: {
@@ -120,7 +147,32 @@ export const PRESETS: Record<string, { label: string; config: CardLabConfig }> =
       radius: 12,
     },
   },
+  buttonBevel: {
+    label: "Button bevel (dark)",
+    config: {
+      ...DEFAULT_CONFIG,
+      hue: 220,
+      sat: 22,
+      light: 7,
+      texOpacity: 0.22,
+      texFreq: 0.85,
+      texTint: "dark",
+      threeD: "button-bevel",
+      edge: "none",
+      bottom: "none",
+      bevelLipEnabled: true,
+      bevelLipHeight: 4,
+      bevelLipColorType: "auto-dark",
+      bevelLipOpacity: 0.95,
+      frameRingEnabled: true,
+      frameRingWidth: 2,
+      dropShadowEnabled: true,
+      dropShadowStrength: 0.55,
+      radius: 14,
+    },
+  },
 };
+
 
 function shadowFor(style: ThreeDStyle): string {
   switch (style) {
@@ -149,8 +201,40 @@ function shadowFor(style: ThreeDStyle): string {
         "inset 0 -2px 0 hsl(220 20% 20% / 0.45)",
         "0 14px 28px -14px hsl(0 0% 0% / 0.7)",
       ].join(", ");
+    case "button-bevel":
+      // Mirrors GameButton: top inner highlight only. Bottom lip + frame + drop
+      // shadow are layered via their own controls so each is independently tunable.
+      return "inset 0 2px 0 hsl(0 0% 100% / 0.18)";
   }
 }
+
+function bevelLipShadow(c: CardLabConfig): string | null {
+  if (!c.bevelLipEnabled) return null;
+  const h = Math.max(1, c.bevelLipHeight | 0);
+  const op = c.bevelLipOpacity.toFixed(2);
+  let color: string;
+  if (c.bevelLipColorType === "auto-dark") {
+    color = `hsl(${c.hue} ${Math.max(40, c.sat)}% ${Math.max(1, c.light - 4)}% / ${op})`;
+  } else if (c.bevelLipColorType === "gold") {
+    color = `hsl(45 85% 45% / ${op})`;
+  } else {
+    color = `hsl(${c.bevelLipHue} ${c.bevelLipSat}% ${c.bevelLipLight}% / ${op})`;
+  }
+  return `inset 0 -${h}px 0 ${color}`;
+}
+
+function frameRingShadow(c: CardLabConfig): string | null {
+  if (!c.frameRingEnabled) return null;
+  const w = Math.max(1, c.frameRingWidth | 0);
+  return `0 0 0 ${w}px hsl(var(--panel-frame))`;
+}
+
+function dropShadow(c: CardLabConfig): string | null {
+  if (!c.dropShadowEnabled) return null;
+  const s = c.dropShadowStrength.toFixed(2);
+  return `0 8px 16px -8px hsl(0 0% 0% / ${s})`;
+}
+
 
 function edgeRule(style: EdgeStyle): { before?: string; extraShadow?: string } {
   switch (style) {
@@ -233,7 +317,13 @@ function textureBg(c: CardLabConfig): string {
 
 export function buildCss(selector: string, c: CardLabConfig): string {
   const fill = `hsl(${c.hue} ${c.sat}% ${c.light}%)`;
-  const shadow = [shadowFor(c.threeD), edgeRule(c.edge).extraShadow].filter(Boolean).join(", ");
+  const shadow = [
+    shadowFor(c.threeD),
+    edgeRule(c.edge).extraShadow,
+    bevelLipShadow(c),
+    frameRingShadow(c),
+    dropShadow(c),
+  ].filter(Boolean).join(", ");
   const tex = textureBg(c);
   const beforeCss = edgeRule(c.edge).before;
   const afterCss = bottomRule(c).after;
@@ -253,6 +343,7 @@ ${beforeCss ? `${selector}::before { ${beforeCss} z-index: 3; }` : ""}
 ${afterCss ? `${selector}::after { ${afterCss} z-index: 3; }` : ""}
 `.trim();
 }
+
 
 export const LS_KEY = "cq.cardLab.v2";
 export const GLOBAL_STYLE_ID = "cq-card-lab-global-style";

@@ -141,10 +141,107 @@ export function CardLab() {
                 { v: "raised", l: "Raised plate (RPG)" },
                 { v: "lithograph", l: "Floating lithograph" },
                 { v: "relief", l: "Carved relief" },
+                { v: "button-bevel", l: "Button bevel (matches +Log)" },
               ]}
               onChange={(v) => set("threeD", v)}
             />
           </Section>
+
+          <Section title="Bevel lip (bottom 3D line)">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">Enable inner lip</Label>
+              <Switch
+                checked={config.bevelLipEnabled}
+                onCheckedChange={(v) => set("bevelLipEnabled", v)}
+              />
+            </div>
+            {config.bevelLipEnabled && (
+              <div className="space-y-4 pt-2 border-t border-border/40 mt-2">
+                <SliderRow
+                  label="Lip thickness"
+                  value={config.bevelLipHeight}
+                  min={1}
+                  max={8}
+                  step={1}
+                  onChange={(v) => set("bevelLipHeight", v)}
+                  suffix="px"
+                />
+                <RadioRow<"auto-dark" | "gold" | "custom">
+                  label="Lip color"
+                  value={config.bevelLipColorType}
+                  stacked={false}
+                  options={[
+                    { v: "auto-dark", l: "Auto dark" },
+                    { v: "gold", l: "Gold" },
+                    { v: "custom", l: "Custom" },
+                  ]}
+                  onChange={(v) => set("bevelLipColorType", v)}
+                />
+                {config.bevelLipColorType === "custom" && (
+                  <div className="space-y-3 p-3 bg-secondary/20 rounded-lg border border-border/40">
+                    <SliderRow label="Hue" value={config.bevelLipHue} min={0} max={360} step={1}
+                      onChange={(v) => set("bevelLipHue", v)} suffix="°" />
+                    <SliderRow label="Saturation" value={config.bevelLipSat} min={0} max={100} step={1}
+                      onChange={(v) => set("bevelLipSat", v)} suffix="%" />
+                    <SliderRow label="Lightness" value={config.bevelLipLight} min={0} max={100} step={1}
+                      onChange={(v) => set("bevelLipLight", v)} suffix="%" />
+                  </div>
+                )}
+                <SliderRow
+                  label="Lip opacity"
+                  value={Math.round(config.bevelLipOpacity * 100)}
+                  min={0}
+                  max={100}
+                  step={5}
+                  onChange={(v) => set("bevelLipOpacity", v / 100)}
+                  suffix="%"
+                />
+              </div>
+            )}
+          </Section>
+
+          <Section title="Outer frame ring">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">Enable frame</Label>
+              <Switch
+                checked={config.frameRingEnabled}
+                onCheckedChange={(v) => set("frameRingEnabled", v)}
+              />
+            </div>
+            {config.frameRingEnabled && (
+              <SliderRow
+                label="Frame width"
+                value={config.frameRingWidth}
+                min={1}
+                max={4}
+                step={1}
+                onChange={(v) => set("frameRingWidth", v)}
+                suffix="px"
+              />
+            )}
+          </Section>
+
+          <Section title="Drop shadow">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">Enable lift shadow</Label>
+              <Switch
+                checked={config.dropShadowEnabled}
+                onCheckedChange={(v) => set("dropShadowEnabled", v)}
+              />
+            </div>
+            {config.dropShadowEnabled && (
+              <SliderRow
+                label="Strength"
+                value={Math.round(config.dropShadowStrength * 100)}
+                min={0}
+                max={100}
+                step={5}
+                onChange={(v) => set("dropShadowStrength", v / 100)}
+                suffix="%"
+              />
+            )}
+          </Section>
+
 
           <Section title="Edge treatment">
             <RadioRow<EdgeStyle>

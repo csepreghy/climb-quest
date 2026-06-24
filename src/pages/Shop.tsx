@@ -15,6 +15,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 import { ItemCard } from "@/components/ItemCard";
 import { BuddyCard } from "@/components/BuddyCard";
+import { EquippedComparison } from "@/components/EquippedComparison";
 
 type GroupKey = ItemGroup | "all";
 const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [

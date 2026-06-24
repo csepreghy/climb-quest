@@ -172,16 +172,7 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
         ctx.stroke();
       }
 
-      // Subtle warm corner glows to sell the gold-rich corners.
-      const glow = (cx: number, cy: number) => {
-        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.55);
-        g.addColorStop(0, "hsl(45 95% 58% / 0.16)");
-        g.addColorStop(1, "hsl(45 95% 58% / 0)");
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
-      };
-      glow(w * 0.95, h * 0.05);
-      glow(w * 0.03, h * 0.95);
+      // Removed corner glows to keep the background completely solid and flat.
     };
 
     const loop = () => {

@@ -5,9 +5,13 @@ import { GameCard, PixelBar } from "@/components/ui/game-card";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { PickCard } from "@/components/pixel/PickCard";
 import { LevelPreviewCard } from "@/components/LevelPreviewCard";
-import { ItemCard } from "@/components/ItemCard";
+import { ShopPreviewTile } from "@/components/pixel/ShopPreviewTile";
 import { LEVELS, ShopItem } from "@/game/data";
 import { useAllItems } from "@/game/customItems";
+import { RARITY_BORDER } from "@/game/data";
+import { isImageEmoji } from "@/game/customItems";
+import { SmartImage } from "@/components/SmartImage";
+import { Trophy, ScrollText as ScrollIcon, Swords as SwordIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { useAuth } from "@/hooks/useAuth";
@@ -340,7 +344,7 @@ function ItemsSlide() {
             i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-2"
           )}
         >
-          <ItemCard item={it} />
+          <ShopPreviewTile item={it} />
         </div>
       ))}
     </div>

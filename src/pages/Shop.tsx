@@ -15,6 +15,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 import { ItemCard } from "@/components/ItemCard";
 import { BuddyCard } from "@/components/BuddyCard";
+import { EquippedComparison } from "@/components/EquippedComparison";
 
 type GroupKey = ItemGroup | "all";
 const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [
@@ -184,11 +185,7 @@ function ShopTile({
   }
 
   function handleTileClick() {
-    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
-      setMobileOpen(true);
-    } else {
-      onClick();
-    }
+    onClick();
   }
 
   function buy() {
@@ -428,7 +425,8 @@ function ShopDetailDialog({
             </span>
           </DialogTitle>
         </DialogHeader>
-        <div className="max-w-sm mx-auto w-full">
+        <div className="max-w-sm mx-auto w-full space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+          <EquippedComparison item={item} />
           {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
         </div>
         <DialogFooter className="gap-2 sm:gap-2 items-center sm:justify-between flex-wrap">

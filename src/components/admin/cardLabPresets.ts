@@ -146,8 +146,32 @@ export const PRESETS: Record<string, { label: string; config: CardLabConfig }> =
       bottomHeight: 3,
       radius: 12,
     },
+  buttonBevel: {
+    label: "Button bevel (dark)",
+    config: {
+      ...DEFAULT_CONFIG,
+      hue: 220,
+      sat: 22,
+      light: 7,
+      texOpacity: 0.22,
+      texFreq: 0.85,
+      texTint: "dark",
+      threeD: "button-bevel",
+      edge: "none",
+      bottom: "none",
+      bevelLipEnabled: true,
+      bevelLipHeight: 4,
+      bevelLipColorType: "auto-dark",
+      bevelLipOpacity: 0.95,
+      frameRingEnabled: true,
+      frameRingWidth: 2,
+      dropShadowEnabled: true,
+      dropShadowStrength: 0.55,
+      radius: 14,
+    },
   },
 };
+
 
 function shadowFor(style: ThreeDStyle): string {
   switch (style) {

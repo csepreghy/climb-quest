@@ -1,33 +1,33 @@
 ## Goal
+Make the topographic background recede so it reads as ambience behind UI text, and add a subtle layered stone texture to the dark base — all pure canvas, no images.
 
-Replace the body gradient background for logged-in users with a CSS+Canvas topographic contour effect — near-black backdrop with thin gold contour lines, denser in two opposite corners and faint through the middle (matching the reference). Static render (no animation).
+## Changes to `src/components/TopographicBackground.tsx`
 
-## Implementation
+### 1. Calm the contours
+- **Iso-levels:** drop from 16 → 8.
+- **Line width:** 1.35px → 0.7px.
+- **Opacity:** stroke alpha ~`0.22 * levelAlpha` (was `0.8`). Hue stays gold (`hsl(45 85% 55%)`), slightly desaturated.
+- **Field range:** widen `levelMin/Max` to `0.28–0.78` so the remaining lines spread out instead of bunching.
 
-### 1. New component: `src/components/TopographicBackground.tsx`
-- `<canvas>` fixed at `inset-0 -z-10 pointer-events-none`, sized to `window.innerWidth × innerHeight × devicePixelRatio`.
-- Generates a smooth 2D scalar field via value-noise (hashed lattice + smoothstep + 4 octaves of FBM) — pure JS, no images, no libs.
-- Adds a radial gradient bias so the field peaks in the top-right and bottom-left, troughs in the middle — produces the corner-cluster look from the reference.
-- Draws contour lines by sampling the field on a grid and using marching-squares to emit line segments at ~14 iso-levels.
-- Stroke = gold `hsl(42 85% 55%)`, line width 0.75–1px, alpha modulated by local field gradient (lines look brighter where contours bunch, faint elsewhere) and by the corner-bias mask.
-- Background fill: dark base `hsl(220 18% 5%)` with a subtle radial vignette to a slightly bluer black, drawn before the contours.
-- Re-renders on `resize` (debounced). No `requestAnimationFrame` loop.
-- Accepts an `animated?: boolean` prop wired but defaulting to `false`; when true it would advance a `z` offset on rAF. Leaving the hook in place makes the later toggle a one-line flip.
+### 2. Layered stone base (new render passes, before contours)
+- **Pass A — fine grain:** per-pixel monochrome noise written into an `ImageData` buffer at a downsampled resolution (e.g. 1/2 scale), then drawn back stretched. Luminance jitter ±4 around the base `hsl(220 35% 3%)`. Cheap, runs once on render/resize.
+- **Pass B — coarse mottling:** reuse the existing FBM field at low frequency, mapped to a very subtle lightness shift (±2%) drawn as a translucent fill grid. Gives the "weathered stone" blotchiness.
+- **Pass C — cracks:** a second high-frequency FBM thresholded to a thin band (e.g. `abs(n - 0.5) < 0.012`), stroked as 1px dark hairlines at `hsl(220 30% 1% / 0.55)`. Sparse, irregular, no marching squares needed — just pixel hits drawn as 1px rects.
+- **Vignette:** very faint dark radial overlay at the edges (`0 → 0.25` alpha) to anchor focus toward the center where UI sits.
 
-### 2. Mount in `src/components/Layout.tsx`
-- Render `<TopographicBackground />` as the first child of the root `<div>` so it sits behind `header`/`main`/`nav` (which already have their own backgrounds or transparency).
-- Add a class on that root (e.g. `cq-app-shell`) used by CSS below.
+### 3. Order of operations per `render()`
+1. Solid black fill
+2. Pass A (grain) → Pass B (mottle) → Pass C (cracks)
+3. Gold contours (dim, fewer)
+4. Vignette overlay
 
-### 3. `src/index.css`
-- Add a rule: `body:has(.cq-app-shell) { background: hsl(220 18% 5%); }` to neutralize the body gradient on logged-in routes. Landing page is unaffected (it sets its own background on a wrapper and doesn't render `Layout`).
-- No changes to the gradient default for logged-out shells.
+## Files touched
+- `src/components/TopographicBackground.tsx` — only this file.
 
-## Technical notes
-- Marching-squares with ~6px cell size at 1× DPR (~3px at 2× DPR) gives clean smooth contours without choppy stair-stepping.
-- Total render cost: one-time, ~50–120 ms on a typical laptop at 1920×1080 — acceptable for a static background.
-- Switching to animated mode later = set `animated` prop to `true`; the component already contains the rAF + z-offset code paths, gated by the prop.
+## Out of scope
+- No `index.css` or `Layout.tsx` changes.
+- No new assets, no fonts, no animation (still static).
 
-## Files
-- create `src/components/TopographicBackground.tsx`
-- edit `src/components/Layout.tsx` (mount component + wrapper class)
-- edit `src/index.css` (neutralize body gradient when shell is present)
+## Risk / perf
+- All passes are O(pixels) once per render/resize. Grain pass uses a downsampled `ImageData` to keep it fast on 4K displays. No rAF loop.
+- If grain still feels too noisy, easy follow-up: lower its alpha or coarsen the downsample factor.

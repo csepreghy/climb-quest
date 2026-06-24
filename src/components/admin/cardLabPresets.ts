@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG: CardLabConfig = {
   hue: 220,
   sat: 28,
   light: 5,
-  texOpacity: 0,
+  texOpacity: 0.45,
   texFreq: 0.85,
   texTint: "dark",
   threeD: "inset",

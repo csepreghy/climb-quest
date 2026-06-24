@@ -16,6 +16,7 @@ import { Plus, Minus, Upload, Trash2, Pencil, Copy, X, User as UserIcon, Users a
 import { AdminNotificationsPanel } from "@/components/notifications/AdminNotificationsPanel";
 import { SnapshotsAdmin } from "@/components/admin/SnapshotsAdmin";
 import { CardLab } from "@/components/admin/CardLab";
+import { TopoLab } from "@/components/admin/TopoLab";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useAllItems,

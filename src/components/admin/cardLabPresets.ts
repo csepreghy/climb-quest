@@ -69,6 +69,7 @@ export const DEFAULT_CONFIG: CardLabConfig = {
   frameRingWidth: 2,
   dropShadowEnabled: true,
   dropShadowStrength: 0.55,
+  linkLipToBottom: true,
 };
 
 

@@ -432,7 +432,7 @@ function ShopDetailDialog({
             </span>
           </DialogTitle>
         </DialogHeader>
-        <div className="max-w-sm mx-auto w-full space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+        <div className="w-full space-y-3 max-h-[70vh] overflow-y-auto pr-1">
           <EquippedComparison item={item} />
           {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
         </div>

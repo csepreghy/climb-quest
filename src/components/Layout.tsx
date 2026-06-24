@@ -205,7 +205,7 @@ export default function Layout() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <header className="cq-header sticky top-0 z-40 backdrop-blur-xl border-b-2 border-[hsl(var(--panel-frame))] shadow-[0_2px_0_hsl(var(--panel-edge)/0.5),0_8px_24px_-12px_hsl(0_0%_0%/0.7)]" style={{ background: "hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))" }}>
+      <header className="cq-header sticky top-0 z-40 backdrop-blur-2xl border-b border-[hsl(var(--gold-trim)/0.25)] shadow-[0_8px_24px_-12px_hsl(0_0%_0%/0.8)]" style={{ background: "hsl(var(--topbar-color, 220 30% 4%) / var(--topbar-opacity, 0.55))" }}>
         <div className="container flex items-center justify-between gap-4 py-5">
           <NavLink to="/home" className="flex items-center gap-4 group flex-1 min-w-0">
             <img
@@ -301,7 +301,7 @@ export default function Layout() {
 
       {/* Bottom nav (mobile) */}
       <nav
-        className="cq-bottom-nav md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border"
+        className="cq-bottom-nav md:hidden fixed bottom-0 inset-x-0 z-40 bg-[hsl(220_30%_4%/0.55)] backdrop-blur-2xl border-t border-[hsl(var(--gold-trim)/0.25)] shadow-[inset_0_1px_0_hsl(var(--gold-trim)/0.08),0_-8px_24px_-12px_hsl(0_0%_0%/0.8)]"
       >
         <div className="grid" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           {NAV.map(n => (

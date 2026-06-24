@@ -215,13 +215,27 @@ function bevelLipShadow(c: CardLabConfig): string | null {
   if (!c.bevelLipEnabled) return null;
   const h = Math.max(1, c.bevelLipHeight | 0);
   const op = c.bevelLipOpacity.toFixed(2);
+
+  // When linked, derive lip color from the bottom-border color so they stay
+  // in sync visually. Lip uses its own opacity slider.
+  let colorType: BevelLipColorType = c.bevelLipColorType;
+  let hue = c.bevelLipHue, sat = c.bevelLipSat, light = c.bevelLipLight;
+  if (c.linkLipToBottom) {
+    if (c.bottomColorType === "gold") colorType = "gold";
+    else if (c.bottomColorType === "dark") colorType = "auto-dark";
+    else {
+      colorType = "custom";
+      hue = c.bottomHue; sat = c.bottomSat; light = c.bottomLight;
+    }
+  }
+
   let color: string;
-  if (c.bevelLipColorType === "auto-dark") {
+  if (colorType === "auto-dark") {
     color = `hsl(${c.hue} ${Math.max(40, c.sat)}% ${Math.max(1, c.light - 4)}% / ${op})`;
-  } else if (c.bevelLipColorType === "gold") {
+  } else if (colorType === "gold") {
     color = `hsl(45 85% 45% / ${op})`;
   } else {
-    color = `hsl(${c.bevelLipHue} ${c.bevelLipSat}% ${c.bevelLipLight}% / ${op})`;
+    color = `hsl(${hue} ${sat}% ${light}% / ${op})`;
   }
   return `inset 0 -${h}px 0 ${color}`;
 }

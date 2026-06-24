@@ -77,7 +77,7 @@ export function HangboardOverlay({
                   "absolute rounded-full transition-all flex items-center justify-center",
                   interactive && "cursor-pointer",
                   isActive
-                    ? "ring-[6px] ring-fuchsia-500 bg-fuchsia-500/50 shadow-[0_0_24px_8px_rgba(217,70,239,0.7)] animate-pulse"
+                    ? "ring-[6px] ring-white bg-white/10 shadow-[0_0_24px_8px_rgba(255,255,255,0.55)] animate-pulse"
                     : isHover && interactive
                       ? "ring-2 ring-white/90 bg-white/15"
                       : debug

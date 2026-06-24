@@ -168,18 +168,8 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
         // Alpha modulated globally per level: middle levels brighter.
         const levelAlpha = 0.6 + 0.4 * Math.sin(Math.PI * t);
 
-        // We can't per-segment alpha cheaply without breaking batching.
-        // Instead we stroke the whole level twice: once with a corner-bias
-        // gradient on top of a faint global pass, which approximates the
-        // bright-corners / faint-middle look from the reference.
-        ctx.strokeStyle = `hsl(45 90% 55% / ${0.12 * levelAlpha})`;
+        ctx.strokeStyle = `hsl(45 98% 62% / ${0.8 * levelAlpha})`;
         ctx.stroke();
-
-        // Bright corner pass
-        ctx.save();
-        ctx.strokeStyle = `hsl(45 98% 62% / ${0.98 * levelAlpha})`;
-        ctx.stroke();
-        ctx.restore();
       }
 
       // Subtle warm corner glows to sell the gold-rich corners.

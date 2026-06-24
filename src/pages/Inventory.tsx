@@ -214,7 +214,7 @@ export default function Inventory() {
               ⚡ Next log boosted by {getItem(s.pendingConsumable)?.name}
             </div>
           )}
-        </Card>
+        </GameCard>
       </div>
 
       <div className="space-y-8">

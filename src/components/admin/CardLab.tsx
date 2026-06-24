@@ -162,17 +162,84 @@ export function CardLab() {
 
           <Section title="Bottom border">
             <RadioRow<BottomStyle>
-              label=""
+              label="Style"
               value={config.bottom}
-              stacked
+              stacked={false}
               options={[
                 { v: "none", l: "None" },
-                { v: "dark-thick", l: "Dark thick (4px)" },
-                { v: "gold-solid", l: "Gold solid (3px)" },
-                { v: "gold-fade", l: "Gold gradient fade" },
+                { v: "solid", l: "Solid border" },
+                { v: "fade", l: "Gradient fade" },
               ]}
               onChange={(v) => set("bottom", v)}
             />
+
+            {config.bottom !== "none" && (
+              <div className="space-y-4 pt-2 border-t border-border/40 mt-2">
+                <SliderRow
+                  label="Height / Thickness"
+                  value={config.bottomHeight ?? 3}
+                  min={1}
+                  max={12}
+                  step={1}
+                  onChange={(v) => set("bottomHeight", v)}
+                  suffix="px"
+                />
+
+                <RadioRow<BottomColorType>
+                  label="Color type"
+                  value={config.bottomColorType ?? "gold"}
+                  stacked={false}
+                  options={[
+                    { v: "gold", l: "Gold" },
+                    { v: "dark", l: "Dark" },
+                    { v: "custom", l: "Custom" },
+                  ]}
+                  onChange={(v) => set("bottomColorType", v)}
+                />
+
+                {config.bottomColorType === "custom" && (
+                  <div className="space-y-3 p-3 bg-secondary/20 rounded-lg border border-border/40">
+                    <SliderRow
+                      label="Color Hue"
+                      value={config.bottomHue ?? 45}
+                      min={0}
+                      max={360}
+                      step={1}
+                      onChange={(v) => set("bottomHue", v)}
+                      suffix="°"
+                    />
+                    <SliderRow
+                      label="Color Saturation"
+                      value={config.bottomSat ?? 85}
+                      min={0}
+                      max={100}
+                      step={1}
+                      onChange={(v) => set("bottomSat", v)}
+                      suffix="%"
+                    />
+                    <SliderRow
+                      label="Color Lightness"
+                      value={config.bottomLight ?? 50}
+                      min={0}
+                      max={100}
+                      step={1}
+                      onChange={(v) => set("bottomLight", v)}
+                      suffix="%"
+                    />
+                  </div>
+                )}
+
+                <SliderRow
+                  label="Border Opacity"
+                  value={Math.round((config.bottomOpacity ?? 1) * 100)}
+                  min={0}
+                  max={100}
+                  step={5}
+                  onChange={(v) => set("bottomOpacity", v / 100)}
+                  suffix="%"
+                />
+              </div>
+            )}
           </Section>
 
           <Section title="Border radius">

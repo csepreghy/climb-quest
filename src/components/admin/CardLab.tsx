@@ -121,7 +121,7 @@ export function CardLab() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,380px)_1fr]">
         {/* Controls */}
-        <GameCard className="p-5 space-y-6 lg:sticky lg:top-24 self-start">
+        <GameCard className="p-5 space-y-6 self-start">
           <Section title="Fill color">
             <SliderRow label="Hue" value={config.hue} min={0} max={360} step={1} onChange={(v) => set("hue", v)} suffix="°" />
             <SliderRow label="Saturation" value={config.sat} min={0} max={60} step={1} onChange={(v) => set("sat", v)} suffix="%" />
@@ -377,7 +377,7 @@ export function CardLab() {
         </GameCard>
 
         {/* Preview */}
-        <div className={`${PREVIEW_CLASS} space-y-4`}>
+        <div className={`${PREVIEW_CLASS} space-y-4 lg:sticky lg:top-24 self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-2`}>
           <GameCard className="p-5">
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Sample card</div>
             <h3 className="text-xl font-bold tracking-tight mb-1">Daily Streak</h3>

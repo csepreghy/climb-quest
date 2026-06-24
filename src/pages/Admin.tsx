@@ -250,6 +250,10 @@ export default function Admin() {
           <CardLab />
         </TabsContent>
 
+        <TabsContent value="topo" className="mt-6">
+          <TopoLab />
+        </TabsContent>
+
         <TabsContent value="notify" className="space-y-6 mt-6">
           <AdminNotificationsPanel />
         </TabsContent>

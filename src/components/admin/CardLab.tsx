@@ -91,10 +91,20 @@ export function CardLab() {
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            <Label htmlFor="apply-global" className="text-sm">Apply globally</Label>
+            <Label htmlFor="apply-global" className="text-sm">Live apply</Label>
             <Switch id="apply-global" checked={global} onCheckedChange={setGlobal} />
           </div>
 
+          <GameButton
+            variant="success"
+            size="sm"
+            onClick={() => {
+              setGlobal(true);
+              toast.success("Applied to all cards across the app");
+            }}
+          >
+            Apply to all cards
+          </GameButton>
           <GameButton variant="ghost" size="sm" onClick={onReset}>
             <RotateCcw className="h-4 w-4" /> Reset
           </GameButton>
@@ -103,7 +113,9 @@ export function CardLab() {
           </GameButton>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Tweaks persist in your browser. "Apply globally" overrides every card in the app so you can browse around.
+          Tweaks persist in your browser. Click <strong>Apply to all cards</strong> to push the
+          current look to every card in the app; toggle <strong>Live apply</strong> off to keep
+          changes scoped to this preview.
         </p>
       </GameCard>
 
@@ -166,27 +178,46 @@ export function CardLab() {
                   onChange={(v) => set("bevelLipHeight", v)}
                   suffix="px"
                 />
-                <RadioRow<"auto-dark" | "gold" | "custom">
-                  label="Lip color"
-                  value={config.bevelLipColorType}
-                  stacked={false}
-                  options={[
-                    { v: "auto-dark", l: "Auto dark" },
-                    { v: "gold", l: "Gold" },
-                    { v: "custom", l: "Custom" },
-                  ]}
-                  onChange={(v) => set("bevelLipColorType", v)}
-                />
-                {config.bevelLipColorType === "custom" && (
-                  <div className="space-y-3 p-3 bg-secondary/20 rounded-lg border border-border/40">
-                    <SliderRow label="Hue" value={config.bevelLipHue} min={0} max={360} step={1}
-                      onChange={(v) => set("bevelLipHue", v)} suffix="°" />
-                    <SliderRow label="Saturation" value={config.bevelLipSat} min={0} max={100} step={1}
-                      onChange={(v) => set("bevelLipSat", v)} suffix="%" />
-                    <SliderRow label="Lightness" value={config.bevelLipLight} min={0} max={100} step={1}
-                      onChange={(v) => set("bevelLipLight", v)} suffix="%" />
-                  </div>
+
+                <div className="flex items-center justify-between rounded-md bg-secondary/30 px-3 py-2">
+                  <Label className="text-xs">Match bottom border color</Label>
+                  <Switch
+                    checked={config.linkLipToBottom}
+                    onCheckedChange={(v) => set("linkLipToBottom", v)}
+                  />
+                </div>
+
+                {config.linkLipToBottom ? (
+                  <p className="text-[11px] text-muted-foreground -mt-2">
+                    Lip color is linked to the <strong>Bottom border</strong> color. Edit it there
+                    and the lip follows.
+                  </p>
+                ) : (
+                  <>
+                    <RadioRow<"auto-dark" | "gold" | "custom">
+                      label="Lip color"
+                      value={config.bevelLipColorType}
+                      stacked={false}
+                      options={[
+                        { v: "auto-dark", l: "Auto dark" },
+                        { v: "gold", l: "Gold" },
+                        { v: "custom", l: "Custom" },
+                      ]}
+                      onChange={(v) => set("bevelLipColorType", v)}
+                    />
+                    {config.bevelLipColorType === "custom" && (
+                      <div className="space-y-3 p-3 bg-secondary/20 rounded-lg border border-border/40">
+                        <SliderRow label="Hue" value={config.bevelLipHue} min={0} max={360} step={1}
+                          onChange={(v) => set("bevelLipHue", v)} suffix="°" />
+                        <SliderRow label="Saturation" value={config.bevelLipSat} min={0} max={100} step={1}
+                          onChange={(v) => set("bevelLipSat", v)} suffix="%" />
+                        <SliderRow label="Lightness" value={config.bevelLipLight} min={0} max={100} step={1}
+                          onChange={(v) => set("bevelLipLight", v)} suffix="%" />
+                      </div>
+                    )}
+                  </>
                 )}
+
                 <SliderRow
                   label="Lip opacity"
                   value={Math.round(config.bevelLipOpacity * 100)}

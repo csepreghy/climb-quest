@@ -295,19 +295,19 @@ function ItemsSlide() {
   const all = useAllItems();
   const [shuffleKey, setShuffleKey] = useState(0);
 
-  // Pick 6, randomized — only re-shuffles when shuffleKey changes
+  // Pick 9, randomized — only re-shuffles when shuffleKey changes
   // (or once items first become available).
   const [picks, setPicks] = useState<ShopItem[]>([]);
   useEffect(() => {
     if (all.length === 0) return;
     if (picks.length > 0 && shuffleKey === 0) return; // keep first selection stable
     const shuffled = [...all].sort(() => Math.random() - 0.5);
-    const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 1);
-    const epic = shuffled.filter(i => i.rarity === "epic").slice(0, 2);
-    const rare = shuffled.filter(i => i.rarity === "rare").slice(0, 2);
+    const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 2);
+    const epic = shuffled.filter(i => i.rarity === "epic").slice(0, 3);
+    const rare = shuffled.filter(i => i.rarity === "rare").slice(0, 3);
     const picked = [...leg, ...epic, ...rare];
     const rest = shuffled.filter(i => !picked.includes(i));
-    setPicks([...picked, ...rest].slice(0, 6));
+    setPicks([...picked, ...rest].slice(0, 9));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all.length, shuffleKey]);
 
@@ -357,7 +357,7 @@ function ItemsSlide() {
   }
   return (
     <div
-      className="grid grid-cols-2 gap-3"
+      className="grid grid-cols-3 gap-2"
       onMouseEnter={() => setShuffleKey(k => k + 1)}
     >
       {items.map((it, i) => (
@@ -368,7 +368,7 @@ function ItemsSlide() {
             i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-2"
           )}
         >
-          <ShopPreviewTile item={it} />
+          <ShopPreviewTile item={it} smallImage />
         </div>
       ))}
     </div>

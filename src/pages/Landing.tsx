@@ -569,11 +569,11 @@ function ShopPreviewGrid() {
     if (picks.length > 0) return;
     const shuffled = [...all].sort(() => Math.random() - 0.5);
     const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 2);
-    const epic = shuffled.filter(i => i.rarity === "epic" && !leg.includes(i)).slice(0, 4);
+    const epic = shuffled.filter(i => i.rarity === "epic" && !leg.includes(i)).slice(0, 3);
     const rare = shuffled.filter(i => i.rarity === "rare" && !leg.includes(i) && !epic.includes(i)).slice(0, 4);
     const picked = [...leg, ...epic, ...rare];
     const rest = shuffled.filter(i => !picked.includes(i));
-    setPicks([...picked, ...rest].slice(0, 12));
+    setPicks([...picked, ...rest].slice(0, 9));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all.length]);
 
@@ -604,9 +604,9 @@ function ShopPreviewGrid() {
   }
 
   return (
-    <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-6 max-w-3xl mx-auto">
+    <div className="grid gap-2 grid-cols-3 max-w-sm sm:max-w-md mx-auto">
       {items.map(it => (
-        <ShopPreviewTile key={it.id} item={it} />
+        <ShopPreviewTile key={it.id} item={it} smallImage />
       ))}
     </div>
   );
@@ -642,7 +642,7 @@ function LeaderboardPreview({ onSignUp }: { onSignUp: () => void }) {
       const { data, error } = await supabase.rpc("get_leaderboard");
       if (cancelled) return;
       if (error) { setError(error.message); return; }
-      setRows(((data ?? []) as any as LbRow[]).slice(0, 5));
+      setRows(((data ?? []) as any as LbRow[]).slice(0, 3));
     })();
     return () => { cancelled = true; };
   }, []);

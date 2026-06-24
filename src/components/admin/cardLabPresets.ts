@@ -37,6 +37,8 @@ export interface CardLabConfig {
   // Drop shadow (lift off background)
   dropShadowEnabled: boolean;
   dropShadowStrength: number;   // 0..1
+  // Link lip color to bottom border color (edit together)
+  linkLipToBottom: boolean;
 }
 
 export const DEFAULT_CONFIG: CardLabConfig = {

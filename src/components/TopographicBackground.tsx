@@ -84,10 +84,10 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
       // Base luminance ~ hsl(220 35% 3%) → approx rgb(5, 6, 10)
       const baseR = 5, baseG = 6, baseB = 10;
       for (let i = 0; i < gd.length; i += 4) {
-        const j = (Math.random() - 0.5) * 8; // ±4 jitter
+        const j = (Math.random() - 0.5) * 22; // ±11 jitter — visible grain
         gd[i]     = Math.max(0, Math.min(255, baseR + j));
         gd[i + 1] = Math.max(0, Math.min(255, baseG + j));
-        gd[i + 2] = Math.max(0, Math.min(255, baseB + j + (Math.random() - 0.5) * 2));
+        gd[i + 2] = Math.max(0, Math.min(255, baseB + j + (Math.random() - 0.5) * 4));
         gd[i + 3] = 255;
       }
       // Blit via an offscreen canvas so we can scale.
@@ -113,35 +113,34 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
         }
       }
 
-      /* ---------- Pass B: coarse mottle (very subtle lightness shifts) ---------- */
+      /* ---------- Pass B: coarse mottle (lightness shifts) ---------- */
       const mcell = 14;
       for (let py = 0; py < h; py += mcell) {
         for (let px = 0; px < w; px += mcell) {
           const n = fbm(px * 0.0018, py * 0.0018, zOffset + 11.3, 3);
-          // Map to ~±3% lightness, very low alpha for subtlety
           const shift = (n - 0.5) * 2; // -1..1
-          const a = 0.06 * Math.abs(shift);
+          const a = 0.22 * Math.abs(shift);
           if (shift >= 0) {
-            ctx.fillStyle = `hsl(220 25% 14% / ${a.toFixed(3)})`;
+            ctx.fillStyle = `hsl(220 22% 22% / ${a.toFixed(3)})`;
           } else {
-            ctx.fillStyle = `hsl(220 50% 0% / ${(a * 1.2).toFixed(3)})`;
+            ctx.fillStyle = `hsl(220 50% 0% / ${(a * 1.3).toFixed(3)})`;
           }
           ctx.fillRect(px, py, mcell, mcell);
         }
       }
 
       /* ---------- Pass C: sparse dark cracks ---------- */
-      // High-frequency FBM thresholded near 0.5 — produces irregular thin veins.
       const ccell = 2;
-      ctx.fillStyle = "hsl(220 40% 1% / 0.6)";
+      ctx.fillStyle = "hsl(220 50% 0% / 0.9)";
       for (let py = 0; py < h; py += ccell) {
         for (let px = 0; px < w; px += ccell) {
           const n = fbm(px * 0.012, py * 0.012, zOffset + 42.7, 3);
-          if (Math.abs(n - 0.5) < 0.012) {
+          if (Math.abs(n - 0.5) < 0.022) {
             ctx.fillRect(px, py, ccell, ccell);
           }
         }
       }
+
 
       /* ---------- Contours (dim, fewer) ---------- */
       const LEVELS = 8;
@@ -205,7 +204,7 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
         if (segCount === 0) continue;
 
         const levelAlpha = 0.6 + 0.4 * Math.sin(Math.PI * t);
-        ctx.strokeStyle = `hsl(45 85% 55% / ${(0.22 * levelAlpha).toFixed(3)})`;
+        ctx.strokeStyle = `hsl(45 88% 58% / ${(0.4 * levelAlpha).toFixed(3)})`;
         ctx.stroke();
       }
 

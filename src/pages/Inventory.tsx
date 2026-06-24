@@ -148,7 +148,7 @@ export default function Inventory() {
   return (
     <div className="grid gap-6 lg:grid-cols-[320px,1fr] animate-float-up">
       <div className="space-y-4">
-        <Card className="gradient-card p-5 text-center">
+        <GameCard className="p-5 text-center">
           <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
           <CharacterNameEditor />
           {adminTools && (

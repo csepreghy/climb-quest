@@ -220,7 +220,7 @@ function bevelLipShadow(c: CardLabConfig): string | null {
   // in sync visually. Lip uses its own opacity slider.
   let colorType: BevelLipColorType = c.bevelLipColorType;
   let hue = c.bevelLipHue, sat = c.bevelLipSat, light = c.bevelLipLight;
-  if (c.linkLipToBottom) {
+  if (c.linkLipToBottom && c.bottom !== "none") {
     if (c.bottomColorType === "gold") colorType = "gold";
     else if (c.bottomColorType === "dark") colorType = "auto-dark";
     else {

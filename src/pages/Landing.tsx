@@ -293,14 +293,12 @@ function CharactersSlide() {
 
 function ItemsSlide() {
   const all = useAllItems();
-  const [shuffleKey, setShuffleKey] = useState(0);
 
-  // Pick 9, randomized — only re-shuffles when shuffleKey changes
-  // (or once items first become available).
+  // Pick 9, randomized — keep selection stable
   const [picks, setPicks] = useState<ShopItem[]>([]);
   useEffect(() => {
     if (all.length === 0) return;
-    if (picks.length > 0 && shuffleKey === 0) return; // keep first selection stable
+    if (picks.length > 0) return;
     const shuffled = [...all].sort(() => Math.random() - 0.5);
     const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 2);
     const epic = shuffled.filter(i => i.rarity === "epic").slice(0, 3);
@@ -308,8 +306,7 @@ function ItemsSlide() {
     const picked = [...leg, ...epic, ...rare];
     const rest = shuffled.filter(i => !picked.includes(i));
     setPicks([...picked, ...rest].slice(0, 9));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [all.length, shuffleKey]);
+  }, [all.length, picks.length]);
 
   // Fetch images for ONLY those ids (small payload).
   const [imgs, setImgs] = useState<Record<string, string>>({});
@@ -329,7 +326,7 @@ function ItemsSlide() {
 
   const items = picks.map(p => imgs[p.id] ? { ...p, emoji: imgs[p.id] } : p);
 
-  // Animate in once. Resets when picks identity changes (i.e., user-triggered reshuffle).
+  // Animate in once. Resets when picks identity changes.
   const [shown, setShown] = useState(0);
   const picksKey = picks.map(p => p.id).join(",");
   useEffect(() => {
@@ -345,8 +342,7 @@ function ItemsSlide() {
     };
     t = setTimeout(tick, 180);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [picksKey]);
+  }, [picksKey, items.length]);
 
   if (items.length === 0) {
     return (
@@ -356,10 +352,7 @@ function ItemsSlide() {
     );
   }
   return (
-    <div
-      className="grid grid-cols-3 gap-2"
-      onMouseEnter={() => setShuffleKey(k => k + 1)}
-    >
+    <div className="grid grid-cols-3 gap-2">
       {items.map((it, i) => (
         <div
           key={it.id}
@@ -569,11 +562,11 @@ function ShopPreviewGrid() {
     if (picks.length > 0) return;
     const shuffled = [...all].sort(() => Math.random() - 0.5);
     const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 2);
-    const epic = shuffled.filter(i => i.rarity === "epic" && !leg.includes(i)).slice(0, 3);
+    const epic = shuffled.filter(i => i.rarity === "epic" && !leg.includes(i)).slice(0, 4);
     const rare = shuffled.filter(i => i.rarity === "rare" && !leg.includes(i) && !epic.includes(i)).slice(0, 4);
     const picked = [...leg, ...epic, ...rare];
     const rest = shuffled.filter(i => !picked.includes(i));
-    setPicks([...picked, ...rest].slice(0, 9));
+    setPicks([...picked, ...rest].slice(0, 12));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all.length]);
 
@@ -604,9 +597,9 @@ function ShopPreviewGrid() {
   }
 
   return (
-    <div className="grid gap-2 grid-cols-3 max-w-sm sm:max-w-md mx-auto">
+    <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-6 max-w-3xl mx-auto">
       {items.map(it => (
-        <ShopPreviewTile key={it.id} item={it} smallImage />
+        <ShopPreviewTile key={it.id} item={it} />
       ))}
     </div>
   );

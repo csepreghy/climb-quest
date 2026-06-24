@@ -9,7 +9,7 @@ import chalkBagImg from "@/assets/chalk-bag.png";
  * Presentational, non-interactive shop tile that mirrors the redesigned
  * shop tile look (.tile-3d). Used on the public landing page.
  */
-export function ShopPreviewTile({ item, className }: { item: ShopItem; className?: string }) {
+export function ShopPreviewTile({ item, className, smallImage }: { item: ShopItem; className?: string; smallImage?: boolean }) {
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
   const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
   const chalkPct = bonusPct || consumablePct;
@@ -30,12 +30,18 @@ export function ShopPreviewTile({ item, className }: { item: ShopItem; className
       className={cn("tile-3d relative aspect-square w-full overflow-hidden", className)}
     >
       {isImageEmoji(item.emoji) ? (
-        <SmartImage src={item.emoji} alt={item.name} loaderSize={24} wrapperClassName="h-full w-full" className="h-full w-full object-cover" />
+        <SmartImage 
+          src={item.emoji} 
+          alt={item.name} 
+          loaderSize={smallImage ? 16 : 24} 
+          wrapperClassName="h-full w-full flex items-center justify-center" 
+          className={cn("object-contain", smallImage ? "h-[60%] w-[60%] -translate-y-1.5" : "h-full w-full object-cover")} 
+        />
       ) : item.emoji ? (
-        <div className="h-full w-full flex items-center justify-center text-3xl sm:text-4xl">{item.emoji}</div>
+        <div className={cn("h-full w-full flex items-center justify-center", smallImage ? "text-xl sm:text-2xl -translate-y-1.5" : "text-3xl sm:text-4xl")}>{item.emoji}</div>
       ) : (
         <div className="h-full w-full flex items-center justify-center">
-          <ChalkBagLoader size={24} />
+          <ChalkBagLoader size={smallImage ? 16 : 24} />
         </div>
       )}
 

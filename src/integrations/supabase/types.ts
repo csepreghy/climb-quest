@@ -529,6 +529,27 @@ export type Database = {
         }
         Relationships: []
       }
+      topo_settings: {
+        Row: {
+          config: Json
+          id: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config: Json
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_game_state: {
         Row: {
           created_at: string

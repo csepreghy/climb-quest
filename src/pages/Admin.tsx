@@ -16,6 +16,7 @@ import { Plus, Minus, Upload, Trash2, Pencil, Copy, X, User as UserIcon, Users a
 import { AdminNotificationsPanel } from "@/components/notifications/AdminNotificationsPanel";
 import { SnapshotsAdmin } from "@/components/admin/SnapshotsAdmin";
 import { CardLab } from "@/components/admin/CardLab";
+import { TopoLab } from "@/components/admin/TopoLab";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useAllItems,
@@ -88,7 +89,7 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-3 sm:grid-cols-10 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-11 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
           {[
             { value: "general", label: "General", Icon: Settings },
             { value: "users", label: "Users", Icon: UsersIcon },
@@ -97,6 +98,7 @@ export default function Admin() {
             { value: "gyms", label: "Gyms", Icon: MapPin },
             { value: "theme", label: "Theme", Icon: Palette },
             { value: "card-lab", label: "Card Lab", Icon: Sparkles },
+            { value: "topo", label: "Topo BG", Icon: Layers },
             { value: "notify", label: "Notify", Icon: Bell },
             { value: "feedback", label: "Feedback", Icon: MessageSquare },
             { value: "snapshots", label: "Snapshots", Icon: Archive },
@@ -246,6 +248,10 @@ export default function Admin() {
 
         <TabsContent value="card-lab" className="mt-6">
           <CardLab />
+        </TabsContent>
+
+        <TabsContent value="topo" className="mt-6">
+          <TopoLab />
         </TabsContent>
 
         <TabsContent value="notify" className="space-y-6 mt-6">

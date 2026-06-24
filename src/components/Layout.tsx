@@ -205,7 +205,7 @@ export default function Layout() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <header className="cq-header sticky top-0 z-40 backdrop-blur-2xl border-b border-[hsl(var(--gold-trim)/0.25)] shadow-[0_8px_24px_-12px_hsl(0_0%_0%/0.8)]" style={{ background: "hsl(var(--topbar-color, 220 30% 4%) / var(--topbar-opacity, 0.55))" }}>
+      <header className="cq-header sticky top-0 z-40 backdrop-blur-2xl border-b border-[hsl(var(--gold-trim)/0.25)] shadow-[0_12px_28px_-8px_hsl(0_0%_0%/0.75),0_4px_10px_-4px_hsl(0_0%_0%/0.55)]" style={{ background: "hsl(var(--topbar-color, 220 30% 4%) / var(--topbar-opacity, 0.55))" }}>
         <div className="container flex items-center justify-between gap-4 py-5">
           <NavLink to="/home" className="flex items-center gap-4 group flex-1 min-w-0">
             <img

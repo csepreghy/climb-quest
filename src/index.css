@@ -108,7 +108,7 @@
   }
   /* Logged-in shell uses the procedural topographic canvas instead. */
   body:has(.cq-app-shell) {
-    background: hsl(220 25% 3%);
+    background: hsl(220 40% 1%);
   }
 }
 

@@ -204,7 +204,7 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
         if (segCount === 0) continue;
 
         const levelAlpha = 0.6 + 0.4 * Math.sin(Math.PI * t);
-        ctx.strokeStyle = `hsl(45 85% 55% / ${(0.22 * levelAlpha).toFixed(3)})`;
+        ctx.strokeStyle = `hsl(45 88% 58% / ${(0.4 * levelAlpha).toFixed(3)})`;
         ctx.stroke();
       }
 

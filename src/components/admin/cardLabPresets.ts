@@ -292,7 +292,13 @@ function textureBg(c: CardLabConfig): string {
 
 export function buildCss(selector: string, c: CardLabConfig): string {
   const fill = `hsl(${c.hue} ${c.sat}% ${c.light}%)`;
-  const shadow = [shadowFor(c.threeD), edgeRule(c.edge).extraShadow].filter(Boolean).join(", ");
+  const shadow = [
+    shadowFor(c.threeD),
+    edgeRule(c.edge).extraShadow,
+    bevelLipShadow(c),
+    frameRingShadow(c),
+    dropShadow(c),
+  ].filter(Boolean).join(", ");
   const tex = textureBg(c);
   const beforeCss = edgeRule(c.edge).before;
   const afterCss = bottomRule(c).after;
@@ -312,6 +318,7 @@ ${beforeCss ? `${selector}::before { ${beforeCss} z-index: 3; }` : ""}
 ${afterCss ? `${selector}::after { ${afterCss} z-index: 3; }` : ""}
 `.trim();
 }
+
 
 export const LS_KEY = "cq.cardLab.v2";
 export const GLOBAL_STYLE_ID = "cq-card-lab-global-style";

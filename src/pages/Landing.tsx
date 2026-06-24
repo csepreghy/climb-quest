@@ -130,7 +130,35 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Shop Preview */}
+      <section className="relative z-10 container pb-24">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">A loot-filled shop</h2>
+          <p className="text-muted-foreground mt-2">Outfits, brushes, power-ups & climbing buddies — earned with Chalk.</p>
+        </div>
+        <ShopPreviewGrid />
+        <div className="mt-6 flex justify-center">
+          <GameButton variant="primary" size="lg" onClick={goAuth}>
+            Start earning Chalk <ArrowRight className="h-4 w-4" />
+          </GameButton>
+        </div>
+      </section>
+
+      {/* Leaderboard Preview */}
+      <section className="relative z-10 container pb-24">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <div className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary/70 text-foreground/90">
+            <Trophy className="h-3.5 w-3.5 text-legendary" />
+            Climbers worldwide
+          </div>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight mt-3">Top of the leaderboard</h2>
+          <p className="text-muted-foreground mt-2">Climb your way up by logging sends and bossing projects.</p>
+        </div>
+        <LeaderboardPreview onSignUp={goAuth} />
+      </section>
+
       {/* Final CTA */}
+
       <section className="relative z-10 container pb-20">
         <GameCard tone="accent" className="p-8 sm:p-12 text-center">
           <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">Ready to send?</h2>

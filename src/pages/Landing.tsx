@@ -5,14 +5,14 @@ import { GameCard, PixelBar } from "@/components/ui/game-card";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { PickCard } from "@/components/pixel/PickCard";
 import { LevelPreviewCard } from "@/components/LevelPreviewCard";
-import { ItemCard } from "@/components/ItemCard";
+import { ShopPreviewTile } from "@/components/pixel/ShopPreviewTile";
 import { LEVELS, ShopItem } from "@/game/data";
 import { useAllItems } from "@/game/customItems";
 import { supabase } from "@/integrations/supabase/client";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ScrollText, Sparkles, ArrowUp, Swords } from "lucide-react";
+import { ArrowRight, ScrollText, Sparkles, ArrowUp, Swords, Trophy } from "lucide-react";
 import logoImg from "@/assets/climbquest-logo.png";
 import boulderImg from "@/assets/log-boulder.webp";
 import bossImg from "@/assets/log-boss.webp";
@@ -126,7 +126,35 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Shop Preview */}
+      <section className="relative z-10 container pb-24">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">A loot-filled shop</h2>
+          <p className="text-muted-foreground mt-2">Outfits, brushes, power-ups & climbing buddies — earned with Chalk.</p>
+        </div>
+        <ShopPreviewGrid />
+        <div className="mt-6 flex justify-center">
+          <GameButton variant="primary" size="lg" onClick={goAuth}>
+            Start earning Chalk <ArrowRight className="h-4 w-4" />
+          </GameButton>
+        </div>
+      </section>
+
+      {/* Leaderboard Preview */}
+      <section className="relative z-10 container pb-24">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <div className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary/70 text-foreground/90">
+            <Trophy className="h-3.5 w-3.5 text-legendary" />
+            Climbers worldwide
+          </div>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight mt-3">Top of the leaderboard</h2>
+          <p className="text-muted-foreground mt-2">Climb your way up by logging sends and bossing projects.</p>
+        </div>
+        <LeaderboardPreview onSignUp={goAuth} />
+      </section>
+
       {/* Final CTA */}
+
       <section className="relative z-10 container pb-20">
         <GameCard tone="accent" className="p-8 sm:p-12 text-center">
           <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">Ready to send?</h2>
@@ -340,7 +368,7 @@ function ItemsSlide() {
             i < shown ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-2"
           )}
         >
-          <ItemCard item={it} />
+          <ShopPreviewTile item={it} />
         </div>
       ))}
     </div>
@@ -530,7 +558,160 @@ function LevelUpSlide() {
   );
 }
 
-/* ---------------- Background ---------------- */
+/* ---------------- Shop Preview ---------------- */
+
+function ShopPreviewGrid() {
+  const all = useAllItems();
+  const [picks, setPicks] = useState<ShopItem[]>([]);
+
+  useEffect(() => {
+    if (all.length === 0) return;
+    if (picks.length > 0) return;
+    const shuffled = [...all].sort(() => Math.random() - 0.5);
+    const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 2);
+    const epic = shuffled.filter(i => i.rarity === "epic" && !leg.includes(i)).slice(0, 4);
+    const rare = shuffled.filter(i => i.rarity === "rare" && !leg.includes(i) && !epic.includes(i)).slice(0, 4);
+    const picked = [...leg, ...epic, ...rare];
+    const rest = shuffled.filter(i => !picked.includes(i));
+    setPicks([...picked, ...rest].slice(0, 12));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all.length]);
+
+  // Fetch images for ONLY those ids (small payload).
+  const [imgs, setImgs] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (picks.length === 0) return;
+    const ids = picks.map(p => p.id);
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("shop_items").select("id,image").in("id", ids);
+      if (cancelled) return;
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { if (r.image) map[r.id] = r.image; });
+      setImgs(prev => ({ ...prev, ...map }));
+    })();
+    return () => { cancelled = true; };
+  }, [picks.map(p => p.id).join(",")]);
+
+  const items = picks.map(p => imgs[p.id] ? { ...p, emoji: imgs[p.id] } : p);
+
+  if (items.length === 0) {
+    return (
+      <div className="text-center text-sm text-muted-foreground py-10">
+        Loading shop preview…
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-6 max-w-3xl mx-auto">
+      {items.map(it => (
+        <ShopPreviewTile key={it.id} item={it} />
+      ))}
+    </div>
+  );
+}
+
+/* ---------------- Leaderboard Preview ---------------- */
+
+type LbRow = {
+  user_id: string;
+  character_name: string;
+  level: number;
+  total_chalk_earned: number;
+  total_logs: number;
+  bosses_sent: number;
+  gender: "male" | "female";
+  equipped: Record<string, string>;
+  owned?: string[];
+};
+
+const TROPHY_COLOR: Record<number, string> = {
+  1: "text-legendary drop-shadow-[0_0_6px_hsl(var(--legendary)/0.6)]",
+  2: "text-[hsl(0_0%_82%)] drop-shadow-[0_0_4px_hsl(0_0%_80%/0.5)]",
+  3: "text-[hsl(28_70%_55%)] drop-shadow-[0_0_4px_hsl(28_70%_55%/0.5)]",
+};
+
+function LeaderboardPreview({ onSignUp }: { onSignUp: () => void }) {
+  const [rows, setRows] = useState<LbRow[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("get_leaderboard");
+      if (cancelled) return;
+      if (error) { setError(error.message); return; }
+      setRows(((data ?? []) as any as LbRow[]).slice(0, 5));
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <GameCard className="p-2 sm:p-3 max-w-2xl mx-auto">
+      {error && (
+        <div className="p-4 text-sm text-destructive text-center">Leaderboard unavailable.</div>
+      )}
+      {!rows && !error && (
+        <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
+      )}
+      {rows && rows.length === 0 && (
+        <div className="p-8 text-center text-sm text-muted-foreground">
+          No climbers yet. Be the first!
+        </div>
+      )}
+      {rows && rows.length > 0 && (
+        <div className="divide-y divide-border/40">
+          {rows.map((row, i) => (
+            <LeaderboardPreviewRow key={row.user_id} row={row} rank={i + 1} />
+          ))}
+        </div>
+      )}
+      <div className="mt-3 pt-3 border-t border-border/40 flex justify-center">
+        <GameButton variant="ghost" size="sm" onClick={onSignUp}>
+          Join the leaderboard <ArrowRight className="h-4 w-4" />
+        </GameButton>
+      </div>
+    </GameCard>
+  );
+}
+
+function LeaderboardPreviewRow({ row, rank }: { row: LbRow; rank: number }) {
+  return (
+    <div
+      className={cn(
+        "w-full flex items-center gap-2 sm:gap-4 py-3 px-1.5 sm:px-2 rounded-md text-left",
+        rank === 1 && "bg-legendary/5",
+      )}
+    >
+      {rank <= 3 ? (
+        <div className="w-10 shrink-0 flex flex-col items-center">
+          <Trophy className={cn("h-6 w-6", TROPHY_COLOR[rank])} fill="currentColor" />
+          <div className="text-[10px] font-bold tabular-nums text-muted-foreground mt-0.5">#{rank}</div>
+        </div>
+      ) : (
+        <div className="w-10 shrink-0 text-center text-sm font-bold text-muted-foreground tabular-nums">#{rank}</div>
+      )}
+      <ClimberAvatar level={row.level} gender={row.gender} equipped={row.equipped as any} size="sm" hideLevel />
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold truncate text-sm sm:text-base">{row.character_name}</div>
+        <div className="text-[11px] text-muted-foreground flex items-center gap-x-1.5 flex-wrap mt-0.5">
+          <span className="font-medium">Lv {row.level}</span>
+          <span className="opacity-40">·</span>
+          <span className="flex items-center gap-0.5"><ScrollText className="h-3 w-3" />{row.total_logs}</span>
+          <span className="opacity-40">·</span>
+          <span className="flex items-center gap-0.5"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        <img src={chalkBagImg} alt="" className="h-4 w-4" />
+        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{row.total_chalk_earned.toLocaleString()}</span>
+      </div>
+    </div>
+  );
+}
+
+
 
 function BackgroundOrbs() {
   return (

@@ -377,7 +377,10 @@ export function applyGlobalCss(config: CardLabConfig | null) {
     tag.id = GLOBAL_STYLE_ID;
     document.head.appendChild(tag);
   }
-  tag.textContent = buildCss(".rpg-panel", config);
+  // Also expose the card fill as the header (topbar) color so the sticky
+  // header matches the card background exactly.
+  const rootVars = `:root { --topbar-color: ${config.hue} ${config.sat}% ${config.light}%; --topbar-opacity: 1; }`;
+  tag.textContent = `${rootVars}\n${buildCss(".rpg-panel", config)}`;
 }
 
 export function loadSavedState(): { config: CardLabConfig; global: boolean } {

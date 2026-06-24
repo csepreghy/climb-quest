@@ -1,8 +1,9 @@
-export type ThreeDStyle = "flat" | "inset" | "raised" | "lithograph" | "relief";
+export type ThreeDStyle = "flat" | "inset" | "raised" | "lithograph" | "relief" | "button-bevel";
 export type EdgeStyle = "none" | "gold-top" | "gold-all" | "chiseled";
 export type BottomStyle = "none" | "solid" | "fade";
 export type BottomColorType = "gold" | "dark" | "custom";
 export type TexTint = "dark" | "gold";
+export type BevelLipColorType = "auto-dark" | "gold" | "custom";
 
 export interface CardLabConfig {
   hue: number;
@@ -15,13 +16,27 @@ export interface CardLabConfig {
   edge: EdgeStyle;
   bottom: BottomStyle;
   radius: number;         // px
-  // Bottom Border Customizations
+  // Bottom Border Customizations (::after strip)
   bottomHeight: number;   // 1..12 px
   bottomColorType: BottomColorType;
-  bottomHue: number;      // 0..360
-  bottomSat: number;      // 0..100
-  bottomLight: number;    // 0..100
-  bottomOpacity: number;  // 0..1
+  bottomHue: number;
+  bottomSat: number;
+  bottomLight: number;
+  bottomOpacity: number;
+  // Inner bevel lip — the button-style inset 3D bottom line
+  bevelLipEnabled: boolean;
+  bevelLipHeight: number;       // 1..8 px
+  bevelLipColorType: BevelLipColorType;
+  bevelLipHue: number;
+  bevelLipSat: number;
+  bevelLipLight: number;
+  bevelLipOpacity: number;      // 0..1
+  // Outer frame ring (like button's 2px frame)
+  frameRingEnabled: boolean;
+  frameRingWidth: number;       // 1..4
+  // Drop shadow (lift off background)
+  dropShadowEnabled: boolean;
+  dropShadowStrength: number;   // 0..1
 }
 
 export const DEFAULT_CONFIG: CardLabConfig = {
@@ -41,7 +56,19 @@ export const DEFAULT_CONFIG: CardLabConfig = {
   bottomSat: 85,
   bottomLight: 50,
   bottomOpacity: 1.0,
+  bevelLipEnabled: false,
+  bevelLipHeight: 3,
+  bevelLipColorType: "auto-dark",
+  bevelLipHue: 220,
+  bevelLipSat: 60,
+  bevelLipLight: 2,
+  bevelLipOpacity: 0.9,
+  frameRingEnabled: false,
+  frameRingWidth: 2,
+  dropShadowEnabled: true,
+  dropShadowStrength: 0.55,
 };
+
 
 export const PRESETS: Record<string, { label: string; config: CardLabConfig }> = {
   current: {

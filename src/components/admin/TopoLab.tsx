@@ -160,7 +160,7 @@ export function TopoLab() {
       </div>
 
       <div className="flex flex-wrap gap-2 pt-2">
-        <GameButton variant="gold" onClick={publish} disabled={saving}>
+        <GameButton variant="legendary" onClick={publish} disabled={saving}>
           {saving ? "Publishing…" : "Publish to all"}
         </GameButton>
         <Button variant="secondary" onClick={reset}>Reset to default</Button>

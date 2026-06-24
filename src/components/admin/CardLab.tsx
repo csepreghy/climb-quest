@@ -16,6 +16,7 @@ import {
   ThreeDStyle,
   EdgeStyle,
   BottomStyle,
+  BottomColorType,
   TexTint,
 } from "./cardLabPresets";
 import { toast } from "sonner";

@@ -1,33 +1,74 @@
 ## Goal
-Make the topographic background recede so it reads as ambience behind UI text, and add a subtle layered stone texture to the dark base — all pure canvas, no images.
+Re-tune the header, bottom nav, and container cards so they sit naturally on the cool dark stone background — cooler hue, faint gold accents, more translucency, and cards that feel carved *into* the surface rather than floating above it.
 
-## Changes to `src/components/TopographicBackground.tsx`
+## Token changes — `src/index.css`
 
-### 1. Calm the contours
-- **Iso-levels:** drop from 16 → 8.
-- **Line width:** 1.35px → 0.7px.
-- **Opacity:** stroke alpha ~`0.22 * levelAlpha` (was `0.8`). Hue stays gold (`hsl(45 85% 55%)`), slightly desaturated.
-- **Field range:** widen `levelMin/Max` to `0.28–0.78` so the remaining lines spread out instead of bunching.
+### Re-color the chrome (warm 20° → cool 220°)
+- `--background`: `20 14% 12%` → `220 25% 6%`
+- `--card`: `20 18% 10%` → `220 28% 5%`
+- `--popover`: same as card
+- `--secondary` / `--muted`: `20 14% 16%` → `220 18% 10%`
+- `--input`: `20 18% 12%` → `220 22% 8%`
+- `--border`: `20 30% 6%` → `220 35% 3%`
+- `--panel-frame`: `20 40% 4%` → `220 50% 2%`
+- `--panel-edge`: `20 20% 22%` → `220 18% 18%`
+- `--panel-fill`: `20 18% 10%` → `220 25% 6%`
+- `--panel-inset-light`: tint shifted to `220 25% 90%` (still mostly luminance)
+- `--panel-inset-dark`: `220 60% 1% / 0.9`
 
-### 2. Layered stone base (new render passes, before contours)
-- **Pass A — fine grain:** per-pixel monochrome noise written into an `ImageData` buffer at a downsampled resolution (e.g. 1/2 scale), then drawn back stretched. Luminance jitter ±4 around the base `hsl(220 35% 3%)`. Cheap, runs once on render/resize.
-- **Pass B — coarse mottling:** reuse the existing FBM field at low frequency, mapped to a very subtle lightness shift (±2%) drawn as a translucent fill grid. Gives the "weathered stone" blotchiness.
-- **Pass C — cracks:** a second high-frequency FBM thresholded to a thin band (e.g. `abs(n - 0.5) < 0.012`), stroked as 1px dark hairlines at `hsl(220 30% 1% / 0.55)`. Sparse, irregular, no marching squares needed — just pixel hits drawn as 1px rects.
-- **Vignette:** very faint dark radial overlay at the edges (`0 → 0.25` alpha) to anchor focus toward the center where UI sits.
+Primary/accent/legendary gold tokens **untouched** — gameplay color identity stays.
 
-### 3. Order of operations per `render()`
-1. Solid black fill
-2. Pass A (grain) → Pass B (mottle) → Pass C (cracks)
-3. Gold contours (dim, fewer)
-4. Vignette overlay
+### New gold trim token
+- Add `--gold-trim: 45 85% 55%;` (matches the contour hue).
+
+## Card style — `.rpg-panel` becomes an inset well
+
+Replace `--shadow-panel` so cards read as recessed rather than raised:
+
+```css
+--shadow-panel:
+  inset 0 0 0 1px hsl(var(--gold-trim) / 0.18),     /* hairline gold edge */
+  inset 0 2px 6px hsl(220 60% 1% / 0.7),            /* deep top shadow */
+  inset 0 -1px 0 hsl(var(--gold-trim) / 0.06),      /* faint bottom glint */
+  0 0 0 1px hsl(220 50% 2%),                        /* crisp outer line */
+  0 1px 0 hsl(220 20% 12% / 0.5);                   /* subtle outer highlight */
+```
+
+`.rpg-panel` background drops slightly *below* the page bg (`hsl(220 30% 4%)`) so the well reads as carved into the stone. Keep rivets but recolor to `hsl(220 14% 30%)`.
+
+`tile-3d` (inventory tiles) gets the same hue shift but **keeps its raised bevel** — those are loot icons, they should pop. Only colors change.
+
+## Header — `src/components/Layout.tsx`
+
+Current header:
+```
+background: hsl(var(--topbar-color, 210 25% 8%) / var(--topbar-opacity, 0.88))
+```
+
+Change to:
+- Default `--topbar-color` fallback → `220 30% 4%`
+- Default `--topbar-opacity` fallback → `0.55`
+- Bump `backdrop-blur-xl` → `backdrop-blur-2xl` for stronger blur
+- Replace bottom border with a 1px gold hairline: `border-b border-[hsl(var(--gold-trim)/0.25)]`
+- Shadow becomes a soft dark drop: `shadow-[0_8px_24px_-12px_hsl(0_0%_0%/0.8)]`
+
+## Bottom nav — `src/components/Layout.tsx`
+
+Currently `bg-background/90 backdrop-blur-xl border-t border-border`. Change to:
+- `bg-[hsl(220_30%_4%/0.55)] backdrop-blur-2xl`
+- `border-t border-[hsl(var(--gold-trim)/0.25)]`
+- Add subtle inner top highlight: `shadow-[inset_0_1px_0_hsl(var(--gold-trim)/0.08),0_-8px_24px_-12px_hsl(0_0%_0%/0.8)]`
 
 ## Files touched
-- `src/components/TopographicBackground.tsx` — only this file.
+- `src/index.css` — token recolors, gold-trim token, panel shadow rewrite
+- `src/components/Layout.tsx` — header + bottom nav classes
 
 ## Out of scope
-- No `index.css` or `Layout.tsx` changes.
-- No new assets, no fonts, no animation (still static).
+- Topographic background component — unchanged
+- Game color tokens (chalk, xp, boss, legendary, etc.) — unchanged
+- Page-level layouts, inventory tile bevel — unchanged
+- Light mode — project is dark-only
 
-## Risk / perf
-- All passes are O(pixels) once per render/resize. Grain pass uses a downsampled `ImageData` to keep it fast on 4K displays. No rAF loop.
-- If grain still feels too noisy, easy follow-up: lower its alpha or coarsen the downsample factor.
+## Risk
+- Many surfaces inherit from `--background`/`--card`/`--muted`; the hue shift will propagate site-wide. That's the intent, but a quick visual sweep of Inventory / Dashboard / Hangboard after the change is worth doing.
+- If the inset-well shadow feels too subtle on small cards, easy follow-up: increase the inset top-shadow blur to 8–10px.

@@ -425,7 +425,8 @@ function ShopDetailDialog({
             </span>
           </DialogTitle>
         </DialogHeader>
-        <div className="max-w-sm mx-auto w-full">
+        <div className="max-w-sm mx-auto w-full space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+          <EquippedComparison item={item} />
           {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
         </div>
         <DialogFooter className="gap-2 sm:gap-2 items-center sm:justify-between flex-wrap">

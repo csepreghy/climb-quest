@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GameCard } from "@/components/ui/game-card";
 import { GameButton } from "@/components/ui/game-button";
+import { TopographicBackground } from "@/components/TopographicBackground";
 import { toast } from "sonner";
 
 export default function Auth() {

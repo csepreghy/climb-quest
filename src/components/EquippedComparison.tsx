@@ -14,7 +14,7 @@ function bonuses(it: ShopItem) {
   };
 }
 
-export function EquippedComparison({ item }: { item: ShopItem }) {
+export function EquippedComparison({ item, className }: { item: ShopItem; className?: string }) {
   const s = useGame();
   const all = useAllItems();
   const equippedId = s.equipped[item.slot];
@@ -32,7 +32,7 @@ export function EquippedComparison({ item }: { item: ShopItem }) {
   ].filter((r) => r.from !== 0 || r.to !== 0);
 
   return (
-    <div className="space-y-2">
+    <div className={cn("space-y-2", className)}>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
         Currently equipped
       </div>

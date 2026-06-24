@@ -369,8 +369,8 @@ function ShopTile({
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 grid place-items-start justify-center p-3 overflow-y-auto">
           <div className="absolute inset-0 bg-black/75 animate-in fade-in duration-150" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-full max-w-[420px] my-auto space-y-3">
-            <EquippedComparison item={item} />
+          <div className="relative w-full max-w-[460px] my-auto space-y-3">
+            <EquippedComparison item={item} className="max-w-[340px] mx-auto w-full" />
             <div
               className={cn(
                 "relative w-full rounded-xl border-4 overflow-hidden bg-[hsl(var(--panel-fill))] animate-rarity-glow flex items-stretch",
@@ -379,7 +379,7 @@ function ShopTile({
               style={{ ["--glow-color" as string]: glowColor }}
             >
               {/* Edge-to-edge image */}
-              <div className="relative w-36 shrink-0 bg-black/40 self-stretch">
+              <div className="relative w-44 shrink-0 bg-black/40 self-stretch">
                 {renderImage()}
                 {locked && (
                   <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
@@ -433,7 +433,7 @@ function ShopDetailDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="w-full space-y-3 max-h-[70vh] overflow-y-auto pr-1">
-          <EquippedComparison item={item} />
+          <EquippedComparison item={item} className="max-w-[340px] mx-auto w-full" />
           {isBuddy ? <BuddyCard item={item} /> : <ItemCard item={item} />}
         </div>
         <DialogFooter className="gap-2 sm:gap-2 items-center sm:justify-between flex-wrap">

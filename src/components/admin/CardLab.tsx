@@ -99,9 +99,14 @@ export function CardLab() {
           <GameButton
             variant="success"
             size="sm"
-            onClick={() => {
+            onClick={async () => {
               setGlobal(true);
-              toast.success("Applied to all cards across the app");
+              try {
+                await saveRemoteConfig(config);
+                toast.success("Pushed to every visitor — they'll see this on next load");
+              } catch (e) {
+                toast.error("Couldn't save app-wide style (need admin)");
+              }
             }}
           >
             Apply to all cards
@@ -114,11 +119,12 @@ export function CardLab() {
           </GameButton>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Tweaks persist in your browser. Click <strong>Apply to all cards</strong> to push the
-          current look to every card in the app; toggle <strong>Live apply</strong> off to keep
-          changes scoped to this preview.
+          Local tweaks live in your browser. Click <strong>Apply to all cards</strong> to publish
+          the look to every visitor (admin only). Toggle <strong>Live apply</strong> off to keep
+          edits scoped to this preview.
         </p>
       </GameCard>
+
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,380px)_1fr]">
         {/* Controls */}

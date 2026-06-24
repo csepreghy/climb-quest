@@ -185,7 +185,11 @@ function ShopTile({
   }
 
   function handleTileClick() {
-    onClick();
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+      setMobileOpen(true);
+    } else {
+      onClick();
+    }
   }
 
   function buy() {
@@ -363,25 +367,28 @@ function ShopTile({
 
       {/* Mobile tap preview — edge-to-edge image left, details right (PickCard-style) */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-50 grid place-items-center p-3">
+        <div className="md:hidden fixed inset-0 z-50 grid place-items-start justify-center p-3 overflow-y-auto">
           <div className="absolute inset-0 bg-black/75 animate-in fade-in duration-150" onClick={() => setMobileOpen(false)} />
-          <div
-            className={cn(
-              "relative w-full max-w-[420px] rounded-xl border-4 overflow-hidden bg-[hsl(var(--panel-fill))] animate-rarity-glow flex items-stretch",
-              rarityBorder[item.rarity],
-            )}
-            style={{ ["--glow-color" as string]: glowColor }}
-          >
-            {/* Edge-to-edge image */}
-            <div className="relative w-36 shrink-0 bg-black/40 self-stretch">
-              {renderImage()}
-              {locked && (
-                <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
-                  <div className="flex flex-col items-center gap-1"><Lock className="h-5 w-5" /><span className="text-xs font-bold">Lv {item.levelReq}</span></div>
-                </div>
+          <div className="relative w-full max-w-[420px] my-auto space-y-3">
+            <EquippedComparison item={item} />
+            <div
+              className={cn(
+                "relative w-full rounded-xl border-4 overflow-hidden bg-[hsl(var(--panel-fill))] animate-rarity-glow flex items-stretch",
+                rarityBorder[item.rarity],
               )}
+              style={{ ["--glow-color" as string]: glowColor }}
+            >
+              {/* Edge-to-edge image */}
+              <div className="relative w-36 shrink-0 bg-black/40 self-stretch">
+                {renderImage()}
+                {locked && (
+                  <div className="absolute inset-0 bg-background/75 grid place-items-center text-muted-foreground">
+                    <div className="flex flex-col items-center gap-1"><Lock className="h-5 w-5" /><span className="text-xs font-bold">Lv {item.levelReq}</span></div>
+                  </div>
+                )}
+              </div>
+              <DetailsCol compact withBuy />
             </div>
-            <DetailsCol compact withBuy />
           </div>
         </div>
       )}

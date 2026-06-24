@@ -179,21 +179,28 @@ export function CardLab() {
                   suffix="px"
                 />
 
-                <div className="flex items-center justify-between rounded-md bg-secondary/30 px-3 py-2">
-                  <Label className="text-xs">Match bottom border color</Label>
-                  <Switch
-                    checked={config.linkLipToBottom}
-                    onCheckedChange={(v) => set("linkLipToBottom", v)}
-                  />
-                </div>
+                {config.bottom !== "none" && (
+                  <div className="flex items-center justify-between rounded-md bg-secondary/30 px-3 py-2">
+                    <Label className="text-xs">Match bottom border color</Label>
+                    <Switch
+                      checked={config.linkLipToBottom}
+                      onCheckedChange={(v) => set("linkLipToBottom", v)}
+                    />
+                  </div>
+                )}
 
-                {config.linkLipToBottom ? (
+                {config.bottom !== "none" && config.linkLipToBottom ? (
                   <p className="text-[11px] text-muted-foreground -mt-2">
                     Lip color is linked to the <strong>Bottom border</strong> color. Edit it there
                     and the lip follows.
                   </p>
                 ) : (
                   <>
+                    {config.bottom === "none" && (
+                      <p className="text-[11px] text-muted-foreground">
+                        No bottom border — editing the lip color directly.
+                      </p>
+                    )}
                     <RadioRow<"auto-dark" | "gold" | "custom">
                       label="Lip color"
                       value={config.bevelLipColorType}
@@ -217,6 +224,7 @@ export function CardLab() {
                     )}
                   </>
                 )}
+
 
                 <SliderRow
                   label="Lip opacity"

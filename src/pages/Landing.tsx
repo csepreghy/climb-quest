@@ -698,9 +698,9 @@ function LeaderboardPreviewRow({ row, rank }: { row: LbRow; rank: number }) {
         <div className="text-[11px] text-muted-foreground flex items-center gap-x-1.5 flex-wrap mt-0.5">
           <span className="font-medium">Lv {row.level}</span>
           <span className="opacity-40">·</span>
-          <span className="flex items-center gap-0.5"><ScrollIcon className="h-3 w-3" />{row.total_logs}</span>
+          <span className="flex items-center gap-0.5"><ScrollText className="h-3 w-3" />{row.total_logs}</span>
           <span className="opacity-40">·</span>
-          <span className="flex items-center gap-0.5"><SwordIcon className="h-3 w-3" />{row.bosses_sent}</span>
+          <span className="flex items-center gap-0.5"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
         </div>
       </div>
       <div className="flex items-center gap-1 shrink-0">

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Procedural topographic-contour background.
+ * Procedural topographic-contour background over a layered stone texture.
  * Pure CSS + Canvas (no images). Static by default; pass `animated` to
  * slowly evolve the noise field via requestAnimationFrame.
  */
@@ -23,7 +23,6 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
       let n = x * 374761393 + y * 668265263 + z * 1442695040;
       n = (n ^ (n >> 13)) * 1274126177;
       n = n ^ (n >> 16);
-      // map to [0,1)
       return ((n >>> 0) % 1_000_000) / 1_000_000;
     };
     const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -50,9 +49,9 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
       return lerp(y0, y1, w);
     };
 
-    const fbm = (x: number, y: number, z: number) => {
+    const fbm = (x: number, y: number, z: number, oct = 4) => {
       let amp = 0.5, freq = 1, sum = 0, norm = 0;
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < oct; i++) {
         sum += amp * vnoise(x * freq, y * freq, z * freq);
         norm += amp;
         amp *= 0.5;
@@ -72,44 +71,84 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
       canvas.style.height = h + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Solid dark base fill (no gradients).
-      ctx.fillStyle = "hsl(220 40% 1%)";
+      // 1. Solid near-black base
+      ctx.fillStyle = "hsl(220 35% 3%)";
       ctx.fillRect(0, 0, w, h);
 
-      // Sample the noise field on a coarse grid.
-      const cell = 5; // px per grid cell at CSS pixels
+      /* ---------- Pass A: fine monochrome grain ---------- */
+      // Render to a half-resolution offscreen ImageData, then scale up.
+      const gw = Math.max(1, Math.floor(w / 2));
+      const gh = Math.max(1, Math.floor(h / 2));
+      const grain = ctx.createImageData(gw, gh);
+      const gd = grain.data;
+      // Base luminance ~ hsl(220 35% 3%) → approx rgb(5, 6, 10)
+      const baseR = 5, baseG = 6, baseB = 10;
+      for (let i = 0; i < gd.length; i += 4) {
+        const j = (Math.random() - 0.5) * 8; // ±4 jitter
+        gd[i]     = Math.max(0, Math.min(255, baseR + j));
+        gd[i + 1] = Math.max(0, Math.min(255, baseG + j));
+        gd[i + 2] = Math.max(0, Math.min(255, baseB + j + (Math.random() - 0.5) * 2));
+        gd[i + 3] = 255;
+      }
+      // Blit via an offscreen canvas so we can scale.
+      const off = document.createElement("canvas");
+      off.width = gw; off.height = gh;
+      off.getContext("2d")!.putImageData(grain, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(off, 0, 0, w, h);
+
+      /* ---------- Field sampling for contours + mottle ---------- */
+      const cell = 5;
       const cols = Math.ceil(w / cell) + 1;
       const rows = Math.ceil(h / cell) + 1;
-      const scale = 0.0035; // noise frequency in world units per px
+      const scale = 0.0035;
       const field = new Float32Array(cols * rows);
-
-      // Corner bias: peaks in top-right and bottom-left, troughs in middle.
-      // Using two anisotropic gaussians.
-      const biasAt = (px: number, py: number) => {
-        const nx = px / w, ny = py / h;
-        const d1 = Math.hypot(nx - 0.92, ny - 0.08); // top-right
-        const d2 = Math.hypot(nx - 0.05, ny - 0.92); // bottom-left
-        const g1 = Math.exp(-(d1 * d1) / 0.18);
-        const g2 = Math.exp(-(d2 * d2) / 0.18);
-        return Math.max(g1, g2);
-      };
 
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
           const px = i * cell;
           const py = j * cell;
-          // Stretch the noise horizontally to get long flowing ridges.
           const n = fbm(px * scale * 0.55, py * scale * 1.4, zOffset);
           field[j * cols + i] = n;
         }
       }
 
-      // Marching squares for many iso-levels.
-      const LEVELS = 16;
-      const levelMin = 0.32;
-      const levelMax = 0.72;
+      /* ---------- Pass B: coarse mottle (very subtle lightness shifts) ---------- */
+      const mcell = 14;
+      for (let py = 0; py < h; py += mcell) {
+        for (let px = 0; px < w; px += mcell) {
+          const n = fbm(px * 0.0018, py * 0.0018, zOffset + 11.3, 3);
+          // Map to ~±3% lightness, very low alpha for subtlety
+          const shift = (n - 0.5) * 2; // -1..1
+          const a = 0.06 * Math.abs(shift);
+          if (shift >= 0) {
+            ctx.fillStyle = `hsl(220 25% 14% / ${a.toFixed(3)})`;
+          } else {
+            ctx.fillStyle = `hsl(220 50% 0% / ${(a * 1.2).toFixed(3)})`;
+          }
+          ctx.fillRect(px, py, mcell, mcell);
+        }
+      }
 
-      ctx.lineWidth = 1.35;
+      /* ---------- Pass C: sparse dark cracks ---------- */
+      // High-frequency FBM thresholded near 0.5 — produces irregular thin veins.
+      const ccell = 2;
+      ctx.fillStyle = "hsl(220 40% 1% / 0.6)";
+      for (let py = 0; py < h; py += ccell) {
+        for (let px = 0; px < w; px += ccell) {
+          const n = fbm(px * 0.012, py * 0.012, zOffset + 42.7, 3);
+          if (Math.abs(n - 0.5) < 0.012) {
+            ctx.fillRect(px, py, ccell, ccell);
+          }
+        }
+      }
+
+      /* ---------- Contours (dim, fewer) ---------- */
+      const LEVELS = 8;
+      const levelMin = 0.28;
+      const levelMax = 0.78;
+
+      ctx.lineWidth = 0.7;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
@@ -165,14 +204,17 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
 
         if (segCount === 0) continue;
 
-        // Alpha modulated globally per level: middle levels brighter.
         const levelAlpha = 0.6 + 0.4 * Math.sin(Math.PI * t);
-
-        ctx.strokeStyle = `hsl(45 98% 62% / ${0.8 * levelAlpha})`;
+        ctx.strokeStyle = `hsl(45 85% 55% / ${(0.22 * levelAlpha).toFixed(3)})`;
         ctx.stroke();
       }
 
-      // Removed corner glows to keep the background completely solid and flat.
+      /* ---------- Vignette ---------- */
+      const vg = ctx.createRadialGradient(w * 0.5, h * 0.5, Math.min(w, h) * 0.25, w * 0.5, h * 0.5, Math.hypot(w, h) * 0.6);
+      vg.addColorStop(0, "hsl(220 40% 1% / 0)");
+      vg.addColorStop(1, "hsl(220 40% 1% / 0.25)");
+      ctx.fillStyle = vg;
+      ctx.fillRect(0, 0, w, h);
     };
 
     const loop = () => {

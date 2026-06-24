@@ -168,7 +168,7 @@ export default function Inventory() {
           )}
         </GameCard>
 
-        <Card className="gradient-card p-4 space-y-3">
+        <GameCard className="p-4 space-y-3">
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Active bonuses</div>
             {totalBonusByActivity.length === 0 ? (

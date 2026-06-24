@@ -12,9 +12,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
-import { Plus, Minus, Upload, Trash2, Pencil, Copy, X, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive, Bell } from "lucide-react";
+import { Plus, Minus, Upload, Trash2, Pencil, Copy, X, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive, Bell, Sparkles } from "lucide-react";
 import { AdminNotificationsPanel } from "@/components/notifications/AdminNotificationsPanel";
 import { SnapshotsAdmin } from "@/components/admin/SnapshotsAdmin";
+import { CardLab } from "@/components/admin/CardLab";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useAllItems,
@@ -87,7 +88,7 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-3 sm:grid-cols-9 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-10 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
           {[
             { value: "general", label: "General", Icon: Settings },
             { value: "users", label: "Users", Icon: UsersIcon },
@@ -95,6 +96,7 @@ export default function Admin() {
             { value: "items", label: "Items", Icon: Package },
             { value: "gyms", label: "Gyms", Icon: MapPin },
             { value: "theme", label: "Theme", Icon: Palette },
+            { value: "card-lab", label: "Card Lab", Icon: Sparkles },
             { value: "notify", label: "Notify", Icon: Bell },
             { value: "feedback", label: "Feedback", Icon: MessageSquare },
             { value: "snapshots", label: "Snapshots", Icon: Archive },
@@ -240,6 +242,10 @@ export default function Admin() {
           <div className="rpg-panel p-5" style={{ background: "hsl(var(--panel-fill))" }}>
             <ThemeStudio />
           </div>
+        </TabsContent>
+
+        <TabsContent value="card-lab" className="mt-6">
+          <CardLab />
         </TabsContent>
 
         <TabsContent value="notify" className="space-y-6 mt-6">

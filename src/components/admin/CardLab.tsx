@@ -91,10 +91,20 @@ export function CardLab() {
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            <Label htmlFor="apply-global" className="text-sm">Apply globally</Label>
+            <Label htmlFor="apply-global" className="text-sm">Live apply</Label>
             <Switch id="apply-global" checked={global} onCheckedChange={setGlobal} />
           </div>
 
+          <GameButton
+            variant="success"
+            size="sm"
+            onClick={() => {
+              setGlobal(true);
+              toast.success("Applied to all cards across the app");
+            }}
+          >
+            Apply to all cards
+          </GameButton>
           <GameButton variant="ghost" size="sm" onClick={onReset}>
             <RotateCcw className="h-4 w-4" /> Reset
           </GameButton>
@@ -103,7 +113,9 @@ export function CardLab() {
           </GameButton>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Tweaks persist in your browser. "Apply globally" overrides every card in the app so you can browse around.
+          Tweaks persist in your browser. Click <strong>Apply to all cards</strong> to push the
+          current look to every card in the app; toggle <strong>Live apply</strong> off to keep
+          changes scoped to this preview.
         </p>
       </GameCard>
 

@@ -417,3 +417,60 @@ export function saveState(config: CardLabConfig, global: boolean) {
     localStorage.setItem(LS_KEY, JSON.stringify({ config, global }));
   } catch {}
 }
+
+// ---------------------------------------------------------------------------
+// Remote (app-wide) card style — stored in `card_lab_settings` so an admin's
+// changes apply for every visitor. We also cache the last fetched config in
+// localStorage and apply it synchronously on boot to avoid a flash of the
+// default look before the network fetch resolves.
+// ---------------------------------------------------------------------------
+
+export const REMOTE_CACHE_KEY = "cq.cardLab.remote.v1";
+
+export function applyCachedRemoteCss(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = localStorage.getItem(REMOTE_CACHE_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.config) return false;
+    const cfg = { ...DEFAULT_CONFIG, ...parsed.config } as CardLabConfig;
+    applyGlobalCss(cfg);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function fetchAndApplyRemoteCss(): Promise<void> {
+  try {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase
+      .from("card_lab_settings")
+      .select("config")
+      .eq("id", 1)
+      .maybeSingle();
+    if (error || !data?.config) return;
+    const cfg = { ...DEFAULT_CONFIG, ...(data.config as Partial<CardLabConfig>) } as CardLabConfig;
+    applyGlobalCss(cfg);
+    try {
+      localStorage.setItem(REMOTE_CACHE_KEY, JSON.stringify({ config: cfg }));
+    } catch {}
+  } catch {
+    /* ignore */
+  }
+}
+
+export async function saveRemoteConfig(config: CardLabConfig): Promise<void> {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data: userData } = await supabase.auth.getUser();
+  const { error } = await supabase
+    .from("card_lab_settings")
+    .upsert({ id: 1, config: JSON.parse(JSON.stringify(config)), updated_by: userData.user?.id ?? null, updated_at: new Date().toISOString() }, { onConflict: "id" });
+  if (error) throw error;
+  try {
+    localStorage.setItem(REMOTE_CACHE_KEY, JSON.stringify({ config }));
+  } catch {}
+  applyGlobalCss(config);
+}
+

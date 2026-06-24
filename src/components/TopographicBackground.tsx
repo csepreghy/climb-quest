@@ -72,11 +72,8 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
       canvas.style.height = h + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Base darker fill with a subtle radial blue-black vignette.
-      const baseGrad = ctx.createRadialGradient(w * 0.5, h * 0.5, 0, w * 0.5, h * 0.5, Math.hypot(w, h) * 0.6);
-      baseGrad.addColorStop(0, "hsl(220 30% 2.5%)");
-      baseGrad.addColorStop(1, "hsl(220 40% 1%)");
-      ctx.fillStyle = baseGrad;
+      // Solid dark base fill (no gradients).
+      ctx.fillStyle = "hsl(220 40% 1%)";
       ctx.fillRect(0, 0, w, h);
 
       // Sample the noise field on a coarse grid.
@@ -184,15 +181,6 @@ export function TopographicBackground({ animated = false }: { animated?: boolean
         ctx.stroke();
         ctx.restore();
       }
-
-      // Overlay: darken middle slightly less so gold lines are more obvious, preserve corners — multiplies down everything
-      // (including the gold strokes) so corners visually dominate, but keeps lines highly visible.
-      const overlay = ctx.createRadialGradient(w * 0.5, h * 0.55, Math.min(w, h) * 0.1, w * 0.5, h * 0.55, Math.hypot(w, h) * 0.7);
-      overlay.addColorStop(0, "hsl(220 40% 1% / 0.82)");
-      overlay.addColorStop(0.55, "hsl(220 40% 1% / 0.45)");
-      overlay.addColorStop(1, "hsl(220 40% 1% / 0)");
-      ctx.fillStyle = overlay;
-      ctx.fillRect(0, 0, w, h);
 
       // Subtle warm corner glows to sell the gold-rich corners.
       const glow = (cx: number, cy: number) => {

@@ -244,6 +244,10 @@ export default function Admin() {
           </div>
         </TabsContent>
 
+        <TabsContent value="card-lab" className="mt-6">
+          <CardLab />
+        </TabsContent>
+
         <TabsContent value="notify" className="space-y-6 mt-6">
           <AdminNotificationsPanel />
         </TabsContent>

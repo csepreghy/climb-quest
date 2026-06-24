@@ -466,7 +466,7 @@ export async function saveRemoteConfig(config: CardLabConfig): Promise<void> {
   const { data: userData } = await supabase.auth.getUser();
   const { error } = await supabase
     .from("card_lab_settings")
-    .upsert({ id: 1, config: config as unknown as Record<string, unknown>, updated_by: userData.user?.id ?? null, updated_at: new Date().toISOString() }, { onConflict: "id" });
+    .upsert({ id: 1, config: JSON.parse(JSON.stringify(config)), updated_by: userData.user?.id ?? null, updated_at: new Date().toISOString() }, { onConflict: "id" });
   if (error) throw error;
   try {
     localStorage.setItem(REMOTE_CACHE_KEY, JSON.stringify({ config }));

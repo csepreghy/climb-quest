@@ -264,6 +264,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
     for (const l of logs) {
       const t = new Date(l.date).getTime();
       if (t < cutoff) continue;
+      if (l.isBoss && l.attemptType !== "send" && l.attemptType !== "flash") continue;
       const label = l.gradeMax || l.grade;
       if (!label) continue;
       const gym = l.gymId ? findGym(l.gymId) : null;

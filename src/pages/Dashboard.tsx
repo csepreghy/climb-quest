@@ -249,7 +249,7 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
   );
 }
 
-export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
+export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string; isBoss?: boolean; attemptType?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
   // Fall back to all known public gyms when a log's gym isn't in the passed list
   // (e.g. when viewing another climber's chart on the leaderboard).
   const pub = usePublicGyms();

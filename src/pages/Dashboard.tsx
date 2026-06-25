@@ -325,7 +325,8 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
       if (idx < 0) continue;
       weeks[idx].chalk += l.chalkTotal;
       const gLabel = l.gradeMax || l.grade;
-      if (gLabel) {
+      const countsForGrade = !l.isBoss || l.attemptType === "send" || l.attemptType === "flash";
+      if (gLabel && countsForGrade) {
         let rank: number;
         const i = upperLabels.indexOf(gLabel.toUpperCase());
         if (i >= 0) rank = i;

@@ -249,7 +249,7 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
   );
 }
 
-export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
+export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string; isBoss?: boolean; attemptType?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
   // Fall back to all known public gyms when a log's gym isn't in the passed list
   // (e.g. when viewing another climber's chart on the leaderboard).
   const pub = usePublicGyms();
@@ -264,6 +264,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
     for (const l of logs) {
       const t = new Date(l.date).getTime();
       if (t < cutoff) continue;
+      if (l.isBoss && l.attemptType !== "send" && l.attemptType !== "flash") continue;
       const label = l.gradeMax || l.grade;
       if (!label) continue;
       const gym = l.gymId ? findGym(l.gymId) : null;
@@ -325,7 +326,8 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
       if (idx < 0) continue;
       weeks[idx].chalk += l.chalkTotal;
       const gLabel = l.gradeMax || l.grade;
-      if (gLabel) {
+      const countsForGrade = !l.isBoss || l.attemptType === "send" || l.attemptType === "flash";
+      if (gLabel && countsForGrade) {
         let rank: number;
         const i = upperLabels.indexOf(gLabel.toUpperCase());
         if (i >= 0) rank = i;

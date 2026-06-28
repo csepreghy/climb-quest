@@ -6,6 +6,7 @@ import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 import { GameButton } from "@/components/ui/game-button";
 import { cn } from "@/lib/utils";
 import { Check, Trash2 } from "lucide-react";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 /**
  * Super-compact inventory tile with the same hover/tap preview pattern as the

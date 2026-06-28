@@ -83,9 +83,6 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
   }, [open, editLog, initialMode]);
 
   function openBossFlow() {
-    if (hasBossSendOnDate(new Date().toISOString())) {
-      toast.error("You seem to have defeated more than one boss in a single day, are you sure both were worthy of bosses?");
-    }
     // Auto-resolve any expired bosses up-front so the user sees current state.
     const expired = expireOverdueBosses();
     if (expired.length > 0) {

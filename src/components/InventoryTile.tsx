@@ -20,12 +20,16 @@ export function InventoryTile({
   equipped,
   primed,
   onRemove,
+  onSell,
+  sellPrice,
 }: {
   item: ShopItem;
   onClick?: () => void;
   equipped?: boolean;
   primed?: boolean;
   onRemove?: () => void;
+  onSell?: () => void;
+  sellPrice?: number;
 }) {
   const tileRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);

@@ -344,12 +344,15 @@ export default function Inventory() {
                   >
                     {groupItems.map(it => {
                       const isPrimed = !!it.consumableBonus && s.pendingConsumable === it.id;
+                      const refund = Math.floor((it.price ?? 0) / 2);
                       return (
                         <InventoryTile
                           key={it.id}
                           item={it}
                           primed={isPrimed}
                           onClick={() => setCompareItem(it)}
+                          onSell={refund > 0 && !isPrimed ? () => setSellTarget(it) : undefined}
+                          sellPrice={refund}
                         />
                       );
                     })}

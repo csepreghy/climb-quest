@@ -156,6 +156,12 @@ export function InventoryTile({
               <Trash2 className="h-4 w-4" />
             </button>
           )}
+          {onSell && typeof sellPrice === "number" && sellPrice > 0 && (
+            <GameButton variant="secondary" size="sm" onClick={() => { setMobileOpen(false); onSell(); }} title="Sell for half price">
+              <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain" />
+              Sell · {sellPrice.toLocaleString()}
+            </GameButton>
+          )}
           <GameButton variant="primary" size="sm" onClick={() => { setMobileOpen(false); onClick?.(); }} className="px-6">
             {equipped ? "Manage" : "Equip"}
           </GameButton>

@@ -6,6 +6,7 @@ import { ChalkBagLoader } from "@/components/ChalkBagLoader";
 import { GameButton } from "@/components/ui/game-button";
 import { cn } from "@/lib/utils";
 import { Check, Trash2 } from "lucide-react";
+import chalkBagImg from "@/assets/chalk-bag.png";
 
 /**
  * Super-compact inventory tile with the same hover/tap preview pattern as the
@@ -19,12 +20,16 @@ export function InventoryTile({
   equipped,
   primed,
   onRemove,
+  onSell,
+  sellPrice,
 }: {
   item: ShopItem;
   onClick?: () => void;
   equipped?: boolean;
   primed?: boolean;
   onRemove?: () => void;
+  onSell?: () => void;
+  sellPrice?: number;
 }) {
   const tileRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -150,6 +155,12 @@ export function InventoryTile({
             >
               <Trash2 className="h-4 w-4" />
             </button>
+          )}
+          {onSell && typeof sellPrice === "number" && sellPrice > 0 && (
+            <GameButton variant="secondary" size="sm" onClick={() => { setMobileOpen(false); onSell(); }} title="Sell for half price">
+              <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain" />
+              Sell · {sellPrice.toLocaleString()}
+            </GameButton>
           )}
           <GameButton variant="primary" size="sm" onClick={() => { setMobileOpen(false); onClick?.(); }} className="px-6">
             {equipped ? "Manage" : "Equip"}

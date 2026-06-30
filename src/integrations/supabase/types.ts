@@ -697,6 +697,7 @@ export type Database = {
       get_leaderboard: {
         Args: never
         Returns: {
+          board_sessions: number
           bosses_sent: number
           character_name: string
           equipped: Json

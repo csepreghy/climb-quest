@@ -30,6 +30,8 @@ export default function BoulderLogs() {
   const [editLog, setEditLog] = useState<BoulderLog | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteStrengthId, setDeleteStrengthId] = useState<string | null>(null);
+  const [deleteBoardId, setDeleteBoardId] = useState<string | null>(null);
+  const { sessions: boardSessions, refresh: refreshBoards } = useBoardSessions();
   const [entryFilter, setEntryFilter] = useState<EntryFilter>("all");
   const [grade, setGrade] = useState<string>("all");
   const [gymId, setGymId] = useState<string>("all");

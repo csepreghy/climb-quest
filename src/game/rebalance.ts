@@ -29,6 +29,8 @@ const SLOT_SHARE: Record<Slot, number> = {
   buddy: 1.0,
   // legacy slots (kept equipable for back-compat)
   aura: 0.6, title: 0.4,
+  // board (1 slot) — meaningful share
+  board: 1.0,
 };
 
 /** Sum of shares for an endgame loadout = 5×0.4 + 3×1.0 + 1×2.0 = 7.0
@@ -69,7 +71,7 @@ const EPIC_LEAN: Record<Slot, "crit" | "boss"> = {
   // boss-leaning (big-effort / power slots)
   powerup: "boss", outfit: "boss", bottoms: "boss", shoes: "boss", title: "boss",
   // buddy — perks not yet implemented; default lean (effects gated off in effectAllowed)
-  buddy: "boss",
+  buddy: "boss", board: "crit",
 };
 
 /** Per-rarity crit chance contributed by one item. */

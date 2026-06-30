@@ -23,6 +23,7 @@ const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
   { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk", "Study"] },
   { key: "power",  label: "Power-ups", categories: [] },
+  { key: "board",  label: "Board",     categories: [] },
   { key: "buddy",  label: "Climbing Buddies", categories: [] },
 ];
 
@@ -116,7 +117,7 @@ function ShopTile({
   item: ShopItem; owned: boolean; chalk: number; level: number;
   state: ReturnType<typeof useGame>; ignoreLevelReq: boolean; onClick: () => void;
 }) {
-  const locked = !ignoreLevelReq && !!(item.levelReq && level < item.levelReq);
+  const locked = false; // level requirements removed
   const price = effectivePrice(state, item.price);
   const canAfford = chalk >= price;
   const isConsumable = !!item.consumableBonus;
@@ -403,7 +404,7 @@ function ShopDetailDialog({
   state: ReturnType<typeof useGame>; ignoreLevelReq: boolean;
 }) {
   if (!item) return null;
-  const locked = !ignoreLevelReq && !!(item.levelReq && level < item.levelReq);
+  const locked = false;
   const price = effectivePrice(state, item.price);
   const canAfford = chalk >= price;
   const isConsumable = !!item.consumableBonus;

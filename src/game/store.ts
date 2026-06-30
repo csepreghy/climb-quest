@@ -1172,7 +1172,7 @@ function levelBadges(lvl: number): string[] {
 export function buyItem(id: string): { ok: boolean; reason?: string } {
   const item = getItem(id);
   if (!item) return { ok: false, reason: "Unknown item" };
-  if (!state.ignoreLevelReq && item.levelReq && state.level < item.levelReq) return { ok: false, reason: `Requires Level ${item.levelReq}` };
+  // Level requirements removed — anyone with enough chalk can buy.
   if (!item.consumableBonus && state.owned.includes(id)) return { ok: false, reason: "Already owned" };
   const price = effectivePrice(state, item.price);
   if (state.chalk < price) return { ok: false, reason: "Not enough Chalk" };

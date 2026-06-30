@@ -52,18 +52,21 @@ const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [
   { value: "gear", label: "Gear" },
   { value: "power", label: "Power-ups" },
   { value: "buddy", label: "Climbing Buddies" },
+  { value: "board", label: "Board" },
 ];
 const CATEGORIES_BY_GROUP: Record<ItemGroup, ShopItem["category"][]> = {
   outfit: ["Top", "Pants", "Shoes", "Hat", "Hand"],
   gear: ["Brushes", "Chalk", "Study"],
   power: ["Power-up"],
   buddy: ["Buddy"],
+  board: ["Board"],
 };
 const CATEGORY_TO_SLOT: Record<string, Slot> = {
   Top: "outfit", Pants: "bottoms", Shoes: "shoes", Hat: "hat", Hand: "hand",
   Brushes: "accessory", Chalk: "chalk", Study: "study",
   "Power-up": "powerup",
   Buddy: "buddy",
+  Board: "board",
   Accessories: "powerup", Auras: "powerup", Titles: "powerup", Consumables: "powerup",
 };
 
@@ -211,15 +214,6 @@ export default function Admin() {
                 <Minus className="h-4 w-4" /> Level Down
               </Button>
             </div>
-            <label className="flex items-center gap-2 mt-4 text-sm cursor-pointer select-none">
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-[hsl(var(--btn-orange))]"
-                checked={!!s.ignoreLevelReq}
-                onChange={e => { adminSetIgnoreLevelReq(e.target.checked); toast.info(e.target.checked ? "Level requirements disabled" : "Level requirements enabled"); }}
-              />
-              <span>Ignore level requirements (shop)</span>
-            </label>
           </GameCard>
         </TabsContent>
 
@@ -736,20 +730,6 @@ function InventoryAdmin() {
                 <Input type="number" min={0} value={draft.bonusPct} onChange={e => setDraft(d => ({ ...d, bonusPct: parseInt(e.target.value) || 0 }))} />
               </div>
             )}
-            <div>
-              <Label className="text-xs">Level requirement</Label>
-              <Input
-                type="number"
-                min={1}
-                max={10}
-                placeholder="None"
-                value={draft.levelReq ?? ""}
-                onChange={e => {
-                  const v = e.target.value;
-                  setDraft(d => ({ ...d, levelReq: v === "" ? undefined : Math.max(1, parseInt(v) || 1) }));
-                }}
-              />
-            </div>
             {effectAllowed(draft.group, draft.rarity, "discount") && (
               <div>
                 <Label className="text-xs">Shop discount %</Label>

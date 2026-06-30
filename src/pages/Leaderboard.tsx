@@ -50,9 +50,10 @@ const SLOT_LABEL: Record<Slot, string> = {
   title: "Title",
   powerup: "Power-up",
   buddy: "Buddy",
+  board: "Board",
 };
 
-const SLOT_ORDER: Slot[] = ["outfit", "bottoms", "shoes", "hat", "hand", "chalk", "accessory", "aura", "buddy", "title", "study", "powerup"];
+const SLOT_ORDER: Slot[] = ["outfit", "bottoms", "shoes", "hat", "hand", "chalk", "accessory", "aura", "buddy", "title", "study", "powerup", "board"];
 
 function rarestItems(ownedIds: string[], lookup: Map<string, ShopItem>, count = 5): ShopItem[] {
   const items = ownedIds.map(id => lookup.get(id)).filter(Boolean) as ShopItem[];

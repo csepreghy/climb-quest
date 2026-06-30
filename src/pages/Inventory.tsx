@@ -224,7 +224,7 @@ export default function Inventory() {
         {/* EQUIPPED */}
         <section className="space-y-4">
           <div className="menu-label">Equipped</div>
-          {(["outfit", "gear", "power", "buddy"] as ItemGroup[]).map(group => {
+          {(["outfit", "gear", "power", "buddy", "board"] as ItemGroup[]).map(group => {
             if (group === "buddy") {
               const buddyId = s.equipped.buddy;
               const buddy = buddyId ? getItem(buddyId) : null;

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { computeChalk, scaledActivityReward, awardChalk } from "@/game/store";
+import { computeChalk, scaledActivityReward, awardChalk, applyBoardBonus } from "@/game/store";
 import type { BoardSessionRow, BoardType, MoonboardVariantId } from "./types";
 import { DEFAULT_KILTER_ANGLES } from "./types";
 import { gradeRank, type BoardGradeSystem } from "./grades";

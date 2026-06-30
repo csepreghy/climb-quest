@@ -31,7 +31,8 @@ export function ItemCard({
   onSell?: () => void;
   sellPrice?: number;
 }) {
-  const tone = item.rarity === "legendary" ? "legendary" : item.rarity === "rare" ? "rare" : "default";
+  const isHighRarity = item.rarity === "legendary" || item.rarity === "mythic";
+  const tone = isHighRarity ? "legendary" : item.rarity === "rare" ? "rare" : "default";
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
   const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
   const chalkPct = bonusPct || consumablePct;
@@ -46,7 +47,7 @@ export function ItemCard({
   return (
     <GameCard
       tone={tone as "default"}
-      shimmer={item.rarity === "legendary"}
+      shimmer={isHighRarity}
       interactive={!!onClick}
       className={cn("p-4 flex flex-col gap-3 relative overflow-hidden", onClick && "cursor-pointer", highlight && "ring-2 ring-[hsl(var(--btn-orange))]/60")}
       onClick={onClick}

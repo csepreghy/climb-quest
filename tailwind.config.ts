@@ -30,6 +30,7 @@ export default {
         chalk: { DEFAULT: "hsl(var(--chalk))", glow: "hsl(var(--chalk-glow))" },
         xp: "hsl(var(--xp))",
         boss: "hsl(var(--boss))",
+        mythic: "hsl(var(--mythic))",
         legendary: "hsl(var(--legendary))",
         epic: "hsl(var(--epic))",
         uncommon: "hsl(var(--uncommon))",

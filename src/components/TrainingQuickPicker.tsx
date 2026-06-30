@@ -39,13 +39,13 @@ export function TrainingQuickPicker({
   return (
     <div className={cn("grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 lg:w-[300px]", className)}>
       {TILES.map(t => (
-        <button
+      <button
           key={t.key}
           type="button"
           onClick={() => handle(t)}
           className={cn(
             "tile-3d group relative overflow-hidden cursor-pointer",
-            "aspect-square w-full hover:-translate-y-0.5 transition active:translate-y-[2px]",
+            "aspect-[4/5] w-full hover:-translate-y-0.5 transition active:translate-y-[2px]",
           )}
           aria-label={`Log ${t.label}`}
         >

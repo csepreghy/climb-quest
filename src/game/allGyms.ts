@@ -9,12 +9,11 @@ export interface AllGymsState extends Omit<GymState, "gyms"> {
   gyms: GymWithSource[];
 }
 
-export function useAllGyms(): AllGymsState {
-  const local = useGyms();
-  const pub = usePublicGyms();
+
+function combine(local: GymState, pub: ReturnType<typeof usePublicGyms>, includeAllPublic: boolean): AllGymsState {
   const localIds = new Set(local.gyms.map(g => g.id));
   const addedPublic = pub.gyms
-    .filter(g => local.addedPublicGymIds.includes(g.id) && !localIds.has(g.id))
+    .filter(g => (includeAllPublic || local.addedPublicGymIds.includes(g.id)) && !localIds.has(g.id))
     .map<GymWithSource>(g => ({ ...g, isPublic: true }));
   const gyms: GymWithSource[] = [...local.gyms, ...addedPublic];
 
@@ -32,4 +31,14 @@ export function useAllGyms(): AllGymsState {
     lastUsedGymId: local.lastUsedGymId,
     addedPublicGymIds: local.addedPublicGymIds,
   };
+}
+
+export function useAllGyms(): AllGymsState {
+  return combine(useGyms(), usePublicGyms(), false);
+}
+
+/** Like useAllGyms, but also surfaces every public gym so users can log climbs
+ *  at gyms they haven't added to their personal list. Use only in logging UIs. */
+export function useAllGymsForLogging(): AllGymsState {
+  return combine(useGyms(), usePublicGyms(), true);
 }

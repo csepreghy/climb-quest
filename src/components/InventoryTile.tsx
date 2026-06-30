@@ -41,17 +41,20 @@ export function InventoryTile({
   const discountPct = item.priceMult && item.priceMult < 1 ? Math.round((1 - item.priceMult) * 100) : 0;
   const critPct = item.critChancePct ? Math.round(item.critChancePct) : 0;
   const bossPct = item.bossBonusPct ? Math.round(item.bossBonusPct) : 0;
+  const boardPct = item.boardBonusPct ? Math.round(item.boardBonusPct) : 0;
   const badges: { text: string; cls: string }[] = [];
   if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/90 text-background border-chalk-glow" });
   if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/90 text-background border-[hsl(var(--btn-orange))]" });
   if (critPct > 0) badges.push({ text: `+${critPct}%`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}%`, cls: "bg-legendary/90 text-background border-legendary" });
+  if (boardPct > 0) badges.push({ text: `+${boardPct}%`, cls: "bg-[hsl(var(--board-bonus))]/90 text-background border-[hsl(var(--board-bonus))]" });
 
   const bonusRows: { label: string; value: string; cls: string }[] = [];
   if (chalkPct > 0) bonusRows.push({ label: "Chalk Bonus", value: `+${chalkPct}%`, cls: "text-chalk-glow" });
   if (discountPct > 0) bonusRows.push({ label: "Shop Discount", value: `−${discountPct}%`, cls: "text-[hsl(var(--btn-orange))]" });
   if (critPct > 0) bonusRows.push({ label: "Critical Chance", value: `+${critPct}%`, cls: "text-[hsl(var(--epic))]" });
   if (bossPct > 0) bonusRows.push({ label: "Boss Bonus", value: `+${bossPct}%`, cls: "text-legendary" });
+  if (boardPct > 0) bonusRows.push({ label: "Board Bonus", value: `+${boardPct}%`, cls: "text-[hsl(var(--board-bonus))]" });
 
   const rarityHsl: Record<string, string> = {
     common: "hsl(0 0% 100% / 0.85)",

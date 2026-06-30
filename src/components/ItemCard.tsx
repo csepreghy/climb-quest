@@ -39,11 +39,13 @@ export function ItemCard({
   const discountPct = item.priceMult && item.priceMult < 1 ? Math.round((1 - item.priceMult) * 100) : 0;
   const critPct = item.critChancePct ? Math.round(item.critChancePct) : 0;
   const bossPct = item.bossBonusPct ? Math.round(item.bossBonusPct) : 0;
+  const boardPct = item.boardBonusPct ? Math.round(item.boardBonusPct) : 0;
   const badges: { text: string; cls: string }[] = [];
   if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/15 text-chalk-glow border-chalk-glow/40" });
   if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/15 text-[hsl(var(--btn-orange))] border-[hsl(var(--btn-orange))]/40" });
   if (critPct > 0) badges.push({ text: `${critPct}% crit`, cls: "bg-[hsl(var(--epic))]/15 text-[hsl(var(--epic))] border-[hsl(var(--epic))]/50" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}% boss`, cls: "bg-legendary/15 text-legendary border-legendary/40" });
+  if (boardPct > 0) badges.push({ text: `+${boardPct}% board`, cls: "bg-[hsl(var(--board-bonus))]/15 text-[hsl(var(--board-bonus))] border-[hsl(var(--board-bonus))]/45" });
   return (
     <GameCard
       tone={tone as "default"}

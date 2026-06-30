@@ -1,0 +1,1 @@
+ALTER TABLE public.shop_items ADD COLUMN IF NOT EXISTS board_bonus_pct numeric NOT NULL DEFAULT 0;

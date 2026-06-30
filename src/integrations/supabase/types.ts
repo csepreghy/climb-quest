@@ -490,6 +490,7 @@ export type Database = {
       shop_items: {
         Row: {
           applies_to: Json
+          board_bonus_pct: number
           bonus_pct: number
           boss_bonus_pct: number
           category: string
@@ -509,6 +510,7 @@ export type Database = {
         }
         Insert: {
           applies_to?: Json
+          board_bonus_pct?: number
           bonus_pct?: number
           boss_bonus_pct?: number
           category: string
@@ -528,6 +530,7 @@ export type Database = {
         }
         Update: {
           applies_to?: Json
+          board_bonus_pct?: number
           bonus_pct?: number
           boss_bonus_pct?: number
           category?: string

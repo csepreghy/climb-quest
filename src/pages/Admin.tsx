@@ -551,6 +551,7 @@ const empty: CustomItemInput = {
   discountPct: 0,
   critChancePct: 0,
   bossBonusPct: 0,
+  boardBonusPct: 0,
 };
 
 function InventoryAdmin() {
@@ -604,6 +605,7 @@ function InventoryAdmin() {
       discountPct: item.priceMult ? Math.round((1 - item.priceMult) * 100) : 0,
       critChancePct: item.critChancePct ?? 0,
       bossBonusPct: item.bossBonusPct ?? 0,
+      boardBonusPct: item.boardBonusPct ?? 0,
       gender: item.gender ?? "unisex",
     };
   }
@@ -764,6 +766,16 @@ function InventoryAdmin() {
                 onChange={e => setDraft(d => ({ ...d, bossBonusPct: Math.max(0, parseInt(e.target.value) || 0) }))}
               />
               <p className="text-[10px] text-muted-foreground mt-1">Extra % chalk on boss attempts and sends. Sums across equipped items.</p>
+            </div>
+            <div>
+              <Label className="text-xs">Board bonus %</Label>
+              <Input
+                type="number"
+                min={0}
+                value={draft.boardBonusPct ?? 0}
+                onChange={e => setDraft(d => ({ ...d, boardBonusPct: Math.max(0, parseInt(e.target.value) || 0) }))}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">Extra % chalk on board sessions only. Sums across equipped items.</p>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ import { GameButton } from "@/components/ui/game-button";
 import { ActivityType, BASE_CHALK, STYLES, Style } from "@/game/data";
 import { computeChalk, logBoulder, updateLog, AttemptType, useGame, ChalkBreakdown, BoulderLog, playerCeiling, hasBossSendOnDate, logStrength, StrengthWorkout, StrengthSet, strengthLevelMult, strengthBossTargetReps, logStrengthBossRep, getStrengthBossProgress, STRENGTH_BOSS_TARGET, strengthBossTarget, setStrengthLevel, maxStrengthLevel, strengthKey, Boss, activeBossProjects, createBossProject, markBossSent, admitBossDefeat, expireOverdueBosses, MAX_ACTIVE_BOSSES, BOSS_DEADLINE_DAYS, BOSS_DEFEAT_PENALTY, bossExpiresAt, logStrengthHold, getHoldRecord, isHoldExercise, HOLD_BOSS_TARGET_SECONDS } from "@/game/store";
 import { setLastUsedGym, gradeLabels, gradeToVRank, difficultyMultiplier, resolveGymGradingSystems } from "@/game/gyms";
-import { useAllGyms as useGyms } from "@/game/allGyms";
+import { useAllGymsForLogging as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Info, Swords, Trophy, Dumbbell, Timer, ChevronDown, Skull, Plus, Clock, Flag } from "lucide-react";

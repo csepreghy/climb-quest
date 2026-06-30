@@ -36,6 +36,7 @@ const SLOT_LABEL: Record<Slot, string> = {
   title: "Title",
   powerup: "Power-up",
   buddy: "Climbing Buddy",
+  board: "Board",
 };
 
 const GROUP_LABEL: Record<ItemGroup, string> = {
@@ -43,6 +44,7 @@ const GROUP_LABEL: Record<ItemGroup, string> = {
   gear: "Gear",
   power: "Power-ups",
   buddy: "Climbing Buddy",
+  board: "Board",
 };
 
 const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
@@ -50,6 +52,7 @@ const GROUP_SLOTS: Record<ItemGroup, Slot[]> = {
   gear: GEAR_SLOTS,
   power: ["powerup"],
   buddy: ["buddy"],
+  board: ["board"],
 };
 
 function EmptySlotCard({ label, onClick }: { label: string; onClick?: () => void }) {

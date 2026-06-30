@@ -213,7 +213,7 @@ export default function Dashboard() {
                     <div className="text-sm font-medium truncate flex items-center gap-1.5">
                       {b.grade}
                       {b.is_flash && <span className="text-[10px] px-1.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] font-bold uppercase">Flash</span>}
-                      {b.is_benchmark && <span className="text-[10px] px-1.5 rounded bg-[hsl(var(--legendary))]/20 text-[hsl(var(--legendary))] font-bold uppercase">Bench</span>}
+                      {b.is_benchmark && <span className="text-[10px] px-1.5 rounded bg-[hsl(var(--legendary))]/20 text-[hsl(var(--legendary))] font-bold uppercase">Benchmark</span>}
                       {b.problem_name && <span className="text-muted-foreground font-normal truncate">· {b.problem_name}</span>}
                     </div>
                     <div className="text-xs text-muted-foreground">

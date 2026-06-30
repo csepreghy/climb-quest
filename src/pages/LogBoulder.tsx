@@ -15,7 +15,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import Hangboard from "@/pages/Hangboard";
 import { useBoardSessions, deleteBoardSession } from "@/game/board/store";
-import { boardLabel } from "@/game/board/types";
+import { boardLabel, type BoardSessionRow } from "@/game/board/types";
+import { gradeRank } from "@/game/board/grades";
+import moonboardAsset from "@/assets/board-moonboard.png.asset.json";
+import kilterAsset from "@/assets/board-kilter.png.asset.json";
 
 type EntryFilter = "all" | "boulder" | "boss";
 type Tab = "boulders" | "strength" | "hangboard" | "board";
@@ -31,6 +34,7 @@ export default function BoulderLogs() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteStrengthId, setDeleteStrengthId] = useState<string | null>(null);
   const [deleteBoardId, setDeleteBoardId] = useState<string | null>(null);
+  const [editBoardSession, setEditBoardSession] = useState<BoardSessionRow | null>(null);
   const { sessions: boardSessions, refresh: refreshBoards } = useBoardSessions();
   const [entryFilter, setEntryFilter] = useState<EntryFilter>("all");
   const [grade, setGrade] = useState<string>("all");
@@ -64,8 +68,9 @@ export default function BoulderLogs() {
     <div className="space-y-5 animate-float-up">
       <LogModal
         open={open}
-        onOpenChange={(v) => { setOpen(v); if (!v) { setEditLog(null); void refreshBoards(); } }}
+        onOpenChange={(v) => { setOpen(v); if (!v) { setEditLog(null); setEditBoardSession(null); void refreshBoards(); } }}
         editLog={editLog}
+        editBoardSession={editBoardSession}
         initialMode={tab === "board" ? "board" : undefined}
       />
 
@@ -355,53 +360,124 @@ export default function BoulderLogs() {
           )}
         </GameCard>
       ) : tab === "board" ? (
-        <GameCard className="p-0 overflow-hidden">
-          {boardSessions.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-12 text-center">
-              <Mountain className="h-8 w-8 mx-auto mb-2 opacity-60" />
-              No board climbs yet. Send one on the MoonBoard or Kilter!
-            </div>
-          ) : (
-            <div className="divide-y divide-border/40">
-              {boardSessions.map(b => (
-                <div key={b.id} className="px-4 py-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0 flex items-center gap-3">
-                    <div className="h-9 w-9 grid place-items-center rounded-lg shrink-0 bg-secondary text-foreground/70">
-                      <Mountain className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium truncate flex items-center gap-2">
-                        {boardLabel(b)}
-                        {b.is_flash && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
-                        {b.is_benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Bench</span>}
+        <>
+          <GameCard className="p-0 overflow-hidden">
+            {boardSessions.length === 0 ? (
+              <div className="text-sm text-muted-foreground py-12 text-center">
+                <Mountain className="h-8 w-8 mx-auto mb-2 opacity-60" />
+                No board climbs yet. Send one on the MoonBoard or Kilter!
+              </div>
+            ) : (
+              <div className="divide-y divide-border/40">
+                {boardSessions.map(b => {
+                  const icon = b.board_type === "moonboard" ? moonboardAsset.url : kilterAsset.url;
+                  return (
+                    <div key={b.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-lg shrink-0 overflow-hidden border border-border bg-black/40">
+                          <img src={icon} alt={b.board_type} className="h-full w-full object-cover" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate flex items-center gap-2">
+                            {boardLabel(b)}
+                            {b.is_flash && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
+                            {b.is_benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Benchmark</span>}
+                          </div>
+                          <div className="text-xs text-muted-foreground truncate">
+                            {new Date(b.logged_at).toLocaleDateString()} · {b.grade}
+                            {b.problem_name ? ` · ${b.problem_name}` : ""}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {new Date(b.logged_at).toLocaleDateString()} · {b.grade}
-                        {b.problem_name ? ` · ${b.problem_name}` : ""}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {b.chalk_awarded ? (
+                          <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{b.chalk_awarded}</div>
+                        ) : null}
+                        <button
+                          onClick={() => { setEditBoardSession(b); setOpen(true); }}
+                          aria-label="Edit board climb"
+                          className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteBoardId(b.id)}
+                          aria-label="Delete board climb"
+                          className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {b.chalk_awarded ? (
-                      <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{b.chalk_awarded}</div>
-                    ) : null}
-                    <button
-                      onClick={() => setDeleteBoardId(b.id)}
-                      aria-label="Delete board climb"
-                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </GameCard>
+                  );
+                })}
+              </div>
+            )}
+          </GameCard>
+
+          <SentBoardProblems sessions={boardSessions} />
+        </>
       ) : (
         <Hangboard />
       )}
 
     </div>
+  );
+}
+
+function SentBoardProblems({ sessions }: { sessions: BoardSessionRow[] }) {
+  const problems = useMemo(() => {
+    const map = new Map<string, { name: string; grade: string; grade_system: any; rank: number; count: number; lastDate: string; flashed: boolean; benchmark: boolean }>();
+    for (const s of sessions) {
+      const name = (s.problem_name ?? "").trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      const rank = gradeRank(s.grade, s.grade_system);
+      const cur = map.get(key);
+      if (!cur || rank > cur.rank) {
+        map.set(key, {
+          name,
+          grade: s.grade,
+          grade_system: s.grade_system,
+          rank,
+          count: (cur?.count ?? 0) + 1,
+          lastDate: cur ? (cur.lastDate > s.logged_at ? cur.lastDate : s.logged_at) : s.logged_at,
+          flashed: (cur?.flashed ?? false) || s.is_flash,
+          benchmark: (cur?.benchmark ?? false) || s.is_benchmark,
+        });
+      } else {
+        cur.count += 1;
+        if (s.logged_at > cur.lastDate) cur.lastDate = s.logged_at;
+        if (s.is_flash) cur.flashed = true;
+        if (s.is_benchmark) cur.benchmark = true;
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name));
+  }, [sessions]);
+
+  if (problems.length === 0) return null;
+
+  return (
+    <GameCard className="p-0 overflow-hidden">
+      <div className="px-4 py-3 border-b border-border/40">
+        <h3 className="menu-label">Sent Problems</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Unique named climbs, highest grade first.</p>
+      </div>
+      <div className="divide-y divide-border/40">
+        {problems.map(p => (
+          <div key={p.name} className="px-4 py-2.5 flex items-center justify-between gap-3">
+            <div className="min-w-0 flex items-center gap-2">
+              <div className="text-sm font-medium truncate">{p.name}</div>
+              {p.benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Benchmark</span>}
+              {p.flashed && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              {p.count > 1 && <span className="text-[11px] text-muted-foreground">×{p.count}</span>}
+              <span className="text-sm font-bold tabular-nums text-[hsl(var(--legendary))]">{p.grade}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </GameCard>
   );
 }

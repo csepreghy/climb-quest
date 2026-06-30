@@ -66,7 +66,7 @@ import boardMoonAsset from "@/assets/board-moonboard.png.asset.json";
 type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing" | "board";
 type Kind = "boulder" | "boss";
 
-export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode }) {
+export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSession }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode; editBoardSession?: import("@/game/board/types").BoardSessionRow | null }) {
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
   const [selectedBoss, setSelectedBoss] = useState<Boss | null>(null);
@@ -74,7 +74,9 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
 
   useEffect(() => {
     if (open) {
-      if (editLog) {
+      if (editBoardSession) {
+        setMode("board");
+      } else if (editLog) {
         setKind(editLog.isBoss ? "boss" : "boulder");
         setMode("form");
       } else {
@@ -82,7 +84,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
         setSelectedBoss(null);
       }
     }
-  }, [open, editLog, initialMode]);
+  }, [open, editLog, editBoardSession, initialMode]);
 
   function openBossFlow() {
     // Auto-resolve any expired bosses up-front so the user sees current state.
@@ -161,7 +163,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
         ) : mode === "strength" ? (
           <StrengthFlow onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
         ) : mode === "board" ? (
-          <BoardLogModal onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
+          <BoardLogModal onBack={() => editBoardSession ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editSession={editBoardSession ?? null} />
         ) : mode === "boss-pick" ? (
           <BossPicker
             onBack={() => setMode("boulder-pick")}

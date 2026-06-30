@@ -16,31 +16,33 @@ import chalkBagImg from "@/assets/chalk-bag.png";
 import { MOONBOARD_VARIANTS, type BoardType } from "@/game/board/types";
 import { gradesForSystem, type BoardGradeSystem } from "@/game/board/grades";
 import {
-  loadBoardPrefs, saveBoardPrefs, useBoardSessions, logBoardSession, maxBoardRank,
+  loadBoardPrefs, saveBoardPrefs, useBoardSessions, logBoardSession, maxBoardRank, updateBoardSession,
 } from "@/game/board/store";
+import type { BoardSessionRow } from "@/game/board/types";
 
-export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+export function BoardLogModal({ onBack, onDone, editSession }: { onBack: () => void; onDone: () => void; editSession?: BoardSessionRow | null }) {
   const { user } = useAuth();
   const { sessions, refresh } = useBoardSessions();
   const prefs = loadBoardPrefs();
+  const isEdit = !!editSession;
 
-  const [boardType, setBoardType] = useState<BoardType>(prefs.last_board_type);
-  const [variant, setVariant] = useState(prefs.last_moonboard_variant);
+  const [boardType, setBoardType] = useState<BoardType>(editSession?.board_type ?? prefs.last_board_type);
+  const [variant, setVariant] = useState<any>((editSession?.moonboard_variant as any) ?? prefs.last_moonboard_variant);
   const [angles, setAngles] = useState<number[]>(prefs.kilter_angles);
-  const [angle, setAngle] = useState<number>(prefs.last_kilter_angle);
+  const [angle, setAngle] = useState<number>(editSession?.kilter_angle ?? prefs.last_kilter_angle);
   const [editAngles, setEditAngles] = useState(false);
   const [newAngle, setNewAngle] = useState("");
 
-  const [system, setSystem] = useState<BoardGradeSystem>(prefs.last_grade_system);
+  const [system, setSystem] = useState<BoardGradeSystem>(editSession?.grade_system ?? prefs.last_grade_system);
   const grades = useMemo(() => gradesForSystem(system), [system]);
-  const [grade, setGrade] = useState(grades[Math.min(5, grades.length - 1)]);
+  const [grade, setGrade] = useState(editSession?.grade ?? gradesForSystem(editSession?.grade_system ?? prefs.last_grade_system)[Math.min(5, gradesForSystem(editSession?.grade_system ?? prefs.last_grade_system).length - 1)]);
   useEffect(() => { if (!grades.includes(grade)) setGrade(grades[Math.min(5, grades.length - 1)]); }, [grades, grade]);
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [problemName, setProblemName] = useState("");
-  const [isBenchmark, setIsBenchmark] = useState(false);
-  const [isFlash, setIsFlash] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [date, setDate] = useState<string>(editSession?.logged_at ?? new Date().toISOString().slice(0, 10));
+  const [problemName, setProblemName] = useState(editSession?.problem_name ?? "");
+  const [isBenchmark, setIsBenchmark] = useState<boolean>(editSession?.is_benchmark ?? false);
+  const [isFlash, setIsFlash] = useState<boolean>(editSession?.is_flash ?? false);
+  const [notes, setNotes] = useState<string>(editSession?.notes ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [celebrate, setCelebrate] = useState<{ chalk: number; isPR: boolean; grade: string } | null>(null);
 
@@ -65,8 +67,7 @@ export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: 
     if (!user) { toast.error("Please sign in"); return; }
     setSubmitting(true);
     try {
-      const prior = maxBoardRank(sessions);
-      const { chalk, isPR } = await logBoardSession(user.id, {
+      const payload = {
         board_type: boardType,
         moonboard_variant: boardType === "moonboard" ? variant : null,
         kilter_angle: boardType === "kilter" ? angle : null,
@@ -77,7 +78,16 @@ export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: 
         grade,
         logged_at: date,
         notes: notes.trim() || null,
-      }, prior);
+      };
+      if (isEdit && editSession) {
+        await updateBoardSession(editSession.id, payload);
+        await refresh();
+        toast.success("Board climb updated");
+        onDone();
+        return;
+      }
+      const prior = maxBoardRank(sessions);
+      const { chalk, isPR } = await logBoardSession(user.id, payload, prior);
       saveBoardPrefs({
         last_board_type: boardType,
         last_moonboard_variant: variant,
@@ -109,9 +119,10 @@ export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: 
       <DialogHeader>
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
-          <DialogTitle>Log Board Climb</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Board Climb" : "Log Board Climb"}</DialogTitle>
         </div>
       </DialogHeader>
+
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1 pt-4">
         {/* Board picker */}
@@ -250,7 +261,7 @@ export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: 
 
         <div className="flex justify-end pt-2">
           <GameButton variant="success" onClick={submit} disabled={submitting}>
-            <Plus className="h-4 w-4" /> {submitting ? "Logging..." : "Log Send"}
+            <Plus className="h-4 w-4" /> {submitting ? (isEdit ? "Saving..." : "Logging...") : (isEdit ? "Save Changes" : "Log Send")}
           </GameButton>
         </div>
       </div>
@@ -269,24 +280,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function BoardCelebrate({ chalk, isPR, grade, onDone }: { chalk: number; isPR: boolean; grade: string; onDone: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onDone, isPR ? 2600 : 1600);
+    if (isPR) return; // PR requires manual dismiss
+    const t = setTimeout(onDone, 1600);
     return () => clearTimeout(t);
   }, [onDone, isPR]);
 
   if (isPR) {
     return (
-      <div className="relative py-10 text-center overflow-hidden">
-        <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(circle at center, hsl(var(--legendary) / 0.35), transparent 70%)" }} />
-        <div className="relative">
-          <Trophy className="mx-auto h-16 w-16 text-[hsl(var(--legendary))] drop-shadow-[0_0_24px_hsl(var(--legendary)/0.7)] animate-banner-pop" />
-          <div className="mt-4 text-xs uppercase tracking-[0.3em] text-[hsl(var(--legendary))] font-bold">New Highest Grade</div>
-          <div className="mt-2 text-5xl font-extrabold gradient-chalk-text tabular-nums animate-pop-in">{grade}</div>
-          <div className="mt-1 text-sm text-muted-foreground italic">A new ceiling — the board respects you.</div>
-          <div className="mt-5 flex items-center justify-center gap-3 animate-pop-in">
-            <img src={chalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--chalk-glow)/0.6)]" />
-            <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{chalk}</span>
-          </div>
+      <div className="relative py-8 text-center">
+        <Trophy className="mx-auto h-12 w-12 text-[hsl(var(--legendary))] drop-shadow-[0_0_8px_hsl(var(--legendary)/0.5)] animate-banner-pop" />
+        <div className="mt-3 text-[11px] uppercase tracking-[0.25em] text-[hsl(var(--legendary))] font-bold">New Highest Grade</div>
+        <div className="mt-1 text-4xl font-extrabold gradient-chalk-text tabular-nums animate-pop-in">{grade}</div>
+        <div className="mt-1 text-xs text-muted-foreground italic">A new ceiling — the board respects you.</div>
+        <div className="mt-4 flex items-center justify-center gap-2 animate-pop-in">
+          <img src={chalkBagImg} alt="Chalk" className="h-9 w-9 object-contain" />
+          <span className="text-3xl font-bold gradient-chalk-text tabular-nums">+{chalk}</span>
+        </div>
+        <div className="mt-5 flex justify-center">
+          <GameButton variant="success" onClick={onDone}>Continue Crushing</GameButton>
         </div>
       </div>
     );
@@ -301,3 +312,4 @@ function BoardCelebrate({ chalk, isPR, grade, onDone }: { chalk: number; isPR: b
     </div>
   );
 }
+

@@ -74,7 +74,9 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
 
   useEffect(() => {
     if (open) {
-      if (editLog) {
+      if (editBoardSession) {
+        setMode("board");
+      } else if (editLog) {
         setKind(editLog.isBoss ? "boss" : "boulder");
         setMode("form");
       } else {
@@ -82,7 +84,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
         setSelectedBoss(null);
       }
     }
-  }, [open, editLog, initialMode]);
+  }, [open, editLog, editBoardSession, initialMode]);
 
   function openBossFlow() {
     // Auto-resolve any expired bosses up-front so the user sees current state.

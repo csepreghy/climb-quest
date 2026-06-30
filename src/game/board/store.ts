@@ -113,6 +113,43 @@ export async function logBoardSession(userId: string, input: BoardLogInput, prev
   return { row: data as BoardSessionRow, chalk, isPR };
 }
 
+export interface BoardEditInput {
+  board_type: BoardType;
+  moonboard_variant: MoonboardVariantId | null;
+  kilter_angle: number | null;
+  problem_name: string | null;
+  is_benchmark: boolean;
+  is_flash: boolean;
+  grade_system: BoardGradeSystem;
+  grade: string;
+  logged_at: string;
+  notes?: string | null;
+}
+
+export async function updateBoardSession(id: string, input: BoardEditInput): Promise<BoardSessionRow> {
+  const rank = gradeRank(input.grade, input.grade_system);
+  const { data, error } = await supabase
+    .from("board_sessions")
+    .update({
+      logged_at: input.logged_at,
+      board_type: input.board_type,
+      moonboard_variant: input.moonboard_variant,
+      kilter_angle: input.kilter_angle,
+      problem_name: input.problem_name,
+      is_benchmark: input.is_benchmark,
+      is_flash: input.is_flash,
+      grade_system: input.grade_system,
+      grade: input.grade,
+      grade_rank: rank,
+      notes: input.notes ?? null,
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as BoardSessionRow;
+}
+
 export async function deleteBoardSession(id: string): Promise<void> {
   const { error } = await supabase.from("board_sessions").delete().eq("id", id);
   if (error) throw error;

@@ -605,6 +605,7 @@ function InventoryAdmin() {
       discountPct: item.priceMult ? Math.round((1 - item.priceMult) * 100) : 0,
       critChancePct: item.critChancePct ?? 0,
       bossBonusPct: item.bossBonusPct ?? 0,
+      boardBonusPct: item.boardBonusPct ?? 0,
       gender: item.gender ?? "unisex",
     };
   }

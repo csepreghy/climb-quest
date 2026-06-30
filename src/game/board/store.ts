@@ -107,9 +107,9 @@ export async function logBoardSession(userId: string, input: BoardLogInput, prev
     .single();
   if (error) throw error;
 
-  // Credit chalk to the player's running totals immediately.
+  // Credit chalk and increment total logs.
   awardChalk(chalk);
-
+  incrementTotalLogs(1);
 
   return { row: data as BoardSessionRow, chalk, isPR };
 }

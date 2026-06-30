@@ -551,6 +551,7 @@ const empty: CustomItemInput = {
   discountPct: 0,
   critChancePct: 0,
   bossBonusPct: 0,
+  boardBonusPct: 0,
 };
 
 function InventoryAdmin() {

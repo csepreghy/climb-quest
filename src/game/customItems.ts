@@ -211,6 +211,7 @@ export async function updateCustomItem(itemId: string, patch: Partial<CustomItem
   }
   if (patch.critChancePct !== undefined) row.crit_chance_pct = Math.max(0, Math.min(100, patch.critChancePct));
   if (patch.bossBonusPct !== undefined) row.boss_bonus_pct = Math.max(0, patch.bossBonusPct);
+  if (patch.boardBonusPct !== undefined) row.board_bonus_pct = Math.max(0, patch.boardBonusPct);
   if (patch.gender !== undefined) row.gender = patch.gender;
   const { error } = await (supabase.from("shop_items") as any).update(row).eq("id", itemId);
   if (error) throw error;

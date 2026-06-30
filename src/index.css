@@ -9,10 +9,10 @@
     --background: 220 25% 6%;
     --foreground: 40 30% 94%;
 
-    --card: 220 28% 5%;
+    --card: 220 24% 13%;
     --card-foreground: 40 30% 94%;
 
-    --popover: 220 28% 5%;
+    --popover: 220 24% 13%;
     --popover-foreground: 40 30% 94%;
 
     --primary: 28 95% 58%;
@@ -62,7 +62,7 @@
     /* Frame & bevel — cool near-black outline */
     --panel-frame: 220 50% 2%;
     --panel-edge: 220 18% 18%;
-    --panel-fill: 220 30% 4%;
+    --panel-fill: 220 30% 12%;
     --panel-inset-light: 220 25% 90% / 0.06;
     --panel-inset-dark: 220 60% 1% / 0.9;
 

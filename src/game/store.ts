@@ -351,6 +351,11 @@ export function awardChalk(amount: number) {
   if (!amount) return;
   set(s => ({ ...s, chalk: s.chalk + amount, totalChalkEarned: s.totalChalkEarned + amount }));
 }
+/** Increment (or decrement) the total log counter. */
+export function incrementTotalLogs(delta: number = 1) {
+  if (!delta) return;
+  set(s => ({ ...s, stats: { ...s.stats, totalLogs: Math.max(0, s.stats.totalLogs + delta) } }));
+}
 export function replaceGameState(next: State) {
   state = { ...initialState(), ...next };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}

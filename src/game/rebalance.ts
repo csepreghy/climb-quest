@@ -29,6 +29,8 @@ const SLOT_SHARE: Record<Slot, number> = {
   buddy: 1.0,
   // legacy slots (kept equipable for back-compat)
   aura: 0.6, title: 0.4,
+  // board (1 slot) — meaningful share
+  board: 1.0,
 };
 
 /** Sum of shares for an endgame loadout = 5×0.4 + 3×1.0 + 1×2.0 = 7.0

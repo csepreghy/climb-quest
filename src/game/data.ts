@@ -95,6 +95,8 @@ export interface ShopItem {
   critChancePct?: number;
   /** Extra % chalk on boss_attempt and boss_send activities (separate from `bonus`). */
   bossBonusPct?: number;
+  /** Extra % chalk on board sessions only. Sums across equipped items. */
+  boardBonusPct?: number;
   levelReq?: number;
   /** Multiplier on shop prices when equipped, e.g. 0.9 = 10% off. Defaults to 1. */
   priceMult?: number;

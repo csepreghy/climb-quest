@@ -60,8 +60,10 @@ import plank5 from "@/assets/strength-plank-5.webp";
 import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
+import { BoardLogModal } from "@/components/board/BoardLogModal";
+import boardMoonAsset from "@/assets/board-moonboard.png.asset.json";
 
-type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing";
+type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing" | "board";
 type Kind = "boulder" | "boss";
 
 export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode }) {

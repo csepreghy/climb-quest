@@ -68,8 +68,9 @@ export default function BoulderLogs() {
     <div className="space-y-5 animate-float-up">
       <LogModal
         open={open}
-        onOpenChange={(v) => { setOpen(v); if (!v) { setEditLog(null); void refreshBoards(); } }}
+        onOpenChange={(v) => { setOpen(v); if (!v) { setEditLog(null); setEditBoardSession(null); void refreshBoards(); } }}
         editLog={editLog}
+        editBoardSession={editBoardSession}
         initialMode={tab === "board" ? "board" : undefined}
       />
 

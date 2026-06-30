@@ -23,6 +23,7 @@ const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
   { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk", "Study"] },
   { key: "power",  label: "Power-ups", categories: [] },
+  { key: "board",  label: "Board",     categories: [] },
   { key: "buddy",  label: "Climbing Buddies", categories: [] },
 ];
 

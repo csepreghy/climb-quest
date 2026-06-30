@@ -154,6 +154,7 @@ export async function updateBoardSession(id: string, input: BoardEditInput): Pro
 export async function deleteBoardSession(id: string): Promise<void> {
   const { error } = await supabase.from("board_sessions").delete().eq("id", id);
   if (error) throw error;
+  incrementTotalLogs(-1);
 }
 
 // ---------- Hook ----------

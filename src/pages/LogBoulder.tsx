@@ -164,7 +164,7 @@ export default function BoulderLogs() {
         {([
           { v: "boulders" as Tab, label: "Boulders", image: pickBoulderImg },
           { v: "strength" as Tab, label: "Strength", image: pullup4 },
-          { v: "board" as Tab, label: "Board", image: boardMoonAsset.url },
+          { v: "board" as Tab, label: "Board", image: moonboardAsset.url },
           { v: "hangboard" as Tab, label: "Hangboard", image: hangboardPickImg.url },
         ]).map(t => (
           <button

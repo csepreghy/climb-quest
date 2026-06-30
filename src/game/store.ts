@@ -596,6 +596,24 @@ export function computeChalk(
   return { base, bonuses, total: running };
 }
 
+/** Apply equipped board-bonus % to an existing breakdown. Used for board sessions
+ *  since they bypass the boulder activity path in `computeChalk`. */
+export function applyBoardBonus(b: ChalkBreakdown): ChalkBreakdown {
+  const eq = state.equipped;
+  let boardPct = 0;
+  for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
+    const id = eq[slotKey]; if (!id) continue;
+    const item = getItem(id);
+    if (item?.boardBonusPct) boardPct += item.boardBonusPct;
+  }
+  if (boardPct > 0) {
+    const amt = Math.round(b.total * (boardPct / 100));
+    b.bonuses.push({ source: `Board bonus (+${boardPct}%)`, amount: amt });
+    b.total += amt;
+  }
+  return b;
+}
+
 // ----- Actions -----
 export interface LogInput {
   activity: ActivityType;

@@ -309,12 +309,27 @@ function ClimberDetailsDialog({
   );
 }
 
-function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
+  const text = typeof value === "string" ? value : value.toLocaleString();
   return (
     <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
-      <div className="text-base font-bold tabular-nums leading-none">{value.toLocaleString()}</div>
+      <div className="text-base font-bold tabular-nums leading-none">{text}</div>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
         {icon} {label}
+      </div>
+    </div>
+  );
+}
+
+function BoardBestTile({ sessions }: { sessions: any[] | null }) {
+  const best = sessions && sessions.length
+    ? sessions.reduce((a: any, b: any) => ((b.grade_rank ?? 0) > (a.grade_rank ?? 0) ? b : a))
+    : null;
+  return (
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+      <div className="text-base font-bold leading-none">{best ? best.grade : "—"}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+        <Mountain className="h-3 w-3" /> Best board
       </div>
     </div>
   );
@@ -357,31 +372,23 @@ function EquippedList({ equipped, lookup }: { equipped: Equipped; lookup: Map<st
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
       {entries.map(({ slot, item }) => (
-        <div
+        <ShopPreviewTile
           key={slot}
-          className={cn(
-            "relative flex flex-col items-center rounded-lg border-2 bg-background/40 p-2 text-center overflow-hidden",
-            RARITY_BORDER[item.rarity],
-          )}
-          title={`${item.name} · ${item.rarity}`}
-        >
-          <div className="absolute top-1 left-1 text-[8px] uppercase tracking-wider px-1 py-0.5 rounded bg-background/70 text-muted-foreground font-semibold">
-            {SLOT_LABEL[slot]}
-          </div>
-          <div className="h-14 w-14 mt-3 mb-1.5 rounded-md bg-background/60 grid place-items-center overflow-hidden">
-            {isImageEmoji(item.emoji) ? (
-              <SmartImage src={item.emoji} alt={item.name} loaderSize={18} className="h-full w-full object-contain p-1" />
-            ) : (
-              <span className="text-2xl">{item.emoji}</span>
-            )}
-          </div>
-          <div className="text-[11px] font-semibold leading-tight line-clamp-2 w-full">{item.name}</div>
-          <div className={cn("text-[9px] uppercase tracking-wider mt-0.5 font-bold", RARITY_TEXT[item.rarity])}>
-            {item.rarity}
-          </div>
-        </div>
+          item={item}
+          hidePrice
+          footer={
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[9px] uppercase tracking-wider text-white/70 font-semibold leading-none">
+                {SLOT_LABEL[slot]}
+              </span>
+              <span className="text-[11px] font-bold leading-tight line-clamp-1 text-white">
+                {item.name}
+              </span>
+            </div>
+          }
+        />
       ))}
     </div>
   );

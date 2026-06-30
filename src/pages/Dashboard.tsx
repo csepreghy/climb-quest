@@ -241,7 +241,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }) {
+function EquippedStrip({ equipped, vertical }: { equipped: Partial<Record<Slot, string>>; vertical?: boolean }) {
   // Subscribe to catalog so strip re-renders once custom item images load on refresh.
   useCustomItems();
   const SLOTS: Slot[] = ["outfit", "bottoms", "shoes", "hat", "chalk", "hand", "accessory", "aura", "buddy", "study", "powerup"];
@@ -255,31 +255,34 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
     .slice(0, 5);
 
   return (
-    <div className="mt-4">
+    <div className={vertical ? "" : "mt-4"}>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Equipped</div>
       {equippedItems.length === 0 ? (
         <Link to="/shop" className="block text-xs text-muted-foreground italic hover:text-foreground">
           Nothing equipped — visit the shop to gear up.
         </Link>
       ) : (
-        <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+        <div className={cn(
+          "flex gap-2",
+          vertical ? "flex-col items-center" : "flex-wrap justify-center sm:justify-start"
+        )}>
           {equippedItems.map(({ slot, item }, idx) => (
             <Link
               key={slot}
               to="/inventory"
               className={cn(
-                "h-14 w-14 rounded-lg bg-background/50 grid place-items-center transition-transform hover:-translate-y-0.5",
+                "rounded-lg bg-background/50 grid place-items-center transition-transform hover:-translate-y-0.5",
+                vertical ? "h-12 w-12" : "h-14 w-14",
                 RARITY_BORDER[item!.rarity],
-                // Show 3 on mobile, 4 on sm, 5 on md+
-                idx >= 3 && "hidden sm:grid",
-                idx >= 4 && "sm:hidden md:grid",
+                !vertical && idx >= 3 && "hidden sm:grid",
+                !vertical && idx >= 4 && "sm:hidden md:grid",
               )}
               title={item!.name}
             >
               {isImageEmoji(item!.emoji) ? (
                 <SmartImage src={item!.emoji} alt={item!.name} loaderSize={20} className="h-full w-full object-contain p-1" />
               ) : (
-                <span className="text-2xl">{item!.emoji}</span>
+                <span className={vertical ? "text-xl" : "text-2xl"}>{item!.emoji}</span>
               )}
             </Link>
           ))}

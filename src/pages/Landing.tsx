@@ -300,10 +300,11 @@ function ItemsSlide() {
     if (all.length === 0) return;
     if (picks.length > 0) return;
     const shuffled = [...all].sort(() => Math.random() - 0.5);
+    const mythic = shuffled.filter(i => i.rarity === "mythic").slice(0, 1);
     const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 2);
     const epic = shuffled.filter(i => i.rarity === "epic").slice(0, 3);
     const rare = shuffled.filter(i => i.rarity === "rare").slice(0, 3);
-    const picked = [...leg, ...epic, ...rare];
+    const picked = [...mythic, ...leg, ...epic, ...rare];
     const rest = shuffled.filter(i => !picked.includes(i));
     setPicks([...picked, ...rest].slice(0, 9));
   }, [all.length, picks.length]);
@@ -561,10 +562,11 @@ function ShopPreviewGrid() {
     if (all.length === 0) return;
     if (picks.length > 0) return;
     const shuffled = [...all].sort(() => Math.random() - 0.5);
-    const leg = shuffled.filter(i => i.rarity === "legendary").slice(0, 2);
-    const epic = shuffled.filter(i => i.rarity === "epic" && !leg.includes(i)).slice(0, 4);
-    const rare = shuffled.filter(i => i.rarity === "rare" && !leg.includes(i) && !epic.includes(i)).slice(0, 4);
-    const picked = [...leg, ...epic, ...rare];
+    const mythic = shuffled.filter(i => i.rarity === "mythic").slice(0, 1);
+    const leg = shuffled.filter(i => i.rarity === "legendary" && !mythic.includes(i)).slice(0, 2);
+    const epic = shuffled.filter(i => i.rarity === "epic" && !mythic.includes(i) && !leg.includes(i)).slice(0, 4);
+    const rare = shuffled.filter(i => i.rarity === "rare" && !mythic.includes(i) && !leg.includes(i) && !epic.includes(i)).slice(0, 4);
+    const picked = [...mythic, ...leg, ...epic, ...rare];
     const rest = shuffled.filter(i => !picked.includes(i));
     setPicks([...picked, ...rest].slice(0, 12));
     // eslint-disable-next-line react-hooks/exhaustive-deps

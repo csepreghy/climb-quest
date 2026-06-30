@@ -19,6 +19,9 @@ import { boardLabel, type BoardSessionRow } from "@/game/board/types";
 import { gradeRank } from "@/game/board/grades";
 import moonboardAsset from "@/assets/board-moonboard.png.asset.json";
 import kilterAsset from "@/assets/board-kilter.png.asset.json";
+import pickBoulderImg from "@/assets/log-pick-boulder.webp";
+import pullup4 from "@/assets/strength-pullup-4.webp";
+import hangboardPickImg from "@/assets/log-hangboard.webp.asset.json";
 
 type EntryFilter = "all" | "boulder" | "boss";
 type Tab = "boulders" | "strength" | "hangboard" | "board";

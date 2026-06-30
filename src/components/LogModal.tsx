@@ -66,7 +66,7 @@ import boardMoonAsset from "@/assets/board-moonboard.png.asset.json";
 type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing" | "board";
 type Kind = "boulder" | "boss";
 
-export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode }) {
+export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSession }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode; editBoardSession?: import("@/game/board/types").BoardSessionRow | null }) {
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
   const [selectedBoss, setSelectedBoss] = useState<Boss | null>(null);

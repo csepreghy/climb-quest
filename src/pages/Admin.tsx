@@ -730,20 +730,6 @@ function InventoryAdmin() {
                 <Input type="number" min={0} value={draft.bonusPct} onChange={e => setDraft(d => ({ ...d, bonusPct: parseInt(e.target.value) || 0 }))} />
               </div>
             )}
-            <div>
-              <Label className="text-xs">Level requirement</Label>
-              <Input
-                type="number"
-                min={1}
-                max={10}
-                placeholder="None"
-                value={draft.levelReq ?? ""}
-                onChange={e => {
-                  const v = e.target.value;
-                  setDraft(d => ({ ...d, levelReq: v === "" ? undefined : Math.max(1, parseInt(v) || 1) }));
-                }}
-              />
-            </div>
             {effectAllowed(draft.group, draft.rarity, "discount") && (
               <div>
                 <Label className="text-xs">Shop discount %</Label>

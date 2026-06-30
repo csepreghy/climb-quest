@@ -67,8 +67,7 @@ export function BoardLogModal({ onBack, onDone, editSession }: { onBack: () => v
     if (!user) { toast.error("Please sign in"); return; }
     setSubmitting(true);
     try {
-      const prior = maxBoardRank(sessions);
-      const { chalk, isPR } = await logBoardSession(user.id, {
+      const payload = {
         board_type: boardType,
         moonboard_variant: boardType === "moonboard" ? variant : null,
         kilter_angle: boardType === "kilter" ? angle : null,
@@ -79,7 +78,16 @@ export function BoardLogModal({ onBack, onDone, editSession }: { onBack: () => v
         grade,
         logged_at: date,
         notes: notes.trim() || null,
-      }, prior);
+      };
+      if (isEdit && editSession) {
+        await updateBoardSession(editSession.id, payload);
+        await refresh();
+        toast.success("Board climb updated");
+        onDone();
+        return;
+      }
+      const prior = maxBoardRank(sessions);
+      const { chalk, isPR } = await logBoardSession(user.id, payload, prior);
       saveBoardPrefs({
         last_board_type: boardType,
         last_moonboard_variant: variant,
@@ -111,9 +119,10 @@ export function BoardLogModal({ onBack, onDone, editSession }: { onBack: () => v
       <DialogHeader>
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
-          <DialogTitle>Log Board Climb</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Board Climb" : "Log Board Climb"}</DialogTitle>
         </div>
       </DialogHeader>
+
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1 pt-4">
         {/* Board picker */}

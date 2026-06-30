@@ -37,7 +37,7 @@ export function TrainingQuickPicker({
   }
 
   return (
-    <div className={cn("grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 lg:w-[300px]", className)}>
+    <div className={cn("grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-2 lg:w-[300px]", className)}>
       {TILES.map(t => (
       <button
           key={t.key}

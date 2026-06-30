@@ -107,12 +107,8 @@ export async function logBoardSession(userId: string, input: BoardLogInput, prev
   if (error) throw error;
 
   // Credit chalk to the player's running totals immediately.
-  const cur = getGameStateSnapshot();
-  replaceGameState({
-    ...cur,
-    chalk: cur.chalk + chalk,
-    totalChalkEarned: cur.totalChalkEarned + chalk,
-  });
+  awardChalk(chalk);
+
 
   return { row: data as BoardSessionRow, chalk, isPR };
 }

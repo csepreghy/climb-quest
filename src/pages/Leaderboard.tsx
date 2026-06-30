@@ -24,6 +24,7 @@ interface Row {
   total_logs: number;
   bosses_sent: number;
   strength_sessions: number;
+  board_sessions: number;
   owned: string[];
   equipped: Equipped;
   gender: Gender;

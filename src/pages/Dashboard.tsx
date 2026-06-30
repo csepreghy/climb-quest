@@ -61,9 +61,14 @@ export default function Dashboard() {
       <LogModal open={logOpen} onOpenChange={setLogOpen} initialMode={logInitialMode} />
       {/* Hero card + quick training picker */}
       <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-stretch">
-        <GameCard tone="accent" className="p-5 sm:p-7">
+      <GameCard tone="accent" className="p-5 sm:p-7">
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">
-            <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
+            <div className="flex items-start gap-4">
+              <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
+              <div className="sm:hidden">
+                <EquippedStrip equipped={s.equipped} vertical />
+              </div>
+            </div>
             <div className="flex-1 min-w-0 text-center sm:text-left">
               {characterName && (
                 <div className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1">{characterName}</div>
@@ -78,7 +83,9 @@ export default function Dashboard() {
                 {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
               </div>
 
-              <EquippedStrip equipped={s.equipped} />
+              <div className="hidden sm:block">
+                <EquippedStrip equipped={s.equipped} />
+              </div>
 
               {next && s.chalk >= next.cost && (
                 <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">

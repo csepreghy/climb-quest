@@ -9,7 +9,7 @@ import chalkBagImg from "@/assets/chalk-bag.png";
  * Presentational, non-interactive shop tile that mirrors the redesigned
  * shop tile look (.tile-3d). Used on the public landing page.
  */
-export function ShopPreviewTile({ item, className, smallImage }: { item: ShopItem; className?: string; smallImage?: boolean }) {
+export function ShopPreviewTile({ item, className, smallImage, hidePrice, footer }: { item: ShopItem; className?: string; smallImage?: boolean; hidePrice?: boolean; footer?: React.ReactNode }) {
   const bonusPct = item.bonus?.mult ? Math.round(item.bonus.mult * 100) : 0;
   const consumablePct = item.consumableBonus ? Math.round(item.consumableBonus * 100) : 0;
   const chalkPct = bonusPct || consumablePct;
@@ -47,12 +47,18 @@ export function ShopPreviewTile({ item, className, smallImage }: { item: ShopIte
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1 px-1.5 py-1 bg-gradient-to-t from-black/80 via-black/50 to-transparent pointer-events-none">
-        <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain drop-shadow" />
-        <span className="text-[12px] leading-none font-extrabold tabular-nums text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]">
-          {item.price.toLocaleString()}
-        </span>
-      </div>
+      {footer ? (
+        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1 bg-gradient-to-t from-black/85 via-black/55 to-transparent pointer-events-none">
+          {footer}
+        </div>
+      ) : !hidePrice ? (
+        <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1 px-1.5 py-1 bg-gradient-to-t from-black/80 via-black/50 to-transparent pointer-events-none">
+          <img src={chalkBagImg} alt="" className="h-3.5 w-3.5 object-contain drop-shadow" />
+          <span className="text-[12px] leading-none font-extrabold tabular-nums text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]">
+            {item.price.toLocaleString()}
+          </span>
+        </div>
+      ) : null}
 
       {badges.length > 0 && (
         <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 max-w-[80%] pointer-events-none">

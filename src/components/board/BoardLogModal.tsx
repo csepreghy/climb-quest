@@ -128,7 +128,7 @@ export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: 
                 onClick={() => setBoardType(b.type)}
                 className={cn(
                   "relative rounded-xl p-1 transition",
-                  active ? `ring-4 ${b.ring} shadow-[0_0_24px_-4px_currentColor]` : "opacity-70 hover:opacity-100",
+                  active ? `ring-4 ${b.ring}` : "opacity-70 hover:opacity-100",
                 )}
               >
                 <div className="relative overflow-hidden rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-black/60">

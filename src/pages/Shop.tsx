@@ -135,7 +135,7 @@ function ShopTile({
   if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/90 text-background border-chalk-glow" });
   if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/90 text-background border-[hsl(var(--btn-orange))]" });
   if (critPct > 0) badges.push({ text: `+${critPct}%`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
-  if (bossPct > 0) badges.push({ text: `+${bossPct}%b`, cls: "bg-legendary/90 text-background border-legendary" });
+  if (bossPct > 0) badges.push({ text: `+${bossPct}%`, cls: "bg-legendary/90 text-background border-legendary" });
 
   // Verbose, colored bonus rows for the hover preview.
   const bonusRows: { label: string; value: string; cls: string }[] = [];

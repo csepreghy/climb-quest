@@ -1,17 +1,17 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
-export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup" | "buddy";
-export type ItemGroup = "outfit" | "gear" | "power" | "buddy";
+export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup" | "buddy" | "board";
+export type ItemGroup = "outfit" | "gear" | "power" | "buddy" | "board";
 
 /** Player level required before the Climbing Buddy slot unlocks. */
-export const BUDDY_SLOT_UNLOCK_LEVEL = 5;
+export const BUDDY_SLOT_UNLOCK_LEVEL = 1;
 
 export type EffectKey = "chalk" | "crit" | "boss" | "discount";
 
 /** Single source of truth for which effects an item may carry, by group + rarity.
- *  - chalk    → outfit & power-ups (any rarity)
- *  - discount → power-ups (any rarity)
+ *  - chalk    → outfit, power-ups, board (any rarity)
+ *  - discount → power-ups, board (any rarity)
  *  - crit     → any group, epic+ only (deterministic crit-vs-boss split per slot at epic; both at legendary)
  *  - boss     → any group, epic+ only
  */
@@ -19,6 +19,7 @@ export function effectAllowed(group: ItemGroup, rarity: Rarity, effect: EffectKe
   // Climbing buddies carry a chalk bonus (default 50%, admin-editable). Other perks land later.
   const epicPlus = rarity === "epic" || rarity === "legendary";
   if (group === "buddy") return effect === "chalk";
+  if (group === "board") return true; // board items support all four effects
   switch (effect) {
     case "chalk":    return group === "outfit" || group === "power";
     case "discount": return group === "power";
@@ -31,12 +32,9 @@ export function effectAllowed(group: ItemGroup, rarity: Rarity, effect: EffectKe
 /** Slots that belong to the "gear" group, in display/unlock order. */
 export const GEAR_SLOTS: Slot[] = ["chalk", "accessory", "study"];
 
-/** How many gear slots are unlocked at a given player level (max 4). */
-export function gearSlotsUnlocked(level: number): number {
-  if (level >= 8) return 4;
-  if (level >= 5) return 3;
-  if (level >= 3) return 2;
-  return 1;
+/** All gear slots are always available — level gating has been removed. */
+export function gearSlotsUnlocked(_level: number): number {
+  return 4;
 }
 export type Gender = "male" | "female";
 

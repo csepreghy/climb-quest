@@ -700,7 +700,7 @@ function LeaderboardPreviewRow({ row, rank }: { row: LbRow; rank: number }) {
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <img src={chalkBagImg} alt="" className="h-4 w-4" />
-        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{row.total_chalk_earned.toLocaleString()}</span>
+        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{formatChalk(row.total_chalk_earned)}</span>
       </div>
     </div>
   );

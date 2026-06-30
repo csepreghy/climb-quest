@@ -160,25 +160,31 @@ export default function BoulderLogs() {
       {tab !== "hangboard" && <DailyCapBar />}
 
       {/* Tab selector */}
-      <div className="flex gap-1 rounded-full border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-1 w-fit">
+      <div className="grid grid-cols-4 gap-2 sm:gap-3 max-w-[360px]">
         {([
-          { v: "boulders", label: "Boulders", icon: Sparkles },
-          { v: "strength", label: "Strength", icon: Dumbbell },
-          { v: "board", label: "Board", icon: Mountain },
-          { v: "hangboard", label: "Hangboard", icon: Dumbbell },
-
-        ] as { v: Tab; label: string; icon: typeof Sparkles }[]).map(t => (
+          { v: "boulders" as Tab, label: "Boulders", image: pickBoulderImg },
+          { v: "strength" as Tab, label: "Strength", image: pullup4 },
+          { v: "board" as Tab, label: "Board", image: boardMoonAsset.url },
+          { v: "hangboard" as Tab, label: "Hangboard", image: hangboardPickImg.url },
+        ]).map(t => (
           <button
             key={t.v}
             onClick={() => setTab(t.v)}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1.5 transition",
-              tab === t.v
-                ? "bg-[hsl(var(--btn-orange))] text-white shadow-[inset_0_2px_0_hsl(0_0%_100%/0.25)]"
-                : "text-muted-foreground hover:text-foreground"
+              "tile-3d group relative overflow-hidden cursor-pointer",
+              "aspect-square w-full hover:-translate-y-0.5 transition active:translate-y-[2px]",
+              tab === t.v && "ring-2 ring-[hsl(var(--btn-orange))] ring-offset-2 ring-offset-background"
             )}
+            aria-label={t.label}
           >
-            <t.icon className="h-3.5 w-3.5" /> {t.label}
+            <img
+              src={t.image}
+              alt={t.label}
+              className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105"
+            />
+            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/55 to-transparent px-1.5 py-1 text-center font-display font-bold text-[10px] sm:text-xs text-white leading-tight">
+              {t.label}
+            </span>
           </button>
         ))}
       </div>

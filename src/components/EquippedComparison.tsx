@@ -10,6 +10,7 @@ function bonuses(it: ShopItem) {
     chalk: Math.round(((it.bonus?.mult ?? 0) + (it.consumableBonus ?? 0)) * 100),
     crit: Math.round(it.critChancePct ?? 0),
     boss: Math.round(it.bossBonusPct ?? 0),
+    board: Math.round(it.boardBonusPct ?? 0),
     discount: it.priceMult && it.priceMult < 1 ? Math.round((1 - it.priceMult) * 100) : 0,
   };
 }
@@ -28,6 +29,7 @@ export function EquippedComparison({ item, className }: { item: ShopItem; classN
     { label: "Chalk Bonus", from: a.chalk, to: b.chalk, cls: "text-chalk-glow" },
     { label: "Critical Chance", from: a.crit, to: b.crit, cls: "text-[hsl(var(--epic))]" },
     { label: "Boss Bonus", from: a.boss, to: b.boss, cls: "text-legendary" },
+    { label: "Board Bonus", from: a.board, to: b.board, cls: "text-[hsl(var(--board-bonus))]" },
     { label: "Shop Discount", from: a.discount, to: b.discount, cls: "text-[hsl(var(--btn-orange))]" },
   ].filter((r) => r.from !== 0 || r.to !== 0);
 

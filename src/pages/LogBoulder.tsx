@@ -396,8 +396,9 @@ function BoardTabContent({
     );
   }
 
-  const shown = sessions.slice(0, visible);
-  const canLoadMore = sessions.length > visible;
+  const sorted = useMemo(() => [...sessions].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)), [sessions]);
+  const shown = sorted.slice(0, visible);
+  const canLoadMore = sorted.length > visible;
 
   return (
     <>

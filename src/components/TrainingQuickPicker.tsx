@@ -45,7 +45,7 @@ export function TrainingQuickPicker({
           onClick={() => handle(t)}
           className={cn(
             "tile-3d group relative overflow-hidden cursor-pointer",
-            "aspect-[4/5] w-full hover:-translate-y-0.5 transition active:translate-y-[2px]",
+            "aspect-square w-full hover:-translate-y-0.5 transition active:translate-y-[2px]",
           )}
           aria-label={`Log ${t.label}`}
         >

@@ -18,7 +18,7 @@ function emit() { listeners.forEach(l => l()); }
 function setState(u: (s: State) => State) { state = u(state); emit(); }
 
 // Lightweight columns — excludes `image` so the initial payload is tiny.
-const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,price_mult,crit_chance_pct,boss_bonus_pct,gender,created_at";
+const LIGHT_COLS = "id,name,group,category,slot,rarity,price,bonus_pct,applies_to,level_req,price_mult,crit_chance_pct,boss_bonus_pct,board_bonus_pct,gender,created_at";
 
 function rowToItem(r: any, image?: string | null): ShopItem {
   const bonusPct = Number(r.bonus_pct ?? 0);

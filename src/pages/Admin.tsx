@@ -214,15 +214,6 @@ export default function Admin() {
                 <Minus className="h-4 w-4" /> Level Down
               </Button>
             </div>
-            <label className="flex items-center gap-2 mt-4 text-sm cursor-pointer select-none">
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-[hsl(var(--btn-orange))]"
-                checked={!!s.ignoreLevelReq}
-                onChange={e => { adminSetIgnoreLevelReq(e.target.checked); toast.info(e.target.checked ? "Level requirements disabled" : "Level requirements enabled"); }}
-              />
-              <span>Ignore level requirements (shop)</span>
-            </label>
           </GameCard>
         </TabsContent>
 

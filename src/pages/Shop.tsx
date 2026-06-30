@@ -117,7 +117,7 @@ function ShopTile({
   item: ShopItem; owned: boolean; chalk: number; level: number;
   state: ReturnType<typeof useGame>; ignoreLevelReq: boolean; onClick: () => void;
 }) {
-  const locked = !ignoreLevelReq && !!(item.levelReq && level < item.levelReq);
+  const locked = false; // level requirements removed
   const price = effectivePrice(state, item.price);
   const canAfford = chalk >= price;
   const isConsumable = !!item.consumableBonus;

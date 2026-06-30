@@ -444,17 +444,21 @@ function BoardTabContent({
                       <img src={icon} alt={b.board_type} className="h-full w-full object-cover" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-medium truncate flex items-center gap-2">
-                        {name ? (
-                          <span className="truncate">{name}</span>
-                        ) : (
-                          <>
-                            <span className="truncate">{b.grade}</span>
-                            <span className="text-xs text-muted-foreground italic">Unnamed</span>
-                          </>
-                        )}
-                        {b.is_flash && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
-                        {b.is_benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Benchmark</span>}
+                      <div className="text-sm font-medium flex flex-col sm:flex-row sm:items-center gap-1">
+                        <div className="truncate">
+                          {name ? (
+                            <span className="truncate">{name}</span>
+                          ) : (
+                            <>
+                              <span className="truncate">{b.grade}</span>
+                              <span className="text-xs text-muted-foreground italic">Unnamed</span>
+                            </>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {b.is_flash && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
+                          {b.is_benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Benchmark</span>}
+                        </div>
                       </div>
                       <div className="text-xs text-muted-foreground truncate">
                         {new Date(b.logged_at).toLocaleDateString()}{name ? ` · ${b.grade}` : ""}

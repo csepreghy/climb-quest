@@ -16,31 +16,33 @@ import chalkBagImg from "@/assets/chalk-bag.png";
 import { MOONBOARD_VARIANTS, type BoardType } from "@/game/board/types";
 import { gradesForSystem, type BoardGradeSystem } from "@/game/board/grades";
 import {
-  loadBoardPrefs, saveBoardPrefs, useBoardSessions, logBoardSession, maxBoardRank,
+  loadBoardPrefs, saveBoardPrefs, useBoardSessions, logBoardSession, maxBoardRank, updateBoardSession,
 } from "@/game/board/store";
+import type { BoardSessionRow } from "@/game/board/types";
 
-export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+export function BoardLogModal({ onBack, onDone, editSession }: { onBack: () => void; onDone: () => void; editSession?: BoardSessionRow | null }) {
   const { user } = useAuth();
   const { sessions, refresh } = useBoardSessions();
   const prefs = loadBoardPrefs();
+  const isEdit = !!editSession;
 
-  const [boardType, setBoardType] = useState<BoardType>(prefs.last_board_type);
-  const [variant, setVariant] = useState(prefs.last_moonboard_variant);
+  const [boardType, setBoardType] = useState<BoardType>(editSession?.board_type ?? prefs.last_board_type);
+  const [variant, setVariant] = useState<any>((editSession?.moonboard_variant as any) ?? prefs.last_moonboard_variant);
   const [angles, setAngles] = useState<number[]>(prefs.kilter_angles);
-  const [angle, setAngle] = useState<number>(prefs.last_kilter_angle);
+  const [angle, setAngle] = useState<number>(editSession?.kilter_angle ?? prefs.last_kilter_angle);
   const [editAngles, setEditAngles] = useState(false);
   const [newAngle, setNewAngle] = useState("");
 
-  const [system, setSystem] = useState<BoardGradeSystem>(prefs.last_grade_system);
+  const [system, setSystem] = useState<BoardGradeSystem>(editSession?.grade_system ?? prefs.last_grade_system);
   const grades = useMemo(() => gradesForSystem(system), [system]);
-  const [grade, setGrade] = useState(grades[Math.min(5, grades.length - 1)]);
+  const [grade, setGrade] = useState(editSession?.grade ?? gradesForSystem(editSession?.grade_system ?? prefs.last_grade_system)[Math.min(5, gradesForSystem(editSession?.grade_system ?? prefs.last_grade_system).length - 1)]);
   useEffect(() => { if (!grades.includes(grade)) setGrade(grades[Math.min(5, grades.length - 1)]); }, [grades, grade]);
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [problemName, setProblemName] = useState("");
-  const [isBenchmark, setIsBenchmark] = useState(false);
-  const [isFlash, setIsFlash] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [date, setDate] = useState<string>(editSession?.logged_at ?? new Date().toISOString().slice(0, 10));
+  const [problemName, setProblemName] = useState(editSession?.problem_name ?? "");
+  const [isBenchmark, setIsBenchmark] = useState<boolean>(editSession?.is_benchmark ?? false);
+  const [isFlash, setIsFlash] = useState<boolean>(editSession?.is_flash ?? false);
+  const [notes, setNotes] = useState<string>(editSession?.notes ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [celebrate, setCelebrate] = useState<{ chalk: number; isPR: boolean; grade: string } | null>(null);
 

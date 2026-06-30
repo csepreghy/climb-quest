@@ -62,6 +62,63 @@ export type Database = {
         }
         Relationships: []
       }
+      board_sessions: {
+        Row: {
+          board_type: string
+          chalk_awarded: number
+          created_at: string
+          grade: string
+          grade_rank: number
+          grade_system: string
+          id: string
+          is_benchmark: boolean
+          is_flash: boolean
+          kilter_angle: number | null
+          logged_at: string
+          moonboard_variant: string | null
+          notes: string | null
+          problem_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          board_type: string
+          chalk_awarded?: number
+          created_at?: string
+          grade: string
+          grade_rank: number
+          grade_system: string
+          id?: string
+          is_benchmark?: boolean
+          is_flash?: boolean
+          kilter_angle?: number | null
+          logged_at?: string
+          moonboard_variant?: string | null
+          notes?: string | null
+          problem_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          board_type?: string
+          chalk_awarded?: number
+          created_at?: string
+          grade?: string
+          grade_rank?: number
+          grade_system?: string
+          id?: string
+          is_benchmark?: boolean
+          is_flash?: boolean
+          kilter_angle?: number | null
+          logged_at?: string
+          moonboard_variant?: string | null
+          notes?: string | null
+          problem_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       card_lab_settings: {
         Row: {
           config: Json

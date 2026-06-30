@@ -60,8 +60,10 @@ import plank5 from "@/assets/strength-plank-5.webp";
 import { getActivityReward } from "@/game/activityRewards";
 import { PickCard } from "@/components/pixel/PickCard";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
+import { BoardLogModal } from "@/components/board/BoardLogModal";
+import boardMoonAsset from "@/assets/board-moonboard.png.asset.json";
 
-type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing";
+type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing" | "board";
 type Kind = "boulder" | "boss";
 
 export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode }) {
@@ -100,7 +102,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
             <DialogHeader>
               <DialogTitle>What are you logging?</DialogTitle>
             </DialogHeader>
-            <div className="grid sm:grid-cols-3 gap-3 mt-2">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
               <PickCard
                 image={pickBoulderImg}
                 title="Boulder"
@@ -121,6 +123,13 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
                 desc="Beastmaker workouts — hangs count toward your Strength Tier."
                 onClick={() => { onOpenChange(false); navigate("/hangboard"); }}
                 ring="ring-[hsl(270_80%_65%)]/60"
+              />
+              <PickCard
+                image={boardMoonAsset.url}
+                title="Board"
+                desc="MoonBoard or Kilter — earn chalk based on your top grade."
+                onClick={() => setMode("board")}
+                ring="ring-[hsl(var(--epic))]/60"
               />
             </div>
           </>
@@ -151,6 +160,8 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
           </>
         ) : mode === "strength" ? (
           <StrengthFlow onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
+        ) : mode === "board" ? (
+          <BoardLogModal onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
         ) : mode === "boss-pick" ? (
           <BossPicker
             onBack={() => setMode("boulder-pick")}

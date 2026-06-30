@@ -15,6 +15,8 @@ import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
 import { useCharacterName } from "@/game/characterName";
 import { StrengthTierChip, StrengthTierModal } from "@/components/StrengthTierStrip";
 import { HangboardChart } from "@/components/hangboard/HangboardChart";
+import { BoardChart } from "@/components/board/BoardChart";
+import { useBoardSessions } from "@/game/board/store";
 import { tierFor } from "@/game/strengthTier";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +43,9 @@ export default function Dashboard() {
   const openBadge = openBadgeId ? BADGES.find(b => b.id === openBadgeId) ?? null : null;
   const openBadgeHave = openBadge ? s.badges.includes(openBadge.id) : false;
   const strengthTierInfo = tierFor(s.strengthSessions ?? []);
+  const { sessions: boardSessions } = useBoardSessions();
+  const hangboardCount = (s.strengthSessions ?? []).filter((ss: any) => (ss.workout as string) === "hangboard").length;
+
 
   
 
@@ -105,7 +110,10 @@ export default function Dashboard() {
 
       <StrengthRepsHoldChart sessions={s.strengthSessions ?? []} />
 
-      <HangboardChart />
+      {boardSessions.length > 0 && <BoardChart />}
+
+      {hangboardCount > 0 && <HangboardChart />}
+
 
 
 
@@ -181,6 +189,36 @@ export default function Dashboard() {
           </div>
         )}
       </GameCard>
+
+      {boardSessions.length > 0 && (
+        <GameCard className="p-5">
+          <h3 className="menu-label mb-3">Recent Board Climbs</h3>
+          <div className="divide-y divide-border/40">
+            {boardSessions.slice(0, 6).map(b => {
+              const where = b.board_type === "moonboard"
+                ? (b.moonboard_variant ?? "MoonBoard").replace(/_/g, " ")
+                : `Kilter ${b.kilter_angle ?? "?"}°`;
+              return (
+                <div key={b.id} className="py-2.5 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate flex items-center gap-1.5">
+                      {b.grade}
+                      {b.is_flash && <span className="text-[10px] px-1.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] font-bold uppercase">Flash</span>}
+                      {b.is_benchmark && <span className="text-[10px] px-1.5 rounded bg-[hsl(var(--legendary))]/20 text-[hsl(var(--legendary))] font-bold uppercase">Bench</span>}
+                      {b.problem_name && <span className="text-muted-foreground font-normal truncate">· {b.problem_name}</span>}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(b.logged_at).toLocaleDateString()} · {where}
+                    </div>
+                  </div>
+                  <div className="text-right text-sm font-medium tabular-nums">+{b.chalk_awarded}</div>
+                </div>
+              );
+            })}
+          </div>
+        </GameCard>
+      )}
+
 
       <StrengthTierModal
         open={tierModalOpen}

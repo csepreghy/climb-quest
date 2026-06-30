@@ -259,7 +259,7 @@ function EquippedStrip({ equipped, vertical }: { equipped: Partial<Record<Slot, 
     .map(e => ({ slot: e.slot, item: getItem(e.id!) }))
     .filter(e => !!e.item)
     .sort((a, b) => (RARITY_RANK[b.item!.rarity] - RARITY_RANK[a.item!.rarity]))
-    .slice(0, 5);
+    .slice(0, vertical ? 3 : 5);
 
   return (
     <div className={vertical ? "" : "mt-4"}>

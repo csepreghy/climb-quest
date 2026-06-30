@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { computeChalk, scaledActivityReward, awardChalk, applyBoardBonus } from "@/game/store";
+import { computeChalk, scaledActivityReward, awardChalk, applyBoardBonus, incrementTotalLogs } from "@/game/store";
 import type { BoardSessionRow, BoardType, MoonboardVariantId } from "./types";
 import { DEFAULT_KILTER_ANGLES } from "./types";
 import { gradeRank, type BoardGradeSystem } from "./grades";
@@ -107,9 +107,9 @@ export async function logBoardSession(userId: string, input: BoardLogInput, prev
     .single();
   if (error) throw error;
 
-  // Credit chalk to the player's running totals immediately.
+  // Credit chalk and increment total logs.
   awardChalk(chalk);
-
+  incrementTotalLogs(1);
 
   return { row: data as BoardSessionRow, chalk, isPR };
 }
@@ -154,6 +154,7 @@ export async function updateBoardSession(id: string, input: BoardEditInput): Pro
 export async function deleteBoardSession(id: string): Promise<void> {
   const { error } = await supabase.from("board_sessions").delete().eq("id", id);
   if (error) throw error;
+  incrementTotalLogs(-1);
 }
 
 // ---------- Hook ----------

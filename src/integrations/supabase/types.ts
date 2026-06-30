@@ -689,6 +689,7 @@ export type Database = {
       get_climber_charts: {
         Args: { target_user: string }
         Returns: {
+          board_sessions: Json
           logs: Json
           strength_sessions: Json
         }[]

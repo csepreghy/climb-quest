@@ -424,3 +424,60 @@ export default function BoulderLogs() {
     </div>
   );
 }
+
+function SentBoardProblems({ sessions }: { sessions: BoardSessionRow[] }) {
+  const problems = useMemo(() => {
+    const map = new Map<string, { name: string; grade: string; grade_system: any; rank: number; count: number; lastDate: string; flashed: boolean; benchmark: boolean }>();
+    for (const s of sessions) {
+      const name = (s.problem_name ?? "").trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      const rank = gradeRank(s.grade, s.grade_system);
+      const cur = map.get(key);
+      if (!cur || rank > cur.rank) {
+        map.set(key, {
+          name,
+          grade: s.grade,
+          grade_system: s.grade_system,
+          rank,
+          count: (cur?.count ?? 0) + 1,
+          lastDate: cur ? (cur.lastDate > s.logged_at ? cur.lastDate : s.logged_at) : s.logged_at,
+          flashed: (cur?.flashed ?? false) || s.is_flash,
+          benchmark: (cur?.benchmark ?? false) || s.is_benchmark,
+        });
+      } else {
+        cur.count += 1;
+        if (s.logged_at > cur.lastDate) cur.lastDate = s.logged_at;
+        if (s.is_flash) cur.flashed = true;
+        if (s.is_benchmark) cur.benchmark = true;
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name));
+  }, [sessions]);
+
+  if (problems.length === 0) return null;
+
+  return (
+    <GameCard className="p-0 overflow-hidden">
+      <div className="px-4 py-3 border-b border-border/40">
+        <h3 className="menu-label">Sent Problems</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Unique named climbs, highest grade first.</p>
+      </div>
+      <div className="divide-y divide-border/40">
+        {problems.map(p => (
+          <div key={p.name} className="px-4 py-2.5 flex items-center justify-between gap-3">
+            <div className="min-w-0 flex items-center gap-2">
+              <div className="text-sm font-medium truncate">{p.name}</div>
+              {p.benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Benchmark</span>}
+              {p.flashed && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              {p.count > 1 && <span className="text-[11px] text-muted-foreground">×{p.count}</span>}
+              <span className="text-sm font-bold tabular-nums text-[hsl(var(--legendary))]">{p.grade}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </GameCard>
+  );
+}

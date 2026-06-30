@@ -323,7 +323,7 @@ export default function Inventory() {
               <p className="text-sm text-muted-foreground italic">No items yet. Visit the shop to gear up.</p>
             </Card>
           ) : (
-            (["buddy", "outfit", "gear", "power"] as ItemGroup[]).map(group => {
+            (["buddy", "outfit", "gear", "power", "board"] as ItemGroup[]).map(group => {
               const groupItems = owned.filter(it => {
                 if (it.group !== group) return false;
                 // Hide equipped (non-consumable) and primed consumables — they already show in the Equipped section.

@@ -24,6 +24,8 @@ import { toast } from "sonner";
 import { Plus, ArrowUp, Trophy, TrendingUp, ChevronRight, Dumbbell } from "lucide-react";
 import { showLevelUpBanner } from "@/components/pixel/LevelUpBanner";
 import { LogModal } from "@/components/LogModal";
+import { TrainingQuickPicker } from "@/components/TrainingQuickPicker";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts";
 import { gradeToVRank, V_SCALE, gradeLabels, resolveGymGradingSystems, type GradingSystem } from "@/game/gyms";
@@ -37,7 +39,8 @@ export default function Dashboard() {
   const next = nextLevel(s);
   const characterName = useCharacterName();
   const [logOpen, setLogOpen] = useState(false);
-  const [logInitialMode, setLogInitialMode] = useState<"boulder-pick" | "strength">("boulder-pick");
+  const [logInitialMode, setLogInitialMode] = useState<"boulder-pick" | "strength" | "board">("boulder-pick");
+
   const [openBadgeId, setOpenBadgeId] = useState<string | null>(null);
   const [tierModalOpen, setTierModalOpen] = useState(false);
   const openBadge = openBadgeId ? BADGES.find(b => b.id === openBadgeId) ?? null : null;
@@ -56,45 +59,44 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 animate-float-up">
       <LogModal open={logOpen} onOpenChange={setLogOpen} initialMode={logInitialMode} />
-      {/* Hero card */}
-      <GameCard tone="accent" className="p-5 sm:p-7">
-        <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">
-          <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
-          <div className="flex-1 min-w-0 text-center sm:text-left">
-            {characterName && (
-              <div className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1">{characterName}</div>
-            )}
-            <div className="menu-label flex items-center gap-2 justify-center sm:justify-start flex-wrap">
-              <span>Level {s.level} · {cur.title}</span>
-              <StrengthTierChip sessions={s.strengthSessions ?? []} onClick={() => setTierModalOpen(true)} />
-            </div>
-            <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
+      {/* Hero card + quick training picker */}
+      <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-stretch">
+        <GameCard tone="accent" className="p-5 sm:p-7">
+          <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">
+            <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
+            <div className="flex-1 min-w-0 text-center sm:text-left">
+              {characterName && (
+                <div className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1">{characterName}</div>
+              )}
+              <div className="menu-label flex items-center gap-2 justify-center sm:justify-start flex-wrap">
+                <span>Level {s.level} · {cur.title}</span>
+                <StrengthTierChip sessions={s.strengthSessions ?? []} onClick={() => setTierModalOpen(true)} />
+              </div>
+              <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
-            <div className="mt-4 text-xs text-muted-foreground">
-              {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
-            </div>
+              <div className="mt-4 text-xs text-muted-foreground">
+                {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
+              </div>
 
-            <EquippedStrip equipped={s.equipped} />
+              <EquippedStrip equipped={s.equipped} />
 
-            <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
-              <GameButton variant="success" onClick={() => { setLogInitialMode("boulder-pick"); setLogOpen(true); }}>
-                <Plus className="h-4 w-4" /> Boulder
-              </GameButton>
-              <GameButton variant="success" onClick={() => { setLogInitialMode("strength"); setLogOpen(true); }}>
-                <Plus className="h-4 w-4" /> Strength
-              </GameButton>
-              <Link to="/hangboard">
-                <GameButton variant="success"><Plus className="h-4 w-4" /> Hangboard</GameButton>
-              </Link>
               {next && s.chalk >= next.cost && (
-                <GameButton variant="primary" onClick={onLevelUp}>
-                  <ArrowUp className="h-4 w-4" /> Level Up
-                </GameButton>
+                <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
+                  <GameButton variant="primary" onClick={onLevelUp}>
+                    <ArrowUp className="h-4 w-4" /> Level Up
+                  </GameButton>
+                </div>
               )}
             </div>
           </div>
-        </div>
-      </GameCard>
+        </GameCard>
+
+        <TrainingQuickPicker
+          className="lg:self-stretch"
+          onPick={(mode) => { setLogInitialMode(mode); setLogOpen(true); }}
+        />
+      </div>
+
 
       {/* Stats */}
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">

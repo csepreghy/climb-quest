@@ -280,24 +280,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function BoardCelebrate({ chalk, isPR, grade, onDone }: { chalk: number; isPR: boolean; grade: string; onDone: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onDone, isPR ? 2600 : 1600);
+    if (isPR) return; // PR requires manual dismiss
+    const t = setTimeout(onDone, 1600);
     return () => clearTimeout(t);
   }, [onDone, isPR]);
 
   if (isPR) {
     return (
-      <div className="relative py-10 text-center overflow-hidden">
-        <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(circle at center, hsl(var(--legendary) / 0.35), transparent 70%)" }} />
-        <div className="relative">
-          <Trophy className="mx-auto h-16 w-16 text-[hsl(var(--legendary))] drop-shadow-[0_0_24px_hsl(var(--legendary)/0.7)] animate-banner-pop" />
-          <div className="mt-4 text-xs uppercase tracking-[0.3em] text-[hsl(var(--legendary))] font-bold">New Highest Grade</div>
-          <div className="mt-2 text-5xl font-extrabold gradient-chalk-text tabular-nums animate-pop-in">{grade}</div>
-          <div className="mt-1 text-sm text-muted-foreground italic">A new ceiling — the board respects you.</div>
-          <div className="mt-5 flex items-center justify-center gap-3 animate-pop-in">
-            <img src={chalkBagImg} alt="Chalk" className="h-12 w-12 object-contain drop-shadow-[0_4px_12px_hsl(var(--chalk-glow)/0.6)]" />
-            <span className="text-4xl font-bold gradient-chalk-text tabular-nums">+{chalk}</span>
-          </div>
+      <div className="relative py-8 text-center">
+        <Trophy className="mx-auto h-12 w-12 text-[hsl(var(--legendary))] drop-shadow-[0_0_8px_hsl(var(--legendary)/0.5)] animate-banner-pop" />
+        <div className="mt-3 text-[11px] uppercase tracking-[0.25em] text-[hsl(var(--legendary))] font-bold">New Highest Grade</div>
+        <div className="mt-1 text-4xl font-extrabold gradient-chalk-text tabular-nums animate-pop-in">{grade}</div>
+        <div className="mt-1 text-xs text-muted-foreground italic">A new ceiling — the board respects you.</div>
+        <div className="mt-4 flex items-center justify-center gap-2 animate-pop-in">
+          <img src={chalkBagImg} alt="Chalk" className="h-9 w-9 object-contain" />
+          <span className="text-3xl font-bold gradient-chalk-text tabular-nums">+{chalk}</span>
+        </div>
+        <div className="mt-5 flex justify-center">
+          <GameButton variant="success" onClick={onDone}>Continue Crushing</GameButton>
         </div>
       </div>
     );
@@ -312,3 +312,4 @@ function BoardCelebrate({ chalk, isPR, grade, onDone }: { chalk: number; isPR: b
     </div>
   );
 }
+

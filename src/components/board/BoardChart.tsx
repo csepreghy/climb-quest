@@ -86,12 +86,12 @@ export function BoardChart() {
             <Tooltip
               contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
               formatter={(v: any, name: string) => {
-                if (name === "Top grade") return [v == null ? "—" : rankToVLabel(Number(v)), name];
+               if (name === "Last grade") return [v == null ? "—" : rankToVLabel(Number(v)), name];
                 return [`${v} climbs`, name];
               }}
             />
             <Area yAxisId="climbs" type="monotone" dataKey="climbs" name="Board climbs" stroke="hsl(var(--rare))" strokeWidth={2} fill="url(#boardClimbGrad)" />
-            <Line yAxisId="grade" type="monotone" dataKey="topRank" name="Top grade" stroke="hsl(var(--legendary))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--legendary))" }} connectNulls />
+            <Line yAxisId="grade" type="monotone" dataKey="lastRank" name="Last grade" stroke="hsl(var(--legendary))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--legendary))" }} connectNulls />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

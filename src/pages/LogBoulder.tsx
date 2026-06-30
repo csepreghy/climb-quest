@@ -15,7 +15,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import Hangboard from "@/pages/Hangboard";
 import { useBoardSessions, deleteBoardSession } from "@/game/board/store";
-import { boardLabel } from "@/game/board/types";
+import { boardLabel, type BoardSessionRow } from "@/game/board/types";
+import { gradeRank } from "@/game/board/grades";
+import moonboardAsset from "@/assets/board-moonboard.png.asset.json";
+import kilterAsset from "@/assets/board-kilter.png.asset.json";
 
 type EntryFilter = "all" | "boulder" | "boss";
 type Tab = "boulders" | "strength" | "hangboard" | "board";

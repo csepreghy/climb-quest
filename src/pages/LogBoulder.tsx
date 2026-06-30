@@ -9,14 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LogModal } from "@/components/LogModal";
 import { DailyCapBar } from "@/components/DailyCapBar";
-import { Plus, Swords, Sparkles, Filter, Pencil, Trash2, Dumbbell } from "lucide-react";
+import { Plus, Swords, Sparkles, Filter, Pencil, Trash2, Dumbbell, Mountain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import Hangboard from "@/pages/Hangboard";
+import { useBoardSessions, deleteBoardSession } from "@/game/board/store";
+import { boardLabel } from "@/game/board/types";
 
 type EntryFilter = "all" | "boulder" | "boss";
-type Tab = "boulders" | "strength" | "hangboard";
+type Tab = "boulders" | "strength" | "hangboard" | "board";
+
 
 export default function BoulderLogs() {
   const s = useGame();
@@ -27,6 +30,8 @@ export default function BoulderLogs() {
   const [editLog, setEditLog] = useState<BoulderLog | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteStrengthId, setDeleteStrengthId] = useState<string | null>(null);
+  const [deleteBoardId, setDeleteBoardId] = useState<string | null>(null);
+  const { sessions: boardSessions, refresh: refreshBoards } = useBoardSessions();
   const [entryFilter, setEntryFilter] = useState<EntryFilter>("all");
   const [grade, setGrade] = useState<string>("all");
   const [gymId, setGymId] = useState<string>("all");
@@ -59,9 +64,34 @@ export default function BoulderLogs() {
     <div className="space-y-5 animate-float-up">
       <LogModal
         open={open}
-        onOpenChange={(v) => { setOpen(v); if (!v) setEditLog(null); }}
+        onOpenChange={(v) => { setOpen(v); if (!v) { setEditLog(null); void refreshBoards(); } }}
         editLog={editLog}
+        initialMode={tab === "board" ? "board" : undefined}
       />
+
+      <AlertDialog open={!!deleteBoardId} onOpenChange={(v) => { if (!v) setDeleteBoardId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this board climb?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the session from your history. This can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (deleteBoardId) {
+                  try { await deleteBoardSession(deleteBoardId); await refreshBoards(); toast.success("Board climb deleted"); }
+                  catch { toast.error("Failed to delete"); }
+                }
+                setDeleteBoardId(null);
+              }}
+            >Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       <AlertDialog open={!!deleteId} onOpenChange={(v) => { if (!v) setDeleteId(null); }}>
         <AlertDialogContent>
@@ -126,7 +156,9 @@ export default function BoulderLogs() {
         {([
           { v: "boulders", label: "Boulders", icon: Sparkles },
           { v: "strength", label: "Strength", icon: Dumbbell },
+          { v: "board", label: "Board", icon: Mountain },
           { v: "hangboard", label: "Hangboard", icon: Dumbbell },
+
         ] as { v: Tab; label: string; icon: typeof Sparkles }[]).map(t => (
           <button
             key={t.v}
@@ -322,9 +354,54 @@ export default function BoulderLogs() {
             </div>
           )}
         </GameCard>
+      ) : tab === "board" ? (
+        <GameCard className="p-0 overflow-hidden">
+          {boardSessions.length === 0 ? (
+            <div className="text-sm text-muted-foreground py-12 text-center">
+              <Mountain className="h-8 w-8 mx-auto mb-2 opacity-60" />
+              No board climbs yet. Send one on the MoonBoard or Kilter!
+            </div>
+          ) : (
+            <div className="divide-y divide-border/40">
+              {boardSessions.map(b => (
+                <div key={b.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex items-center gap-3">
+                    <div className="h-9 w-9 grid place-items-center rounded-lg shrink-0 bg-secondary text-foreground/70">
+                      <Mountain className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate flex items-center gap-2">
+                        {boardLabel(b)}
+                        {b.is_flash && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
+                        {b.is_benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Bench</span>}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {new Date(b.logged_at).toLocaleDateString()} · {b.grade}
+                        {b.problem_name ? ` · ${b.problem_name}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {b.chalk_awarded ? (
+                      <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{b.chalk_awarded}</div>
+                    ) : null}
+                    <button
+                      onClick={() => setDeleteBoardId(b.id)}
+                      aria-label="Delete board climb"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </GameCard>
       ) : (
         <Hangboard />
       )}
+
     </div>
   );
 }

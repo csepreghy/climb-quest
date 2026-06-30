@@ -547,7 +547,7 @@ function SentBoardProblems({ sessions }: { sessions: BoardSessionRow[] }) {
     <GameCard className="p-0 overflow-hidden">
       <div className="px-4 py-3 border-b border-border/40">
         <h3 className="menu-label">Sent Problems</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">Unique named climbs, highest grade first.</p>
+        <p className="text-xs text-muted-foreground mt-0.5">All your completed board problems in one place.</p>
       </div>
       <div className="px-4 py-3 border-b border-border/40 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
         <Input

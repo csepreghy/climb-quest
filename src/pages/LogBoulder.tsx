@@ -64,9 +64,34 @@ export default function BoulderLogs() {
     <div className="space-y-5 animate-float-up">
       <LogModal
         open={open}
-        onOpenChange={(v) => { setOpen(v); if (!v) setEditLog(null); }}
+        onOpenChange={(v) => { setOpen(v); if (!v) { setEditLog(null); void refreshBoards(); } }}
         editLog={editLog}
+        initialMode={tab === "board" ? "board" : undefined}
       />
+
+      <AlertDialog open={!!deleteBoardId} onOpenChange={(v) => { if (!v) setDeleteBoardId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this board climb?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the session from your history. This can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (deleteBoardId) {
+                  try { await deleteBoardSession(deleteBoardId); await refreshBoards(); toast.success("Board climb deleted"); }
+                  catch { toast.error("Failed to delete"); }
+                }
+                setDeleteBoardId(null);
+              }}
+            >Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       <AlertDialog open={!!deleteId} onOpenChange={(v) => { if (!v) setDeleteId(null); }}>
         <AlertDialogContent>

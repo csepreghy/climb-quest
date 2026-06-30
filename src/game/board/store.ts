@@ -47,11 +47,12 @@ export function boardBaseReward(newRank: number, priorMaxRank: number | null): {
   return { base: 25, isPR: false };
 }
 
-/** Reuse the boulder chalk pipeline so equipped/streak/tier/crit/cap bonuses all apply. */
+/** Reuse the boulder chalk pipeline so equipped/streak/tier/crit/cap bonuses all apply,
+ *  then layer on any equipped Board Bonus % (board-only effect). */
 export function computeBoardChalk(boardBase: number, flashed: boolean) {
   const boulderBase = scaledActivityReward("boulder");
   const diffMult = boardBase / Math.max(1, boulderBase);
-  return computeChalk("boulder", [], false, flashed, diffMult);
+  return applyBoardBonus(computeChalk("boulder", [], false, flashed, diffMult));
 }
 
 // ---------- Supabase API ----------

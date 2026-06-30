@@ -113,9 +113,9 @@ export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: 
         </div>
       </DialogHeader>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1 pt-4">
         {/* Board picker */}
-        <div className="grid grid-cols-2 gap-4 p-1">
+        <div className="grid grid-cols-2 gap-4 p-3">
           {([
             { type: "moonboard" as const, label: "MoonBoard", img: moonboardAsset.url, ring: "ring-[hsl(var(--epic))]" },
             { type: "kilter"    as const, label: "Kilter Board", img: kilterAsset.url, ring: "ring-[hsl(var(--rare))]" },

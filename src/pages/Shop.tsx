@@ -404,7 +404,7 @@ function ShopDetailDialog({
   state: ReturnType<typeof useGame>; ignoreLevelReq: boolean;
 }) {
   if (!item) return null;
-  const locked = !ignoreLevelReq && !!(item.levelReq && level < item.levelReq);
+  const locked = false;
   const price = effectivePrice(state, item.price);
   const canAfford = chalk >= price;
   const isConsumable = !!item.consumableBonus;

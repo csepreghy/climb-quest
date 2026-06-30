@@ -156,7 +156,9 @@ export default function BoulderLogs() {
         {([
           { v: "boulders", label: "Boulders", icon: Sparkles },
           { v: "strength", label: "Strength", icon: Dumbbell },
+          { v: "board", label: "Board", icon: Mountain },
           { v: "hangboard", label: "Hangboard", icon: Dumbbell },
+
         ] as { v: Tab; label: string; icon: typeof Sparkles }[]).map(t => (
           <button
             key={t.v}

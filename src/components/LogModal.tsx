@@ -160,6 +160,8 @@ export function LogModal({ open, onOpenChange, editLog, initialMode }: { open: b
           </>
         ) : mode === "strength" ? (
           <StrengthFlow onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
+        ) : mode === "board" ? (
+          <BoardLogModal onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
         ) : mode === "boss-pick" ? (
           <BossPicker
             onBack={() => setMode("boulder-pick")}

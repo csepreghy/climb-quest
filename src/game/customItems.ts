@@ -25,6 +25,7 @@ function rowToItem(r: any, image?: string | null): ShopItem {
   const priceMult = r.price_mult !== undefined && r.price_mult !== null ? Number(r.price_mult) : 1;
   const critPct = Number(r.crit_chance_pct ?? 0);
   const bossPct = Number(r.boss_bonus_pct ?? 0);
+  const boardPct = Number(r.board_bonus_pct ?? 0);
   const gender = (r.gender as "male" | "female" | "unisex" | null) ?? "unisex";
   return {
     id: r.id,
@@ -40,6 +41,7 @@ function rowToItem(r: any, image?: string | null): ShopItem {
     priceMult: priceMult !== 1 ? priceMult : undefined,
     critChancePct: critPct > 0 ? critPct : undefined,
     bossBonusPct: bossPct > 0 ? bossPct : undefined,
+    boardBonusPct: boardPct > 0 ? boardPct : undefined,
     gender: gender !== "unisex" ? gender : undefined,
     bonus: bonusPct > 0
       ? { mult: bonusPct / 100, appliesTo: (r.applies_to ?? "all") as ActivityType[] | "all" }

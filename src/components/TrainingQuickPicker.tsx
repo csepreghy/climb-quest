@@ -11,14 +11,13 @@ type Tile = {
   key: "boulder" | "strength" | "hangboard" | "board";
   label: string;
   image: string;
-  ring: string;
 };
 
 const TILES: Tile[] = [
-  { key: "boulder",   label: "Boulder",   image: pickBoulderImg,        ring: "ring-[hsl(var(--btn-green))]/60" },
-  { key: "strength",  label: "Strength",  image: pullup4,               ring: "ring-[hsl(var(--sky))]/60" },
-  { key: "hangboard", label: "Hangboard", image: hangboardPickImg.url,  ring: "ring-[hsl(270_80%_65%)]/60" },
-  { key: "board",     label: "Board",     image: boardMoonAsset.url,    ring: "ring-[hsl(var(--epic))]/60" },
+  { key: "boulder",   label: "Boulder",   image: pickBoulderImg },
+  { key: "strength",  label: "Strength",  image: pullup4 },
+  { key: "hangboard", label: "Hangboard", image: hangboardPickImg.url },
+  { key: "board",     label: "Board",     image: boardMoonAsset.url },
 ];
 
 export function TrainingQuickPicker({
@@ -38,17 +37,15 @@ export function TrainingQuickPicker({
   }
 
   return (
-    <div className={cn("grid grid-cols-4 gap-2 sm:gap-3 lg:grid-cols-2 lg:w-[300px]", className)}>
+    <div className={cn("grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 lg:w-[300px]", className)}>
       {TILES.map(t => (
         <button
           key={t.key}
           type="button"
           onClick={() => handle(t)}
           className={cn(
-            "group relative overflow-hidden rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-secondary/50",
-            "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
-            "aspect-square w-full hover:ring-4 transition active:translate-y-[2px]",
-            t.ring,
+            "tile-3d group relative overflow-hidden cursor-pointer",
+            "aspect-square w-full hover:-translate-y-0.5 transition active:translate-y-[2px]",
           )}
           aria-label={`Log ${t.label}`}
         >

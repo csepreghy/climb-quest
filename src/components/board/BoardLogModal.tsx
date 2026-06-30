@@ -115,7 +115,7 @@ export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: 
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
         {/* Board picker */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4 p-1">
           {([
             { type: "moonboard" as const, label: "MoonBoard", img: moonboardAsset.url, ring: "ring-[hsl(var(--epic))]" },
             { type: "kilter"    as const, label: "Kilter Board", img: kilterAsset.url, ring: "ring-[hsl(var(--rare))]" },
@@ -127,15 +127,17 @@ export function BoardLogModal({ onBack, onDone }: { onBack: () => void; onDone: 
                 type="button"
                 onClick={() => setBoardType(b.type)}
                 className={cn(
-                  "relative rounded-xl overflow-hidden border-2 border-[hsl(var(--panel-frame))] bg-black/60 transition",
+                  "relative rounded-xl p-1 transition",
                   active ? `ring-4 ${b.ring} shadow-[0_0_24px_-4px_currentColor]` : "opacity-70 hover:opacity-100",
                 )}
               >
-                <div className="aspect-square">
-                  <img src={b.img} alt={b.label} className="h-full w-full object-cover" />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2 py-1.5 text-center text-sm font-bold">
-                  {b.label}
+                <div className="relative overflow-hidden rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-black/60">
+                  <div className="aspect-square scale-[0.95]">
+                    <img src={b.img} alt={b.label} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2 py-1.5 text-center text-sm font-bold">
+                    {b.label}
+                  </div>
                 </div>
               </button>
             );

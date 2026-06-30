@@ -11,7 +11,7 @@ import { useAllItems } from "@/game/customItems";
 import { supabase } from "@/integrations/supabase/client";
 import { resolvedLevel, useLevelOverrides } from "@/game/levelOverrides";
 import { useAuth } from "@/hooks/useAuth";
-import { cn } from "@/lib/utils";
+import { cn, formatChalk } from "@/lib/utils";
 import { ArrowRight, ScrollText, Sparkles, ArrowUp, Swords, Trophy } from "lucide-react";
 import logoImg from "@/assets/climbquest-logo.png";
 import boulderImg from "@/assets/log-boulder.webp";
@@ -700,7 +700,7 @@ function LeaderboardPreviewRow({ row, rank }: { row: LbRow; rank: number }) {
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <img src={chalkBagImg} alt="" className="h-4 w-4" />
-        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{row.total_chalk_earned.toLocaleString()}</span>
+        <span className="text-sm font-bold tabular-nums gradient-chalk-text">{formatChalk(row.total_chalk_earned)}</span>
       </div>
     </div>
   );

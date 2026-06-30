@@ -73,6 +73,8 @@
     /* Solid button fills */
     --btn-orange: 28 95% 58%;
     --btn-orange-shadow: 18 80% 30%;
+    /* Shop discount — lighter than blood red so black overlay text stays readable */
+    --shop-discount: 358 75% 60%;
     --btn-green: 150 60% 45%;
     --btn-green-shadow: 152 70% 20%;
     --btn-purple: 353 55% 50%;        /* alias kept, now red */

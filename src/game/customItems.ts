@@ -142,6 +142,8 @@ export interface CustomItemInput {
   critChancePct?: number;
   /** Extra % chalk on boss attempts/sends. */
   bossBonusPct?: number;
+  /** Extra % chalk on board sessions only. */
+  boardBonusPct?: number;
   /** Gender restriction for Tops/Pants. */
   gender?: "male" | "female" | "unisex";
 }

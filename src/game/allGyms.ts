@@ -9,10 +9,6 @@ export interface AllGymsState extends Omit<GymState, "gyms"> {
   gyms: GymWithSource[];
 }
 
-function buildState(includeAllPublic: boolean): AllGymsState {
-  // NOTE: cannot reference hooks inside here — caller is responsible.
-  throw new Error("internal");
-}
 
 function combine(local: GymState, pub: ReturnType<typeof usePublicGyms>, includeAllPublic: boolean): AllGymsState {
   const localIds = new Set(local.gyms.map(g => g.id));

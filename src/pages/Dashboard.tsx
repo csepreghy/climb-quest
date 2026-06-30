@@ -252,7 +252,7 @@ function EquippedStrip({ equipped, vertical }: { equipped: Partial<Record<Slot, 
   // Subscribe to catalog so strip re-renders once custom item images load on refresh.
   useCustomItems();
   const SLOTS: Slot[] = ["outfit", "bottoms", "shoes", "hat", "chalk", "hand", "accessory", "aura", "buddy", "study", "powerup"];
-  const RARITY_RANK: Record<string, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
+  const RARITY_RANK: Record<string, number> = { mythic: 6, legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
   const equippedItems = SLOTS
     .map(slot => ({ slot, id: equipped[slot] }))
     .filter(e => !!e.id)

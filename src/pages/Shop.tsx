@@ -45,7 +45,7 @@ export default function Shop() {
     const filtered = activeGroup.categories.length === 0 || cat === "All"
       ? inGroup
       : inGroup.filter(i => i.category === cat);
-    const rarityOrder: Record<string, number> = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4 };
+    const rarityOrder: Record<string, number> = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, mythic: 5 };
     return [...filtered].sort((a, b) =>
       (rarityOrder[a.rarity] ?? 99) - (rarityOrder[b.rarity] ?? 99) || a.price - b.price
     );
@@ -151,6 +151,7 @@ function ShopTile({
     rare: "hsl(var(--rare))",
     epic: "hsl(var(--epic))",
     legendary: "hsl(var(--legendary))",
+    mythic: "hsl(var(--mythic))",
   };
   const rarityBorder: Record<string, string> = {
     common: "border-white/80",
@@ -158,6 +159,7 @@ function ShopTile({
     rare: "border-rare",
     epic: "border-epic",
     legendary: "border-legendary",
+    mythic: "border-mythic",
   };
   const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 

@@ -1,6 +1,6 @@
 // ClimbQuest game data: levels, items, badges, boss templates
 
-export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
+export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary" | "mythic";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup" | "buddy" | "board";
 export type ItemGroup = "outfit" | "gear" | "power" | "buddy" | "board";
 
@@ -17,7 +17,7 @@ export type EffectKey = "chalk" | "crit" | "boss" | "discount";
  */
 export function effectAllowed(group: ItemGroup, rarity: Rarity, effect: EffectKey): boolean {
   // Climbing buddies carry a chalk bonus (default 50%, admin-editable). Other perks land later.
-  const epicPlus = rarity === "epic" || rarity === "legendary";
+  const epicPlus = rarity === "epic" || rarity === "legendary" || rarity === "mythic";
   if (group === "buddy") return effect === "chalk";
   if (group === "board") return true; // board items support all four effects
   switch (effect) {
@@ -175,7 +175,7 @@ export const RARITY_COLOR: Record<Rarity, string> = {
   rare: "text-rare border-rare/50",
   epic: "text-epic border-epic/60",
   legendary: "text-legendary border-legendary/60",
-  
+  mythic: "text-mythic border-mythic/60",
 };
 
 // Border ring color around an item's image, by rarity.
@@ -185,5 +185,5 @@ export const RARITY_BORDER: Record<Rarity, string> = {
   rare: "ring-2 ring-rare",
   epic: "ring-2 ring-epic",
   legendary: "ring-2 ring-legendary",
-  
+  mythic: "ring-2 ring-mythic",
 };

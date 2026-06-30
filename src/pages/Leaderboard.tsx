@@ -28,8 +28,9 @@ interface Row {
   gender: Gender;
 }
 
-const RARITY_ORDER: Record<Rarity, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
+const RARITY_ORDER: Record<Rarity, number> = { mythic: 6, legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
 const RARITY_TEXT: Record<Rarity, string> = {
+  mythic: "text-mythic",
   legendary: "text-legendary",
   epic: "text-epic",
   rare: "text-rare",

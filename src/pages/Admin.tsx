@@ -46,7 +46,7 @@ import { useActivityRewards, setActivityRewards } from "@/game/activityRewards";
 import { Dumbbell } from "lucide-react";
 
 
-const RARITIES: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"];
+const RARITIES: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary", "mythic"];
 const GROUP_OPTIONS: { value: ItemGroup; label: string }[] = [
   { value: "outfit", label: "Outfit" },
   { value: "gear", label: "Gear" },

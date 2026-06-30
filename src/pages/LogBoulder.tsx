@@ -590,30 +590,3 @@ function SentBoardProblems({ sessions }: { sessions: BoardSessionRow[] }) {
     </GameCard>
   );
 }
-
-  if (problems.length === 0) return null;
-
-  return (
-    <GameCard className="p-0 overflow-hidden">
-      <div className="px-4 py-3 border-b border-border/40">
-        <h3 className="menu-label">Sent Problems</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">Unique named climbs, highest grade first.</p>
-      </div>
-      <div className="divide-y divide-border/40">
-        {problems.map(p => (
-          <div key={p.name} className="px-4 py-2.5 flex items-center justify-between gap-3">
-            <div className="min-w-0 flex items-center gap-2">
-              <div className="text-sm font-medium truncate">{p.name}</div>
-              {p.benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Benchmark</span>}
-              {p.flashed && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              {p.count > 1 && <span className="text-[11px] text-muted-foreground">×{p.count}</span>}
-              <span className="text-sm font-bold tabular-nums text-[hsl(var(--legendary))]">{p.grade}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </GameCard>
-  );
-}

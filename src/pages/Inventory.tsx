@@ -633,6 +633,16 @@ function specialBonusSummary(eq: ReturnType<typeof useGame>["equipped"]) {
     });
   }
 
+  // Board bonus — sum across items.
+  const boardPct = equipped.reduce((sum, it) => sum + (it.boardBonusPct ?? 0), 0);
+  if (boardPct > 0) {
+    out.push({
+      label: "Board sessions",
+      value: `+${Math.round(boardPct)}%`,
+      tone: "text-[hsl(var(--board-bonus))]",
+    });
+  }
+
   return out;
 }
 

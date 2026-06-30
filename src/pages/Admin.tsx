@@ -767,6 +767,16 @@ function InventoryAdmin() {
               />
               <p className="text-[10px] text-muted-foreground mt-1">Extra % chalk on boss attempts and sends. Sums across equipped items.</p>
             </div>
+            <div>
+              <Label className="text-xs">Board bonus %</Label>
+              <Input
+                type="number"
+                min={0}
+                value={draft.boardBonusPct ?? 0}
+                onChange={e => setDraft(d => ({ ...d, boardBonusPct: Math.max(0, parseInt(e.target.value) || 0) }))}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">Extra % chalk on board sessions only. Sums across equipped items.</p>
+            </div>
           </div>
         </div>
 

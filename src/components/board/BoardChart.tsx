@@ -17,7 +17,7 @@ export function BoardChart() {
     const thisWeekStart = new Date(today);
     thisWeekStart.setDate(today.getDate() - dow);
 
-    type Wk = { ts: number; label: string; climbs: number; topRank: number | null };
+    type Wk = { ts: number; label: string; climbs: number; lastRank: number | null; lastTs: number };
     const weeks: Wk[] = [];
     for (let i = WEEKS - 1; i >= 0; i--) {
       const ws = new Date(thisWeekStart);
@@ -26,7 +26,8 @@ export function BoardChart() {
         ts: ws.getTime(),
         label: ws.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
         climbs: 0,
-        topRank: null,
+        lastRank: null,
+        lastTs: 0,
       });
     }
     const earliest = weeks[0].ts;
@@ -39,11 +40,14 @@ export function BoardChart() {
     };
 
     for (const s of sessions) {
-      const i = idxFor(new Date(s.logged_at));
+      const d = new Date(s.logged_at);
+      const i = idxFor(d);
       if (i < 0) continue;
       weeks[i].climbs += 1;
-      if (weeks[i].topRank === null || s.grade_rank > (weeks[i].topRank as number)) {
-        weeks[i].topRank = s.grade_rank;
+      const ts = d.getTime();
+      if (ts >= weeks[i].lastTs) {
+        weeks[i].lastTs = ts;
+        weeks[i].lastRank = s.grade_rank;
       }
     }
     return weeks;

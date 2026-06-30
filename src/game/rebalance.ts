@@ -9,12 +9,12 @@
 import { ActivityType, BASE_CHALK, effectAllowed, Rarity, ShopItem, Slot } from "./data";
 
 const RARITY_BASE_PRICE: Record<Rarity, number> = {
-  common: 80, uncommon: 250, rare: 700, epic: 7000, legendary: 100000,
+  common: 80, uncommon: 250, rare: 700, epic: 7000, legendary: 100000, mythic: 500000,
 };
 
-/** Rarity contribution factor — legendary is full strength. */
+/** Rarity contribution factor — mythic is full strength. */
 const RARITY_FACTOR: Record<Rarity, number> = {
-  common: 0.05, uncommon: 0.1, rare: 0.2, epic: 0.5, legendary: 1.0,
+  common: 0.05, uncommon: 0.1, rare: 0.2, epic: 0.5, legendary: 1.0, mythic: 1.5,
 };
 
 /** Per-slot share of the endgame budget (relative weight). */
@@ -51,17 +51,17 @@ export const ENDGAME_CEILING = {
 
 /** Per-rarity discount targets (best-wins, doesn't stack). */
 const DISCOUNT_BY_RARITY: Record<Rarity, number> = {
-  common: 0, uncommon: 2, rare: 5, epic: 15, legendary: 30,
+  common: 0, uncommon: 2, rare: 5, epic: 15, legendary: 30, mythic: 45,
 };
 
 /** Outfit chalk bonus magnitudes — generous so high-rarity outfits feel meaningful. */
 const CHALK_BONUS_OUTFIT: Record<Rarity, number> = {
-  common: 3, uncommon: 6, rare: 10, epic: 22, legendary: 40,
+  common: 3, uncommon: 6, rare: 10, epic: 22, legendary: 40, mythic: 60,
 };
 
 /** Power-up chalk bonus magnitudes — smaller (only 1 slot, so per-item can't dominate). */
 const CHALK_BONUS_POWER: Record<Rarity, number> = {
-  common: 1, uncommon: 2, rare: 4, epic: 9, legendary: 16,
+  common: 1, uncommon: 2, rare: 4, epic: 9, legendary: 16, mythic: 24,
 };
 
 /** At epic rarity each item leans into either crit or boss. Legendary gets both. */
@@ -76,12 +76,12 @@ const EPIC_LEAN: Record<Slot, "crit" | "boss"> = {
 
 /** Per-rarity crit chance contributed by one item. */
 const CRIT_BY_RARITY: Record<Rarity, number> = {
-  common: 1, uncommon: 2, rare: 3, epic: 5, legendary: 10,
+  common: 1, uncommon: 2, rare: 3, epic: 5, legendary: 10, mythic: 15,
 };
 
 /** Per-rarity boss bonus contributed by one item. */
 const BOSS_BY_RARITY: Record<Rarity, number> = {
-  common: 2, uncommon: 3, rare: 5, epic: 8, legendary: 15,
+  common: 2, uncommon: 3, rare: 5, epic: 8, legendary: 15, mythic: 22,
 };
 
 /** Slots that can roll discount (study-leaning + powerups). */
@@ -90,7 +90,7 @@ function canDiscount(slot: Slot): boolean {
 }
 
 function hasBothEffects(r: Rarity): boolean {
-  return r === "epic" || r === "legendary";
+  return r === "epic" || r === "legendary" || r === "mythic";
 }
 
 function niceRound(n: number): number {
@@ -145,7 +145,7 @@ export function targetBossBonusPct(item: ShopItem): number {
 
 /** Lowest level at which an item of this rarity may unlock. */
 const MIN_LEVEL_BY_RARITY: Record<Rarity, number> = {
-  common: 1, uncommon: 1, rare: 2, epic: 4, legendary: 6,
+  common: 1, uncommon: 1, rare: 2, epic: 4, legendary: 6, mythic: 8,
 };
 const MAX_LEVEL = 10;
 
@@ -175,7 +175,7 @@ export function targetPrice(item: ShopItem, levelReq: number): number {
 /** Assign a level requirement per item: cheaper-first within rarity, respecting the rarity floor. */
 function computeLevelReqs(items: ShopItem[]): Map<string, number> {
   const out = new Map<string, number>();
-  const groups: Record<Rarity, ShopItem[]> = { common: [], uncommon: [], rare: [], epic: [], legendary: [] };
+  const groups: Record<Rarity, ShopItem[]> = { common: [], uncommon: [], rare: [], epic: [], legendary: [], mythic: [] };
   for (const it of items) groups[it.rarity].push(it);
   (Object.keys(groups) as Rarity[]).forEach(r => {
     const list = groups[r].slice().sort((a, b) => {
@@ -258,7 +258,7 @@ export function proposeRebalance(
     }
     // No useless items: if every effect rounded to 0, give a small chalk/boss/crit floor.
     if (next.bonusPct === 0 && next.discountPct === 0 && next.critPct === 0 && next.bossPct === 0) {
-      const floor = item.rarity === "legendary" ? 5 : item.rarity === "epic" ? 3 : item.rarity === "rare" ? 2 : 1;
+      const floor = item.rarity === "mythic" ? 7 : item.rarity === "legendary" ? 5 : item.rarity === "epic" ? 3 : item.rarity === "rare" ? 2 : 1;
       if (effectAllowed(item.group, item.rarity, "chalk")) next.bonusPct = floor;
       else if (effectAllowed(item.group, item.rarity, "boss")) next.bossPct = floor;
       else if (effectAllowed(item.group, item.rarity, "crit")) next.critPct = floor;

@@ -373,13 +373,133 @@ export default function BoulderLogs() {
   );
 }
 
+function BoardTabContent({
+  sessions,
+  onEdit,
+  onDelete,
+}: {
+  sessions: BoardSessionRow[];
+  onEdit: (b: BoardSessionRow) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [sub, setSub] = useState<"logs" | "sent">("logs");
+  const [visible, setVisible] = useState(10);
+
+  if (sessions.length === 0) {
+    return (
+      <GameCard className="p-0 overflow-hidden">
+        <div className="text-sm text-muted-foreground py-12 text-center">
+          <Mountain className="h-8 w-8 mx-auto mb-2 opacity-60" />
+          No board climbs yet. Send one on the MoonBoard or Kilter!
+        </div>
+      </GameCard>
+    );
+  }
+
+  const shown = sessions.slice(0, visible);
+  const canLoadMore = sessions.length > visible;
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-2">
+        {([
+          { v: "logs", label: "History" },
+          { v: "sent", label: "Sent Problems" },
+        ] as const).map(t => (
+          <button
+            key={t.v}
+            onClick={() => setSub(t.v)}
+            className={cn(
+              "px-3 py-2 rounded-lg text-sm font-medium border transition",
+              sub === t.v
+                ? "bg-secondary border-border text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {sub === "logs" ? (
+        <GameCard className="p-0 overflow-hidden">
+          <div className="divide-y divide-border/40">
+            {shown.map(b => {
+              const icon = b.board_type === "moonboard" ? moonboardAsset.url : kilterAsset.url;
+              const name = (b.problem_name ?? "").trim();
+              return (
+                <div key={b.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-lg shrink-0 overflow-hidden border border-border bg-black/40">
+                      <img src={icon} alt={b.board_type} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate flex items-center gap-2">
+                        {name ? (
+                          <span className="truncate">{name}</span>
+                        ) : (
+                          <>
+                            <span className="truncate">{b.grade}</span>
+                            <span className="text-xs text-muted-foreground italic">Unnamed</span>
+                          </>
+                        )}
+                        {b.is_flash && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
+                        {b.is_benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Benchmark</span>}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {new Date(b.logged_at).toLocaleDateString()}{name ? ` · ${b.grade}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {b.chalk_awarded ? (
+                      <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{b.chalk_awarded}</div>
+                    ) : null}
+                    <button
+                      onClick={() => onEdit(b)}
+                      aria-label="Edit board climb"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(b.id)}
+                      aria-label="Delete board climb"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {canLoadMore && (
+            <div className="p-3 border-t border-border/40 flex justify-center">
+              <GameButton variant="secondary" size="sm" onClick={() => setVisible(v => v + 10)}>
+                Load more ({sessions.length - visible} left)
+              </GameButton>
+            </div>
+          )}
+        </GameCard>
+      ) : (
+        <SentBoardProblems sessions={sessions} />
+      )}
+    </>
+  );
+}
+
 function SentBoardProblems({ sessions }: { sessions: BoardSessionRow[] }) {
+  const [search, setSearch] = useState("");
+  const [gradeFilter, setGradeFilter] = useState<string>("all");
+  const [boardFilter, setBoardFilter] = useState<string>("all");
+
   const problems = useMemo(() => {
-    const map = new Map<string, { name: string; grade: string; grade_system: any; rank: number; count: number; lastDate: string; flashed: boolean; benchmark: boolean }>();
+    const map = new Map<string, { name: string; grade: string; grade_system: any; board_type: string; rank: number; count: number; lastDate: string; flashed: boolean; benchmark: boolean }>();
     for (const s of sessions) {
       const name = (s.problem_name ?? "").trim();
       if (!name) continue;
-      const key = name.toLowerCase();
+      const key = `${s.board_type}::${name.toLowerCase()}`;
       const rank = gradeRank(s.grade, s.grade_system);
       const cur = map.get(key);
       if (!cur || rank > cur.rank) {
@@ -387,6 +507,7 @@ function SentBoardProblems({ sessions }: { sessions: BoardSessionRow[] }) {
           name,
           grade: s.grade,
           grade_system: s.grade_system,
+          board_type: s.board_type,
           rank,
           count: (cur?.count ?? 0) + 1,
           lastDate: cur ? (cur.lastDate > s.logged_at ? cur.lastDate : s.logged_at) : s.logged_at,
@@ -402,6 +523,73 @@ function SentBoardProblems({ sessions }: { sessions: BoardSessionRow[] }) {
     }
     return Array.from(map.values()).sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name));
   }, [sessions]);
+
+  const grades = useMemo(() => Array.from(new Set(problems.map(p => p.grade))), [problems]);
+
+  const filtered = useMemo(() => problems.filter(p => {
+    if (gradeFilter !== "all" && p.grade !== gradeFilter) return false;
+    if (boardFilter !== "all" && p.board_type !== boardFilter) return false;
+    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  }), [problems, gradeFilter, boardFilter, search]);
+
+  return (
+    <GameCard className="p-0 overflow-hidden">
+      <div className="px-4 py-3 border-b border-border/40">
+        <h3 className="menu-label">Sent Problems</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Unique named climbs, highest grade first.</p>
+      </div>
+      <div className="px-4 py-3 border-b border-border/40 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+        <Input
+          placeholder="Search by name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="h-9"
+        />
+        <Select value={gradeFilter} onValueChange={setGradeFilter}>
+          <SelectTrigger className="h-9 sm:w-32"><SelectValue placeholder="Grade" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All grades</SelectItem>
+            {grades.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={boardFilter} onValueChange={setBoardFilter}>
+          <SelectTrigger className="h-9 sm:w-36"><SelectValue placeholder="Board" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All boards</SelectItem>
+            <SelectItem value="moonboard">MoonBoard</SelectItem>
+            <SelectItem value="kilter">Kilter</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      {filtered.length === 0 ? (
+        <div className="text-sm text-muted-foreground py-8 text-center">No problems match your filters.</div>
+      ) : (
+        <div className="divide-y divide-border/40">
+          {filtered.map(p => {
+            const icon = p.board_type === "moonboard" ? moonboardAsset.url : kilterAsset.url;
+            return (
+              <div key={`${p.board_type}-${p.name}`} className="px-4 py-2.5 flex items-center justify-between gap-3">
+                <div className="min-w-0 flex items-center gap-2">
+                  <div className="h-6 w-6 rounded shrink-0 overflow-hidden border border-border bg-black/40">
+                    <img src={icon} alt={p.board_type} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="text-sm font-medium truncate">{p.name}</div>
+                  {p.benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Benchmark</span>}
+                  {p.flashed && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  {p.count > 1 && <span className="text-[11px] text-muted-foreground">×{p.count}</span>}
+                  <span className="text-sm font-bold tabular-nums text-[hsl(var(--legendary))]">{p.grade}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </GameCard>
+  );
+}
 
   if (problems.length === 0) return null;
 

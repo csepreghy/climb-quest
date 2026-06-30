@@ -9,14 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LogModal } from "@/components/LogModal";
 import { DailyCapBar } from "@/components/DailyCapBar";
-import { Plus, Swords, Sparkles, Filter, Pencil, Trash2, Dumbbell } from "lucide-react";
+import { Plus, Swords, Sparkles, Filter, Pencil, Trash2, Dumbbell, Mountain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import Hangboard from "@/pages/Hangboard";
+import { useBoardSessions, deleteBoardSession } from "@/game/board/store";
+import { boardLabel } from "@/game/board/types";
 
 type EntryFilter = "all" | "boulder" | "boss";
-type Tab = "boulders" | "strength" | "hangboard";
+type Tab = "boulders" | "strength" | "hangboard" | "board";
+
 
 export default function BoulderLogs() {
   const s = useGame();

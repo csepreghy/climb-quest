@@ -61,9 +61,14 @@ export default function Dashboard() {
       <LogModal open={logOpen} onOpenChange={setLogOpen} initialMode={logInitialMode} />
       {/* Hero card + quick training picker */}
       <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-stretch">
-        <GameCard tone="accent" className="p-5 sm:p-7">
+      <GameCard tone="accent" className="p-5 sm:p-7">
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">
-            <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
+            <div className="flex items-start gap-4">
+              <ClimberAvatar level={s.level} gender={s.gender} equipped={s.equipped} size="xl" glow />
+              <div className="sm:hidden">
+                <EquippedStrip equipped={s.equipped} vertical />
+              </div>
+            </div>
             <div className="flex-1 min-w-0 text-center sm:text-left">
               {characterName && (
                 <div className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1">{characterName}</div>
@@ -78,7 +83,9 @@ export default function Dashboard() {
                 {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
               </div>
 
-              <EquippedStrip equipped={s.equipped} />
+              <div className="hidden sm:block">
+                <EquippedStrip equipped={s.equipped} />
+              </div>
 
               {next && s.chalk >= next.cost && (
                 <div className="mt-5 flex flex-wrap gap-2 justify-center sm:justify-start">
@@ -241,7 +248,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }) {
+function EquippedStrip({ equipped, vertical }: { equipped: Partial<Record<Slot, string>>; vertical?: boolean }) {
   // Subscribe to catalog so strip re-renders once custom item images load on refresh.
   useCustomItems();
   const SLOTS: Slot[] = ["outfit", "bottoms", "shoes", "hat", "chalk", "hand", "accessory", "aura", "buddy", "study", "powerup"];
@@ -255,31 +262,34 @@ function EquippedStrip({ equipped }: { equipped: Partial<Record<Slot, string>> }
     .slice(0, 5);
 
   return (
-    <div className="mt-4">
+    <div className={vertical ? "" : "mt-4"}>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Equipped</div>
       {equippedItems.length === 0 ? (
         <Link to="/shop" className="block text-xs text-muted-foreground italic hover:text-foreground">
           Nothing equipped — visit the shop to gear up.
         </Link>
       ) : (
-        <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+        <div className={cn(
+          "flex gap-2",
+          vertical ? "flex-col items-center" : "flex-wrap justify-center sm:justify-start"
+        )}>
           {equippedItems.map(({ slot, item }, idx) => (
             <Link
               key={slot}
               to="/inventory"
               className={cn(
-                "h-14 w-14 rounded-lg bg-background/50 grid place-items-center transition-transform hover:-translate-y-0.5",
+                "rounded-lg bg-background/50 grid place-items-center transition-transform hover:-translate-y-0.5",
+                vertical ? "h-12 w-12" : "h-14 w-14",
                 RARITY_BORDER[item!.rarity],
-                // Show 3 on mobile, 4 on sm, 5 on md+
-                idx >= 3 && "hidden sm:grid",
-                idx >= 4 && "sm:hidden md:grid",
+                !vertical && idx >= 3 && "hidden sm:grid",
+                !vertical && idx >= 4 && "sm:hidden md:grid",
               )}
               title={item!.name}
             >
               {isImageEmoji(item!.emoji) ? (
                 <SmartImage src={item!.emoji} alt={item!.name} loaderSize={20} className="h-full w-full object-contain p-1" />
               ) : (
-                <span className="text-2xl">{item!.emoji}</span>
+                <span className={vertical ? "text-xl" : "text-2xl"}>{item!.emoji}</span>
               )}
             </Link>
           ))}

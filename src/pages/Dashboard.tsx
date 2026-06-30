@@ -18,7 +18,7 @@ import { HangboardChart } from "@/components/hangboard/HangboardChart";
 import { BoardChart } from "@/components/board/BoardChart";
 import { useBoardSessions } from "@/game/board/store";
 import { tierFor } from "@/game/strengthTier";
-import { cn } from "@/lib/utils";
+import { cn, formatChalk } from "@/lib/utils";
 
 import { toast } from "sonner";
 import { Plus, ArrowUp, Trophy, TrendingUp, ChevronRight, Dumbbell } from "lucide-react";
@@ -106,13 +106,20 @@ export default function Dashboard() {
 
 
       {/* Stats */}
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="All-time chalk" value={s.totalChalkEarned} />
+      <div className="grid gap-2 grid-cols-3 lg:grid-cols-8">
+        <StatCard label="All-time chalk" value={formatChalk(s.totalChalkEarned)} />
         <StatCard label="Total logs" value={s.stats.totalLogs} />
         <StatCard label="Total sends" value={s.stats.totalSends} />
         <StatCard label="Total flashes" value={s.stats.totalFlashes} />
         <StatCard label="Bosses defeated" value={s.stats.bossesSent} />
         <StatCard label="Strength sessions" value={(s.strengthSessions ?? []).length} />
+        <StatCard label="Board climbs" value={boardSessions.length} />
+        <StatCard
+          label="Best board"
+          value={boardSessions.length
+            ? boardSessions.reduce((a, b) => ((b.grade_rank ?? 0) > (a.grade_rank ?? 0) ? b : a)).grade
+            : "—"}
+        />
       </div>
 
       <ChalkOverTimeChart logs={s.logs} gyms={gyms} strengthSessions={s.strengthSessions ?? []} />
@@ -239,11 +246,12 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value }: { label: string; value: number | string }) {
+  const text = typeof value === "string" ? value : value.toLocaleString();
   return (
-    <GameCard className="p-4 text-center">
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="text-2xl font-bold mt-1 gradient-chalk-text tabular-nums">{value.toLocaleString()}</div>
+    <GameCard className="px-2 py-2.5 text-center">
+      <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground leading-tight line-clamp-2 min-h-[2em]">{label}</div>
+      <div className="text-base sm:text-lg lg:text-xl font-bold mt-0.5 gradient-chalk-text tabular-nums leading-none">{text}</div>
     </GameCard>
   );
 }

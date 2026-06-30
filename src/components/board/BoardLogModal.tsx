@@ -261,7 +261,7 @@ export function BoardLogModal({ onBack, onDone, editSession }: { onBack: () => v
 
         <div className="flex justify-end pt-2">
           <GameButton variant="success" onClick={submit} disabled={submitting}>
-            <Plus className="h-4 w-4" /> {submitting ? "Logging..." : "Log Send"}
+            <Plus className="h-4 w-4" /> {submitting ? (isEdit ? "Saving..." : "Logging...") : (isEdit ? "Save Changes" : "Log Send")}
           </GameButton>
         </div>
       </div>

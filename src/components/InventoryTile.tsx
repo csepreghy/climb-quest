@@ -59,6 +59,7 @@ export function InventoryTile({
     rare: "hsl(var(--rare))",
     epic: "hsl(var(--epic))",
     legendary: "hsl(var(--legendary))",
+    mythic: "hsl(var(--mythic))",
   };
   const rarityBorder: Record<string, string> = {
     common: "border-white/80",
@@ -66,6 +67,7 @@ export function InventoryTile({
     rare: "border-rare",
     epic: "border-epic",
     legendary: "border-legendary",
+    mythic: "border-mythic",
   };
   const glowColor = rarityHsl[item.rarity] ?? rarityHsl.common;
 

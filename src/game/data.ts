@@ -7,25 +7,27 @@ export type ItemGroup = "outfit" | "gear" | "power" | "buddy" | "board";
 /** Player level required before the Climbing Buddy slot unlocks. */
 export const BUDDY_SLOT_UNLOCK_LEVEL = 1;
 
-export type EffectKey = "chalk" | "crit" | "boss" | "discount";
+export type EffectKey = "chalk" | "crit" | "boss" | "board" | "discount";
 
 /** Single source of truth for which effects an item may carry, by group + rarity.
  *  - chalk    → outfit, power-ups, board (any rarity)
  *  - discount → power-ups, board (any rarity)
  *  - crit     → any group, epic+ only (deterministic crit-vs-boss split per slot at epic; both at legendary)
  *  - boss     → any group, epic+ only
+ *  - board    → any group, epic+ only (mirrors boss). Applies only to board climbing.
  */
 export function effectAllowed(group: ItemGroup, rarity: Rarity, effect: EffectKey): boolean {
   // Climbing buddies carry a chalk bonus (default 50%, admin-editable). Other perks land later.
   const epicPlus = rarity === "epic" || rarity === "legendary" || rarity === "mythic";
   if (group === "buddy") return effect === "chalk";
-  if (group === "board") return true; // board items support all four effects
+  if (group === "board") return true; // board items support all five effects
   switch (effect) {
     case "chalk":    return group === "outfit" || group === "power";
     case "discount": return group === "power";
-    // Gear is the home of crit/boss at every rarity; other groups only at epic+.
+    // Gear is the home of crit/boss/board at every rarity; other groups only at epic+.
     case "crit":     return group === "gear" || epicPlus;
     case "boss":     return group === "gear" || epicPlus;
+    case "board":    return group === "gear" || epicPlus;
   }
 }
 

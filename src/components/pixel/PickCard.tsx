@@ -9,6 +9,7 @@ export function PickCard({
   onClick,
   ring,
   imageClassName,
+  size = "default",
 }: {
   image?: string;
   content?: ReactNode;
@@ -17,7 +18,9 @@ export function PickCard({
   onClick?: () => void;
   ring: string;
   imageClassName?: string;
+  size?: "default" | "sm";
 }) {
+  const isSm = size === "sm";
   const Comp: any = onClick ? "button" : "div";
   return (
     <Comp
@@ -26,12 +29,15 @@ export function PickCard({
       className={cn(
         "group rounded-xl text-left border-2 border-[hsl(var(--panel-frame))] bg-secondary/50 overflow-hidden w-full h-full",
         "shadow-[inset_0_2px_0_hsl(0_0%_100%/0.06),inset_0_-3px_0_hsl(0_0%_0%/0.4),0_8px_18px_-10px_hsl(0_0%_0%/0.6)]",
-        "flex sm:flex sm:flex-col",
+        isSm ? "flex flex-col" : "flex sm:flex sm:flex-col",
         onClick && "hover:ring-4 transition active:translate-y-[2px]",
         ring,
       )}
     >
-      <div className="h-24 w-24 shrink-0 sm:h-auto sm:w-full sm:aspect-square overflow-hidden bg-black/60 grid place-items-center">
+      <div className={cn(
+        "shrink-0 overflow-hidden bg-black/60 grid place-items-center",
+        isSm ? "h-auto w-full aspect-square" : "h-24 w-24 sm:h-auto sm:w-full sm:aspect-square"
+      )}>
         {content
           ? content
           : image && (
@@ -42,9 +48,9 @@ export function PickCard({
               />
             )}
       </div>
-      <div className="p-3 sm:p-4 min-w-0 flex-1 sm:flex-1">
-        <div className="font-display font-bold text-base sm:text-lg">{title}</div>
-        <div className="text-xs text-muted-foreground mt-1 leading-snug">{desc}</div>
+      <div className={cn("min-w-0 flex-1", isSm ? "p-1.5" : "p-3 sm:p-4")}>
+        <div className={cn("font-display font-bold leading-tight", isSm ? "text-[11px]" : "text-base sm:text-lg")}>{title}</div>
+        <div className={cn("text-muted-foreground leading-snug", isSm ? "text-[10px] mt-0.5" : "text-xs mt-1")}>{desc}</div>
       </div>
     </Comp>
   );

@@ -104,13 +104,14 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
             <DialogHeader>
               <DialogTitle>What are you logging?</DialogTitle>
             </DialogHeader>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
+            <div className="grid grid-cols-4 gap-2 mt-2">
               <PickCard
                 image={pickBoulderImg}
                 title="Boulder"
                 desc="Log a climb — single send, project, or boss battle."
                 onClick={() => setMode("boulder-pick")}
                 ring="ring-[hsl(var(--btn-green))]/60"
+                size="sm"
               />
               <PickCard
                 image={pullup4}
@@ -118,6 +119,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
                 desc="Core or pull-ups — track sets, reps, and rest."
                 onClick={() => setMode("strength")}
                 ring="ring-[hsl(var(--sky))]/60"
+                size="sm"
               />
               <PickCard
                 image={hangboardPickImg.url}
@@ -125,6 +127,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
                 desc="Beastmaker workouts — hangs count toward your Strength Tier."
                 onClick={() => { onOpenChange(false); navigate("/hangboard"); }}
                 ring="ring-[hsl(270_80%_65%)]/60"
+                size="sm"
               />
               <PickCard
                 image={boardMoonAsset.url}
@@ -132,6 +135,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
                 desc="MoonBoard or Kilter — earn chalk based on your top grade."
                 onClick={() => setMode("board")}
                 ring="ring-[hsl(var(--epic))]/60"
+                size="sm"
               />
             </div>
           </>

@@ -346,6 +346,11 @@ export function bindGameRemoteSync(saver: ((s: State) => void) | null) {
   }
 }
 export function getGameStateSnapshot(): State { return state; }
+/** Credit raw chalk to the player and persist (also syncs remotely). */
+export function awardChalk(amount: number) {
+  if (!amount) return;
+  set(s => ({ ...s, chalk: s.chalk + amount, totalChalkEarned: s.totalChalkEarned + amount }));
+}
 export function replaceGameState(next: State) {
   state = { ...initialState(), ...next };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}

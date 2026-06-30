@@ -71,7 +71,7 @@ const EPIC_LEAN: Record<Slot, "crit" | "boss"> = {
   // boss-leaning (big-effort / power slots)
   powerup: "boss", outfit: "boss", bottoms: "boss", shoes: "boss", title: "boss",
   // buddy — perks not yet implemented; default lean (effects gated off in effectAllowed)
-  buddy: "boss",
+  buddy: "boss", board: "crit",
 };
 
 /** Per-rarity crit chance contributed by one item. */

@@ -56,7 +56,7 @@ export function BoardChart() {
   return (
     <GameCard className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <TrendingUp className="h-3 w-3" /> Board · climbs &amp; top grade
+        <TrendingUp className="h-3 w-3" /> Board · climbs &amp; last grade
         <span className="ml-2 text-[10px] font-normal text-muted-foreground normal-case tracking-normal">({sessions.length} total)</span>
       </h3>
       <div className="h-56 -ml-2">

@@ -15,6 +15,8 @@ import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
 import { useCharacterName } from "@/game/characterName";
 import { StrengthTierChip, StrengthTierModal } from "@/components/StrengthTierStrip";
 import { HangboardChart } from "@/components/hangboard/HangboardChart";
+import { BoardChart } from "@/components/board/BoardChart";
+import { useBoardSessions } from "@/game/board/store";
 import { tierFor } from "@/game/strengthTier";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +43,9 @@ export default function Dashboard() {
   const openBadge = openBadgeId ? BADGES.find(b => b.id === openBadgeId) ?? null : null;
   const openBadgeHave = openBadge ? s.badges.includes(openBadge.id) : false;
   const strengthTierInfo = tierFor(s.strengthSessions ?? []);
+  const { sessions: boardSessions } = useBoardSessions();
+  const hangboardCount = (s.strengthSessions ?? []).filter((ss: any) => (ss.workout as string) === "hangboard").length;
+
 
   
 
@@ -105,7 +110,10 @@ export default function Dashboard() {
 
       <StrengthRepsHoldChart sessions={s.strengthSessions ?? []} />
 
-      <HangboardChart />
+      {boardSessions.length > 0 && <BoardChart />}
+
+      {hangboardCount > 0 && <HangboardChart />}
+
 
 
 

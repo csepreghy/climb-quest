@@ -43,8 +43,8 @@ export interface CardLabConfig {
 
 export const DEFAULT_CONFIG: CardLabConfig = {
   hue: 220,
-  sat: 28,
-  light: 5,
+  sat: 24,
+  light: 12,
   texOpacity: 0.45,
   texFreq: 0.85,
   texTint: "dark",
@@ -68,7 +68,7 @@ export const DEFAULT_CONFIG: CardLabConfig = {
   frameRingEnabled: false,
   frameRingWidth: 2,
   dropShadowEnabled: true,
-  dropShadowStrength: 0.55,
+  dropShadowStrength: 0.72,
   linkLipToBottom: true,
 };
 

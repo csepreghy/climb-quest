@@ -354,9 +354,54 @@ export default function BoulderLogs() {
             </div>
           )}
         </GameCard>
+      ) : tab === "board" ? (
+        <GameCard className="p-0 overflow-hidden">
+          {boardSessions.length === 0 ? (
+            <div className="text-sm text-muted-foreground py-12 text-center">
+              <Mountain className="h-8 w-8 mx-auto mb-2 opacity-60" />
+              No board climbs yet. Send one on the MoonBoard or Kilter!
+            </div>
+          ) : (
+            <div className="divide-y divide-border/40">
+              {boardSessions.map(b => (
+                <div key={b.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex items-center gap-3">
+                    <div className="h-9 w-9 grid place-items-center rounded-lg shrink-0 bg-secondary text-foreground/70">
+                      <Mountain className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate flex items-center gap-2">
+                        {boardLabel(b)}
+                        {b.is_flash && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[hsl(var(--btn-orange))]/20 text-[hsl(var(--btn-orange))] border border-[hsl(var(--btn-orange))]/40">Flash</span>}
+                        {b.is_benchmark && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">Bench</span>}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {new Date(b.logged_at).toLocaleDateString()} · {b.grade}
+                        {b.problem_name ? ` · ${b.problem_name}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {b.chalk_awarded ? (
+                      <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{b.chalk_awarded}</div>
+                    ) : null}
+                    <button
+                      onClick={() => setDeleteBoardId(b.id)}
+                      aria-label="Delete board climb"
+                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </GameCard>
       ) : (
         <Hangboard />
       )}
+
     </div>
   );
 }

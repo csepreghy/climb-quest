@@ -20,7 +20,7 @@ export function ShopPreviewTile({ item, className, smallImage }: { item: ShopIte
 
   const badges: { text: string; cls: string }[] = [];
   if (chalkPct > 0) badges.push({ text: `+${chalkPct}%`, cls: "bg-chalk-glow/90 text-background border-chalk-glow" });
-  if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--btn-orange))]/90 text-background border-[hsl(var(--btn-orange))]" });
+  if (discountPct > 0) badges.push({ text: `−${discountPct}%`, cls: "bg-[hsl(var(--shop-discount))]/95 text-black border-[hsl(var(--shop-discount))]" });
   if (critPct > 0) badges.push({ text: `+${critPct}%`, cls: "bg-[hsl(var(--epic))]/90 text-background border-[hsl(var(--epic))]" });
   if (bossPct > 0) badges.push({ text: `+${bossPct}%`, cls: "bg-legendary/90 text-background border-legendary" });
   if (boardPct > 0) badges.push({ text: `+${boardPct}%`, cls: "bg-[hsl(var(--board-bonus))]/90 text-background border-[hsl(var(--board-bonus))]" });

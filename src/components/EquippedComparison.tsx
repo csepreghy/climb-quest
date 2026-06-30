@@ -30,7 +30,7 @@ export function EquippedComparison({ item, className }: { item: ShopItem; classN
     { label: "Critical Chance", from: a.crit, to: b.crit, cls: "text-[hsl(var(--epic))]" },
     { label: "Boss Bonus", from: a.boss, to: b.boss, cls: "text-legendary" },
     { label: "Board Bonus", from: a.board, to: b.board, cls: "text-[hsl(var(--board-bonus))]" },
-    { label: "Shop Discount", from: a.discount, to: b.discount, cls: "text-[hsl(var(--btn-orange))]" },
+    { label: "Shop Discount", from: a.discount, to: b.discount, cls: "text-[hsl(var(--shop-discount))]" },
   ].filter((r) => r.from !== 0 || r.to !== 0);
 
   return (

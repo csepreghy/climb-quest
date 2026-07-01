@@ -5,7 +5,7 @@ import pullup4 from "@/assets/strength-pullup-4.webp";
 import hangboardPickImg from "@/assets/log-hangboard.webp.asset.json";
 import boardMoonAsset from "@/assets/board-moonboard.png.asset.json";
 
-export type QuickPickMode = "boulder-pick" | "strength" | "board";
+export type QuickPickMode = "boulder" | "strength" | "board";
 
 type Tile = {
   key: "boulder" | "strength" | "hangboard" | "board";

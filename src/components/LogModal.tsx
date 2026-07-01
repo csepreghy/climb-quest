@@ -1272,6 +1272,7 @@ type SessionLogEntry = {
   sets: StrengthSet[];
   chalk: number;
   mode?: "hold" | "pushup";
+  critPre?: number | null;
 };
 
 function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
@@ -1343,19 +1344,20 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       const dateISO = new Date(date).toISOString();
       const { chalk, breakdown } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{chalk} Chalk · {WORKOUT_META[workout].title} L{level}</div>);
-      const finalEntry: SessionLogEntry = { workout, level, sets: newSets, chalk, mode: setMode };
+      const critPre = findCritPre(breakdown);
+      const finalEntry: SessionLogEntry = { workout, level, sets: newSets, chalk, mode: setMode, critPre };
       if (sessionLogs.length > 0) {
         setSessionLogs(prev => [...prev, finalEntry]);
         setStep("session-summary");
       } else {
-        setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image, critPre: findCritPre(breakdown) });
+        setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image, critPre });
         setStep("celebrate");
       }
     } else if (action === "new-workout") {
       const dateISO = new Date(date).toISOString();
-      const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
+      const { chalk, breakdown } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{chalk} Chalk · {WORKOUT_META[workout].title} L{level} · pick next workout</div>);
-      setSessionLogs(prev => [...prev, { workout, level, sets: newSets, chalk, mode: setMode }]);
+      setSessionLogs(prev => [...prev, { workout, level, sets: newSets, chalk, mode: setMode, critPre: findCritPre(breakdown) }]);
       setSets([]);
       setReps(5);
       setStep("workout");
@@ -1445,6 +1447,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     {repCount > 0 ? ` · ${repCount} reps` : ""}
                     {holdCount > 0 ? ` · ${holdCount} hold${holdCount === 1 ? "" : "s"}` : ""}
                   </div>
+                  {typeof l.critPre === "number" && l.critPre > 0 && (
+                    <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[hsl(var(--epic))]/20 text-[hsl(var(--epic))] border border-[hsl(var(--epic))]/40">
+                      💥 Crit! {l.critPre} × 2
+                    </div>
+                  )}
                 </div>
                 <div className="text-right font-display font-bold text-[hsl(var(--btn-orange))]">+{l.chalk}</div>
               </div>

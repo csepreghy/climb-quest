@@ -212,7 +212,7 @@ function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k
                 : "border-border bg-secondary/40 hover:border-[hsl(var(--btn-orange))]/60"
             )}
           >
-            <div className={cn("h-10 w-10 shrink-0 rounded-md overflow-hidden ring-1", active ? "ring-[hsl(var(--btn-orange))]/60" : `${o.ring}/40`)}>
+            <div className={cn("h-20 w-20 shrink-0 rounded-md overflow-hidden ring-1", active ? "ring-[hsl(var(--btn-orange))]/60" : `${o.ring}/40`)}>
               <img src={o.img} alt="" className="h-full w-full object-cover" />
             </div>
             <span className={cn("text-sm font-bold", active ? "text-foreground" : "text-muted-foreground")}>{o.label}</span>

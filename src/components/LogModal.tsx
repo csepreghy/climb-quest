@@ -192,29 +192,37 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 // ===================== KIND TOGGLE =====================
 
 function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k: "boulder" | "boss") => void }) {
+  const opts = [
+    { v: "boulder" as const, label: "Boulder", img: boulderImg, ring: "ring-[hsl(var(--btn-green))]" },
+    { v: "boss" as const, label: "Boss Project", img: bossImg, ring: "ring-[hsl(var(--boss))]" },
+  ];
   return (
     <div className="grid grid-cols-2 gap-2">
-      {([
-        { v: "boulder" as const, label: "Regular" },
-        { v: "boss" as const, label: "Boss Project" },
-      ]).map(o => (
-        <button
-          key={o.v}
-          type="button"
-          onClick={() => onChange(o.v)}
-          className={cn(
-            "rounded-lg px-3 py-2 text-sm font-bold border-2 transition",
-            kind === o.v
-              ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
-              : "border-border bg-secondary/40 text-muted-foreground hover:border-[hsl(var(--btn-orange))]/60"
-          )}
-        >
-          {o.label}
-        </button>
-      ))}
+      {opts.map(o => {
+        const active = kind === o.v;
+        return (
+          <button
+            key={o.v}
+            type="button"
+            onClick={() => onChange(o.v)}
+            className={cn(
+              "flex items-center gap-2 rounded-lg border-2 p-1.5 pr-3 transition text-left",
+              active
+                ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/10 ring-2 ring-[hsl(var(--btn-orange))]/40"
+                : "border-border bg-secondary/40 hover:border-[hsl(var(--btn-orange))]/60"
+            )}
+          >
+            <div className={cn("h-10 w-10 shrink-0 rounded-md overflow-hidden ring-1", active ? "ring-[hsl(var(--btn-orange))]/60" : `${o.ring}/40`)}>
+              <img src={o.img} alt="" className="h-full w-full object-cover" />
+            </div>
+            <span className={cn("text-sm font-bold", active ? "text-foreground" : "text-muted-foreground")}>{o.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
+
 
 // ===================== BOULDER FORM =====================
 

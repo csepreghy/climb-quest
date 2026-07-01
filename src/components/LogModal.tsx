@@ -185,7 +185,7 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
             onDone={() => onOpenChange(false)}
           />
         ) : kind === "boss" ? (
-          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
+          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} onSwitchToBoulder={editLog ? undefined : () => { setKind("boulder"); setMode("form"); }} />
         ) : (
           <BoulderForm
             onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")}

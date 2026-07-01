@@ -79,9 +79,6 @@ export default function Dashboard() {
               </div>
               <p className="text-muted-foreground mt-2 text-sm italic">"{cur.desc}"</p>
 
-              <div className="mt-4 text-xs text-muted-foreground">
-                {next ? <>Next: <span className="text-foreground font-medium">{next.title}</span></> : "Max level"}
-              </div>
 
               <div className="hidden sm:block">
                 <EquippedStrip equipped={s.equipped} />

@@ -668,6 +668,9 @@ function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: 
       </DialogHeader>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+        {onSwitchToBoulder && !existingBoss && !editLog && (
+          <KindToggle kind="boss" onChange={(k) => { if (k === "boulder") onSwitchToBoulder(); }} />
+        )}
         {existingBoss && (
           <BossSummary boss={existingBoss} gymName={gym?.name} holdColorHex={holdColor?.hex} holdColorHex2={holdColor?.hex2} holdColorName={holdColor?.name} />
         )}

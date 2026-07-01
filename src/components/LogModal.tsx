@@ -1447,6 +1447,11 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
                     {repCount > 0 ? ` · ${repCount} reps` : ""}
                     {holdCount > 0 ? ` · ${holdCount} hold${holdCount === 1 ? "" : "s"}` : ""}
                   </div>
+                  {typeof l.critPre === "number" && l.critPre > 0 && (
+                    <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[hsl(var(--epic))]/20 text-[hsl(var(--epic))] border border-[hsl(var(--epic))]/40">
+                      💥 Crit! {l.critPre} × 2
+                    </div>
+                  )}
                 </div>
                 <div className="text-right font-display font-bold text-[hsl(var(--btn-orange))]">+{l.chalk}</div>
               </div>

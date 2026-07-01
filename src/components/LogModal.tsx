@@ -1344,19 +1344,20 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
       const dateISO = new Date(date).toISOString();
       const { chalk, breakdown } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{chalk} Chalk · {WORKOUT_META[workout].title} L{level}</div>);
-      const finalEntry: SessionLogEntry = { workout, level, sets: newSets, chalk, mode: setMode };
+      const critPre = findCritPre(breakdown);
+      const finalEntry: SessionLogEntry = { workout, level, sets: newSets, chalk, mode: setMode, critPre };
       if (sessionLogs.length > 0) {
         setSessionLogs(prev => [...prev, finalEntry]);
         setStep("session-summary");
       } else {
-        setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image, critPre: findCritPre(breakdown) });
+        setCelebrate({ chalk, label: `${WORKOUT_META[workout].title} L${level} · ${newSets.length} set${newSets.length === 1 ? "" : "s"}`, image: workoutLevelImage(workout, level, setMode) ?? WORKOUT_META[workout].image, critPre });
         setStep("celebrate");
       }
     } else if (action === "new-workout") {
       const dateISO = new Date(date).toISOString();
-      const { chalk } = logStrength({ workout, level, sets: newSets, date: dateISO });
+      const { chalk, breakdown } = logStrength({ workout, level, sets: newSets, date: dateISO });
       toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{chalk} Chalk · {WORKOUT_META[workout].title} L{level} · pick next workout</div>);
-      setSessionLogs(prev => [...prev, { workout, level, sets: newSets, chalk, mode: setMode }]);
+      setSessionLogs(prev => [...prev, { workout, level, sets: newSets, chalk, mode: setMode, critPre: findCritPre(breakdown) }]);
       setSets([]);
       setReps(5);
       setStep("workout");

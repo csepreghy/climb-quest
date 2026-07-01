@@ -211,6 +211,33 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
   );
 }
 
+// ===================== KIND TOGGLE =====================
+
+function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k: "boulder" | "boss") => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {([
+        { v: "boulder" as const, label: "Regular" },
+        { v: "boss" as const, label: "Boss Project" },
+      ]).map(o => (
+        <button
+          key={o.v}
+          type="button"
+          onClick={() => onChange(o.v)}
+          className={cn(
+            "rounded-lg px-3 py-2 text-sm font-bold border-2 transition",
+            kind === o.v
+              ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
+              : "border-border bg-secondary/40 text-muted-foreground hover:border-[hsl(var(--btn-orange))]/60"
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ===================== BOULDER FORM =====================
 
 function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () => void; onDone: () => void; onSwitchToBoss?: () => void; editLog?: BoulderLog | null }) {

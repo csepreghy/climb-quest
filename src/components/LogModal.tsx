@@ -193,11 +193,11 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 
 function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k: "boulder" | "boss") => void }) {
   const opts = [
-    { v: "boulder" as const, label: "Boulder", img: boulderImg, ring: "ring-[hsl(var(--btn-green))]" },
+    { v: "boulder" as const, label: "Boulder", img: boulderImg, ring: "ring-[hsl(var(--sky))]" },
     { v: "boss" as const, label: "Boss Project", img: bossImg, ring: "ring-[hsl(var(--boss))]" },
   ];
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="flex gap-3">
       {opts.map(o => {
         const active = kind === o.v;
         return (
@@ -206,16 +206,18 @@ function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k
             type="button"
             onClick={() => onChange(o.v)}
             className={cn(
-              "flex items-center gap-2 rounded-lg border-2 p-1.5 pr-3 transition text-left",
-              active
-                ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/10 ring-2 ring-[hsl(var(--btn-orange))]/40"
-                : "border-border bg-secondary/40 hover:border-[hsl(var(--btn-orange))]/60"
+              "relative rounded-xl p-1 transition",
+              active ? `ring-4 ${o.ring}` : "opacity-70 hover:opacity-100",
             )}
           >
-            <div className={cn("h-20 w-20 shrink-0 rounded-md overflow-hidden ring-1", active ? "ring-[hsl(var(--btn-orange))]/60" : `${o.ring}/40`)}>
-              <img src={o.img} alt="" className="h-full w-full object-cover" />
+            <div className="relative overflow-hidden rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-black/60">
+              <div className="aspect-[4/3] w-40 scale-[0.95]">
+                <img src={o.img} alt={o.label} className="h-full w-full object-cover" />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2 py-1.5 text-center text-sm font-bold">
+                {o.label}
+              </div>
             </div>
-            <span className={cn("text-sm font-bold", active ? "text-foreground" : "text-muted-foreground")}>{o.label}</span>
           </button>
         );
       })}

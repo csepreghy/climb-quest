@@ -283,10 +283,11 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   const [useRange, setUseRange] = useState(!!editLog?.gradeMax);
   useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
 
-  const [activity, setActivity] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder" | "project_boulder">>(
-    (editLog?.activity as any) ?? "boulder"
+  const [activity, setActivity] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder" | "project_boulder"> | null>(
+    (editLog?.activity as any) ?? null
   );
-  const [attemptType, setAttemptType] = useState<AttemptType>(editLog?.attemptType ?? "send");
+  const [attemptType, setAttemptType] = useState<AttemptType | null>(editLog?.attemptType ?? null);
+  const [step, setStep] = useState<"main" | "effort">("main");
   const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
   const [notes, setNotes] = useState(editLog?.notes ?? "");
   const [celebrating, setCelebrating] = useState<{ total: number; critPre: number | null } | null>(null);

@@ -883,7 +883,7 @@ function BossSummary({ boss, gymName, holdColorHex, holdColorHex2, holdColorName
   );
 }
 
-function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void; onPickExisting: (b: Boss) => void; onPickNew: () => void }) {
+function BossPicker({ onBack, onPickExisting, onPickNew, onSwitchToBoulder }: { onBack: () => void; onPickExisting: (b: Boss) => void; onPickNew: () => void; onSwitchToBoulder?: () => void }) {
   const s = useGame();
   const gymState = useGyms();
   const active = activeBossProjects(s);
@@ -900,6 +900,13 @@ function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void;
           Keep track of up to {MAX_ACTIVE_BOSSES} boss projects. Each one gives you {BOSS_DEADLINE_DAYS} day to defeat.
         </DialogDescription>
       </DialogHeader>
+
+      {onSwitchToBoulder && (
+        <div className="pt-2">
+          <KindToggle kind="boss" onChange={(k) => { if (k === "boulder") onSwitchToBoulder(); }} />
+        </div>
+      )}
+
 
       <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
         {active.length === 0 && (

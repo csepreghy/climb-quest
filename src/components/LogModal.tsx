@@ -193,7 +193,7 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 
 function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k: "boulder" | "boss") => void }) {
   const opts = [
-    { v: "boulder" as const, label: "Boulder", img: boulderImg, ring: "ring-[hsl(var(--sky))]" },
+    { v: "boulder" as const, label: "Boulder", img: boulderImg, ring: "ring-[hsl(197_100%_47%)]" },
     { v: "boss" as const, label: "Boss Project", img: bossImg, ring: "ring-[hsl(var(--boss))]" },
   ];
   return (
@@ -207,11 +207,11 @@ function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k
             onClick={() => onChange(o.v)}
             className={cn(
               "relative rounded-xl p-1 transition",
-              active ? `ring-4 ${o.ring}` : "opacity-70 hover:opacity-100",
+              active ? `ring-4 ${o.ring}` : "ring-2 ring-[hsl(var(--panel-frame))] opacity-70 hover:opacity-100",
             )}
           >
-            <div className="relative overflow-hidden rounded-xl border-2 border-[hsl(var(--panel-frame))] bg-black/60">
-              <div className="aspect-[4/3] w-40 scale-[0.95]">
+            <div className="relative overflow-hidden rounded-xl bg-black/60">
+              <div className="aspect-square w-[200px]">
                 <img src={o.img} alt={o.label} className="h-full w-full object-cover" />
               </div>
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2 py-1.5 text-center text-sm font-bold">

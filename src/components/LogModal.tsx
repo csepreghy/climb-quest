@@ -64,9 +64,10 @@ import { BoardLogModal } from "@/components/board/BoardLogModal";
 import boardMoonAsset from "@/assets/board-moonboard.png.asset.json";
 
 type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing" | "board";
+type InitialMode = "pick" | "boulder-pick" | "boulder" | "strength" | "board";
 type Kind = "boulder" | "boss";
 
-export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSession }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode; editBoardSession?: import("@/game/board/types").BoardSessionRow | null }) {
+export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSession }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: InitialMode; editBoardSession?: import("@/game/board/types").BoardSessionRow | null }) {
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
   const [selectedBoss, setSelectedBoss] = useState<Boss | null>(null);
@@ -80,7 +81,9 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
         setKind(editLog.isBoss ? "boss" : "boulder");
         setMode("form");
       } else {
-        setMode(initialMode ?? "pick");
+        const im = initialMode ?? "pick";
+        if (im === "boulder") { setKind("boulder"); setMode("form"); }
+        else { setMode(im); }
         setSelectedBoss(null);
       }
     }

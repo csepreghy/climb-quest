@@ -114,9 +114,10 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
                 image={pickBoulderImg}
                 title="Boulder"
                 desc="Log a climb — single send, project, or boss battle."
-                onClick={() => setMode("boulder-pick")}
+                onClick={() => { setKind("boulder"); setMode("form"); }}
                 ring="ring-[hsl(var(--btn-green))]/60"
               />
+
               <PickCard
                 image={pullup4}
                 title="Strength"

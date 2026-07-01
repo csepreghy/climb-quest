@@ -30,7 +30,7 @@ export function TrainingQuickPicker({
   const navigate = useNavigate();
 
   function handle(t: Tile) {
-    if (t.key === "boulder") onPick("boulder-pick");
+    if (t.key === "boulder") onPick("boulder");
     else if (t.key === "strength") onPick("strength");
     else if (t.key === "board") onPick("board");
     else if (t.key === "hangboard") navigate("/hangboard");

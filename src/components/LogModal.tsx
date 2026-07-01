@@ -354,12 +354,11 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       </DialogHeader>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto px-2 pt-1 pb-2">
-        {!editLog && onSwitchToBoss && (
-          <KindToggle kind="boulder" onChange={(k) => { if (k === "boss") onSwitchToBoss(); }} />
-        )}
-
         {step === "main" ? (
           <>
+            {!editLog && onSwitchToBoss && (
+              <KindToggle kind="boulder" onChange={(k) => { if (k === "boss") onSwitchToBoss(); }} />
+            )}
             {gymState.gyms.length === 0 && (
               <div className="text-xs rounded-md border border-border bg-secondary/40 px-3 py-2 text-muted-foreground">
                 No gyms set up yet — you can still log this climb. <a href="/gym" className="font-semibold text-foreground underline underline-offset-2">Add a gym</a> to track hold colors and your gym's grading.

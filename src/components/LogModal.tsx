@@ -19,6 +19,8 @@ import pickBoulderImg from "@/assets/log-pick-boulder.webp";
 import hangboardPickImg from "@/assets/log-hangboard.webp.asset.json";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import bossImg from "@/assets/log-boss.webp";
+import effortMediumImg from "@/assets/effort-medium.png.asset.json";
+import effortHardImg from "@/assets/effort-hard.png.asset.json";
 import strengthImg from "@/assets/log-strength.webp";
 import strengthCoreImg from "@/assets/strength-core.webp";
 import core1 from "@/assets/strength-core-1.webp";

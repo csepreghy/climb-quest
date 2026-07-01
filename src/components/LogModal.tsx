@@ -141,40 +141,16 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
               />
             </div>
           </>
-        ) : mode === "boulder-pick" ? (
-          <>
-            <DialogHeader>
-              <div className="flex items-center gap-3">
-                <button onClick={() => setMode("pick")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
-                <DialogTitle>Log a climb</DialogTitle>
-              </div>
-            </DialogHeader>
-            <div className="grid sm:grid-cols-2 gap-3 mt-2">
-              <PickCard
-                image={boulderImg}
-                title="Boulder"
-                desc="Within your abilities — first try, or several attempts in a single session."
-                onClick={() => { setKind("boulder"); setMode("form"); }}
-                ring="ring-[hsl(var(--btn-green))]/60"
-              />
-              <PickCard
-                image={bossImg}
-                title="Boss Project"
-                desc="Hard. Multi-session grind. Your nemesis."
-                onClick={openBossFlow}
-                ring="ring-[hsl(var(--boss))]/70"
-              />
-            </div>
-          </>
         ) : mode === "strength" ? (
           <StrengthFlow onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
         ) : mode === "board" ? (
           <BoardLogModal onBack={() => editBoardSession ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editSession={editBoardSession ?? null} />
         ) : mode === "boss-pick" ? (
           <BossPicker
-            onBack={() => setMode("boulder-pick")}
+            onBack={() => setMode("pick")}
             onPickExisting={(b) => { setSelectedBoss(b); setMode("boss-existing"); }}
             onPickNew={() => { setSelectedBoss(null); setMode("boss-new"); }}
+            onSwitchToBoulder={() => { setKind("boulder"); setMode("form"); }}
           />
         ) : mode === "boss-existing" && selectedBoss ? (
           <BossForm
@@ -190,15 +166,16 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
           />
 
         ) : kind === "boss" ? (
-          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} onSwitchToBoulder={editLog ? undefined : () => { setKind("boulder"); setMode("form"); }} />
+          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} onSwitchToBoulder={editLog ? undefined : () => { setKind("boulder"); setMode("form"); }} />
         ) : (
           <BoulderForm
-            onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")}
+            onBack={() => editLog ? onOpenChange(false) : setMode("pick")}
             onDone={() => onOpenChange(false)}
             onSwitchToBoss={openBossFlow}
             editLog={editLog ?? null}
           />
         )}
+
       </DialogContent>
     </Dialog>
   );

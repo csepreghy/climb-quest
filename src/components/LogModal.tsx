@@ -725,7 +725,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: 
         </div>
       </DialogHeader>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto overflow-x-hidden pr-1">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto px-2 pt-1 pb-2">
         {onSwitchToBoulder && !existingBoss && !editLog && (
           <KindToggle kind="boss" onChange={(k) => { if (k === "boulder") onSwitchToBoulder(); }} />
         )}

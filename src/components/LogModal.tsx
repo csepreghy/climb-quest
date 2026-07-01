@@ -529,7 +529,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       </div>
 
 
-      <Dialog open={projectPromptOpen} onOpenChange={(o) => { setProjectPromptOpen(o); if (!o) setAttemptType("send"); }}>
+      <Dialog open={projectPromptOpen} onOpenChange={(o) => { setProjectPromptOpen(o); if (!o) setAttemptType(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center">Log this as a Boss Project?</DialogTitle>
@@ -546,7 +546,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
             <GameButton variant="primary" size="md" className="w-full" onClick={() => { setProjectPromptOpen(false); onSwitchToBoss?.(); }}>
               Yes, log as Boss Project
             </GameButton>
-            <GameButton variant="ghost" size="sm" className="w-full" onClick={() => { setProjectPromptOpen(false); setAttemptType("send"); }}>
+            <GameButton variant="ghost" size="sm" className="w-full" onClick={() => { setProjectPromptOpen(false); setAttemptType(null); }}>
               No, it's just a boulder
             </GameButton>
           </div>

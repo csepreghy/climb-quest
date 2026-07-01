@@ -19,6 +19,8 @@ import pickBoulderImg from "@/assets/log-pick-boulder.webp";
 import hangboardPickImg from "@/assets/log-hangboard.webp.asset.json";
 import chalkBagImg from "@/assets/chalk-bag.png";
 import bossImg from "@/assets/log-boss.webp";
+import effortMediumImg from "@/assets/effort-medium.png.asset.json";
+import effortHardImg from "@/assets/effort-hard.png.asset.json";
 import strengthImg from "@/assets/log-strength.webp";
 import strengthCoreImg from "@/assets/strength-core.webp";
 import core1 from "@/assets/strength-core-1.webp";
@@ -64,9 +66,10 @@ import { BoardLogModal } from "@/components/board/BoardLogModal";
 import boardMoonAsset from "@/assets/board-moonboard.png.asset.json";
 
 type Mode = "pick" | "boulder-pick" | "form" | "strength" | "boss-pick" | "boss-new" | "boss-existing" | "board";
+type InitialMode = "pick" | "boulder-pick" | "boulder" | "strength" | "board";
 type Kind = "boulder" | "boss";
 
-export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSession }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: Mode; editBoardSession?: import("@/game/board/types").BoardSessionRow | null }) {
+export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSession }: { open: boolean; onOpenChange: (v: boolean) => void; editLog?: BoulderLog | null; initialMode?: InitialMode; editBoardSession?: import("@/game/board/types").BoardSessionRow | null }) {
   const [mode, setMode] = useState<Mode>("pick");
   const [kind, setKind] = useState<Kind>("boulder");
   const [selectedBoss, setSelectedBoss] = useState<Boss | null>(null);
@@ -80,7 +83,9 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
         setKind(editLog.isBoss ? "boss" : "boulder");
         setMode("form");
       } else {
-        setMode(initialMode ?? "pick");
+        const im = initialMode ?? "pick";
+        if (im === "boulder") { setKind("boulder"); setMode("form"); }
+        else { setMode(im); }
         setSelectedBoss(null);
       }
     }
@@ -180,9 +185,11 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
           <BossForm
             onBack={() => setMode("boss-pick")}
             onDone={() => onOpenChange(false)}
+            onSwitchToBoulder={() => { setKind("boulder"); setMode("form"); }}
           />
+
         ) : kind === "boss" ? (
-          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} />
+          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} onSwitchToBoulder={editLog ? undefined : () => { setKind("boulder"); setMode("form"); }} />
         ) : (
           <BoulderForm
             onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")}
@@ -200,6 +207,33 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
   return (
     <div className={cn("h-14 w-14 shrink-0 rounded-lg overflow-hidden border-2 border-[hsl(var(--panel-frame))]", ring)}>
       <img src={src} alt={alt} className="h-full w-full object-cover" />
+    </div>
+  );
+}
+
+// ===================== KIND TOGGLE =====================
+
+function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k: "boulder" | "boss") => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {([
+        { v: "boulder" as const, label: "Regular" },
+        { v: "boss" as const, label: "Boss Project" },
+      ]).map(o => (
+        <button
+          key={o.v}
+          type="button"
+          onClick={() => onChange(o.v)}
+          className={cn(
+            "rounded-lg px-3 py-2 text-sm font-bold border-2 transition",
+            kind === o.v
+              ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
+              : "border-border bg-secondary/40 text-muted-foreground hover:border-[hsl(var(--btn-orange))]/60"
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -249,10 +283,11 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   const [useRange, setUseRange] = useState(!!editLog?.gradeMax);
   useEffect(() => { if (grades.length && !grades.includes(grade)) setGrade(grades[0]); }, [grades.join("|")]);
 
-  const [activity, setActivity] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder" | "project_boulder">>(
-    (editLog?.activity as any) ?? "boulder"
+  const [activity, setActivity] = useState<Extract<ActivityType, "warmup_boulder" | "boulder" | "hard_boulder" | "project_boulder"> | null>(
+    (editLog?.activity as any) ?? null
   );
-  const [attemptType, setAttemptType] = useState<AttemptType>(editLog?.attemptType ?? "send");
+  const [attemptType, setAttemptType] = useState<AttemptType | null>(editLog?.attemptType ?? null);
+  const [step, setStep] = useState<"main" | "effort">("main");
   const [styles, setStyles] = useState<Style[]>(editLog?.styles ?? []);
   const [notes, setNotes] = useState(editLog?.notes ?? "");
   const [celebrating, setCelebrating] = useState<{ total: number; critPre: number | null } | null>(null);
@@ -268,7 +303,9 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
     [grade, gs, ceiling],
   );
   const preview = useMemo(
-    () => computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat),
+    () => (activity && attemptType)
+      ? computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat)
+      : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activity, attemptType, styles.join(","), diffMult],
   );
@@ -278,6 +315,10 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   }
 
   function submit() {
+    if (!activity || !attemptType) {
+      toast.error("Pick an effort and attempt first");
+      return;
+    }
     if (attemptType === "project" && !editLog) {
       setProjectPromptOpen(true);
       return;
@@ -325,136 +366,170 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
       </DialogHeader>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-        {gymState.gyms.length === 0 && (
-          <div className="text-xs rounded-md border border-border bg-secondary/40 px-3 py-2 text-muted-foreground">
-            No gyms set up yet — you can still log this climb. <a href="/gym" className="font-semibold text-foreground underline underline-offset-2">Add a gym</a> to track hold colors and your gym's grading.
-          </div>
+        {!editLog && onSwitchToBoss && (
+          <KindToggle kind="boulder" onChange={(k) => { if (k === "boss") onSwitchToBoss(); }} />
         )}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Date">
-            <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          </Field>
-          <Field label="Gym">
-            <Select value={gymId} onValueChange={setGymId} disabled={gymState.gyms.length === 0}>
-              <SelectTrigger><SelectValue placeholder="Pick a gym" /></SelectTrigger>
-              <SelectContent>{gymState.gyms.map(g => <SelectItem key={g.id} value={g.id}>{g.name}{g.primary ? " ★" : ""}</SelectItem>)}</SelectContent>
-            </Select>
-          </Field>
-          <Field label="Grading system">
-            <Select value={gsId} onValueChange={setGsId} disabled={availableSystems.length <= 1}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {availableSystems.map(g => (
-                  <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label={useRange ? "Grade (min)" : "Grade"}>
-            <div className="flex gap-2">
-              <Select value={grade} onValueChange={setGrade}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
-              </Select>
-              <button type="button" onClick={() => setUseRange(r => !r)}
-                className="text-xs px-2 rounded-md border border-border bg-secondary/50 whitespace-nowrap">
-                {useRange ? "Single" : "Range"}
-              </button>
+
+        {step === "main" ? (
+          <>
+            {gymState.gyms.length === 0 && (
+              <div className="text-xs rounded-md border border-border bg-secondary/40 px-3 py-2 text-muted-foreground">
+                No gyms set up yet — you can still log this climb. <a href="/gym" className="font-semibold text-foreground underline underline-offset-2">Add a gym</a> to track hold colors and your gym's grading.
+              </div>
+            )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Date">
+                <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
+              </Field>
+              <Field label="Gym">
+                <Select value={gymId} onValueChange={setGymId} disabled={gymState.gyms.length === 0}>
+                  <SelectTrigger><SelectValue placeholder="Pick a gym" /></SelectTrigger>
+                  <SelectContent>{gymState.gyms.map(g => <SelectItem key={g.id} value={g.id}>{g.name}{g.primary ? " ★" : ""}</SelectItem>)}</SelectContent>
+                </Select>
+              </Field>
+              <Field label={useRange ? "Grade (min)" : "Grade"}>
+                <div className="flex gap-2">
+                  <Select value={grade} onValueChange={setGrade}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
+                  </Select>
+                  <button type="button" onClick={() => setUseRange(r => !r)}
+                    className="text-xs px-2 rounded-md border border-border bg-secondary/50 whitespace-nowrap">
+                    {useRange ? "Single" : "Range"}
+                  </button>
+                </div>
+              </Field>
+              {useRange && (
+                <Field label="Grade (max)">
+                  <Select value={gradeMax || grade} onValueChange={setGradeMax}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
+                  </Select>
+                </Field>
+              )}
+              <Field label="Hold color">
+                {gym && gym.holdColors.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {gym.holdColors.map(c => (
+                      <button key={c.id} type="button" onClick={() => setHoldColorId(c.id === holdColorId ? "" : c.id)}
+                        title={c.name}
+                        className={cn("h-8 w-8 rounded-full border-2 transition",
+                          holdColorId === c.id ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40" : "border-[hsl(var(--panel-frame))] hover:border-[hsl(var(--btn-orange))]")}
+                        style={{ background: c.hex2 ? `linear-gradient(90deg, ${c.hex} 0 50%, ${c.hex2} 50% 100%)` : c.hex }} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground italic">Add hold colors in My Gym.</div>
+                )}
+              </Field>
             </div>
-          </Field>
-          {useRange && (
-            <Field label="Grade (max)">
-              <Select value={gradeMax || grade} onValueChange={setGradeMax}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
-              </Select>
+
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {STYLES.map(st => {
+                  const on = styles.includes(st);
+                  return (
+                    <button key={st} type="button" onClick={() => toggleStyle(st)}
+                      className={cn("text-xs px-2.5 py-1 rounded-full border-2 capitalize transition",
+                        on
+                          ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
+                          : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
+                      {st}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Field label="Notes">
+              <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Beta unlocked. Tried not to scream." rows={2} />
             </Field>
-          )}
-          <Field label="Boulder type">
-            <Select value={activity} onValueChange={(v) => setActivity(v as typeof activity)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="warmup_boulder">Warm-up · +{BASE_CHALK.warmup_boulder}</SelectItem>
-                <SelectItem value="boulder">Regular · +{BASE_CHALK.boulder}</SelectItem>
-                <SelectItem value="hard_boulder">Hard · +{BASE_CHALK.hard_boulder}</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="Hold color">
-            {gym && gym.holdColors.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {gym.holdColors.map(c => (
-                  <button key={c.id} type="button" onClick={() => setHoldColorId(c.id === holdColorId ? "" : c.id)}
-                    title={c.name}
-                    className={cn("h-8 w-8 rounded-full border-2 transition",
-                      holdColorId === c.id ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40" : "border-[hsl(var(--panel-frame))] hover:border-[hsl(var(--btn-orange))]")}
-                    style={{ background: c.hex2 ? `linear-gradient(90deg, ${c.hex} 0 50%, ${c.hex2} 50% 100%)` : c.hex }} />
+          </>
+        ) : (
+          <>
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Effort</Label>
+              <p className="text-[11px] text-muted-foreground mt-1 mb-2 italic">This is not about how hard the boulder is, but how hard it was for you to do.</p>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { v: "warmup_boulder" as const, label: "Easy", desc: "Low effort, I can do them back to back a few times without rest", img: boulderImg },
+                  { v: "boulder" as const, label: "Medium", desc: "Had to try harder, but I didn't have to put in 100%", img: effortMediumImg as unknown as string },
+                  { v: "hard_boulder" as const, label: "Hard", desc: "Took quite some effort, could have fallen in a few places", img: effortHardImg as unknown as string },
+                ]).map(o => (
+                  <button
+                    key={o.v}
+                    type="button"
+                    onClick={() => setActivity(o.v)}
+                    className={cn(
+                      "rounded-lg overflow-hidden border-2 transition text-left flex flex-col",
+                      activity === o.v
+                        ? "border-[hsl(var(--btn-orange))] ring-2 ring-[hsl(var(--btn-orange))]/40 bg-[hsl(var(--btn-orange))]/10"
+                        : "border-border bg-secondary/40 hover:border-[hsl(var(--btn-orange))]/60"
+                    )}
+                  >
+                    <div className="aspect-square w-full overflow-hidden bg-black/30">
+                      <img src={o.img} alt={o.label} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="p-2 space-y-1">
+                      <div className="text-sm font-bold">{o.label}</div>
+                      <div className="text-[10px] leading-tight text-muted-foreground">{o.desc}</div>
+                    </div>
+                  </button>
                 ))}
               </div>
-            ) : (
-              <div className="text-xs text-muted-foreground italic">Add hold colors in My Gym.</div>
-            )}
-          </Field>
-        </div>
+            </div>
 
-        <div>
-          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Attempt</Label>
-          <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {([
-              { v: "flash", label: "Flash ⚡", desc: "First try" },
-              { v: "send", label: "Send 🏆", desc: "Multi-try, 1 sesh" },
-              { v: "repeat", label: "Repeat 🔁", desc: "Done it before" },
-              { v: "project", label: "Project 🎯", desc: "Multi-session" },
-            ] as { v: AttemptType; label: string; desc: string }[]).map(o => (
-              <button key={o.v} type="button"
-                onClick={() => {
-                  setAttemptType(o.v);
-                  if (o.v === "project" && !editLog && onSwitchToBoss) {
-                    setProjectPromptOpen(true);
-                  }
-                }}
-                className={cn("rounded-lg p-2.5 text-left border-2 transition",
-                  attemptType === o.v
-                    ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15"
-                    : "border-border bg-secondary/40 hover:border-[hsl(var(--btn-orange))]/60")}>
-                <div className="text-sm font-bold">{o.label}</div>
-                <div className="text-[10px] text-muted-foreground">{o.desc}</div>
-              </button>
-            ))}
-          </div>
-        </div>
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Attempt</Label>
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {([
+                  { v: "flash", label: "Flash ⚡", desc: "First try" },
+                  { v: "send", label: "Send 🏆", desc: "Multi-try, 1 sesh" },
+                  { v: "repeat", label: "Repeat 🔁", desc: "Done it before" },
+                  { v: "project", label: "Project 🎯", desc: "Multi-session" },
+                ] as { v: AttemptType; label: string; desc: string }[]).map(o => (
+                  <button key={o.v} type="button"
+                    onClick={() => {
+                      setAttemptType(o.v);
+                      if (o.v === "project" && !editLog && onSwitchToBoss) {
+                        setProjectPromptOpen(true);
+                      }
+                    }}
+                    className={cn("rounded-lg p-2.5 text-left border-2 transition",
+                      attemptType === o.v
+                        ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15"
+                        : "border-border bg-secondary/40 hover:border-[hsl(var(--btn-orange))]/60")}>
+                    <div className="text-sm font-bold">{o.label}</div>
+                    <div className="text-[10px] text-muted-foreground">{o.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div>
-          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {STYLES.map(st => {
-              const on = styles.includes(st);
-              return (
-                <button key={st} type="button" onClick={() => toggleStyle(st)}
-                  className={cn("text-xs px-2.5 py-1 rounded-full border-2 capitalize transition",
-                    on
-                      ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
-                      : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
-                  {st}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <Field label="Notes">
-          <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Beta unlocked. Tried not to scream." rows={2} />
-        </Field>
-
-        <PreviewReward preview={preview} />
+            {preview && <PreviewReward preview={preview} />}
+          </>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
-        <GameButton variant="success" size="md" onClick={submit}>{editLog ? "Save changes" : "Send it"}</GameButton>
+        {step === "main" ? (
+          <>
+            <GameButton variant="ghost" size="sm" onClick={onBack}>{editLog ? "Cancel" : "Back"}</GameButton>
+            <GameButton variant="success" size="md" onClick={() => setStep("effort")}>{editLog ? "Next" : "Next"}</GameButton>
+          </>
+        ) : (
+          <>
+            <GameButton variant="ghost" size="sm" onClick={() => setStep("main")}>Back</GameButton>
+            <GameButton variant="success" size="md" onClick={submit} disabled={!activity || !attemptType}>
+              {editLog ? "Save changes" : "Send it"}
+            </GameButton>
+          </>
+        )}
       </div>
 
-      <Dialog open={projectPromptOpen} onOpenChange={(o) => { setProjectPromptOpen(o); if (!o) setAttemptType("send"); }}>
+
+      <Dialog open={projectPromptOpen} onOpenChange={(o) => { setProjectPromptOpen(o); if (!o) setAttemptType(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center">Log this as a Boss Project?</DialogTitle>
@@ -471,7 +546,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
             <GameButton variant="primary" size="md" className="w-full" onClick={() => { setProjectPromptOpen(false); onSwitchToBoss?.(); }}>
               Yes, log as Boss Project
             </GameButton>
-            <GameButton variant="ghost" size="sm" className="w-full" onClick={() => { setProjectPromptOpen(false); setAttemptType("send"); }}>
+            <GameButton variant="ghost" size="sm" className="w-full" onClick={() => { setProjectPromptOpen(false); setAttemptType(null); }}>
               No, it's just a boulder
             </GameButton>
           </div>
@@ -492,7 +567,7 @@ const ATTEMPT_TIERS: { v: AttemptTier; label: string; mult: number; desc: string
   { v: "10+", label: "10+ attempts", mult: 1.5, desc: "Full grind mode" },
 ];
 
-function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null; existingBoss?: Boss | null }) {
+function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null; existingBoss?: Boss | null; onSwitchToBoulder?: () => void }) {
   const gymState = useGyms();
   const lockedFields = !!existingBoss; // when attacking an existing boss, fields are read-only
   const initialGymId = existingBoss?.gymId
@@ -663,6 +738,9 @@ function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => voi
       </DialogHeader>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+        {onSwitchToBoulder && !existingBoss && !editLog && (
+          <KindToggle kind="boss" onChange={(k) => { if (k === "boulder") onSwitchToBoulder(); }} />
+        )}
         {existingBoss && (
           <BossSummary boss={existingBoss} gymName={gym?.name} holdColorHex={holdColor?.hex} holdColorHex2={holdColor?.hex2} holdColorName={holdColor?.name} />
         )}

@@ -5,7 +5,7 @@ import pullup4 from "@/assets/strength-pullup-4.webp";
 import hangboardPickImg from "@/assets/log-hangboard.webp.asset.json";
 import boardMoonAsset from "@/assets/board-moonboard.png.asset.json";
 
-export type QuickPickMode = "boulder-pick" | "strength" | "board";
+export type QuickPickMode = "boulder" | "strength" | "board";
 
 type Tile = {
   key: "boulder" | "strength" | "hangboard" | "board";
@@ -30,7 +30,7 @@ export function TrainingQuickPicker({
   const navigate = useNavigate();
 
   function handle(t: Tile) {
-    if (t.key === "boulder") onPick("boulder-pick");
+    if (t.key === "boulder") onPick("boulder");
     else if (t.key === "strength") onPick("strength");
     else if (t.key === "board") onPick("board");
     else if (t.key === "hangboard") navigate("/hangboard");

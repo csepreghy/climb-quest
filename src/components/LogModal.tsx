@@ -193,11 +193,11 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 
 function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k: "boulder" | "boss") => void }) {
   const opts = [
-    { v: "boulder" as const, label: "Boulder", img: boulderImg, ring: "ring-[hsl(197_100%_47%)]" },
+    { v: "boulder" as const, label: "Boulder", img: boulderImg, ring: "ring-[hsl(197_100%_42%)]" },
     { v: "boss" as const, label: "Boss Project", img: bossImg, ring: "ring-[hsl(var(--boss))]" },
   ];
   return (
-    <div className="flex gap-3 w-full">
+    <div className="flex gap-3 w-full px-1 pt-1">
       {opts.map(o => {
         const active = kind === o.v;
         return (
@@ -211,7 +211,7 @@ function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k
             )}
           >
             <div className="relative overflow-hidden rounded-xl bg-black/60">
-              <div className="aspect-square w-full sm:w-[200px]">
+              <div className="aspect-square w-full sm:w-[180px]">
                 <img src={o.img} alt={o.label} className="h-full w-full object-cover" />
               </div>
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2 py-1.5 text-center text-sm font-bold">

@@ -39,7 +39,7 @@ export default function Dashboard() {
   const next = nextLevel(s);
   const characterName = useCharacterName();
   const [logOpen, setLogOpen] = useState(false);
-  const [logInitialMode, setLogInitialMode] = useState<"boulder-pick" | "strength" | "board">("boulder-pick");
+  const [logInitialMode, setLogInitialMode] = useState<"boulder" | "strength" | "board">("boulder");
 
   const [openBadgeId, setOpenBadgeId] = useState<string | null>(null);
   const [tierModalOpen, setTierModalOpen] = useState(false);

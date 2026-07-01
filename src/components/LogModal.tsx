@@ -497,7 +497,7 @@ const ATTEMPT_TIERS: { v: AttemptTier; label: string; mult: number; desc: string
   { v: "10+", label: "10+ attempts", mult: 1.5, desc: "Full grind mode" },
 ];
 
-function BossForm({ onBack, onDone, editLog, existingBoss }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null; existingBoss?: Boss | null }) {
+function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: { onBack: () => void; onDone: () => void; editLog?: BoulderLog | null; existingBoss?: Boss | null; onSwitchToBoulder?: () => void }) {
   const gymState = useGyms();
   const lockedFields = !!existingBoss; // when attacking an existing boss, fields are read-only
   const initialGymId = existingBoss?.gymId

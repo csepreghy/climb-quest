@@ -353,7 +353,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
         </div>
       </DialogHeader>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto overflow-x-hidden pr-1">
         {!editLog && onSwitchToBoss && (
           <KindToggle kind="boulder" onChange={(k) => { if (k === "boss") onSwitchToBoss(); }} />
         )}
@@ -725,7 +725,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: 
         </div>
       </DialogHeader>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto overflow-x-hidden pr-1">
         {onSwitchToBoulder && !existingBoss && !editLog && (
           <KindToggle kind="boss" onChange={(k) => { if (k === "boulder") onSwitchToBoulder(); }} />
         )}
@@ -918,7 +918,7 @@ function BossPicker({ onBack, onPickExisting, onPickNew, onSwitchToBoulder }: { 
       )}
 
 
-      <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+      <div className="space-y-3 max-h-[70vh] overflow-y-auto overflow-x-hidden pr-1">
         {active.length === 0 && (
           <div className="text-sm text-muted-foreground italic px-1">
             No active boss projects yet. Pick a nemesis below.

@@ -436,12 +436,12 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
           <>
             <div>
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Effort</Label>
-              <p className="text-[11px] text-muted-foreground mt-1 mb-2 italic">This is not about how hard the boulder is, but how hard it was for you to do.</p>
+              <p className="text-[11px] text-muted-foreground mt-1 mb-2 italic">This is not about how hard the boulder is, but how hard it was for you.</p>
               <div className="grid grid-cols-3 gap-2">
                 {([
                   { v: "warmup_boulder" as const, label: "Easy", desc: "Low effort, I can do them back to back a few times without rest", img: boulderImg },
-                  { v: "boulder" as const, label: "Medium", desc: "Had to try harder, but I didn't have to put in 100%", img: effortMediumImg as unknown as string },
-                  { v: "hard_boulder" as const, label: "Hard", desc: "Took quite some effort, could have fallen in a few places", img: effortHardImg as unknown as string },
+                  { v: "boulder" as const, label: "Medium", desc: "Had to try harder, but I didn't have to put in 100%", img: effortMediumImg.url },
+                  { v: "hard_boulder" as const, label: "Hard", desc: "Took quite some effort, could have fallen in a few places", img: effortHardImg.url },
                 ]).map(o => (
                   <button
                     key={o.v}

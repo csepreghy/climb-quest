@@ -353,7 +353,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
         </div>
       </DialogHeader>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto overflow-x-hidden pr-1">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto px-2 pt-1 pb-2">
         {!editLog && onSwitchToBoss && (
           <KindToggle kind="boulder" onChange={(k) => { if (k === "boss") onSwitchToBoss(); }} />
         )}

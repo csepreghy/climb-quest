@@ -197,7 +197,7 @@ function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k
     { v: "boss" as const, label: "Boss Project", img: bossImg, ring: "ring-[hsl(var(--boss))]" },
   ];
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 w-full">
       {opts.map(o => {
         const active = kind === o.v;
         return (
@@ -206,12 +206,12 @@ function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k
             type="button"
             onClick={() => onChange(o.v)}
             className={cn(
-              "relative rounded-xl p-1 transition",
+              "relative rounded-xl p-1 transition flex-1 sm:flex-none",
               active ? `ring-4 ${o.ring}` : "ring-2 ring-[hsl(var(--panel-frame))] opacity-70 hover:opacity-100",
             )}
           >
             <div className="relative overflow-hidden rounded-xl bg-black/60">
-              <div className="aspect-square w-[200px]">
+              <div className="aspect-square w-full sm:w-[200px]">
                 <img src={o.img} alt={o.label} className="h-full w-full object-cover" />
               </div>
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2 py-1.5 text-center text-sm font-bold">
@@ -353,7 +353,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
         </div>
       </DialogHeader>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto overflow-x-hidden pr-1">
         {!editLog && onSwitchToBoss && (
           <KindToggle kind="boulder" onChange={(k) => { if (k === "boss") onSwitchToBoss(); }} />
         )}
@@ -725,7 +725,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: 
         </div>
       </DialogHeader>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto overflow-x-hidden pr-1">
         {onSwitchToBoulder && !existingBoss && !editLog && (
           <KindToggle kind="boss" onChange={(k) => { if (k === "boulder") onSwitchToBoulder(); }} />
         )}
@@ -918,7 +918,7 @@ function BossPicker({ onBack, onPickExisting, onPickNew, onSwitchToBoulder }: { 
       )}
 
 
-      <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+      <div className="space-y-3 max-h-[70vh] overflow-y-auto overflow-x-hidden pr-1">
         {active.length === 0 && (
           <div className="text-sm text-muted-foreground italic px-1">
             No active boss projects yet. Pick a nemesis below.

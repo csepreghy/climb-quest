@@ -114,9 +114,10 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
                 image={pickBoulderImg}
                 title="Boulder"
                 desc="Log a climb — single send, project, or boss battle."
-                onClick={() => setMode("boulder-pick")}
+                onClick={() => { setKind("boulder"); setMode("form"); }}
                 ring="ring-[hsl(var(--btn-green))]/60"
               />
+
               <PickCard
                 image={pullup4}
                 title="Strength"
@@ -140,40 +141,16 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
               />
             </div>
           </>
-        ) : mode === "boulder-pick" ? (
-          <>
-            <DialogHeader>
-              <div className="flex items-center gap-3">
-                <button onClick={() => setMode("pick")} className="p-1 rounded hover:bg-secondary"><ArrowLeft className="h-4 w-4" /></button>
-                <DialogTitle>Log a climb</DialogTitle>
-              </div>
-            </DialogHeader>
-            <div className="grid sm:grid-cols-2 gap-3 mt-2">
-              <PickCard
-                image={boulderImg}
-                title="Boulder"
-                desc="Within your abilities — first try, or several attempts in a single session."
-                onClick={() => { setKind("boulder"); setMode("form"); }}
-                ring="ring-[hsl(var(--btn-green))]/60"
-              />
-              <PickCard
-                image={bossImg}
-                title="Boss Project"
-                desc="Hard. Multi-session grind. Your nemesis."
-                onClick={openBossFlow}
-                ring="ring-[hsl(var(--boss))]/70"
-              />
-            </div>
-          </>
         ) : mode === "strength" ? (
           <StrengthFlow onBack={() => setMode("pick")} onDone={() => onOpenChange(false)} />
         ) : mode === "board" ? (
           <BoardLogModal onBack={() => editBoardSession ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editSession={editBoardSession ?? null} />
         ) : mode === "boss-pick" ? (
           <BossPicker
-            onBack={() => setMode("boulder-pick")}
+            onBack={() => setMode("pick")}
             onPickExisting={(b) => { setSelectedBoss(b); setMode("boss-existing"); }}
             onPickNew={() => { setSelectedBoss(null); setMode("boss-new"); }}
+            onSwitchToBoulder={() => { setKind("boulder"); setMode("form"); }}
           />
         ) : mode === "boss-existing" && selectedBoss ? (
           <BossForm
@@ -189,15 +166,16 @@ export function LogModal({ open, onOpenChange, editLog, initialMode, editBoardSe
           />
 
         ) : kind === "boss" ? (
-          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} onSwitchToBoulder={editLog ? undefined : () => { setKind("boulder"); setMode("form"); }} />
+          <BossForm onBack={() => editLog ? onOpenChange(false) : setMode("pick")} onDone={() => onOpenChange(false)} editLog={editLog ?? null} onSwitchToBoulder={editLog ? undefined : () => { setKind("boulder"); setMode("form"); }} />
         ) : (
           <BoulderForm
-            onBack={() => editLog ? onOpenChange(false) : setMode("boulder-pick")}
+            onBack={() => editLog ? onOpenChange(false) : setMode("pick")}
             onDone={() => onOpenChange(false)}
             onSwitchToBoss={openBossFlow}
             editLog={editLog ?? null}
           />
         )}
+
       </DialogContent>
     </Dialog>
   );
@@ -214,29 +192,37 @@ function HeaderImage({ src, alt, ring }: { src: string; alt: string; ring: strin
 // ===================== KIND TOGGLE =====================
 
 function KindToggle({ kind, onChange }: { kind: "boulder" | "boss"; onChange: (k: "boulder" | "boss") => void }) {
+  const opts = [
+    { v: "boulder" as const, label: "Boulder", img: boulderImg, ring: "ring-[hsl(var(--btn-green))]" },
+    { v: "boss" as const, label: "Boss Project", img: bossImg, ring: "ring-[hsl(var(--boss))]" },
+  ];
   return (
     <div className="grid grid-cols-2 gap-2">
-      {([
-        { v: "boulder" as const, label: "Regular" },
-        { v: "boss" as const, label: "Boss Project" },
-      ]).map(o => (
-        <button
-          key={o.v}
-          type="button"
-          onClick={() => onChange(o.v)}
-          className={cn(
-            "rounded-lg px-3 py-2 text-sm font-bold border-2 transition",
-            kind === o.v
-              ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
-              : "border-border bg-secondary/40 text-muted-foreground hover:border-[hsl(var(--btn-orange))]/60"
-          )}
-        >
-          {o.label}
-        </button>
-      ))}
+      {opts.map(o => {
+        const active = kind === o.v;
+        return (
+          <button
+            key={o.v}
+            type="button"
+            onClick={() => onChange(o.v)}
+            className={cn(
+              "flex items-center gap-2 rounded-lg border-2 p-1.5 pr-3 transition text-left",
+              active
+                ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/10 ring-2 ring-[hsl(var(--btn-orange))]/40"
+                : "border-border bg-secondary/40 hover:border-[hsl(var(--btn-orange))]/60"
+            )}
+          >
+            <div className={cn("h-10 w-10 shrink-0 rounded-md overflow-hidden ring-1", active ? "ring-[hsl(var(--btn-orange))]/60" : `${o.ring}/40`)}>
+              <img src={o.img} alt="" className="h-full w-full object-cover" />
+            </div>
+            <span className={cn("text-sm font-bold", active ? "text-foreground" : "text-muted-foreground")}>{o.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
+
 
 // ===================== BOULDER FORM =====================
 
@@ -905,7 +891,7 @@ function BossSummary({ boss, gymName, holdColorHex, holdColorHex2, holdColorName
   );
 }
 
-function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void; onPickExisting: (b: Boss) => void; onPickNew: () => void }) {
+function BossPicker({ onBack, onPickExisting, onPickNew, onSwitchToBoulder }: { onBack: () => void; onPickExisting: (b: Boss) => void; onPickNew: () => void; onSwitchToBoulder?: () => void }) {
   const s = useGame();
   const gymState = useGyms();
   const active = activeBossProjects(s);
@@ -922,6 +908,13 @@ function BossPicker({ onBack, onPickExisting, onPickNew }: { onBack: () => void;
           Keep track of up to {MAX_ACTIVE_BOSSES} boss projects. Each one gives you {BOSS_DEADLINE_DAYS} day to defeat.
         </DialogDescription>
       </DialogHeader>
+
+      {onSwitchToBoulder && (
+        <div className="pt-2">
+          <KindToggle kind="boss" onChange={(k) => { if (k === "boulder") onSwitchToBoulder(); }} />
+        </div>
+      )}
+
 
       <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
         {active.length === 0 && (

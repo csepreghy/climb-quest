@@ -1272,6 +1272,7 @@ type SessionLogEntry = {
   sets: StrengthSet[];
   chalk: number;
   mode?: "hold" | "pushup";
+  critPre?: number | null;
 };
 
 function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {

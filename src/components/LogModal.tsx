@@ -303,7 +303,9 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
     [grade, gs, ceiling],
   );
   const preview = useMemo(
-    () => computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat),
+    () => (activity && attemptType)
+      ? computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat)
+      : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activity, attemptType, styles.join(","), diffMult],
   );
@@ -313,6 +315,10 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   }
 
   function submit() {
+    if (!activity || !attemptType) {
+      toast.error("Pick an effort and attempt first");
+      return;
+    }
     if (attemptType === "project" && !editLog) {
       setProjectPromptOpen(true);
       return;

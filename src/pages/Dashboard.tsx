@@ -683,8 +683,8 @@ function BadgeTile({
         )}
         style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, width: TOTAL }}
       >
-        <div className="rounded-xl border-4 border-white/80 overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-2xl">
-          <div className="relative shrink-0 self-stretch bg-black/40 grid place-items-center" style={{ width: IMG, height: IMG }}>
+        <div className="rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-[0_0_40px_-10px_rgba(0,0,0,0.6)]">
+          <div className="relative shrink-0 self-stretch grid place-items-center" style={{ width: IMG, height: IMG }}>
             <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="xl" />
           </div>
           <Details />
@@ -696,8 +696,8 @@ function BadgeTile({
         <div className="md:hidden fixed inset-0 z-50 grid place-items-center p-3 overflow-y-auto">
           <div className="absolute inset-0 bg-black/75 animate-in fade-in duration-150" onClick={() => setMobileOpen(false)} />
           <div className="relative w-full max-w-[460px]">
-            <div className="relative w-full rounded-xl border-4 border-white/80 overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-2xl">
-              <div className="relative w-40 shrink-0 bg-black/40 self-stretch grid place-items-center">
+            <div className="relative w-full rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-[0_0_40px_-10px_rgba(0,0,0,0.6)]">
+              <div className="relative w-40 shrink-0 self-stretch grid place-items-center">
                 <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="lg" />
               </div>
               <Details compact />

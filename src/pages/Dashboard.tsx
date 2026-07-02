@@ -46,7 +46,8 @@ export default function Dashboard() {
 
   const [openBadgeId, setOpenBadgeId] = useState<string | null>(null);
   const [tierModalOpen, setTierModalOpen] = useState(false);
-  const openBadge = openBadgeId ? BADGES.find(b => b.id === openBadgeId) ?? null : null;
+  const resolvedBadges = useResolvedBadges();
+  const openBadge = openBadgeId ? resolvedBadges.find(b => b.id === openBadgeId) ?? null : null;
   const openBadgeHave = openBadge ? s.badges.includes(openBadge.id) : false;
   const strengthTierInfo = tierFor(s.strengthSessions ?? []);
   const { sessions: boardSessions } = useBoardSessions();

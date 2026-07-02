@@ -420,11 +420,10 @@ function BoardBestTile({ sessions }: { sessions: any[] | null }) {
     ? sessions.reduce((a: any, b: any) => ((b.grade_rank ?? 0) > (a.grade_rank ?? 0) ? b : a))
     : null;
   return (
-    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
-      <div className="text-base font-bold leading-none">{best ? best.grade : "—"}</div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
-        <Mountain className="h-3 w-3" /> Best board
-      </div>
+    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
+      <div className="text-muted-foreground mb-1"><Mountain className="h-3.5 w-3.5" /></div>
+      <div className="text-base sm:text-lg font-bold leading-none">{best ? best.grade : "—"}</div>
+      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">Best board</div>
     </div>
   );
 }

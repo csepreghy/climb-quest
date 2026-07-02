@@ -105,7 +105,7 @@ export function BadgeCard({
           !have && "opacity-40 grayscale"
         )}
       >
-        {have && image ? (
+        {image ? (
           <img src={image} alt={name} className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-xs">❔</div>

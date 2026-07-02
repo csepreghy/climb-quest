@@ -67,6 +67,27 @@ export default function BoulderLogs() {
   const shown = filtered.slice(0, visible);
   const strengthSessions = s.strengthSessions ?? [];
 
+  const strengthStats = useMemo(() => {
+    const repsByWorkout: Record<string, number> = {};
+    const holdsByWorkout: Record<string, number> = {};
+    let totalReps = 0;
+    let totalHoldSeconds = 0;
+    for (const ss of strengthSessions) {
+      for (const st of ss.sets) {
+        if (st.mode === "hold") {
+          const sec = st.reps || 0;
+          holdsByWorkout[ss.workout] = (holdsByWorkout[ss.workout] || 0) + sec;
+          totalHoldSeconds += sec;
+        } else {
+          const r = st.reps || 0;
+          repsByWorkout[ss.workout] = (repsByWorkout[ss.workout] || 0) + r;
+          totalReps += r;
+        }
+      }
+    }
+    return { repsByWorkout, holdsByWorkout, totalReps, totalHoldSeconds };
+  }, [strengthSessions]);
+
   return (
     <div className="space-y-5 animate-float-up">
       <LogModal

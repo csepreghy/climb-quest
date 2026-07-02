@@ -231,6 +231,13 @@ export default function Admin() {
           <InventoryAdmin />
         </TabsContent>
 
+        <TabsContent value="badges" className="space-y-6 mt-6">
+          <BadgesAdmin />
+        </TabsContent>
+
+
+        </TabsContent>
+
         <TabsContent value="gyms" className="space-y-6 mt-6">
           <PublicGymsAdmin />
         </TabsContent>

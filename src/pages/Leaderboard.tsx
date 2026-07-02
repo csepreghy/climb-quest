@@ -412,23 +412,21 @@ function BoardBestTile({ sessions }: { sessions: any[] | null }) {
 function StrengthTierTile({ sessions }: { sessions: StrengthSession[] | null }) {
   if (!sessions) {
     return (
-      <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
-        <div className="text-muted-foreground mb-1"><Dumbbell className="h-3.5 w-3.5" /></div>
-        <div className="text-base sm:text-lg font-bold tabular-nums leading-none text-muted-foreground">—</div>
-        <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">Tier</div>
+      <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+        <div className="text-base font-bold tabular-nums leading-none text-muted-foreground">—</div>
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Tier</div>
       </div>
     );
   }
   const { tier, qualifiedDays } = tierFor(sessions);
   const pct = tierChalkPct(tier);
   return (
-    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
-      <div className="text-muted-foreground mb-1"><Dumbbell className="h-3.5 w-3.5" /></div>
-      <div className={cn("text-base sm:text-lg font-bold leading-none", TIER_TEXT[tier])}>
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+      <div className={cn("text-base font-bold leading-none", TIER_TEXT[tier])}>
         {TIER_LABEL[tier]}
       </div>
-      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">
-        {qualifiedDays} of 7 days{pct > 0 ? ` · +${pct}%` : ""}
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+        <Dumbbell className="h-3 w-3" /> {qualifiedDays} of 7 days{pct > 0 ? ` · +${pct}%` : ""}
       </div>
     </div>
   );

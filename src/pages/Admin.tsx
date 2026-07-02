@@ -236,7 +236,6 @@ export default function Admin() {
         </TabsContent>
 
 
-        </TabsContent>
 
         <TabsContent value="gyms" className="space-y-6 mt-6">
           <PublicGymsAdmin />

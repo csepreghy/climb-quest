@@ -102,9 +102,9 @@ export default function Layout() {
       ids.forEach((id, i) => {
         const b = BADGE_BY_ID[id];
         const name = b?.name ?? "New Badge";
-        const emoji = b?.emoji ?? "🏅";
+        const image = b?.image ?? "";
         setTimeout(() => {
-          showBadgeUnlock(name, emoji, BADGE_CHALK_REWARD);
+          showBadgeUnlock(name, image, BADGE_CHALK_REWARD);
         }, i * 200);
       });
     });

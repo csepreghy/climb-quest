@@ -1,4 +1,6 @@
+import shopaholicAsset from "@/assets/badges/shopaholic.png.asset.json";
 // ClimbQuest game data: levels, items, badges, boss templates
+
 
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary" | "mythic";
 export type Slot = "shoes" | "chalk" | "outfit" | "bottoms" | "hat" | "hand" | "accessory" | "study" | "aura" | "title" | "powerup" | "buddy" | "board";
@@ -66,11 +68,11 @@ export interface ClimberLevel {
 
 export const LEVELS: ClimberLevel[] = [
   { level: 1, title: "Rental Shoe Rookie", cost: 0,        emoji: "🥾", desc: "Oversized rentals, max enthusiasm.",            unlocks: ["Starter avatar", "Rental shoes", "Plain chalk bag", "1 Gear slot"] },
-  { level: 2, title: "Chalk Chaser",       cost: 100,      emoji: "💨", desc: "Obsessed with chalk. Still figuring it out.",   unlocks: ["Chalk bag skin", "Beanie", "First Send badge"] },
-  { level: 3, title: "Footwork Fiend",     cost: 300,      emoji: "👣", desc: "Discovers feet exist. Game-changing.",          unlocks: ["Footwork badge", "Cleaner shoes", "+1 Gear slot"] },
+  { level: 2, title: "Chalk Chaser",       cost: 100,      emoji: "💨", desc: "Obsessed with chalk. Still figuring it out.",   unlocks: ["Chalk bag skin", "Beanie"] },
+  { level: 3, title: "Footwork Fiend",     cost: 300,      emoji: "👣", desc: "Discovers feet exist. Game-changing.",          unlocks: ["Cleaner shoes", "+1 Gear slot"] },
   { level: 4, title: "Jug Juggler",        cost: 800,      emoji: "🤹", desc: "Big holds, big confidence, slightly chaotic.",  unlocks: ["Chalk bucket", "Funny socks"] },
   { level: 5, title: "Cute Crimper",       cost: 2000,     emoji: "🤏", desc: "Tiny holds = personality trait.",               unlocks: ["Magdust", "Wristband", "+1 Gear slot", "+1 Power-up slot"] },
-  { level: 6, title: "Dyno Devourer",      cost: 5000,     emoji: "🦘", desc: "Full commitment. No fear. Only flight.",        unlocks: ["Neon pants", "Neon chalk bag", "No Static badge"] },
+  { level: 6, title: "Dyno Devourer",      cost: 5000,     emoji: "🦘", desc: "Full commitment. No fear. Only flight.",        unlocks: ["Neon pants", "Neon chalk bag"] },
   { level: 7, title: "Board Goblin",       cost: 15000,    emoji: "👺", desc: "Lives on the board. Slightly feral.",           unlocks: ["Board shoes", "Tape pack"] },
   { level: 8, title: "Beta Breaker",       cost: 50000,    emoji: "🧠", desc: "Reads sequences. Solves cruxes. Smug.",         unlocks: ["Beta notebook", "Smart glasses", "+1 Gear slot (max)", "Sequence Master"] },
   { level: 9, title: "Project Beast",      cost: 200000,   emoji: "🦍", desc: "Long-term projects only. Locked in.",           unlocks: ["Project Beast Fit", "Premium brush", "Elite hoodie"] },
@@ -109,27 +111,10 @@ export const SHOP: ShopItem[] = [];
 export const ITEM_BY_ID: Record<string, ShopItem> = Object.fromEntries(SHOP.map(i => [i.id, i]));
 
 export interface BadgeDef {
-  id: string; name: string; emoji: string; desc: string;
+  id: string; name: string; image: string; desc: string; rarity?: Rarity;
 }
 export const BADGES: BadgeDef[] = [
-  { id: "first_send",        name: "First Send",        emoji: "🎉", desc: "Sent your first boulder." },
-  { id: "first_flash",       name: "Flashed a Boulder", emoji: "⚡", desc: "Flashed a boulder first try." },
-  { id: "chalk_monster",     name: "Chalk Monster",     emoji: "👹", desc: "Earned 1,000 Chalk total." },
-  { id: "slab_survivor",     name: "Slab Survivor",     emoji: "🧗", desc: "Logged a slab problem." },
-  { id: "overhang_enjoyer",  name: "Overhang Enjoyer",  emoji: "🙃", desc: "Logged an overhang problem." },
-  { id: "crux_breaker",      name: "Crux Breaker",      emoji: "🔓", desc: "Sent a boss project." },
-  { id: "project_slayer",    name: "Project Slayer",    emoji: "⚔️", desc: "Sent 3 boss projects." },
-  { id: "crocs_equipped",    name: "Crocs Equipped",    emoji: "🩴", desc: "Equipped Crocs." },
-  { id: "dyno_unlocked",     name: "Dyno Devourer Unlocked", emoji: "🦘", desc: "Reached level 6." },
-  { id: "demigod_unlocked",  name: "Crimp Demigod Unlocked", emoji: "👑", desc: "Reached level 10." },
-  { id: "tiny_crimp",        name: "Tiny Crimp Survivor", emoji: "🤏", desc: "Logged 5 crimp problems." },
-  { id: "first_purchase",    name: "First Purchase",    emoji: "🛍️", desc: "Bought your first shop item." },
-  { id: "first_equip",       name: "Geared Up",         emoji: "🎽", desc: "Equipped your first item." },
-  { id: "five_purchases",    name: "Shopaholic",        emoji: "🧾", desc: "Bought 5 shop items." },
-  { id: "all_slots_equipped", name: "Fully Kitted",     emoji: "🧰", desc: "Equipped items on all available slots." },
-  { id: "first_strength_boss", name: "Strength Boss Slayer", emoji: "💪", desc: "Defeated your first strength boss." },
-  { id: "first_buddy",       name: "Buddy System",      emoji: "🐾", desc: "Got your first Climbing Buddy." },
-  { id: "strength_tier_3",   name: "Strength Tier III", emoji: "🏋️", desc: "Reached Level 3 in one strength category." },
+  { id: "shopaholic", name: "Shopaholic", image: shopaholicAsset.url, desc: "Bought 10 shop items.", rarity: "epic" },
 ];
 
 export const BADGE_BY_ID: Record<string, BadgeDef> = Object.fromEntries(BADGES.map(b => [b.id, b]));

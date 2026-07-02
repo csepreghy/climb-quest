@@ -1,6 +1,6 @@
 import { useEffect, useSyncExternalStore } from "react";
 import {
-  ACTIVITY_LABELS, ActivityType, BADGES, BOSS_TEMPLATES,
+  ACTIVITY_LABELS, ActivityType, BOSS_TEMPLATES,
   ITEM_BY_ID, LEVELS, ShopItem, Style, BossTemplate, Gender,
   GEAR_SLOTS, gearSlotsUnlocked, Slot, BUDDY_SLOT_UNLOCK_LEVEL,
 } from "./data";
@@ -1158,20 +1158,9 @@ export function updateLog(id: string, input: LogInput) {
 }
 
 let lastNewBadges: string[] = [];
-function computeNewBadges(s: State, log: BoulderLog): string[] {
-  const have = new Set(s.badges);
-  const add: string[] = [];
-  const stylesIn = new Set(log.styles);
-  if (!have.has("first_send")) add.push("first_send");
-  if (stylesIn.has("slab") && !have.has("slab_survivor")) add.push("slab_survivor");
-  if (stylesIn.has("overhang") && !have.has("overhang_enjoyer")) add.push("overhang_enjoyer");
-  const total = s.totalChalkEarned + log.chalkTotal;
-  if (total >= 1000 && !have.has("chalk_monster")) add.push("chalk_monster");
-  // crimp count
-  const crimpCount = s.logs.filter(l => l.styles.includes("crimp")).length + (log.styles.includes("crimp") ? 1 : 0);
-  if (crimpCount >= 5 && !have.has("tiny_crimp")) add.push("tiny_crimp");
-  lastNewBadges = add;
-  return add;
+function computeNewBadges(_s: State, _log: BoulderLog): string[] {
+  lastNewBadges = [];
+  return [];
 }
 function computeNewBadgesAfter() { return lastNewBadges; }
 
@@ -1185,11 +1174,8 @@ export function levelUp(): { ok: boolean; reason?: string; unlocks?: string[] } 
   });
   return { ok: true, unlocks: next.unlocks };
 }
-function levelBadges(lvl: number): string[] {
-  const out: string[] = [];
-  if (lvl >= 6) out.push("dyno_unlocked");
-  if (lvl >= 10) out.push("demigod_unlocked");
-  return out;
+function levelBadges(_lvl: number): string[] {
+  return [];
 }
 
 export function buyItem(id: string): { ok: boolean; reason?: string } {
@@ -1202,12 +1188,7 @@ export function buyItem(id: string): { ok: boolean; reason?: string } {
   set(s => {
     const owned = item.consumableBonus ? s.owned : [...s.owned, id];
     const add: string[] = [];
-    if (id === "crocs") add.push("crocs_equipped");
-    if (item.group === "buddy") add.push("first_buddy");
-    if (!item.consumableBonus) {
-      if (owned.length >= 1) add.push("first_purchase");
-      if (owned.length >= 5) add.push("five_purchases");
-    }
+    if (!item.consumableBonus && owned.length >= 10) add.push("shopaholic");
     const next: State = { ...s, chalk: s.chalk - price, owned };
     return applyBadges(next, add);
   });
@@ -1231,9 +1212,7 @@ export function equipItem(id: string): { ok: boolean; reason?: string } {
   }
   set(s => {
     const next: State = { ...s, equipped: { ...s.equipped, [item.slot]: id } };
-    const add = ["first_equip"];
-    if (allRequiredSlotsEquipped(next)) add.push("all_slots_equipped");
-    return applyBadges(next, add);
+    return next;
   });
   return { ok: true };
 }
@@ -1366,31 +1345,8 @@ function applyBadges(s: State, addIds: string[], silent = false): State {
 /** Compute every badge id the player currently deserves based on their state. */
 function deservedBadges(s: State): string[] {
   const out: string[] = [];
-  // From logs
-  if (s.logs.length > 0 || s.stats.totalLogs > 0) out.push("first_send");
-  if (s.logs.some(l => l.attemptType === "flash")) out.push("first_flash");
-  if (s.logs.some(l => l.styles.includes("slab"))) out.push("slab_survivor");
-  if (s.logs.some(l => l.styles.includes("overhang"))) out.push("overhang_enjoyer");
-  if (s.totalChalkEarned >= 1000) out.push("chalk_monster");
-  if (s.logs.filter(l => l.styles.includes("crimp")).length >= 5) out.push("tiny_crimp");
-  // Bosses
-  if (s.bosses.some(b => b.sent)) out.push("crux_breaker");
-  if (s.bosses.filter(b => b.sent).length >= 3) out.push("project_slayer");
-  // Levels
-  if (s.level >= 6) out.push("dyno_unlocked");
-  if (s.level >= 10) out.push("demigod_unlocked");
-  // Items
-  if (s.owned.includes("crocs")) out.push("crocs_equipped");
-  if (s.owned.some(id => getItem(id)?.group === "buddy")) out.push("first_buddy");
-  // Shop activity
   const purchased = s.owned.length;
-  if (purchased >= 1) out.push("first_purchase");
-  if (purchased >= 5) out.push("five_purchases");
-  if (Object.values(s.equipped).some(Boolean)) out.push("first_equip");
-  if (allRequiredSlotsEquipped(s)) out.push("all_slots_equipped");
-  // Strength
-  if ((s.strengthSessions ?? []).some(x => x.bossSend)) out.push("first_strength_boss");
-  if (Object.values(s.strengthLevels ?? {}).some(v => (v ?? 0) >= 3)) out.push("strength_tier_3");
+  if (purchased >= 10 && !s.badges.includes("shopaholic")) out.push("shopaholic");
   return out;
 }
 
@@ -1453,10 +1409,7 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
       return { ...b, attempts: [att, ...(b.attempts ?? [])], highPoint, sent: b.sent || sent, sentDate: sent ? att.date : b.sentDate };
     });
     const sentNow = outcome === "send" || outcome === "flash";
-    const add: string[] = [];
-    if (sentNow) add.push("crux_breaker");
     const bossesSent = bosses.filter(b => b.sent).length;
-    if (bossesSent >= 3) add.push("project_slayer");
     const next: State = {
       ...s,
       chalk: s.chalk + att.chalk,
@@ -1465,7 +1418,7 @@ export function attemptBoss(bossId: string, outcome: BossAttempt["outcome"], not
       pendingConsumable: null,
       stats: { ...s.stats, bossesSent, totalSends: s.stats.totalSends + (sentNow ? 1 : 0), totalFlashes: s.stats.totalFlashes + (outcome === "flash" ? 1 : 0) },
     };
-    return applyStreakProgress(s, applyBadges(next, add));
+    return applyStreakProgress(s, next);
   });
   return { attempt: att, breakdown };
 }
@@ -1551,11 +1504,8 @@ export function createBossProject(input: BossProjectInput): { boss: Boss; ok: bo
 
 export function markBossSent(bossId: string) {
   set(s => {
-    const add: string[] = [];
     const bosses = s.bosses.map(b => b.id === bossId ? { ...b, sent: true, sentDate: new Date().toISOString(), highPoint: 100 } : b);
-    if (bosses.some(b => b.sent)) add.push("crux_breaker");
-    if (bosses.filter(b => b.sent).length >= 3) add.push("project_slayer");
-    return applyBadges({ ...s, bosses }, add);
+    return { ...s, bosses };
   });
 }
 

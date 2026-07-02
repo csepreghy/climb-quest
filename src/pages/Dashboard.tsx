@@ -12,6 +12,7 @@ import { RARITY_BORDER, type Slot } from "@/game/data";
 import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
+import { BadgeCard } from "@/components/BadgeCard";
 import { useCharacterName } from "@/game/characterName";
 import { StrengthTierChip, StrengthTierModal } from "@/components/StrengthTierStrip";
 import { HangboardChart } from "@/components/hangboard/HangboardChart";
@@ -141,7 +142,13 @@ export default function Dashboard() {
             <>
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  <div className="text-4xl shrink-0">{openBadgeHave ? openBadge.emoji : "❔"}</div>
+                  <div className="h-16 w-16 shrink-0 rounded-full overflow-hidden border-2 border-legendary/40 bg-[hsl(var(--panel-fill))]">
+                    {openBadgeHave && openBadge.image ? (
+                      <img src={openBadge.image} alt={openBadge.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-2xl">❔</div>
+                    )}
+                  </div>
                   <div className="min-w-0">
                     <DialogTitle className="text-left">
                       {openBadgeHave ? openBadge.name : "Locked Badge"}
@@ -596,7 +603,7 @@ function BadgesGrid({ badges, onOpen }: { badges: string[]; onOpen: (id: string)
                 have ? "border-legendary/40 bg-legendary/5" : "border-border opacity-50"
               )}
             >
-              <div className="text-xl shrink-0">{have ? b.emoji : "❔"}</div>
+              <BadgeCard image={b.image} name={b.name} have={have} rarity={b.rarity} variant="shine" size="md" />
               <div className="min-w-0">
                 <div className="text-xs font-semibold truncate">{have ? b.name : "Locked"}</div>
                 <div className="text-[10px] text-muted-foreground line-clamp-1">{b.desc}</div>

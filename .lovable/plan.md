@@ -1,111 +1,73 @@
-# Board Training — Plan
+## Badge Redesign Plan
 
-A new log type "Board" alongside Boulder, Strength, Hangboard. Tracks MoonBoard and Kilter Board climbs, awards Chalk based on grade relative to user's PR, and shows on the dashboard.
+### Overview
+Completely revamp the badge system: remove all 18 existing badges except Shopaholic, switch from emoji-based to image-based badges, render every badge as a circular card with shine/3D effects, and prepare for user-provided 150×150 artwork.
 
-## 1. Assets
+---
 
-Upload the two provided images via lovable-assets:
-- `src/assets/board-moonboard.webp.asset.json`
-- `src/assets/board-kilter.webp.asset.json`
+### Phase 1 — Badge Data Refactor
 
-Used as the picker tiles inside the modal and as the icon on the type picker.
+**`src/game/data.ts`**
+- Update `BadgeDef` interface: replace `emoji: string` with `image: string` (path or asset URL) and add optional `rarity: Rarity`.
+- Replace the `BADGES` array so it contains only the Shopaholic badge:
+  ```ts
+  { id: "shopaholic", name: "Shopaholic", image: "", desc: "Bought 10 shop items.", rarity: "epic" }
+  ```
+- Update `BADGE_BY_ID` accordingly.
 
-## 2. Data model (Lovable Cloud)
+**`src/game/store.ts`**
+- No schema changes needed (`badges: string[]` stays).
+- Keep badge award/grant logic intact; it already works with string IDs.
+- Update any hard-coded badge references (e.g., in onboarding or level-up unlocks) to remove deleted badges.
 
-New table `board_sessions`:
-- `user_id`, `logged_at` (date), `board_type` ('moonboard' | 'kilter')
-- `moonboard_variant` (text, nullable) — one of: `mb_2016`, `mb_2017`, `mb_2019`, `mini_mb_2020`, `mb_2024`, `mini_mb_2025`
-- `kilter_angle` (int, nullable) — degrees, user-configurable (e.g. 25/30/40/45/50/55/60/65/70)
-- `problem_name` (text, nullable)
-- `is_benchmark` (bool)
-- `is_flash` (bool)
-- `grade_system` ('v' | 'french')
-- `grade` (text, e.g. "V5" or "7A+")
-- `grade_rank` (int) — normalized rank used for PR / chalk calc, stored at write time
-- `chalk_awarded` (int)
+### Phase 2 — UI Components
 
-RLS: user can CRUD their own rows. Grants for `authenticated` + `service_role`.
+**New: `src/components/BadgeCard.tsx`**
+- Circular badge display component.
+- Two style options (user can pick or we can support both):
+  1. **Shine variant**: Circular container with animated rarity glow (`animate-rarity-glow`), subtle gradient overlay, and a glint/shine effect similar to shop item hover previews.
+  2. **Token variant**: Flat circular token with a bottom 3D perspective shadow, like a circular trading card/token.
+- Props: `image`, `name`, `desc`, `have` (unlocked or locked), `rarity`, `onClick`.
+- Locked state: grayscale/dimmed with a lock icon or question mark overlay.
+- Size: default 64×64px image area inside a ~80×80px circular frame for grids; larger 120×120px for the unlock banner.
 
-User preferences (stored in existing profile / localStorage):
-- `last_board_type`, `last_moonboard_variant`, `last_kilter_angle`, `last_grade_system`, `kilter_angle_options` (custom list).
+**Update: `src/pages/Dashboard.tsx` — `BadgesGrid`**
+- Replace the emoji + text-row layout with a grid of `BadgeCard` components.
+- Each cell shows the circular badge image, name below, and description on hover or in a detail modal.
+- Keep the expand/collapse behavior.
+- Update the modal that opens on badge click to show the larger circular badge image.
 
-## 3. Grade normalization
+**Update: `src/components/pixel/BadgeUnlockBanner.tsx`**
+- Replace the large emoji display with a large circular `BadgeCard` (120px) in the center of the banner.
+- Keep the chalk reward and particle burst animations.
 
-`src/game/board/grades.ts`:
-- V scale: V0..V17 → ranks 0..17.
-- French boulder scale: 4, 5, 5+, 6A, 6A+, 6B, 6B+ … 9A. Map each to nearest V rank (standard conversion table).
-- Helpers: `parseGrade`, `gradeRank`, `gradesForSystem`.
+### Phase 3 — Asset Pipeline
 
-## 4. Chalk reward formula
+**`src/assets/` & Lovable Assets**
+- Create a dedicated badge asset folder pattern: `src/assets/badges/<badge-id>.asset.json`.
+- Document the image spec for the user:
+  - Resolution: 150×150px (square source, rendered circular via CSS `border-radius: 50%` and `object-fit: cover`)
+  - Format: PNG or WebP with transparent background preferred
+  - File naming: `<badge-id>.png` (e.g., `shopaholic.png`)
+- When the user uploads badge images, use `lovable-assets create --file <path> --filename <badge-id>.png > src/assets/badges/<badge-id>.png.asset.json` and remove the local binary.
+- Update `src/game/data.ts` badge definitions to point to the imported asset URLs.
 
-```
-diff = userMaxRank - newRank
-if newRank > userMaxRank → 200 (new PR)
-diff <= 0  → 200 (ties PR — treat as PR-equal)  *suggested tweak*
-diff 1-2  → 100
-diff 3-4  → 50
-diff >= 5 → 25
-```
+### Phase 4 — Cleanup
 
-Then multiplied by the existing chalk bonuses (outfit/gear/buddy %, crit chance, etc.) — same pipeline as boulder logs. Flash adds a small bonus (+25%, matches existing flash treatment if present; otherwise additive +25 chalk — to confirm with existing boulder logic).
+- Search the codebase for any remaining references to the deleted badge IDs and remove/update them.
+- Update `src/index.css` if any badge-specific utility classes are needed (e.g., `.badge-glow`, `.badge-token-shadow`).
+- Verify no TypeScript errors and that the build passes.
 
-Suggestion to highlight to user: also award +50 bonus chalk the first time a specific `(board_type, variant/angle, problem_name)` is sent (first ascent for that user) to encourage variety. Optional — included behind a simple check.
+### Out of Scope (Next Iteration)
+- The user will provide the new full badge list and images in a follow-up request.
+- For now, only Shopaholic exists in the data; the UI must be robust enough to render an arbitrary number of badge images when they arrive.
 
-## 5. UI
+---
 
-### LogModal type picker
-Add a 4th tile "Board" using a small board icon. Order: Boulder, Strength, Hangboard, Board.
-
-### BoardLogModal (`src/components/board/BoardLogModal.tsx`)
-- Top: two large image tiles (MoonBoard / Kilter) — `.tile-3d` style. Selected one glows.
-- If MoonBoard → select variant (segmented control / dropdown).
-- If Kilter → select angle from configured list + "Edit angles" link opening a small inline editor (chips with + / remove).
-- Date picker (defaults today).
-- Grade system toggle (V / French).
-- Grade selector (scroll list filtered by system).
-- Problem name (text input, optional).
-- Benchmark checkbox.
-- Flash checkbox.
-- Notes (optional, suggested).
-- Submit → writes row, computes chalk, fires celebratory modal.
-
-### Celebration
-Reuse existing chalk-earned celebratory pattern. Two variants:
-- Standard: chalk bag asset + "+X Chalk".
-- **New PR**: bigger banner, gold glow, message like "NEW HIGH GRADE — VX!" plus chalk amount.
-
-### History / logs
-In existing logs lists, render board entries with:
-- Board icon + label ("MoonBoard 2019" or "Kilter 40°")
-- Grade chip, problem name, Benchmark/Flash badges, date.
-
-### Dashboard
-New chart card "Board progression" — only renders when user has ≥1 board session:
-- Weekly aggregation.
-- Two lines: highest grade (rank) and number of climbs.
-- Mirrors the existing boulder chart styling.
-
-Hangboard chart: hide when user has 0 hangboard sessions.
-
-## 6. Files to add / change
-
-Add:
-- `src/assets/board-moonboard.webp.asset.json`, `src/assets/board-kilter.webp.asset.json`
-- `src/game/board/types.ts`, `src/game/board/grades.ts`, `src/game/board/rewards.ts`, `src/game/board/store.ts`
-- `src/components/board/BoardLogModal.tsx`
-- `src/components/board/BoardPRCelebration.tsx` (or extend existing celebration)
-- `src/components/board/BoardChart.tsx`
-
-Change:
-- `src/components/LogModal.tsx` — add Board tile in type picker, route to BoardLogModal.
-- `src/pages/Dashboard.tsx` — mount BoardChart conditionally; hide hangboard chart when 0 sessions.
-- Existing logs list component(s) — render board entries.
-- Supabase migration for `board_sessions` (+ RLS + grants).
-
-## 7. Open questions / suggestions for you
-
-1. Tie-with-PR (same rank as current max) — award 200 (treated as PR) or 100? Default = 200.
-2. Flash bonus: keep at +25% chalk (matches boulder convention) — OK?
-3. First-ascent-of-that-problem bonus (+50): include or skip? Default = include.
-4. Kilter default angle options: 25/30/40/45/50/55/60/65/70 — OK as initial list?
-5. Should board climbs count toward daily chalk cap the same way boulders do? Default = yes.
+### Acceptance Criteria
+1. Only the Shopaholic badge appears in the badge grid.
+2. All badge slots render as circular images, not emojis.
+3. Locked badges show a circular placeholder (question mark or lock) with dimmed styling.
+4. Badge unlock banner shows a large circular badge image instead of an emoji.
+5. Build passes with zero TypeScript errors.
+6. Asset pipeline is ready for 150×150 user-provided images.

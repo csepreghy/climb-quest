@@ -585,6 +585,130 @@ function badgeProgress(id: string, ownedCount: number): { current: number; targe
   return null;
 }
 
+function BadgeTile({
+  badge,
+  have,
+  progress,
+  onOpen,
+}: {
+  badge: typeof BADGES[number];
+  have: boolean;
+  progress: { current: number; target: number } | null;
+  onOpen: () => void;
+}) {
+  const tileRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const IMG = 200;
+  const DETAILS_W = 244;
+  const TOTAL = IMG + DETAILS_W;
+  const CARD_H = IMG;
+
+  function handleEnter() {
+    const r = tileRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const tileCx = r.left + r.width / 2;
+    const tileCy = r.top + r.height / 2;
+    const desiredLeft = tileCx - IMG / 2;
+    const desiredTop = tileCy - CARD_H / 2;
+    const left = Math.max(12, Math.min(desiredLeft, window.innerWidth - TOTAL - 12));
+    const top = Math.max(12, Math.min(desiredTop, window.innerHeight - CARD_H - 12));
+    setPos({ left, top });
+  }
+
+  function handleTileClick() {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+      setMobileOpen(true);
+    } else {
+      onOpen();
+    }
+  }
+
+  const pct = progress ? Math.round((progress.current / progress.target) * 100) : (have ? 100 : 0);
+
+  const Details = ({ compact }: { compact?: boolean }) => (
+    <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-3 gap-1.5" : "p-4 gap-2")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
+      <div className="min-w-0">
+        <div className={cn("font-bold leading-snug break-words", compact ? "text-base" : "text-lg")}>
+          {have ? badge.name : "Locked Badge"}
+        </div>
+        <div className={cn("uppercase tracking-wider inline-block mt-1 px-2 py-0.5 rounded border text-[10px]", have ? "border-legendary/50 text-legendary" : "border-border text-muted-foreground")}>
+          {have ? "Unlocked" : (badge.rarity ?? "locked")}
+        </div>
+      </div>
+      <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "text-xs" : "text-sm")}>
+        {badge.desc}
+      </p>
+      {progress && (
+        <div className="mt-auto">
+          <div className="flex items-center justify-between text-[10px] tabular-nums text-muted-foreground mb-1">
+            <span>Progress</span>
+            <span>{progress.current} / {progress.target}</span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-[hsl(var(--panel-fill))] overflow-hidden border border-border/60">
+            <div className="h-full rounded-full bg-legendary transition-all" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="group relative" onMouseEnter={handleEnter}>
+      {/* Desktop backdrop */}
+      <div className="hidden md:block pointer-events-none fixed inset-0 z-40 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+      {/* Tile */}
+      <div
+        ref={tileRef}
+        onClick={handleTileClick}
+        role="button"
+        tabIndex={0}
+        aria-label={have ? badge.name : "Locked badge"}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTileClick(); } }}
+        className={cn(
+          "relative cursor-pointer outline-none rounded-full",
+          "transition-opacity duration-200 md:group-hover:opacity-0",
+        )}
+      >
+        <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="md" />
+      </div>
+
+      {/* Desktop hover preview */}
+      <div
+        className={cn(
+          "hidden md:block fixed z-50",
+          "opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200",
+        )}
+        style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, width: TOTAL }}
+      >
+        <div className="rounded-xl border-4 border-white/80 overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-2xl">
+          <div className="relative shrink-0 self-stretch bg-black/40 grid place-items-center" style={{ width: IMG, height: IMG }}>
+            <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="xl" />
+          </div>
+          <Details />
+        </div>
+      </div>
+
+      {/* Mobile tap modal */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50 grid place-items-center p-3 overflow-y-auto">
+          <div className="absolute inset-0 bg-black/75 animate-in fade-in duration-150" onClick={() => setMobileOpen(false)} />
+          <div className="relative w-full max-w-[460px]">
+            <div className="relative w-full rounded-xl border-4 border-white/80 overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-2xl">
+              <div className="relative w-40 shrink-0 bg-black/40 self-stretch grid place-items-center">
+                <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="lg" />
+              </div>
+              <Details compact />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BadgesGrid({ badges, ownedCount, onOpen }: { badges: string[]; ownedCount: number; onOpen: (id: string) => void }) {
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
@@ -600,46 +724,8 @@ function BadgesGrid({ badges, ownedCount, onOpen }: { badges: string[]; ownedCou
         {list.map(b => {
           const have = badges.includes(b.id);
           const prog = badgeProgress(b.id, ownedCount);
-          const pct = prog ? Math.round((prog.current / prog.target) * 100) : (have ? 100 : 0);
           return (
-            <HoverCard key={b.id} openDelay={120} closeDelay={80}>
-              <HoverCardTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => onOpen(b.id)}
-                  aria-label={have ? b.name : "Locked badge"}
-                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring transition hover:-translate-y-0.5"
-                >
-                  <BadgeCard image={b.image} name={b.name} have={have} rarity={b.rarity} variant="shine" size="md" />
-                </button>
-              </HoverCardTrigger>
-              <HoverCardContent align="center" sideOffset={10} className="w-64">
-                <div className="flex items-start gap-3">
-                  <BadgeCard image={b.image} name={b.name} have={have} rarity={b.rarity} variant="shine" size="sm" />
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold leading-tight">{have ? b.name : "Locked"}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">
-                      {have ? "Unlocked" : b.rarity}
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{b.desc}</p>
-                {prog && (
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-[10px] tabular-nums text-muted-foreground mb-1">
-                      <span>Progress</span>
-                      <span>{prog.current} / {prog.target}</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-[hsl(var(--panel-fill))] overflow-hidden border border-border/60">
-                      <div
-                        className="h-full rounded-full bg-legendary transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </HoverCardContent>
-            </HoverCard>
+            <BadgeTile key={b.id} badge={b} have={have} progress={prog} onOpen={() => onOpen(b.id)} />
           );
         })}
       </div>

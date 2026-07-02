@@ -714,7 +714,7 @@ function BadgeTile({
   );
 }
 
-function BadgesGrid({ badges, ownedCount, onOpen }: { badges: string[]; ownedCount: number; onOpen: (id: string) => void }) {
+function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, onOpen }: { badges: string[]; ownedCount: number; totalChalkEarned: number; totalSends: number; onOpen: (id: string) => void }) {
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
   const initial = isMobile ? 8 : 16;
@@ -728,7 +728,7 @@ function BadgesGrid({ badges, ownedCount, onOpen }: { badges: string[]; ownedCou
       <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-4 justify-items-center">
         {list.map(b => {
           const have = badges.includes(b.id);
-          const prog = badgeProgress(b.id, ownedCount);
+          const prog = badgeProgress(b.id, { ownedCount, totalChalkEarned, totalSends });
           return (
             <BadgeTile key={b.id} badge={b} have={have} progress={prog} onOpen={() => onOpen(b.id)} />
           );

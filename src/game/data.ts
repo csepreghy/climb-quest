@@ -116,15 +116,15 @@ export const SHOP: ShopItem[] = [];
 export const ITEM_BY_ID: Record<string, ShopItem> = Object.fromEntries(SHOP.map(i => [i.id, i]));
 
 export interface BadgeDef {
-  id: string; name: string; image: string; desc: string; rarity?: Rarity;
+  id: string; name: string; image: string; desc: string; flavor?: string; rarity?: Rarity;
 }
 export const BADGES: BadgeDef[] = [
-  { id: "shopaholic", name: "Shopaholic", image: shopaholicAsset.url, desc: "Bought 10 shop items.", rarity: "epic" },
-  { id: "chalk_1k", name: "1K Club", image: chalk1kAsset.url, desc: "Earned 1,000 total Chalk.", rarity: "rare" },
-  { id: "chalk_10k", name: "10K Club", image: chalk10kAsset.url, desc: "Earned 10,000 total Chalk.", rarity: "epic" },
-  { id: "chalk_50k", name: "50K Club", image: chalk50kAsset.url, desc: "Earned 50,000 total Chalk.", rarity: "legendary" },
-  { id: "chalk_100k", name: "100K Club", image: chalk100kAsset.url, desc: "Earned 100,000 total Chalk.", rarity: "mythic" },
-  { id: "sends_100", name: "Century Sender", image: sends100Asset.url, desc: "Logged 100 sends.", rarity: "rare" },
+  { id: "shopaholic", name: "Shopaholic", image: shopaholicAsset.url, desc: "Buy 10 shop items.", flavor: "Retail therapy is a valid training plan.", rarity: "epic" },
+  { id: "chalk_1k", name: "1K Club", image: chalk1kAsset.url, desc: "Earn 1,000 total Chalk.", flavor: "The dust has settled — on your hands.", rarity: "rare" },
+  { id: "chalk_10k", name: "10K Club", image: chalk10kAsset.url, desc: "Earn 10,000 total Chalk.", flavor: "You could open your own chalk bag boutique.", rarity: "epic" },
+  { id: "chalk_50k", name: "50K Club", image: chalk50kAsset.url, desc: "Earn 50,000 total Chalk.", flavor: "Your gym vacuum has filed a complaint.", rarity: "legendary" },
+  { id: "chalk_100k", name: "100K Club", image: chalk100kAsset.url, desc: "Earn 100,000 total Chalk.", flavor: "Six-figure chalk hustler. Suspicious white powder everywhere.", rarity: "mythic" },
+  { id: "sends_100", name: "Century Sender", image: sends100Asset.url, desc: "Log 100 sends.", flavor: "The wall knows your name. It's a little concerned.", rarity: "rare" },
 ];
 
 export const BADGE_BY_ID: Record<string, BadgeDef> = Object.fromEntries(BADGES.map(b => [b.id, b]));

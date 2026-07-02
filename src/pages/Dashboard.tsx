@@ -8,7 +8,7 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
 import { getItem, isImageEmoji, useCustomItems } from "@/game/customItems";
-import { RARITY_BORDER, type Slot } from "@/game/data";
+import { RARITY_BORDER, RARITY_COLOR, type Slot } from "@/game/data";
 import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";

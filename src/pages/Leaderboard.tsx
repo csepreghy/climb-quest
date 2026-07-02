@@ -286,6 +286,44 @@ function ClimberDetailsDialog({
               <StrengthTierTile sessions={charts?.strengthSessions ?? null} />
             </div>
 
+            {(() => {
+              const sessions = charts?.strengthSessions ?? [];
+              if (!sessions.length) return null;
+              const repsByWorkout: Record<string, number> = {};
+              const holdsByWorkout: Record<string, number> = {};
+              let totalReps = 0;
+              let totalHoldSeconds = 0;
+              for (const ss of sessions) {
+                for (const st of ss.sets) {
+                  if (st.mode === "hold") {
+                    const sec = st.reps || 0;
+                    holdsByWorkout[ss.workout] = (holdsByWorkout[ss.workout] || 0) + sec;
+                    totalHoldSeconds += sec;
+                  } else {
+                    const r = st.reps || 0;
+                    repsByWorkout[ss.workout] = (repsByWorkout[ss.workout] || 0) + r;
+                    totalReps += r;
+                  }
+                }
+              }
+              return (
+                <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+                  {totalReps > 0 && <StrengthStatCard label="Total reps" value={totalReps} />}
+                  {totalHoldSeconds > 0 && <StrengthStatCard label="Total hold time" value={formatDuration(totalHoldSeconds)} />}
+                  {WORKOUT_ORDER.map(w => {
+                    const reps = repsByWorkout[w];
+                    if (reps) return <StrengthStatCard key={`${w}-reps`} label={WORKOUT_LABEL[w]} value={reps} />;
+                    return null;
+                  })}
+                  {WORKOUT_ORDER.map(w => {
+                    const holds = holdsByWorkout[w];
+                    if (holds) return <StrengthStatCard key={`${w}-holds`} label={`${WORKOUT_LABEL[w]} holds`} value={formatDuration(holds)} />;
+                    return null;
+                  })}
+                </div>
+              );
+            })()}
+
             {chartsLoading && (
               <div className="text-xs text-muted-foreground py-4 text-center">Loading charts…</div>
             )}

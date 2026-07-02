@@ -727,7 +727,7 @@ function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, resolved
   return (
     <GameCard tone="legendary" className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <Trophy className="h-3 w-3" /> Badges ({badges.length}/{BADGES.length})
+        <Trophy className="h-3 w-3" /> Badges ({badges.length}/{resolved.length})
       </h3>
       <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-4 justify-items-center">
         {list.map(b => {
@@ -741,7 +741,7 @@ function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, resolved
       {hasMore && (
         <div className="mt-3 flex justify-center">
           <GameButton variant="ghost" onClick={() => setExpanded(v => !v)}>
-            {expanded ? "Show less" : `Show all (${BADGES.length})`}
+            {expanded ? "Show less" : `Show all (${resolved.length})`}
           </GameButton>
         </div>
       )}

@@ -579,7 +579,12 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
   );
 }
 
-function BadgesGrid({ badges, onOpen }: { badges: string[]; onOpen: (id: string) => void }) {
+function badgeProgress(id: string, ownedCount: number): { current: number; target: number } | null {
+  if (id === "shopaholic") return { current: Math.min(ownedCount, 10), target: 10 };
+  return null;
+}
+
+function BadgesGrid({ badges, ownedCount, onOpen }: { badges: string[]; ownedCount: number; onOpen: (id: string) => void }) {
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
   const initial = isMobile ? 8 : 16;
@@ -590,25 +595,50 @@ function BadgesGrid({ badges, onOpen }: { badges: string[]; onOpen: (id: string)
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
         <Trophy className="h-3 w-3" /> Badges ({badges.length}/{BADGES.length})
       </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-4 justify-items-center">
         {list.map(b => {
           const have = badges.includes(b.id);
+          const prog = badgeProgress(b.id, ownedCount);
+          const pct = prog ? Math.round((prog.current / prog.target) * 100) : (have ? 100 : 0);
           return (
-            <button
-              type="button"
-              key={b.id}
-              onClick={() => onOpen(b.id)}
-              className={cn(
-                "flex items-center gap-2 p-2.5 rounded-lg border text-left transition hover:-translate-y-0.5",
-                have ? "border-legendary/40 bg-legendary/5" : "border-border opacity-50"
-              )}
-            >
-              <BadgeCard image={b.image} name={b.name} have={have} rarity={b.rarity} variant="shine" size="md" />
-              <div className="min-w-0">
-                <div className="text-xs font-semibold truncate">{have ? b.name : "Locked"}</div>
-                <div className="text-[10px] text-muted-foreground line-clamp-1">{b.desc}</div>
-              </div>
-            </button>
+            <HoverCard key={b.id} openDelay={120} closeDelay={80}>
+              <HoverCardTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => onOpen(b.id)}
+                  aria-label={have ? b.name : "Locked badge"}
+                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring transition hover:-translate-y-0.5"
+                >
+                  <BadgeCard image={b.image} name={b.name} have={have} rarity={b.rarity} variant="shine" size="md" />
+                </button>
+              </HoverCardTrigger>
+              <HoverCardContent align="center" sideOffset={10} className="w-64">
+                <div className="flex items-start gap-3">
+                  <BadgeCard image={b.image} name={b.name} have={have} rarity={b.rarity} variant="shine" size="sm" />
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold leading-tight">{have ? b.name : "Locked"}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">
+                      {have ? "Unlocked" : b.rarity}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{b.desc}</p>
+                {prog && (
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-[10px] tabular-nums text-muted-foreground mb-1">
+                      <span>Progress</span>
+                      <span>{prog.current} / {prog.target}</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-[hsl(var(--panel-fill))] overflow-hidden border border-border/60">
+                      <div
+                        className="h-full rounded-full bg-legendary transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </HoverCardContent>
+            </HoverCard>
           );
         })}
       </div>

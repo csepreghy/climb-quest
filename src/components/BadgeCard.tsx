@@ -10,6 +10,7 @@ interface BadgeCardProps {
   size?: "sm" | "md" | "lg" | "xl";
   onClick?: () => void;
   className?: string;
+  hoverScale?: boolean;
 }
 
 export function BadgeCard({
@@ -21,6 +22,7 @@ export function BadgeCard({
   size = "md",
   onClick,
   className,
+  hoverScale = true,
 }: BadgeCardProps) {
   const sizeClasses = {
     sm: "h-8 w-8",
@@ -37,7 +39,8 @@ export function BadgeCard({
     <div
       onClick={onClick}
       className={cn(
-        "relative rounded-full transition-transform duration-200 hover:scale-110",
+        "relative rounded-full transition-transform duration-200",
+        hoverScale && "hover:scale-110",
         sizeClasses[size],
         onClick && "cursor-pointer",
         className

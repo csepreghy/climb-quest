@@ -8,7 +8,7 @@ import { ClimberAvatar } from "@/components/ClimberAvatar";
 import { GameButton } from "@/components/ui/game-button";
 import { GameCard, PixelBar } from "@/components/ui/game-card";
 import { getItem, isImageEmoji, useCustomItems } from "@/game/customItems";
-import { RARITY_BORDER, type Slot } from "@/game/data";
+import { RARITY_BORDER, RARITY_COLOR, type Slot } from "@/game/data";
 import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
@@ -633,8 +633,8 @@ function BadgeTile({
         <div className={cn("font-bold leading-snug break-words", compact ? "text-base" : "text-lg")}>
           {have ? badge.name : "Locked Badge"}
         </div>
-        <div className={cn("uppercase tracking-wider inline-block mt-1 px-2 py-0.5 rounded border text-[10px]", have ? "border-legendary/50 text-legendary" : "border-border text-muted-foreground")}>
-          {have ? "Unlocked" : (badge.rarity ?? "locked")}
+        <div className={cn("uppercase tracking-wider inline-block mt-1 px-2 py-0.5 rounded border text-[10px]", RARITY_COLOR[badge.rarity ?? "common"])}>
+          {badge.rarity ?? "common"}
         </div>
       </div>
       <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "text-xs" : "text-sm")}>
@@ -685,7 +685,7 @@ function BadgeTile({
       >
         <div className="rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-[0_0_40px_-10px_rgba(0,0,0,0.6)]">
           <div className="relative shrink-0 self-stretch grid place-items-center" style={{ width: IMG, height: IMG }}>
-            <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="xl" />
+            <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="xl" hoverScale={false} />
           </div>
           <Details />
         </div>
@@ -698,7 +698,7 @@ function BadgeTile({
           <div className="relative w-full max-w-[460px]">
             <div className="relative w-full rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-[0_0_40px_-10px_rgba(0,0,0,0.6)]">
               <div className="relative w-40 shrink-0 self-stretch grid place-items-center">
-                <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="lg" />
+                <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="lg" hoverScale={false} />
               </div>
               <Details compact />
             </div>

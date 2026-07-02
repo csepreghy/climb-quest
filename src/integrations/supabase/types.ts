@@ -62,6 +62,36 @@ export type Database = {
         }
         Relationships: []
       }
+      badge_overrides: {
+        Row: {
+          badge_id: string
+          created_at: string
+          description: string | null
+          rarity: string | null
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          badge_id: string
+          created_at?: string
+          description?: string | null
+          rarity?: string | null
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          badge_id?: string
+          created_at?: string
+          description?: string | null
+          rarity?: string | null
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       board_sessions: {
         Row: {
           board_type: string

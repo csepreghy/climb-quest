@@ -12,6 +12,7 @@ import { RARITY_BORDER, RARITY_COLOR, type Slot } from "@/game/data";
 import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
+import { useResolvedBadges } from "@/game/badgeOverrides";
 import { BadgeCard } from "@/components/BadgeCard";
 import { useCharacterName } from "@/game/characterName";
 import { StrengthTierChip, StrengthTierModal } from "@/components/StrengthTierStrip";
@@ -45,7 +46,8 @@ export default function Dashboard() {
 
   const [openBadgeId, setOpenBadgeId] = useState<string | null>(null);
   const [tierModalOpen, setTierModalOpen] = useState(false);
-  const openBadge = openBadgeId ? BADGES.find(b => b.id === openBadgeId) ?? null : null;
+  const resolvedBadges = useResolvedBadges();
+  const openBadge = openBadgeId ? resolvedBadges.find(b => b.id === openBadgeId) ?? null : null;
   const openBadgeHave = openBadge ? s.badges.includes(openBadge.id) : false;
   const strengthTierInfo = tierFor(s.strengthSessions ?? []);
   const { sessions: boardSessions } = useBoardSessions();
@@ -134,7 +136,7 @@ export default function Dashboard() {
 
 
       {/* All Badges */}
-      <BadgesGrid badges={s.badges} ownedCount={s.owned.length} totalChalkEarned={s.totalChalkEarned} totalSends={s.stats?.totalSends ?? 0} onOpen={(id) => setOpenBadgeId(id)} />
+      <BadgesGrid badges={s.badges} ownedCount={s.owned.length} totalChalkEarned={s.totalChalkEarned} totalSends={s.stats?.totalSends ?? 0} resolved={resolvedBadges} onOpen={(id) => setOpenBadgeId(id)} />
 
       {/* Badge details dialog */}
       <Dialog open={!!openBadgeId} onOpenChange={(v) => { if (!v) setOpenBadgeId(null); }}>
@@ -716,16 +718,16 @@ function BadgeTile({
   );
 }
 
-function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, onOpen }: { badges: string[]; ownedCount: number; totalChalkEarned: number; totalSends: number; onOpen: (id: string) => void }) {
+function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, resolved, onOpen }: { badges: string[]; ownedCount: number; totalChalkEarned: number; totalSends: number; resolved: typeof BADGES; onOpen: (id: string) => void }) {
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
   const initial = isMobile ? 8 : 16;
-  const list = expanded ? BADGES : BADGES.slice(0, initial);
-  const hasMore = BADGES.length > initial;
+  const list = expanded ? resolved : resolved.slice(0, initial);
+  const hasMore = resolved.length > initial;
   return (
     <GameCard tone="legendary" className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <Trophy className="h-3 w-3" /> Badges ({badges.length}/{BADGES.length})
+        <Trophy className="h-3 w-3" /> Badges ({badges.length}/{resolved.length})
       </h3>
       <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-4 justify-items-center">
         {list.map(b => {
@@ -739,7 +741,7 @@ function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, onOpen }
       {hasMore && (
         <div className="mt-3 flex justify-center">
           <GameButton variant="ghost" onClick={() => setExpanded(v => !v)}>
-            {expanded ? "Show less" : `Show all (${BADGES.length})`}
+            {expanded ? "Show less" : `Show all (${resolved.length})`}
           </GameButton>
         </div>
       )}

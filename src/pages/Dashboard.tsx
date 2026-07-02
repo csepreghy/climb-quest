@@ -633,8 +633,8 @@ function BadgeTile({
         <div className={cn("font-bold leading-snug break-words", compact ? "text-base" : "text-lg")}>
           {have ? badge.name : "Locked Badge"}
         </div>
-        <div className={cn("uppercase tracking-wider inline-block mt-1 px-2 py-0.5 rounded border text-[10px]", have ? "border-legendary/50 text-legendary" : "border-border text-muted-foreground")}>
-          {have ? "Unlocked" : (badge.rarity ?? "locked")}
+        <div className={cn("uppercase tracking-wider inline-block mt-1 px-2 py-0.5 rounded border text-[10px]", RARITY_COLOR[badge.rarity ?? "common"])}>
+          {badge.rarity ?? "common"}
         </div>
       </div>
       <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "text-xs" : "text-sm")}>

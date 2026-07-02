@@ -37,7 +37,7 @@ export function BadgeCard({
     <div
       onClick={onClick}
       className={cn(
-        "relative rounded-full",
+        "relative rounded-full transition-transform duration-200 hover:scale-110",
         sizeClasses[size],
         onClick && "cursor-pointer",
         className

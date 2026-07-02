@@ -212,6 +212,38 @@ function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; look
   );
 }
 
+const WORKOUT_ORDER = ["pullup", "pushup", "squat", "handstand", "plank", "core"] as const;
+const WORKOUT_LABEL: Record<string, string> = {
+  pullup: "Pull-ups",
+  pushup: "Push-ups",
+  squat: "Squats",
+  handstand: "Handstand",
+  plank: "Plank",
+  core: "Core",
+};
+
+function formatDuration(totalSeconds: number): string {
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (minutes < 60) {
+    return seconds > 0 ? `${minutes}m ${seconds}` : `${minutes}m`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
+function StrengthStatCard({ label, value }: { label: string; value: number | string }) {
+  const text = typeof value === "string" ? value : value.toLocaleString();
+  return (
+    <GameCard className="px-2 py-2.5 text-center">
+      <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground leading-tight line-clamp-2 min-h-[2em]">{label}</div>
+      <div className="text-base sm:text-lg font-bold mt-0.5 gradient-chalk-text tabular-nums leading-none">{text}</div>
+    </GameCard>
+  );
+}
+
 function ClimberDetailsDialog({
   open, onOpenChange, row, rank, lookup,
 }: {
@@ -285,6 +317,44 @@ function ClimberDetailsDialog({
               <BoardBestTile sessions={charts?.boardSessions ?? null} />
               <StrengthTierTile sessions={charts?.strengthSessions ?? null} />
             </div>
+
+            {(() => {
+              const sessions = charts?.strengthSessions ?? [];
+              if (!sessions.length) return null;
+              const repsByWorkout: Record<string, number> = {};
+              const holdsByWorkout: Record<string, number> = {};
+              let totalReps = 0;
+              let totalHoldSeconds = 0;
+              for (const ss of sessions) {
+                for (const st of ss.sets) {
+                  if (st.mode === "hold") {
+                    const sec = st.reps || 0;
+                    holdsByWorkout[ss.workout] = (holdsByWorkout[ss.workout] || 0) + sec;
+                    totalHoldSeconds += sec;
+                  } else {
+                    const r = st.reps || 0;
+                    repsByWorkout[ss.workout] = (repsByWorkout[ss.workout] || 0) + r;
+                    totalReps += r;
+                  }
+                }
+              }
+              return (
+                <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+                  {totalReps > 0 && <StrengthStatCard label="Total reps" value={totalReps} />}
+                  {totalHoldSeconds > 0 && <StrengthStatCard label="Total hold time" value={formatDuration(totalHoldSeconds)} />}
+                  {WORKOUT_ORDER.map(w => {
+                    const reps = repsByWorkout[w];
+                    if (reps) return <StrengthStatCard key={`${w}-reps`} label={WORKOUT_LABEL[w]} value={reps} />;
+                    return null;
+                  })}
+                  {WORKOUT_ORDER.map(w => {
+                    const holds = holdsByWorkout[w];
+                    if (holds) return <StrengthStatCard key={`${w}-holds`} label={`${WORKOUT_LABEL[w]} holds`} value={formatDuration(holds)} />;
+                    return null;
+                  })}
+                </div>
+              );
+            })()}
 
             {chartsLoading && (
               <div className="text-xs text-muted-foreground py-4 text-center">Loading charts…</div>

@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import chalkBagImg from "@/assets/chalk-bag.png";
-import { Plus, Minus, Upload, Trash2, Pencil, Copy, X, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive, Bell, Sparkles } from "lucide-react";
+import { Plus, Minus, Upload, Trash2, Pencil, Copy, X, User as UserIcon, Users as UsersIcon, Shield, Settings, Layers, Package, MapPin, Palette, MessageSquare, Archive, Bell, Sparkles, Trophy } from "lucide-react";
 import { AdminNotificationsPanel } from "@/components/notifications/AdminNotificationsPanel";
 import { SnapshotsAdmin } from "@/components/admin/SnapshotsAdmin";
 import { CardLab } from "@/components/admin/CardLab";

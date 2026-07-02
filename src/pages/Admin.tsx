@@ -98,6 +98,7 @@ export default function Admin() {
             { value: "users", label: "Users", Icon: UsersIcon },
             { value: "levels", label: "Levels", Icon: Layers },
             { value: "items", label: "Items", Icon: Package },
+            { value: "badges", label: "Badges", Icon: Trophy },
             { value: "gyms", label: "Gyms", Icon: MapPin },
             { value: "theme", label: "Theme", Icon: Palette },
             { value: "card-lab", label: "Card Lab", Icon: Sparkles },

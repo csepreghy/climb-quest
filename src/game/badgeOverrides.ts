@@ -22,6 +22,7 @@ function rowToOverride(r: any): BadgeOverride {
     badgeId: r.badge_id,
     title: r.title,
     description: r.description,
+    flavor: r.flavor ?? null,
     rarity: (r.rarity ?? null) as Rarity | null,
   };
 }
@@ -70,6 +71,7 @@ export function resolveBadge(def: BadgeDef): BadgeDef {
     ...def,
     name: o.title?.trim() ? o.title : def.name,
     desc: o.description?.trim() ? o.description : def.desc,
+    flavor: o.flavor?.trim() ? o.flavor : def.flavor,
     rarity: o.rarity ?? def.rarity,
   };
 }
@@ -83,6 +85,7 @@ export function useResolvedBadges(): BadgeDef[] {
       ...b,
       name: o.title?.trim() ? o.title : b.name,
       desc: o.description?.trim() ? o.description : b.desc,
+      flavor: o.flavor?.trim() ? o.flavor : b.flavor,
       rarity: o.rarity ?? b.rarity,
     };
   });
@@ -91,6 +94,7 @@ export function useResolvedBadges(): BadgeDef[] {
 export interface BadgeOverrideInput {
   title?: string | null;
   description?: string | null;
+  flavor?: string | null;
   rarity?: Rarity | null;
 }
 
@@ -100,6 +104,7 @@ export async function saveBadgeOverride(badgeId: string, input: BadgeOverrideInp
     badge_id: badgeId,
     title: input.title ?? null,
     description: input.description ?? null,
+    flavor: input.flavor ?? null,
     rarity: input.rarity ?? null,
     updated_by: user?.id ?? null,
   };
@@ -114,3 +119,4 @@ export async function clearBadgeOverride(badgeId: string): Promise<void> {
   if (error) throw error;
   await refresh();
 }
+

@@ -718,12 +718,12 @@ function BadgeTile({
   );
 }
 
-function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, onOpen }: { badges: string[]; ownedCount: number; totalChalkEarned: number; totalSends: number; onOpen: (id: string) => void }) {
+function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, resolved, onOpen }: { badges: string[]; ownedCount: number; totalChalkEarned: number; totalSends: number; resolved: typeof BADGES; onOpen: (id: string) => void }) {
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
   const initial = isMobile ? 8 : 16;
-  const list = expanded ? BADGES : BADGES.slice(0, initial);
-  const hasMore = BADGES.length > initial;
+  const list = expanded ? resolved : resolved.slice(0, initial);
+  const hasMore = resolved.length > initial;
   return (
     <GameCard tone="legendary" className="p-5">
       <h3 className="menu-label mb-3 flex items-center gap-1.5">

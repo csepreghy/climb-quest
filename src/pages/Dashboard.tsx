@@ -698,7 +698,7 @@ function BadgeTile({
           <div className="relative w-full max-w-[460px]">
             <div className="relative w-full rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-[0_0_40px_-10px_rgba(0,0,0,0.6)]">
               <div className="relative w-40 shrink-0 self-stretch grid place-items-center">
-                <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="lg" />
+                <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="lg" hoverScale={false} />
               </div>
               <Details compact />
             </div>

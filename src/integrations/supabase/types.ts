@@ -67,6 +67,7 @@ export type Database = {
           badge_id: string
           created_at: string
           description: string | null
+          flavor: string | null
           rarity: string | null
           title: string | null
           updated_at: string
@@ -76,6 +77,7 @@ export type Database = {
           badge_id: string
           created_at?: string
           description?: string | null
+          flavor?: string | null
           rarity?: string | null
           title?: string | null
           updated_at?: string
@@ -85,6 +87,7 @@ export type Database = {
           badge_id?: string
           created_at?: string
           description?: string | null
+          flavor?: string | null
           rarity?: string | null
           title?: string | null
           updated_at?: string

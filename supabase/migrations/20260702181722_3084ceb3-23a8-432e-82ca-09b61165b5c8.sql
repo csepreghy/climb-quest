@@ -1,0 +1,1 @@
+ALTER TABLE public.badge_overrides ADD COLUMN IF NOT EXISTS flavor text;

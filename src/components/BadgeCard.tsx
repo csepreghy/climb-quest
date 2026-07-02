@@ -1,15 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { Rarity } from "@/game/data";
 
-const RARITY_GLOW: Record<string, string> = {
-  common: "hsl(0 0% 100% / 0.85)",
-  uncommon: "hsl(var(--uncommon))",
-  rare: "hsl(var(--rare))",
-  epic: "hsl(var(--epic))",
-  legendary: "hsl(var(--legendary))",
-  mythic: "hsl(var(--mythic))",
-};
-
 interface BadgeCardProps {
   image: string;
   name: string;
@@ -31,14 +22,16 @@ export function BadgeCard({
   onClick,
   className,
 }: BadgeCardProps) {
-  const glowColor = RARITY_GLOW[rarity] ?? RARITY_GLOW.common;
-
   const sizeClasses = {
     sm: "h-8 w-8",
     md: "h-24 w-24",
     lg: "h-28 w-28",
     xl: "h-32 w-32",
   };
+
+  const borderColor = have
+    ? `hsl(var(--${rarity}))`
+    : `hsl(var(--${rarity}) / 0.55)`;
 
   return (
     <div
@@ -50,9 +43,7 @@ export function BadgeCard({
         className
       )}
       style={{
-        boxShadow: have
-          ? "0 0 0 2px hsl(0 0% 100%), 0 4px 12px -4px hsl(0 0% 0% / 0.5)"
-          : "0 0 0 2px hsl(0 0% 100% / 0.55)",
+        boxShadow: `0 0 0 3px ${borderColor}, 0 4px 12px -4px hsl(0 0% 0% / 0.5)`,
       }}
     >
       <div

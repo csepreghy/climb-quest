@@ -407,11 +407,10 @@ function ClimberDetailsDialog({
 function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
   const text = typeof value === "string" ? value : value.toLocaleString();
   return (
-    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
-      <div className="text-base font-bold tabular-nums leading-none">{text}</div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
-        {icon} {label}
-      </div>
+    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
+      <div className="text-muted-foreground mb-1">{icon}</div>
+      <div className="text-base sm:text-lg font-bold tabular-nums leading-none">{text}</div>
+      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
     </div>
   );
 }

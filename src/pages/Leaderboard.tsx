@@ -258,6 +258,28 @@ function ClimberDetailsDialog({
   const [chartsLoading, setChartsLoading] = useState(false);
   const [chartsError, setChartsError] = useState<string | null>(null);
 
+  const strengthStats = useMemo(() => {
+    const sessions = charts?.strengthSessions ?? [];
+    const repsByWorkout: Record<string, number> = {};
+    const holdsByWorkout: Record<string, number> = {};
+    let totalReps = 0;
+    let totalHoldSeconds = 0;
+    for (const ss of sessions) {
+      for (const st of ss.sets) {
+        if (st.mode === "hold") {
+          const sec = st.reps || 0;
+          holdsByWorkout[ss.workout] = (holdsByWorkout[ss.workout] || 0) + sec;
+          totalHoldSeconds += sec;
+        } else {
+          const r = st.reps || 0;
+          repsByWorkout[ss.workout] = (repsByWorkout[ss.workout] || 0) + r;
+          totalReps += r;
+        }
+      }
+    }
+    return { repsByWorkout, holdsByWorkout, totalReps, totalHoldSeconds, sessions };
+  }, [charts]);
+
   useEffect(() => {
     if (!open || !row) { setCharts(null); setChartsError(null); return; }
     let cancelled = false;

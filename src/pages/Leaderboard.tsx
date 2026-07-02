@@ -331,15 +331,6 @@ function ClimberDetailsDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              <StatTile icon={<ScrollText className="h-3.5 w-3.5" />} label="Logs" value={row.total_logs} />
-              <StatTile icon={<Swords className="h-3.5 w-3.5" />} label="Bosses" value={row.bosses_sent} />
-              <StatTile icon={<Dumbbell className="h-3.5 w-3.5" />} label="Reps" value={chartsLoading ? "—" : strengthStats.totalReps} />
-              <StatTile icon={<Mountain className="h-3.5 w-3.5" />} label="Board" value={chartsLoading ? "—" : (charts?.boardSessions ?? []).length} />
-              <BoardBestTile sessions={charts?.boardSessions ?? null} />
-              <StrengthTierTile sessions={charts?.strengthSessions ?? null} />
-            </div>
-
             {strengthStats.sessions.length > 0 && (
               <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
                 {strengthStats.totalReps > 0 && <StrengthStatCard label="Total reps" value={strengthStats.totalReps} />}
@@ -356,6 +347,15 @@ function ClimberDetailsDialog({
                 })}
               </div>
             )}
+
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <StatTile icon={<ScrollText className="h-3 w-3" />} label="Logs" value={row.total_logs} />
+              <StatTile icon={<Swords className="h-3 w-3" />} label="Bosses" value={row.bosses_sent} />
+              <StatTile icon={<Dumbbell className="h-3 w-3" />} label="Strength" value={row.strength_sessions ?? 0} />
+              <StatTile icon={<Mountain className="h-3 w-3" />} label="Board" value={chartsLoading ? "—" : (charts?.boardSessions ?? []).length} />
+              <BoardBestTile sessions={charts?.boardSessions ?? null} />
+              <StrengthTierTile sessions={charts?.strengthSessions ?? null} />
+            </div>
 
             {chartsLoading && (
               <div className="text-xs text-muted-foreground py-4 text-center">Loading charts…</div>
@@ -386,10 +386,11 @@ function ClimberDetailsDialog({
 function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
   const text = typeof value === "string" ? value : value.toLocaleString();
   return (
-    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
-      <div className="text-muted-foreground mb-1">{icon}</div>
-      <div className="text-base sm:text-lg font-bold tabular-nums leading-none">{text}</div>
-      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+      <div className="text-base font-bold tabular-nums leading-none">{text}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+        {icon} {label}
+      </div>
     </div>
   );
 }
@@ -399,10 +400,11 @@ function BoardBestTile({ sessions }: { sessions: any[] | null }) {
     ? sessions.reduce((a: any, b: any) => ((b.grade_rank ?? 0) > (a.grade_rank ?? 0) ? b : a))
     : null;
   return (
-    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
-      <div className="text-muted-foreground mb-1"><Mountain className="h-3.5 w-3.5" /></div>
-      <div className="text-base sm:text-lg font-bold leading-none">{best ? best.grade : "—"}</div>
-      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">Best board</div>
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+      <div className="text-base font-bold leading-none">{best ? best.grade : "—"}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+        <Mountain className="h-3 w-3" /> Best board
+      </div>
     </div>
   );
 }
@@ -410,23 +412,21 @@ function BoardBestTile({ sessions }: { sessions: any[] | null }) {
 function StrengthTierTile({ sessions }: { sessions: StrengthSession[] | null }) {
   if (!sessions) {
     return (
-      <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
-        <div className="text-muted-foreground mb-1"><Dumbbell className="h-3.5 w-3.5" /></div>
-        <div className="text-base sm:text-lg font-bold tabular-nums leading-none text-muted-foreground">—</div>
-        <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">Tier</div>
+      <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+        <div className="text-base font-bold tabular-nums leading-none text-muted-foreground">—</div>
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Tier</div>
       </div>
     );
   }
   const { tier, qualifiedDays } = tierFor(sessions);
   const pct = tierChalkPct(tier);
   return (
-    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
-      <div className="text-muted-foreground mb-1"><Dumbbell className="h-3.5 w-3.5" /></div>
-      <div className={cn("text-base sm:text-lg font-bold leading-none", TIER_TEXT[tier])}>
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+      <div className={cn("text-base font-bold leading-none", TIER_TEXT[tier])}>
         {TIER_LABEL[tier]}
       </div>
-      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">
-        {qualifiedDays} of 7 days{pct > 0 ? ` · +${pct}%` : ""}
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+        <Dumbbell className="h-3 w-3" /> {qualifiedDays} of 7 days{pct > 0 ? ` · +${pct}%` : ""}
       </div>
     </div>
   );

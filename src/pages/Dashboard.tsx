@@ -136,7 +136,7 @@ export default function Dashboard() {
 
 
       {/* All Badges */}
-      <BadgesGrid badges={s.badges} ownedCount={s.owned.length} totalChalkEarned={s.totalChalkEarned} totalSends={s.stats?.totalSends ?? 0} onOpen={(id) => setOpenBadgeId(id)} />
+      <BadgesGrid badges={s.badges} ownedCount={s.owned.length} totalChalkEarned={s.totalChalkEarned} totalSends={s.stats?.totalSends ?? 0} resolved={resolvedBadges} onOpen={(id) => setOpenBadgeId(id)} />
 
       {/* Badge details dialog */}
       <Dialog open={!!openBadgeId} onOpenChange={(v) => { if (!v) setOpenBadgeId(null); }}>

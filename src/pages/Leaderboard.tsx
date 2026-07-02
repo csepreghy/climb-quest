@@ -331,31 +331,57 @@ function ClimberDetailsDialog({
               </div>
             </div>
 
+            <div className="grid gap-2 grid-cols-3 sm:grid-cols-6">
+              <StrengthStatCard label="Logs" value={row.total_logs} />
+              <StrengthStatCard label="Bosses" value={row.bosses_sent} />
+              <StrengthStatCard label="Strength" value={row.strength_sessions ?? 0} />
+              <StrengthStatCard label="Board" value={chartsLoading ? "—" : (charts?.boardSessions ?? []).length} />
+              <StrengthStatCard label="Best board" value={(charts?.boardSessions && charts.boardSessions.length) ? charts.boardSessions.reduce((a: any, b: any) => ((b.grade_rank ?? 0) > (a.grade_rank ?? 0) ? b : a)).grade : "—"} />
+              <StrengthStatCard label="Tier" value={(() => {
+                if (!charts?.strengthSessions) return "—";
+                const { tier } = tierFor(charts.strengthSessions);
+                return TIER_LABEL[tier];
+              })()} />
+            </div>
+
             {strengthStats.sessions.length > 0 && (
               <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-                {strengthStats.totalReps > 0 && <StrengthStatCard label="Total reps" value={strengthStats.totalReps} />}
-                {strengthStats.totalHoldSeconds > 0 && <StrengthStatCard label="Total hold time" value={formatDuration(strengthStats.totalHoldSeconds)} />}
+                {strengthStats.totalReps > 0 && (
+                  <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+                    <div className="text-base font-bold tabular-nums leading-none">{strengthStats.totalReps.toLocaleString()}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                      <Dumbbell className="h-3 w-3" /> Total reps
+                    </div>
+                  </div>
+                )}
+                {strengthStats.totalHoldSeconds > 0 && (
+                  <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+                    <div className="text-base font-bold tabular-nums leading-none">{formatDuration(strengthStats.totalHoldSeconds)}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Total hold time</div>
+                  </div>
+                )}
                 {WORKOUT_ORDER.map(w => {
                   const reps = strengthStats.repsByWorkout[w];
-                  if (reps) return <StrengthStatCard key={`${w}-reps`} label={WORKOUT_LABEL[w]} value={reps} />;
+                  if (reps) return (
+                    <div key={`${w}-reps`} className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+                      <div className="text-base font-bold tabular-nums leading-none">{reps.toLocaleString()}</div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{WORKOUT_LABEL[w]}</div>
+                    </div>
+                  );
                   return null;
                 })}
                 {WORKOUT_ORDER.map(w => {
                   const holds = strengthStats.holdsByWorkout[w];
-                  if (holds) return <StrengthStatCard key={`${w}-holds`} label={`${WORKOUT_LABEL[w]} holds`} value={formatDuration(holds)} />;
+                  if (holds) return (
+                    <div key={`${w}-holds`} className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
+                      <div className="text-base font-bold tabular-nums leading-none">{formatDuration(holds)}</div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{WORKOUT_LABEL[w]} holds</div>
+                    </div>
+                  );
                   return null;
                 })}
               </div>
             )}
-
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              <StatTile icon={<ScrollText className="h-3 w-3" />} label="Logs" value={row.total_logs} />
-              <StatTile icon={<Swords className="h-3 w-3" />} label="Bosses" value={row.bosses_sent} />
-              <StatTile icon={<Dumbbell className="h-3 w-3" />} label="Strength" value={row.strength_sessions ?? 0} />
-              <StatTile icon={<Mountain className="h-3 w-3" />} label="Board" value={chartsLoading ? "—" : (charts?.boardSessions ?? []).length} />
-              <BoardBestTile sessions={charts?.boardSessions ?? null} />
-              <StrengthTierTile sessions={charts?.strengthSessions ?? null} />
-            </div>
 
             {chartsLoading && (
               <div className="text-xs text-muted-foreground py-4 text-center">Loading charts…</div>

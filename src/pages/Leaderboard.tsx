@@ -334,8 +334,8 @@ function ClimberDetailsDialog({
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               <StatTile icon={<ScrollText className="h-3.5 w-3.5" />} label="Logs" value={row.total_logs} />
               <StatTile icon={<Swords className="h-3.5 w-3.5" />} label="Bosses" value={row.bosses_sent} />
-              <StatTile icon={<Dumbbell className="h-3.5 w-3.5" />} label="Strength" value={row.strength_sessions ?? 0} />
-              <StatTile icon={<Mountain className="h-3.5 w-3.5" />} label="Board" value={(charts?.boardSessions ?? []).length} />
+              <StatTile icon={<Dumbbell className="h-3.5 w-3.5" />} label="Reps" value={chartsLoading ? "—" : strengthStats.totalReps} />
+              <StatTile icon={<Mountain className="h-3.5 w-3.5" />} label="Board" value={chartsLoading ? "—" : (charts?.boardSessions ?? []).length} />
               <BoardBestTile sessions={charts?.boardSessions ?? null} />
               <StrengthTierTile sessions={charts?.strengthSessions ?? null} />
             </div>

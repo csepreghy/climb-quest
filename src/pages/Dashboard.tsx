@@ -134,7 +134,7 @@ export default function Dashboard() {
 
 
       {/* All Badges */}
-      <BadgesGrid badges={s.badges} ownedCount={s.owned.length} onOpen={(id) => setOpenBadgeId(id)} />
+      <BadgesGrid badges={s.badges} ownedCount={s.owned.length} totalChalkEarned={s.totalChalkEarned} totalSends={s.stats?.totalSends ?? 0} onOpen={(id) => setOpenBadgeId(id)} />
 
       {/* Badge details dialog */}
       <Dialog open={!!openBadgeId} onOpenChange={(v) => { if (!v) setOpenBadgeId(null); }}>
@@ -580,8 +580,13 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
   );
 }
 
-function badgeProgress(id: string, ownedCount: number): { current: number; target: number } | null {
-  if (id === "shopaholic") return { current: Math.min(ownedCount, 10), target: 10 };
+function badgeProgress(id: string, ctx: { ownedCount: number; totalChalkEarned: number; totalSends: number }): { current: number; target: number } | null {
+  if (id === "shopaholic") return { current: ctx.ownedCount, target: 10 };
+  if (id === "chalk_1k") return { current: ctx.totalChalkEarned, target: 1000 };
+  if (id === "chalk_10k") return { current: ctx.totalChalkEarned, target: 10000 };
+  if (id === "chalk_50k") return { current: ctx.totalChalkEarned, target: 50000 };
+  if (id === "chalk_100k") return { current: ctx.totalChalkEarned, target: 100000 };
+  if (id === "sends_100") return { current: ctx.totalSends, target: 100 };
   return null;
 }
 
@@ -625,7 +630,7 @@ function BadgeTile({
     }
   }
 
-  const pct = progress ? Math.round((progress.current / progress.target) * 100) : (have ? 100 : 0);
+  const pct = progress ? Math.min(100, Math.round((progress.current / progress.target) * 100)) : (have ? 100 : 0);
 
   const Details = ({ compact }: { compact?: boolean }) => (
     <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-3 gap-1.5" : "p-4 gap-2")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
@@ -644,7 +649,7 @@ function BadgeTile({
         <div className="mt-auto">
           <div className="flex items-center justify-between text-[10px] tabular-nums text-muted-foreground mb-1">
             <span>Progress</span>
-            <span>{progress.current} / {progress.target}</span>
+            <span>{progress.current.toLocaleString()} / {progress.target.toLocaleString()}</span>
           </div>
           <div className="h-2 w-full rounded-full bg-[hsl(var(--panel-fill))] overflow-hidden border border-border/60">
             <div className="h-full rounded-full bg-legendary transition-all" style={{ width: `${pct}%` }} />
@@ -709,7 +714,7 @@ function BadgeTile({
   );
 }
 
-function BadgesGrid({ badges, ownedCount, onOpen }: { badges: string[]; ownedCount: number; onOpen: (id: string) => void }) {
+function BadgesGrid({ badges, ownedCount, totalChalkEarned, totalSends, onOpen }: { badges: string[]; ownedCount: number; totalChalkEarned: number; totalSends: number; onOpen: (id: string) => void }) {
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
   const initial = isMobile ? 8 : 16;
@@ -723,7 +728,7 @@ function BadgesGrid({ badges, ownedCount, onOpen }: { badges: string[]; ownedCou
       <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-4 justify-items-center">
         {list.map(b => {
           const have = badges.includes(b.id);
-          const prog = badgeProgress(b.id, ownedCount);
+          const prog = badgeProgress(b.id, { ownedCount, totalChalkEarned, totalSends });
           return (
             <BadgeTile key={b.id} badge={b} have={have} progress={prog} onOpen={() => onOpen(b.id)} />
           );

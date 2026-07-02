@@ -1,4 +1,9 @@
 import shopaholicAsset from "@/assets/badges/shopaholic.png.asset.json";
+import chalk1kAsset from "@/assets/badges/1k.png.asset.json";
+import chalk10kAsset from "@/assets/badges/10k.png.asset.json";
+import chalk50kAsset from "@/assets/badges/50k.png.asset.json";
+import chalk100kAsset from "@/assets/badges/100k.png.asset.json";
+import sends100Asset from "@/assets/badges/100sends.png.asset.json";
 // ClimbQuest game data: levels, items, badges, boss templates
 
 
@@ -115,6 +120,11 @@ export interface BadgeDef {
 }
 export const BADGES: BadgeDef[] = [
   { id: "shopaholic", name: "Shopaholic", image: shopaholicAsset.url, desc: "Bought 10 shop items.", rarity: "epic" },
+  { id: "chalk_1k", name: "1K Club", image: chalk1kAsset.url, desc: "Earned 1,000 total Chalk.", rarity: "rare" },
+  { id: "chalk_10k", name: "10K Club", image: chalk10kAsset.url, desc: "Earned 10,000 total Chalk.", rarity: "epic" },
+  { id: "chalk_50k", name: "50K Club", image: chalk50kAsset.url, desc: "Earned 50,000 total Chalk.", rarity: "legendary" },
+  { id: "chalk_100k", name: "100K Club", image: chalk100kAsset.url, desc: "Earned 100,000 total Chalk.", rarity: "mythic" },
+  { id: "sends_100", name: "Century Sender", image: sends100Asset.url, desc: "Logged 100 sends.", rarity: "rare" },
 ];
 
 export const BADGE_BY_ID: Record<string, BadgeDef> = Object.fromEntries(BADGES.map(b => [b.id, b]));

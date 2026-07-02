@@ -1323,7 +1323,9 @@ function emitBadges(ids: string[]) {
  */
 function applyBadges(s: State, addIds: string[], silent = false): State {
   const haveBadges = new Set(s.badges);
-  const fresh = addIds.filter(id => !haveBadges.has(id));
+  // Auto-merge any additional badges the user now deserves based on state.
+  const merged = [...addIds, ...deservedBadges(s)];
+  const fresh = merged.filter(id => !haveBadges.has(id));
   const nextBadges = fresh.length ? [...s.badges, ...fresh] : s.badges;
 
   const claimed = new Set(s.badgeChalkClaimedFor ?? []);
@@ -1346,9 +1348,19 @@ function applyBadges(s: State, addIds: string[], silent = false): State {
 function deservedBadges(s: State): string[] {
   const out: string[] = [];
   const purchased = s.owned.length;
-  if (purchased >= 10 && !s.badges.includes("shopaholic")) out.push("shopaholic");
+  const have = new Set(s.badges);
+  if (purchased >= 10 && !have.has("shopaholic")) out.push("shopaholic");
+  const tc = s.totalChalkEarned;
+  if (tc >= 1000 && !have.has("chalk_1k")) out.push("chalk_1k");
+  if (tc >= 10000 && !have.has("chalk_10k")) out.push("chalk_10k");
+  if (tc >= 50000 && !have.has("chalk_50k")) out.push("chalk_50k");
+  if (tc >= 100000 && !have.has("chalk_100k")) out.push("chalk_100k");
+  const sends = s.stats?.totalSends ?? 0;
+  if (sends >= 100 && !have.has("sends_100")) out.push("sends_100");
   return out;
 }
+
+
 
 /**
  * Retroactively award any deserved badges and back-pay the +50 chalk for every

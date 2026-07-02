@@ -579,20 +579,6 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
   );
 }
 
-function BadgeImage({ src, alt, have, size = "md" }: { src: string; alt: string; have: boolean; size?: "sm" | "md" | "lg" }) {
-  const s = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-8 w-8" : "h-10 w-10";
-  const border = have ? "border-legendary/50" : "border-border";
-  return (
-    <div className={cn("shrink-0 rounded-full overflow-hidden bg-[hsl(var(--panel-fill))] border-2", s, border)}>
-      {have && src ? (
-        <img src={src} alt={alt} className="h-full w-full object-cover" />
-      ) : (
-        <div className="h-full w-full flex items-center justify-center text-sm">❔</div>
-      )}
-    </div>
-  );
-}
-
 function BadgesGrid({ badges, onOpen }: { badges: string[]; onOpen: (id: string) => void }) {
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
@@ -617,7 +603,7 @@ function BadgesGrid({ badges, onOpen }: { badges: string[]; onOpen: (id: string)
                 have ? "border-legendary/40 bg-legendary/5" : "border-border opacity-50"
               )}
             >
-              <BadgeImage src={b.image} alt={b.name} have={have} size="md" />
+              <BadgeCard image={b.image} name={b.name} have={have} rarity={b.rarity} variant="shine" size="md" />
               <div className="min-w-0">
                 <div className="text-xs font-semibold truncate">{have ? b.name : "Locked"}</div>
                 <div className="text-[10px] text-muted-foreground line-clamp-1">{b.desc}</div>

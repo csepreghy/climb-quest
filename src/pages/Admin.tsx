@@ -1292,3 +1292,105 @@ function FeedbackAdmin() {
     </GameCard>
   );
 }
+
+function BadgesAdmin() {
+  const overrides = useBadgeOverrides();
+  return (
+    <GameCard tone="legendary" className="p-5">
+      <div className="menu-label mb-3 flex items-center gap-1.5"><Trophy className="h-3.5 w-3.5" /> Badge Overrides</div>
+      <p className="text-sm text-muted-foreground mb-4">
+        Rename badges or change their description and rarity. Award conditions (when a badge is earned) are controlled in code and cannot be edited here.
+      </p>
+      <div className="grid gap-4">
+        {BADGES.map(b => (
+          <BadgeAdminRow key={b.id} badge={b} override={overrides.get(b.id) ?? null} />
+        ))}
+      </div>
+    </GameCard>
+  );
+}
+
+function BadgeAdminRow({ badge, override }: { badge: typeof BADGES[number]; override: import("@/game/badgeOverrides").BadgeOverride | null }) {
+  const [title, setTitle] = useState(override?.title ?? "");
+  const [desc, setDesc] = useState(override?.description ?? "");
+  const [rarity, setRarity] = useState<Rarity | "">(override?.rarity ?? "");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    setTitle(override?.title ?? "");
+    setDesc(override?.description ?? "");
+    setRarity(override?.rarity ?? "");
+  }, [override?.title, override?.description, override?.rarity]);
+
+  const effectiveTitle = title.trim() || badge.name;
+  const effectiveDesc = desc.trim() || badge.desc;
+  const effectiveRarity = (rarity || badge.rarity || "common") as Rarity;
+
+  async function save() {
+    setBusy(true);
+    try {
+      await saveBadgeOverride(badge.id, {
+        title: title.trim() ? title.trim() : null,
+        description: desc.trim() ? desc.trim() : null,
+        rarity: rarity ? (rarity as Rarity) : null,
+      });
+      toast.success("Badge updated");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to save");
+    } finally { setBusy(false); }
+  }
+
+  async function reset() {
+    setBusy(true);
+    try {
+      await clearBadgeOverride(badge.id);
+      toast.success("Reset to defaults");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to reset");
+    } finally { setBusy(false); }
+  }
+
+  return (
+    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-[hsl(var(--panel-fill))] p-4 flex gap-4">
+      <div className="shrink-0">
+        <div
+          className="h-20 w-20 rounded-full overflow-hidden"
+          style={{ boxShadow: `0 0 0 3px hsl(var(--${effectiveRarity}))` }}
+        >
+          <img src={badge.image} alt={effectiveTitle} className="h-full w-full object-cover" />
+        </div>
+      </div>
+      <div className="flex-1 grid gap-2 min-w-0">
+        <div className="text-xs text-muted-foreground">ID: <span className="font-mono">{badge.id}</span></div>
+        <div className="grid sm:grid-cols-2 gap-2">
+          <div>
+            <Label className="text-xs">Title</Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder={badge.name} maxLength={60} />
+          </div>
+          <div>
+            <Label className="text-xs">Rarity</Label>
+            <Select value={rarity || "__default"} onValueChange={v => setRarity(v === "__default" ? "" : (v as Rarity))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__default">Default ({badge.rarity ?? "common"})</SelectItem>
+                {RARITIES.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div>
+          <Label className="text-xs">Description</Label>
+          <Input value={desc} onChange={e => setDesc(e.target.value)} placeholder={badge.desc} maxLength={200} />
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Preview: <span className="font-semibold text-foreground">{effectiveTitle}</span> · {effectiveRarity} — {effectiveDesc}
+        </div>
+        <div className="flex gap-2 mt-1">
+          <Button size="sm" onClick={save} disabled={busy}>Save</Button>
+          <Button size="sm" variant="secondary" onClick={reset} disabled={busy || !override}>Reset</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+

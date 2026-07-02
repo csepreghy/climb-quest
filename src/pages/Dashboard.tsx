@@ -162,8 +162,16 @@ export default function Dashboard() {
                   </div>
                 </div>
               </DialogHeader>
-              <DialogDescription className="text-sm text-foreground/80 whitespace-normal break-words">
-                {openBadge.desc}
+              <DialogDescription asChild>
+                <div className="space-y-2 text-sm">
+                  {openBadge.flavor && (
+                    <p className="italic text-muted-foreground/80">“{openBadge.flavor}”</p>
+                  )}
+                  <div className="rounded border-l-2 border-legendary/70 bg-legendary/5 pl-2 py-1">
+                    <div className="text-[9px] uppercase tracking-wider text-legendary/90 font-semibold mb-0.5">How to earn</div>
+                    <p className="text-foreground/90">{openBadge.desc}</p>
+                  </div>
+                </div>
               </DialogDescription>
             </>
           )}

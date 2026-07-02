@@ -35,8 +35,8 @@ export function BadgeCard({
 
   const sizeClasses = {
     sm: "h-8 w-8",
-    md: "h-10 w-10",
-    lg: "h-16 w-16",
+    md: "h-20 w-20",
+    lg: "h-24 w-24",
     xl: "h-28 w-28",
   };
 
@@ -105,7 +105,7 @@ export function BadgeCard({
           !have && "opacity-40 grayscale"
         )}
       >
-        {have && image ? (
+        {image ? (
           <img src={image} alt={name} className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-xs">❔</div>

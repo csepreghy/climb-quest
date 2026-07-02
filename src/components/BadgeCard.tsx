@@ -33,7 +33,7 @@ export function BadgeCard({
 
   const borderColor = have
     ? `hsl(var(--${rarity}))`
-    : `hsl(var(--${rarity}) / 0.55)`;
+    : `hsl(var(--muted-foreground) / 0.5)`;
 
   return (
     <div

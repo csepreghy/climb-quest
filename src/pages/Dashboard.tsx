@@ -631,6 +631,8 @@ function BadgeTile({
   }
 
   const pct = progress ? Math.min(100, Math.round((progress.current / progress.target) * 100)) : (have ? 100 : 0);
+  const rarityKey = badge.rarity ?? "common";
+  const glowColor = rarityKey === "common" ? "hsl(0 0% 100% / 0.85)" : `hsl(var(--${rarityKey}))`;
 
   const Details = ({ compact }: { compact?: boolean }) => (
     <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-3 gap-1.5" : "p-4 gap-2")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
@@ -686,9 +688,9 @@ function BadgeTile({
           "hidden md:block fixed z-50",
           "opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200",
         )}
-        style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, width: TOTAL }}
+        style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, width: TOTAL, ["--glow-color" as string]: glowColor }}
       >
-        <div className="rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-[0_0_40px_-10px_rgba(0,0,0,0.6)]">
+        <div className="rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow">
           <div className="relative shrink-0 self-stretch grid place-items-center" style={{ width: IMG, height: IMG }}>
             <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="xl" hoverScale={false} />
           </div>
@@ -700,8 +702,8 @@ function BadgeTile({
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 grid place-items-center p-3 overflow-y-auto">
           <div className="absolute inset-0 bg-black/75 animate-in fade-in duration-150" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-full max-w-[460px]">
-            <div className="relative w-full rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch shadow-[0_0_40px_-10px_rgba(0,0,0,0.6)]">
+          <div className="relative w-full max-w-[460px]" style={{ ["--glow-color" as string]: glowColor }}>
+            <div className="relative w-full rounded-xl overflow-hidden bg-[hsl(var(--panel-fill))] flex items-stretch animate-rarity-glow">
               <div className="relative w-40 shrink-0 self-stretch grid place-items-center">
                 <BadgeCard image={badge.image} name={badge.name} have={have} rarity={badge.rarity} size="lg" hoverScale={false} />
               </div>

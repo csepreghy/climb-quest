@@ -330,65 +330,87 @@ export default function BoulderLogs() {
           </GameCard>
         </>
       ) : tab === "strength" ? (
-        <GameCard className="p-0 overflow-hidden">
-          {strengthSessions.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-12 text-center">
-              <Dumbbell className="h-8 w-8 mx-auto mb-2 opacity-60" />
-              No strength sessions yet. Crush some reps!
-            </div>
-          ) : (
-            <div className="divide-y divide-border/40">
-              {strengthSessions.map(ss => (
-                <div key={ss.id} className="px-4 py-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0 flex items-center gap-3">
-                    <div className={cn("h-9 w-9 grid place-items-center rounded-lg shrink-0",
-                      ss.bossSend ? "bg-boss/20 text-boss" : "bg-secondary text-foreground/70")}>
-                      {ss.bossSend ? <Swords className="h-4 w-4" /> : <Dumbbell className="h-4 w-4" />}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium truncate capitalize flex items-center gap-2">
-                        {ss.workout === "pullup" ? "Pull-up" : ss.workout === "pushup" ? "Push-up" : ss.workout === "handstand" ? "Handstand" : ss.workout === "squat" ? "Squat" : ss.workout === "plank" ? "Plank" : "Core"} · Level {ss.level}
-                        {ss.bossSend && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-boss/20 text-boss border border-boss/40">Boss</span>}
-                      </div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {(() => {
-                          const isHandstand = ss.workout === "handstand";
-                          const holds = ss.sets.filter(st => st.mode === "hold");
-                          const reps = ss.sets.filter(st => st.mode !== "hold");
-                          const parts: string[] = [];
-                          if (holds.length) parts.push(`${holds.length} hold${holds.length === 1 ? "" : "s"}`);
-                          if (reps.length) {
-                            const repTotal = reps.reduce((a, b) => a + (b.reps || 0), 0);
-                            parts.push(`${reps.length} set${reps.length === 1 ? "" : "s"} · ${repTotal} reps`);
-                          }
-                          const summary = parts.join(" · ") || `${ss.sets.length} set${ss.sets.length === 1 ? "" : "s"}`;
-                          const detail = ss.sets.map(st => {
-                            const lv = st.level ?? ss.level;
-                            if (st.mode === "hold") return `L${lv} · ${st.reps}s`;
-                            return `L${lv} · ${st.reps} reps`;
-                          }).join(" / ");
-                          return <>{new Date(ss.date).toLocaleDateString()} · {summary} · {detail}</>;
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {ss.chalkTotal ? (
-                      <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{ss.chalkTotal}</div>
-                    ) : null}
-                    <button
-                      onClick={() => setDeleteStrengthId(ss.id)}
-                      aria-label="Delete session"
-                      className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+        <>
+          {strengthSessions.length > 0 && (
+            <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {strengthStats.totalReps > 0 && (
+                <StrengthStatCard label="Total reps" value={strengthStats.totalReps} />
+              )}
+              {strengthStats.totalHoldSeconds > 0 && (
+                <StrengthStatCard label="Total hold time" value={formatDuration(strengthStats.totalHoldSeconds)} />
+              )}
+              {WORKOUT_ORDER.map(w => {
+                const reps = strengthStats.repsByWorkout[w];
+                if (reps) return <StrengthStatCard key={`${w}-reps`} label={WORKOUT_LABEL[w]} value={reps} />;
+                return null;
+              })}
+              {WORKOUT_ORDER.map(w => {
+                const holds = strengthStats.holdsByWorkout[w];
+                if (holds) return <StrengthStatCard key={`${w}-holds`} label={`${WORKOUT_LABEL[w]} holds`} value={formatDuration(holds)} />;
+                return null;
+              })}
             </div>
           )}
-        </GameCard>
+          <GameCard className="p-0 overflow-hidden">
+            {strengthSessions.length === 0 ? (
+              <div className="text-sm text-muted-foreground py-12 text-center">
+                <Dumbbell className="h-8 w-8 mx-auto mb-2 opacity-60" />
+                No strength sessions yet. Crush some reps!
+              </div>
+            ) : (
+              <div className="divide-y divide-border/40">
+                {strengthSessions.map(ss => (
+                  <div key={ss.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex items-center gap-3">
+                      <div className={cn("h-9 w-9 grid place-items-center rounded-lg shrink-0",
+                        ss.bossSend ? "bg-boss/20 text-boss" : "bg-secondary text-foreground/70")}>
+                        {ss.bossSend ? <Swords className="h-4 w-4" /> : <Dumbbell className="h-4 w-4" />}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate capitalize flex items-center gap-2">
+                          {ss.workout === "pullup" ? "Pull-up" : ss.workout === "pushup" ? "Push-up" : ss.workout === "handstand" ? "Handstand" : ss.workout === "squat" ? "Squat" : ss.workout === "plank" ? "Plank" : "Core"} · Level {ss.level}
+                          {ss.bossSend && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-boss/20 text-boss border border-boss/40">Boss</span>}
+                        </div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {(() => {
+                            const isHandstand = ss.workout === "handstand";
+                            const holds = ss.sets.filter(st => st.mode === "hold");
+                            const reps = ss.sets.filter(st => st.mode !== "hold");
+                            const parts: string[] = [];
+                            if (holds.length) parts.push(`${holds.length} hold${holds.length === 1 ? "" : "s"}`);
+                            if (reps.length) {
+                              const repTotal = reps.reduce((a, b) => a + (b.reps || 0), 0);
+                              parts.push(`${reps.length} set${reps.length === 1 ? "" : "s"} · ${repTotal} reps`);
+                            }
+                            const summary = parts.join(" · ") || `${ss.sets.length} set${ss.sets.length === 1 ? "" : "s"}`;
+                            const detail = ss.sets.map(st => {
+                              const lv = st.level ?? ss.level;
+                              if (st.mode === "hold") return `L${lv} · ${st.reps}s`;
+                              return `L${lv} · ${st.reps} reps`;
+                            }).join(" / ");
+                            return <>{new Date(ss.date).toLocaleDateString()} · {summary} · {detail}</>;
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {ss.chalkTotal ? (
+                        <div className="text-sm font-bold tabular-nums gradient-chalk-text">+{ss.chalkTotal}</div>
+                      ) : null}
+                      <button
+                        onClick={() => setDeleteStrengthId(ss.id)}
+                        aria-label="Delete session"
+                        className="h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GameCard>
+        </>
       ) : tab === "board" ? (
         <BoardTabContent
           sessions={boardSessions}

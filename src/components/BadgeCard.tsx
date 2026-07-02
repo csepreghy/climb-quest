@@ -28,7 +28,7 @@ export function BadgeCard({
     sm: "h-8 w-8",
     md: "h-24 w-24",
     lg: "h-28 w-28",
-    xl: "h-32 w-32",
+    xl: "h-36 w-36",
   };
 
   const borderColor = have

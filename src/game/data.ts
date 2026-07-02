@@ -1,4 +1,9 @@
 import shopaholicAsset from "@/assets/badges/shopaholic.png.asset.json";
+import chalk1kAsset from "@/assets/badges/1k.png.asset.json";
+import chalk10kAsset from "@/assets/badges/10k.png.asset.json";
+import chalk50kAsset from "@/assets/badges/50k.png.asset.json";
+import chalk100kAsset from "@/assets/badges/100k.png.asset.json";
+import sends100Asset from "@/assets/badges/100sends.png.asset.json";
 // ClimbQuest game data: levels, items, badges, boss templates
 
 

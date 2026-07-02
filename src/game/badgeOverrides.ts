@@ -8,6 +8,7 @@ export interface BadgeOverride {
   badgeId: string;
   title: string | null;
   description: string | null;
+  flavor: string | null;
   rarity: Rarity | null;
 }
 

@@ -27,8 +27,9 @@ import {
   backfillShopImages,
   CustomItemInput,
 } from "@/game/customItems";
-import { ItemGroup, Rarity, Slot, ShopItem, LEVELS, Gender, effectAllowed } from "@/game/data";
+import { ItemGroup, Rarity, Slot, ShopItem, LEVELS, Gender, effectAllowed, BADGES } from "@/game/data";
 import { useLevelOverrides, resolvedLevel, saveLevel, clearLevel, hasAnyOverride } from "@/game/levelOverrides";
+import { useBadgeOverrides, saveBadgeOverride, clearBadgeOverride } from "@/game/badgeOverrides";
 import { cn } from "@/lib/utils";
 import {
   usePublicGyms,

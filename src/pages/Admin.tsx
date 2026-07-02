@@ -92,7 +92,7 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-3 sm:grid-cols-11 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-12 gap-1 h-auto p-1 w-full bg-secondary/40 border-2 border-[hsl(var(--panel-frame))] rounded-lg">
           {[
             { value: "general", label: "General", Icon: Settings },
             { value: "users", label: "Users", Icon: UsersIcon },

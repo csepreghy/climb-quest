@@ -12,6 +12,7 @@ import { RARITY_BORDER, RARITY_COLOR, type Slot } from "@/game/data";
 import { SmartImage } from "@/components/SmartImage";
 
 import { BADGE_BY_ID, ACTIVITY_LABELS, BADGES } from "@/game/data";
+import { useResolvedBadges } from "@/game/badgeOverrides";
 import { BadgeCard } from "@/components/BadgeCard";
 import { useCharacterName } from "@/game/characterName";
 import { StrengthTierChip, StrengthTierModal } from "@/components/StrengthTierStrip";

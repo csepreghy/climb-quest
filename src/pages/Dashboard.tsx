@@ -580,8 +580,13 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
   );
 }
 
-function badgeProgress(id: string, ownedCount: number): { current: number; target: number } | null {
-  if (id === "shopaholic") return { current: Math.min(ownedCount, 10), target: 10 };
+function badgeProgress(id: string, ctx: { ownedCount: number; totalChalkEarned: number; totalSends: number }): { current: number; target: number } | null {
+  if (id === "shopaholic") return { current: ctx.ownedCount, target: 10 };
+  if (id === "chalk_1k") return { current: ctx.totalChalkEarned, target: 1000 };
+  if (id === "chalk_10k") return { current: ctx.totalChalkEarned, target: 10000 };
+  if (id === "chalk_50k") return { current: ctx.totalChalkEarned, target: 50000 };
+  if (id === "chalk_100k") return { current: ctx.totalChalkEarned, target: 100000 };
+  if (id === "sends_100") return { current: ctx.totalSends, target: 100 };
   return null;
 }
 

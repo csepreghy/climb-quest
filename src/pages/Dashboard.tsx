@@ -630,7 +630,7 @@ function BadgeTile({
     }
   }
 
-  const pct = progress ? Math.round((progress.current / progress.target) * 100) : (have ? 100 : 0);
+  const pct = progress ? Math.min(100, Math.round((progress.current / progress.target) * 100)) : (have ? 100 : 0);
 
   const Details = ({ compact }: { compact?: boolean }) => (
     <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-3 gap-1.5" : "p-4 gap-2")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>

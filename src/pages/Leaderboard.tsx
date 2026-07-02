@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { GameCard } from "@/components/ui/game-card";
 import { ClimberAvatar } from "@/components/ClimberAvatar";
@@ -258,6 +258,28 @@ function ClimberDetailsDialog({
   const [chartsLoading, setChartsLoading] = useState(false);
   const [chartsError, setChartsError] = useState<string | null>(null);
 
+  const strengthStats = useMemo(() => {
+    const sessions = charts?.strengthSessions ?? [];
+    const repsByWorkout: Record<string, number> = {};
+    const holdsByWorkout: Record<string, number> = {};
+    let totalReps = 0;
+    let totalHoldSeconds = 0;
+    for (const ss of sessions) {
+      for (const st of ss.sets) {
+        if (st.mode === "hold") {
+          const sec = st.reps || 0;
+          holdsByWorkout[ss.workout] = (holdsByWorkout[ss.workout] || 0) + sec;
+          totalHoldSeconds += sec;
+        } else {
+          const r = st.reps || 0;
+          repsByWorkout[ss.workout] = (repsByWorkout[ss.workout] || 0) + r;
+          totalReps += r;
+        }
+      }
+    }
+    return { repsByWorkout, holdsByWorkout, totalReps, totalHoldSeconds, sessions };
+  }, [charts]);
+
   useEffect(() => {
     if (!open || !row) { setCharts(null); setChartsError(null); return; }
     let cancelled = false;
@@ -312,49 +334,28 @@ function ClimberDetailsDialog({
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               <StatTile icon={<ScrollText className="h-3.5 w-3.5" />} label="Logs" value={row.total_logs} />
               <StatTile icon={<Swords className="h-3.5 w-3.5" />} label="Bosses" value={row.bosses_sent} />
-              <StatTile icon={<Dumbbell className="h-3.5 w-3.5" />} label="Strength" value={row.strength_sessions ?? 0} />
-              <StatTile icon={<Mountain className="h-3.5 w-3.5" />} label="Board" value={(charts?.boardSessions ?? []).length} />
+              <StatTile icon={<Dumbbell className="h-3.5 w-3.5" />} label="Reps" value={chartsLoading ? "—" : strengthStats.totalReps} />
+              <StatTile icon={<Mountain className="h-3.5 w-3.5" />} label="Board" value={chartsLoading ? "—" : (charts?.boardSessions ?? []).length} />
               <BoardBestTile sessions={charts?.boardSessions ?? null} />
               <StrengthTierTile sessions={charts?.strengthSessions ?? null} />
             </div>
 
-            {(() => {
-              const sessions = charts?.strengthSessions ?? [];
-              if (!sessions.length) return null;
-              const repsByWorkout: Record<string, number> = {};
-              const holdsByWorkout: Record<string, number> = {};
-              let totalReps = 0;
-              let totalHoldSeconds = 0;
-              for (const ss of sessions) {
-                for (const st of ss.sets) {
-                  if (st.mode === "hold") {
-                    const sec = st.reps || 0;
-                    holdsByWorkout[ss.workout] = (holdsByWorkout[ss.workout] || 0) + sec;
-                    totalHoldSeconds += sec;
-                  } else {
-                    const r = st.reps || 0;
-                    repsByWorkout[ss.workout] = (repsByWorkout[ss.workout] || 0) + r;
-                    totalReps += r;
-                  }
-                }
-              }
-              return (
-                <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-                  {totalReps > 0 && <StrengthStatCard label="Total reps" value={totalReps} />}
-                  {totalHoldSeconds > 0 && <StrengthStatCard label="Total hold time" value={formatDuration(totalHoldSeconds)} />}
-                  {WORKOUT_ORDER.map(w => {
-                    const reps = repsByWorkout[w];
-                    if (reps) return <StrengthStatCard key={`${w}-reps`} label={WORKOUT_LABEL[w]} value={reps} />;
-                    return null;
-                  })}
-                  {WORKOUT_ORDER.map(w => {
-                    const holds = holdsByWorkout[w];
-                    if (holds) return <StrengthStatCard key={`${w}-holds`} label={`${WORKOUT_LABEL[w]} holds`} value={formatDuration(holds)} />;
-                    return null;
-                  })}
-                </div>
-              );
-            })()}
+            {strengthStats.sessions.length > 0 && (
+              <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+                {strengthStats.totalReps > 0 && <StrengthStatCard label="Total reps" value={strengthStats.totalReps} />}
+                {strengthStats.totalHoldSeconds > 0 && <StrengthStatCard label="Total hold time" value={formatDuration(strengthStats.totalHoldSeconds)} />}
+                {WORKOUT_ORDER.map(w => {
+                  const reps = strengthStats.repsByWorkout[w];
+                  if (reps) return <StrengthStatCard key={`${w}-reps`} label={WORKOUT_LABEL[w]} value={reps} />;
+                  return null;
+                })}
+                {WORKOUT_ORDER.map(w => {
+                  const holds = strengthStats.holdsByWorkout[w];
+                  if (holds) return <StrengthStatCard key={`${w}-holds`} label={`${WORKOUT_LABEL[w]} holds`} value={formatDuration(holds)} />;
+                  return null;
+                })}
+              </div>
+            )}
 
             {chartsLoading && (
               <div className="text-xs text-muted-foreground py-4 text-center">Loading charts…</div>
@@ -385,11 +386,10 @@ function ClimberDetailsDialog({
 function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
   const text = typeof value === "string" ? value : value.toLocaleString();
   return (
-    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
-      <div className="text-base font-bold tabular-nums leading-none">{text}</div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
-        {icon} {label}
-      </div>
+    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
+      <div className="text-muted-foreground mb-1">{icon}</div>
+      <div className="text-base sm:text-lg font-bold tabular-nums leading-none">{text}</div>
+      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
     </div>
   );
 }
@@ -399,11 +399,10 @@ function BoardBestTile({ sessions }: { sessions: any[] | null }) {
     ? sessions.reduce((a: any, b: any) => ((b.grade_rank ?? 0) > (a.grade_rank ?? 0) ? b : a))
     : null;
   return (
-    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
-      <div className="text-base font-bold leading-none">{best ? best.grade : "—"}</div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
-        <Mountain className="h-3 w-3" /> Best board
-      </div>
+    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
+      <div className="text-muted-foreground mb-1"><Mountain className="h-3.5 w-3.5" /></div>
+      <div className="text-base sm:text-lg font-bold leading-none">{best ? best.grade : "—"}</div>
+      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">Best board</div>
     </div>
   );
 }
@@ -411,21 +410,23 @@ function BoardBestTile({ sessions }: { sessions: any[] | null }) {
 function StrengthTierTile({ sessions }: { sessions: StrengthSession[] | null }) {
   if (!sessions) {
     return (
-      <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
-        <div className="text-base font-bold tabular-nums leading-none text-muted-foreground">—</div>
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Tier</div>
+      <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
+        <div className="text-muted-foreground mb-1"><Dumbbell className="h-3.5 w-3.5" /></div>
+        <div className="text-base sm:text-lg font-bold tabular-nums leading-none text-muted-foreground">—</div>
+        <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">Tier</div>
       </div>
     );
   }
   const { tier, qualifiedDays } = tierFor(sessions);
   const pct = tierChalkPct(tier);
   return (
-    <div className="rounded-lg border-2 border-[hsl(var(--panel-frame))] bg-secondary/40 p-2 text-center">
-      <div className={cn("text-base font-bold leading-none", TIER_TEXT[tier])}>
+    <div className="tile-3d flex flex-col items-center justify-center p-2.5 text-center">
+      <div className="text-muted-foreground mb-1"><Dumbbell className="h-3.5 w-3.5" /></div>
+      <div className={cn("text-base sm:text-lg font-bold leading-none", TIER_TEXT[tier])}>
         {TIER_LABEL[tier]}
       </div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex items-center justify-center gap-1">
-        <Dumbbell className="h-3 w-3" /> {qualifiedDays} of 7 days{pct > 0 ? ` · +${pct}%` : ""}
+      <div className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">
+        {qualifiedDays} of 7 days{pct > 0 ? ` · +${pct}%` : ""}
       </div>
     </div>
   );

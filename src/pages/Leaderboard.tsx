@@ -212,6 +212,38 @@ function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; look
   );
 }
 
+const WORKOUT_ORDER = ["pullup", "pushup", "squat", "handstand", "plank", "core"] as const;
+const WORKOUT_LABEL: Record<string, string> = {
+  pullup: "Pull-ups",
+  pushup: "Push-ups",
+  squat: "Squats",
+  handstand: "Handstand",
+  plank: "Plank",
+  core: "Core",
+};
+
+function formatDuration(totalSeconds: number): string {
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (minutes < 60) {
+    return seconds > 0 ? `${minutes}m ${seconds}` : `${minutes}m`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
+function StrengthStatCard({ label, value }: { label: string; value: number | string }) {
+  const text = typeof value === "string" ? value : value.toLocaleString();
+  return (
+    <GameCard className="px-2 py-2.5 text-center">
+      <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground leading-tight line-clamp-2 min-h-[2em]">{label}</div>
+      <div className="text-base sm:text-lg font-bold mt-0.5 gradient-chalk-text tabular-nums leading-none">{text}</div>
+    </GameCard>
+  );
+}
+
 function ClimberDetailsDialog({
   open, onOpenChange, row, rank, lookup,
 }: {

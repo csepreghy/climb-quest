@@ -162,8 +162,16 @@ export default function Dashboard() {
                   </div>
                 </div>
               </DialogHeader>
-              <DialogDescription className="text-sm text-foreground/80 whitespace-normal break-words">
-                {openBadge.desc}
+              <DialogDescription asChild>
+                <div className="space-y-2 text-sm">
+                  {openBadge.flavor && (
+                    <p className="italic text-muted-foreground/80">“{openBadge.flavor}”</p>
+                  )}
+                  <div className="rounded border-l-2 border-legendary/70 bg-legendary/5 pl-2 py-1">
+                    <div className="text-[9px] uppercase tracking-wider text-legendary/90 font-semibold mb-0.5">How to earn</div>
+                    <p className="text-foreground/90">{openBadge.desc}</p>
+                  </div>
+                </div>
               </DialogDescription>
             </>
           )}
@@ -634,7 +642,9 @@ function BadgeTile({
 
   const pct = progress ? Math.min(100, Math.round((progress.current / progress.target) * 100)) : (have ? 100 : 0);
   const rarityKey = badge.rarity ?? "common";
-  const glowColor = rarityKey === "common" ? "hsl(0 0% 100% / 0.85)" : `hsl(var(--${rarityKey}))`;
+  const glowColor = !have
+    ? "hsl(var(--muted-foreground) / 0.5)"
+    : rarityKey === "common" ? "hsl(0 0% 100% / 0.85)" : `hsl(var(--${rarityKey}))`;
 
   const Details = ({ compact }: { compact?: boolean }) => (
     <div className={cn("flex flex-col min-w-0 flex-1", compact ? "p-3 gap-1.5" : "p-4 gap-2")} style={!compact ? { width: DETAILS_W, height: IMG } : undefined}>
@@ -646,9 +656,17 @@ function BadgeTile({
           {badge.rarity ?? "common"}
         </div>
       </div>
-      <p className={cn("text-muted-foreground leading-relaxed flex-1 overflow-hidden", compact ? "text-xs" : "text-sm")}>
-        {badge.desc}
-      </p>
+      <div className={cn("flex-1 overflow-hidden min-h-0 flex flex-col", compact ? "gap-1.5" : "gap-2")}>
+        {badge.flavor && (
+          <p className={cn("italic text-muted-foreground/80 leading-snug", compact ? "text-[11px]" : "text-xs")}>
+            “{badge.flavor}”
+          </p>
+        )}
+        <div className={cn("rounded border-l-2 border-legendary/70 bg-legendary/5 pl-2 py-1", compact ? "text-xs" : "text-sm")}>
+          <div className="text-[9px] uppercase tracking-wider text-legendary/90 font-semibold mb-0.5">How to earn</div>
+          <p className="text-foreground/90 leading-snug">{badge.desc}</p>
+        </div>
+      </div>
       {progress && (
         <div className="mt-auto">
           <div className="flex items-center justify-between text-[10px] tabular-nums text-muted-foreground mb-1">
@@ -662,6 +680,7 @@ function BadgeTile({
       )}
     </div>
   );
+
 
   return (
     <div className="group relative" onMouseEnter={handleEnter}>

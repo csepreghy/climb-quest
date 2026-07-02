@@ -1314,17 +1314,20 @@ function BadgesAdmin() {
 function BadgeAdminRow({ badge, override }: { badge: typeof BADGES[number]; override: import("@/game/badgeOverrides").BadgeOverride | null }) {
   const [title, setTitle] = useState(override?.title ?? "");
   const [desc, setDesc] = useState(override?.description ?? "");
+  const [flavor, setFlavor] = useState(override?.flavor ?? "");
   const [rarity, setRarity] = useState<Rarity | "">(override?.rarity ?? "");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     setTitle(override?.title ?? "");
     setDesc(override?.description ?? "");
+    setFlavor(override?.flavor ?? "");
     setRarity(override?.rarity ?? "");
-  }, [override?.title, override?.description, override?.rarity]);
+  }, [override?.title, override?.description, override?.flavor, override?.rarity]);
 
   const effectiveTitle = title.trim() || badge.name;
   const effectiveDesc = desc.trim() || badge.desc;
+  const effectiveFlavor = flavor.trim() || badge.flavor || "";
   const effectiveRarity = (rarity || badge.rarity || "common") as Rarity;
 
   async function save() {
@@ -1333,6 +1336,7 @@ function BadgeAdminRow({ badge, override }: { badge: typeof BADGES[number]; over
       await saveBadgeOverride(badge.id, {
         title: title.trim() ? title.trim() : null,
         description: desc.trim() ? desc.trim() : null,
+        flavor: flavor.trim() ? flavor.trim() : null,
         rarity: rarity ? (rarity as Rarity) : null,
       });
       toast.success("Badge updated");
@@ -1380,11 +1384,17 @@ function BadgeAdminRow({ badge, override }: { badge: typeof BADGES[number]; over
           </div>
         </div>
         <div>
-          <Label className="text-xs">Description</Label>
+          <Label className="text-xs">Flavor <span className="text-muted-foreground/70 font-normal">(funny tagline)</span></Label>
+          <Input value={flavor} onChange={e => setFlavor(e.target.value)} placeholder={badge.flavor ?? ""} maxLength={200} />
+        </div>
+        <div>
+          <Label className="text-xs">How to earn <span className="text-muted-foreground/70 font-normal">(criteria description)</span></Label>
           <Input value={desc} onChange={e => setDesc(e.target.value)} placeholder={badge.desc} maxLength={200} />
         </div>
-        <div className="text-xs text-muted-foreground">
-          Preview: <span className="font-semibold text-foreground">{effectiveTitle}</span> · {effectiveRarity} — {effectiveDesc}
+        <div className="text-xs text-muted-foreground space-y-0.5">
+          <div>Preview: <span className="font-semibold text-foreground">{effectiveTitle}</span> · {effectiveRarity}</div>
+          {effectiveFlavor && <div className="italic">“{effectiveFlavor}”</div>}
+          <div>How to earn: {effectiveDesc}</div>
         </div>
         <div className="flex gap-2 mt-1">
           <Button size="sm" onClick={save} disabled={busy}>Save</Button>
@@ -1394,4 +1404,5 @@ function BadgeAdminRow({ badge, override }: { badge: typeof BADGES[number]; over
     </div>
   );
 }
+
 

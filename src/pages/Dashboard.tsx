@@ -649,7 +649,7 @@ function BadgeTile({
         <div className="mt-auto">
           <div className="flex items-center justify-between text-[10px] tabular-nums text-muted-foreground mb-1">
             <span>Progress</span>
-            <span>{progress.current} / {progress.target}</span>
+            <span>{progress.current.toLocaleString()} / {progress.target.toLocaleString()}</span>
           </div>
           <div className="h-2 w-full rounded-full bg-[hsl(var(--panel-fill))] overflow-hidden border border-border/60">
             <div className="h-full rounded-full bg-legendary transition-all" style={{ width: `${pct}%` }} />

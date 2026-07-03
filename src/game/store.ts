@@ -361,6 +361,23 @@ export function incrementTotalLogs(delta: number = 1) {
   if (!delta) return;
   set(s => ({ ...s, stats: { ...s.stats, totalLogs: Math.max(0, s.stats.totalLogs + delta) } }));
 }
+/** Record board-session chalk under a local-day key so it counts toward the daily cap. */
+function localDayKey(iso: string): string {
+  return new Date(iso).toDateString();
+}
+export function addBoardChalkForDate(dateISO: string, amount: number) {
+  if (!amount) return;
+  const key = localDayKey(dateISO);
+  set(s => {
+    const map = { ...(s.boardChalkByDay ?? {}) };
+    map[key] = Math.max(0, (map[key] ?? 0) + amount);
+    return { ...s, boardChalkByDay: map };
+  });
+}
+export function setBoardChalkByDay(map: Record<string, number>) {
+  set(s => ({ ...s, boardChalkByDay: { ...map } }));
+}
+
 export function replaceGameState(next: State) {
   state = { ...initialState(), ...next };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}

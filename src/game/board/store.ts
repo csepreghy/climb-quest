@@ -172,9 +172,20 @@ export function useBoardSessions() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!user) { setSessions([]); return; }
+    if (!user) { setSessions([]); setBoardChalkByDay({}); return; }
     setLoading(true);
-    try { setSessions(await fetchBoardSessions(user.id)); }
+    try {
+      const rows = await fetchBoardSessions(user.id);
+      setSessions(rows);
+      // Rebuild the per-day board-chalk map used by the daily cap.
+      const map: Record<string, number> = {};
+      for (const r of rows) {
+        const [yy, mm, dd] = r.logged_at.split("-").map(Number);
+        const key = new Date(yy, (mm ?? 1) - 1, dd ?? 1).toDateString();
+        map[key] = (map[key] ?? 0) + (r.chalk_awarded ?? 0);
+      }
+      setBoardChalkByDay(map);
+    }
     catch (e) { console.error("board sessions fetch failed", e); }
     finally { setLoading(false); }
   }, [user]);
@@ -183,6 +194,7 @@ export function useBoardSessions() {
 
   return { sessions, loading, refresh };
 }
+
 
 /** User's all-time top grade-rank across logged board sessions. */
 export function maxBoardRank(sessions: BoardSessionRow[]): number | null {

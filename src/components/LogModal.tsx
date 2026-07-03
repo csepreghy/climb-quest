@@ -365,36 +365,40 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
                 No gyms set up yet — you can still log this climb. <a href="/gym" className="font-semibold text-foreground underline underline-offset-2">Add a gym</a> to track hold colors and your gym's grading.
               </div>
             )}
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-3">
               <Field label="Date">
                 <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
               </Field>
-              <Field label="Gym">
-                <Select value={gymId} onValueChange={setGymId} disabled={gymState.gyms.length === 0}>
-                  <SelectTrigger><SelectValue placeholder="Pick a gym" /></SelectTrigger>
-                  <SelectContent>{gymState.gyms.map(g => <SelectItem key={g.id} value={g.id}>{g.name}{g.primary ? " ★" : ""}</SelectItem>)}</SelectContent>
-                </Select>
-              </Field>
-              <Field label={useRange ? "Grade (min)" : "Grade"}>
-                <div className="flex gap-2">
-                  <Select value={grade} onValueChange={setGrade}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
-                  </Select>
-                  <button type="button" onClick={() => setUseRange(r => !r)}
-                    className="text-xs px-2 rounded-md border border-border bg-secondary/50 whitespace-nowrap">
-                    {useRange ? "Single" : "Range"}
-                  </button>
-                </div>
-              </Field>
-              {useRange && (
-                <Field label="Grade (max)">
-                  <Select value={gradeMax || grade} onValueChange={setGradeMax}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Gym">
+                  <Select value={gymId} onValueChange={setGymId} disabled={gymState.gyms.length === 0}>
+                    <SelectTrigger><SelectValue placeholder="Pick a gym" /></SelectTrigger>
+                    <SelectContent>{gymState.gyms.map(g => <SelectItem key={g.id} value={g.id}>{g.name}{g.primary ? " ★" : ""}</SelectItem>)}</SelectContent>
                   </Select>
                 </Field>
-              )}
+                <div className="space-y-3">
+                  <Field label={useRange ? "Grade (min)" : "Grade"}>
+                    <div className="flex gap-2">
+                      <Select value={grade} onValueChange={setGrade}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
+                      </Select>
+                      <button type="button" onClick={() => setUseRange(r => !r)}
+                        className="text-xs px-2 rounded-md border border-border bg-secondary/50 whitespace-nowrap">
+                        {useRange ? "Single" : "Range"}
+                      </button>
+                    </div>
+                  </Field>
+                  {useRange && (
+                    <Field label="Grade (max)">
+                      <Select value={gradeMax || grade} onValueChange={setGradeMax}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>{grades.map(renderGradeItem)}</SelectContent>
+                      </Select>
+                    </Field>
+                  )}
+                </div>
+              </div>
               <Field label="Hold color">
                 {gym && gym.holdColors.length > 0 ? (
                   <div className="flex flex-wrap gap-1.5">
@@ -412,23 +416,31 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
               </Field>
             </div>
 
-            <div>
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Style</Label>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {STYLES.map(st => {
-                  const on = styles.includes(st);
-                  return (
-                    <button key={st} type="button" onClick={() => toggleStyle(st)}
-                      className={cn("text-xs px-2.5 py-1 rounded-full border-2 capitalize transition",
-                        on
-                          ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
-                          : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
-                      {st}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <Collapsible defaultOpen={false}>
+              <CollapsibleTrigger className="flex w-full items-center gap-2 py-2 text-left">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground pointer-events-none">Style</Label>
+                {styles.length > 0 && (
+                  <span className="text-[10px] text-muted-foreground">{styles.length} selected</span>
+                )}
+                <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {STYLES.map(st => {
+                    const on = styles.includes(st);
+                    return (
+                      <button key={st} type="button" onClick={() => toggleStyle(st)}
+                        className={cn("text-xs px-2.5 py-1 rounded-full border-2 capitalize transition",
+                          on
+                            ? "border-[hsl(var(--btn-orange))] bg-[hsl(var(--btn-orange))]/15 text-foreground"
+                            : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground")}>
+                        {st}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             <Field label="Notes">
               <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Beta unlocked. Tried not to scream." rows={2} />

@@ -227,7 +227,9 @@ const initialState = (): State => ({
   loginDays: [],
   activeBuffs: [],
   streakMilestonesAwarded: [],
+  boardChalkByDay: {},
 });
+
 
 function spawnBoss(t: BossTemplate): Boss {
   return {

@@ -47,13 +47,16 @@ export function boardBaseReward(newRank: number, priorMaxRank: number | null): {
   return { base: 25, isPR: false };
 }
 
-/** Reuse the boulder chalk pipeline so equipped/streak/tier/crit/cap bonuses all apply,
- *  then layer on any equipped Board Bonus % (board-only effect). */
-export function computeBoardChalk(boardBase: number, flashed: boolean) {
+/** Reuse the boulder chalk pipeline so equipped/streak/tier/crit bonuses apply,
+ *  then layer on the equipped Board Bonus % and apply the daily cap once at the end. */
+export function computeBoardChalk(boardBase: number, flashed: boolean, dateISO?: string) {
   const boulderBase = scaledActivityReward("boulder");
   const diffMult = boardBase / Math.max(1, boulderBase);
-  return applyBoardBonus(computeChalk("boulder", [], false, flashed, diffMult));
+  // Skip cap inside computeChalk — applyBoardBonus adds the board bonus first, then caps.
+  const pre = computeChalk("boulder", [], false, flashed, diffMult, dateISO, false, true);
+  return applyBoardBonus(pre, dateISO);
 }
+
 
 // ---------- Supabase API ----------
 export async function fetchBoardSessions(userId: string): Promise<BoardSessionRow[]> {

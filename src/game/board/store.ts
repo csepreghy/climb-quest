@@ -86,7 +86,10 @@ export interface BoardLogInput {
 export async function logBoardSession(userId: string, input: BoardLogInput, prevMaxRank: number | null): Promise<{ row: BoardSessionRow; chalk: number; isPR: boolean }> {
   const rank = gradeRank(input.grade, input.grade_system);
   const { base, isPR } = boardBaseReward(rank, prevMaxRank);
-  const breakdown = computeBoardChalk(base, input.is_flash);
+  // Convert logged_at (YYYY-MM-DD) to a local ISO so cap accounting uses the correct day.
+  const [yy, mm, dd] = input.logged_at.split("-").map(Number);
+  const localISO = new Date(yy, (mm ?? 1) - 1, dd ?? 1, 12, 0, 0).toISOString();
+  const breakdown = computeBoardChalk(base, input.is_flash, localISO);
   const chalk = breakdown.total;
 
   const { data, error } = await supabase
@@ -110,12 +113,14 @@ export async function logBoardSession(userId: string, input: BoardLogInput, prev
     .single();
   if (error) throw error;
 
-  // Credit chalk and increment total logs.
+  // Credit chalk, mark it against today's daily-cap usage, and bump total logs.
   awardChalk(chalk);
+  addBoardChalkForDate(localISO, chalk);
   incrementTotalLogs(1);
 
   return { row: data as BoardSessionRow, chalk, isPR };
 }
+
 
 export interface BoardEditInput {
   board_type: BoardType;

@@ -606,7 +606,7 @@ export function computeChalk(
   // Daily cap — soft, with diminishing returns. Applied last. Active cap-buff scales the cap up.
   const dateForCap = dateISO ?? new Date().toISOString();
   const cfg = getDailyCapConfig();
-  if (cfg.enabled) {
+  if (cfg.enabled && !skipCap) {
     const used = chalkUsedOnDate(state, dateForCap);
     const capBase = computeDailyCap(state.level, cfg);
     const capBuff = activeCapBuffPct(state);
@@ -625,9 +625,9 @@ export function computeChalk(
   return { base, bonuses, total: running };
 }
 
-/** Apply equipped board-bonus % to an existing breakdown. Used for board sessions
- *  since they bypass the boulder activity path in `computeChalk`. */
-export function applyBoardBonus(b: ChalkBreakdown): ChalkBreakdown {
+/** Apply equipped board-bonus % to a pre-cap breakdown, then apply the daily cap.
+ *  Board flow calls `computeChalk` with `skipCap=true`, adds board bonus here, and caps once. */
+export function applyBoardBonus(b: ChalkBreakdown, dateISO?: string): ChalkBreakdown {
   const eq = state.equipped;
   let boardPct = 0;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
@@ -635,13 +635,30 @@ export function applyBoardBonus(b: ChalkBreakdown): ChalkBreakdown {
     const item = getItem(id);
     if (item?.boardBonusPct) boardPct += item.boardBonusPct;
   }
+  let running = b.total;
   if (boardPct > 0) {
-    const amt = Math.round(b.total * (boardPct / 100));
+    const amt = Math.round(running * (boardPct / 100));
     b.bonuses.push({ source: `Board bonus (+${boardPct}%)`, amount: amt });
-    b.total += amt;
+    running += amt;
   }
+  const cfg = getDailyCapConfig();
+  if (cfg.enabled) {
+    const dateForCap = dateISO ?? new Date().toISOString();
+    const used = chalkUsedOnDate(state, dateForCap);
+    const capBase = computeDailyCap(state.level, cfg);
+    const capBuff = activeCapBuffPct(state);
+    const cap = Math.round(capBase * (1 + capBuff / 100));
+    const capped = applyDailyCap(running, used, cap, cfg);
+    if (capped.reduced) {
+      b.bonuses.push({ source: capped.label ?? "Daily cap", amount: capped.granted - running });
+      running = capped.granted;
+    }
+    b.capInfo = { cap, used, reduced: capped.reduced };
+  }
+  b.total = Math.max(0, running);
   return b;
 }
+
 
 // ----- Actions -----
 export interface LogInput {

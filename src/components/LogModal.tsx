@@ -445,7 +445,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
             </Collapsible>
 
             <Field label="Notes">
-              <Textarea autoResize value={notes} onChange={e => setNotes(e.target.value)} placeholder="Beta unlocked. Tried not to scream." />	extareaprops />
+              <Textarea autoResize value={notes} onChange={e => setNotes(e.target.value)} placeholder="Beta unlocked. Tried not to scream." />
             </Field>
           </>
         ) : (

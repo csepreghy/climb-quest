@@ -13,6 +13,7 @@ import { useAllGymsForLogging as useGyms } from "@/game/allGyms";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Info, Swords, Trophy, Dumbbell, Timer, ChevronDown, Skull, Plus, Clock, Flag } from "lucide-react";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import boulderImg from "@/assets/log-boulder.webp";
 import pickBoulderImg from "@/assets/log-pick-boulder.webp";

@@ -822,7 +822,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: 
         )}
 
         <Field label="Notes">
-          <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="So close. The crux is brutal." rows={2} />
+          <Textarea autoResize value={notes} onChange={e => setNotes(e.target.value)} placeholder="So close. The crux is brutal." />
         </Field>
       </div>
 

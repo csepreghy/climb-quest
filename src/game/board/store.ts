@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { computeChalk, scaledActivityReward, awardChalk, applyBoardBonus, incrementTotalLogs } from "@/game/store";
+import { computeChalk, scaledActivityReward, awardChalk, applyBoardBonus, incrementTotalLogs, addBoardChalkForDate, setBoardChalkByDay } from "@/game/store";
 import type { BoardSessionRow, BoardType, MoonboardVariantId } from "./types";
 import { DEFAULT_KILTER_ANGLES } from "./types";
 import { gradeRank, type BoardGradeSystem } from "./grades";
@@ -47,13 +47,16 @@ export function boardBaseReward(newRank: number, priorMaxRank: number | null): {
   return { base: 25, isPR: false };
 }
 
-/** Reuse the boulder chalk pipeline so equipped/streak/tier/crit/cap bonuses all apply,
- *  then layer on any equipped Board Bonus % (board-only effect). */
-export function computeBoardChalk(boardBase: number, flashed: boolean) {
+/** Reuse the boulder chalk pipeline so equipped/streak/tier/crit bonuses apply,
+ *  then layer on the equipped Board Bonus % and apply the daily cap once at the end. */
+export function computeBoardChalk(boardBase: number, flashed: boolean, dateISO?: string) {
   const boulderBase = scaledActivityReward("boulder");
   const diffMult = boardBase / Math.max(1, boulderBase);
-  return applyBoardBonus(computeChalk("boulder", [], false, flashed, diffMult));
+  // Skip cap inside computeChalk — applyBoardBonus adds the board bonus first, then caps.
+  const pre = computeChalk("boulder", [], false, flashed, diffMult, dateISO, false, true);
+  return applyBoardBonus(pre, dateISO);
 }
+
 
 // ---------- Supabase API ----------
 export async function fetchBoardSessions(userId: string): Promise<BoardSessionRow[]> {
@@ -83,7 +86,10 @@ export interface BoardLogInput {
 export async function logBoardSession(userId: string, input: BoardLogInput, prevMaxRank: number | null): Promise<{ row: BoardSessionRow; chalk: number; isPR: boolean }> {
   const rank = gradeRank(input.grade, input.grade_system);
   const { base, isPR } = boardBaseReward(rank, prevMaxRank);
-  const breakdown = computeBoardChalk(base, input.is_flash);
+  // Convert logged_at (YYYY-MM-DD) to a local ISO so cap accounting uses the correct day.
+  const [yy, mm, dd] = input.logged_at.split("-").map(Number);
+  const localISO = new Date(yy, (mm ?? 1) - 1, dd ?? 1, 12, 0, 0).toISOString();
+  const breakdown = computeBoardChalk(base, input.is_flash, localISO);
   const chalk = breakdown.total;
 
   const { data, error } = await supabase
@@ -107,12 +113,14 @@ export async function logBoardSession(userId: string, input: BoardLogInput, prev
     .single();
   if (error) throw error;
 
-  // Credit chalk and increment total logs.
+  // Credit chalk, mark it against today's daily-cap usage, and bump total logs.
   awardChalk(chalk);
+  addBoardChalkForDate(localISO, chalk);
   incrementTotalLogs(1);
 
   return { row: data as BoardSessionRow, chalk, isPR };
 }
+
 
 export interface BoardEditInput {
   board_type: BoardType;
@@ -164,9 +172,20 @@ export function useBoardSessions() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!user) { setSessions([]); return; }
+    if (!user) { setSessions([]); setBoardChalkByDay({}); return; }
     setLoading(true);
-    try { setSessions(await fetchBoardSessions(user.id)); }
+    try {
+      const rows = await fetchBoardSessions(user.id);
+      setSessions(rows);
+      // Rebuild the per-day board-chalk map used by the daily cap.
+      const map: Record<string, number> = {};
+      for (const r of rows) {
+        const [yy, mm, dd] = r.logged_at.split("-").map(Number);
+        const key = new Date(yy, (mm ?? 1) - 1, dd ?? 1).toDateString();
+        map[key] = (map[key] ?? 0) + (r.chalk_awarded ?? 0);
+      }
+      setBoardChalkByDay(map);
+    }
     catch (e) { console.error("board sessions fetch failed", e); }
     finally { setLoading(false); }
   }, [user]);
@@ -175,6 +194,7 @@ export function useBoardSessions() {
 
   return { sessions, loading, refresh };
 }
+
 
 /** User's all-time top grade-rank across logged board sessions. */
 export function maxBoardRank(sessions: BoardSessionRow[]): number | null {

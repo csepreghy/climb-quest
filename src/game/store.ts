@@ -197,7 +197,10 @@ export interface State {
   activeBuffs?: import("./streak").ActiveBuff[];
   /** Streak-milestone day numbers (14/21/30/…) already awarded. */
   streakMilestonesAwarded?: number[];
+  /** Chalk earned via board sessions, keyed by local toDateString(). Counts toward the daily cap. */
+  boardChalkByDay?: Record<string, number>;
 }
+
 
 const STORAGE_KEY = "climbquest:v1";
 
@@ -224,7 +227,9 @@ const initialState = (): State => ({
   loginDays: [],
   activeBuffs: [],
   streakMilestonesAwarded: [],
+  boardChalkByDay: {},
 });
+
 
 function spawnBoss(t: BossTemplate): Boss {
   return {
@@ -356,6 +361,23 @@ export function incrementTotalLogs(delta: number = 1) {
   if (!delta) return;
   set(s => ({ ...s, stats: { ...s.stats, totalLogs: Math.max(0, s.stats.totalLogs + delta) } }));
 }
+/** Record board-session chalk under a local-day key so it counts toward the daily cap. */
+function localDayKey(iso: string): string {
+  return new Date(iso).toDateString();
+}
+export function addBoardChalkForDate(dateISO: string, amount: number) {
+  if (!amount) return;
+  const key = localDayKey(dateISO);
+  set(s => {
+    const map = { ...(s.boardChalkByDay ?? {}) };
+    map[key] = Math.max(0, (map[key] ?? 0) + amount);
+    return { ...s, boardChalkByDay: map };
+  });
+}
+export function setBoardChalkByDay(map: Record<string, number>) {
+  set(s => ({ ...s, boardChalkByDay: { ...map } }));
+}
+
 export function replaceGameState(next: State) {
   state = { ...initialState(), ...next };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
@@ -451,7 +473,9 @@ export function computeChalk(
   difficultyMult = 1,
   dateISO?: string,
   repeat = false,
+  skipCap = false,
 ): ChalkBreakdown {
+
   const baseRaw = scaledActivityReward(activity);
   const base = Math.max(1, Math.round(baseRaw * difficultyMult));
   const bonuses: { source: string; amount: number }[] = [];
@@ -582,7 +606,7 @@ export function computeChalk(
   // Daily cap — soft, with diminishing returns. Applied last. Active cap-buff scales the cap up.
   const dateForCap = dateISO ?? new Date().toISOString();
   const cfg = getDailyCapConfig();
-  if (cfg.enabled) {
+  if (cfg.enabled && !skipCap) {
     const used = chalkUsedOnDate(state, dateForCap);
     const capBase = computeDailyCap(state.level, cfg);
     const capBuff = activeCapBuffPct(state);
@@ -601,9 +625,9 @@ export function computeChalk(
   return { base, bonuses, total: running };
 }
 
-/** Apply equipped board-bonus % to an existing breakdown. Used for board sessions
- *  since they bypass the boulder activity path in `computeChalk`. */
-export function applyBoardBonus(b: ChalkBreakdown): ChalkBreakdown {
+/** Apply equipped board-bonus % to a pre-cap breakdown, then apply the daily cap.
+ *  Board flow calls `computeChalk` with `skipCap=true`, adds board bonus here, and caps once. */
+export function applyBoardBonus(b: ChalkBreakdown, dateISO?: string): ChalkBreakdown {
   const eq = state.equipped;
   let boardPct = 0;
   for (const slotKey of Object.keys(eq) as (keyof Equipped)[]) {
@@ -611,13 +635,30 @@ export function applyBoardBonus(b: ChalkBreakdown): ChalkBreakdown {
     const item = getItem(id);
     if (item?.boardBonusPct) boardPct += item.boardBonusPct;
   }
+  let running = b.total;
   if (boardPct > 0) {
-    const amt = Math.round(b.total * (boardPct / 100));
+    const amt = Math.round(running * (boardPct / 100));
     b.bonuses.push({ source: `Board bonus (+${boardPct}%)`, amount: amt });
-    b.total += amt;
+    running += amt;
   }
+  const cfg = getDailyCapConfig();
+  if (cfg.enabled) {
+    const dateForCap = dateISO ?? new Date().toISOString();
+    const used = chalkUsedOnDate(state, dateForCap);
+    const capBase = computeDailyCap(state.level, cfg);
+    const capBuff = activeCapBuffPct(state);
+    const cap = Math.round(capBase * (1 + capBuff / 100));
+    const capped = applyDailyCap(running, used, cap, cfg);
+    if (capped.reduced) {
+      b.bonuses.push({ source: capped.label ?? "Daily cap", amount: capped.granted - running });
+      running = capped.granted;
+    }
+    b.capInfo = { cap, used, reduced: capped.reduced };
+  }
+  b.total = Math.max(0, running);
   return b;
 }
+
 
 // ----- Actions -----
 export interface LogInput {

@@ -145,7 +145,7 @@ function dayKey(iso: string): string {
   return new Date(iso).toDateString();
 }
 
-/** Sum of chalk earned (logs + boss attempts + strength sessions) on the given local date. */
+/** Sum of chalk earned (logs + boss attempts + strength sessions + board sessions) on the given local date. */
 export function chalkUsedOnDate(s: State, dateISO: string): number {
   const target = dayKey(dateISO);
   let total = 0;
@@ -156,8 +156,10 @@ export function chalkUsedOnDate(s: State, dateISO: string): number {
   for (const ss of s.strengthSessions ?? []) {
     if (dayKey(ss.date) === target) total += ss.chalkTotal ?? 0;
   }
+  total += (s.boardChalkByDay ?? {})[target] ?? 0;
   return total;
 }
+
 
 /** Consecutive day streak ending at today (or yesterday if no log today). */
 export function currentStreak(s: State): number {

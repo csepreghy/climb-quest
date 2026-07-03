@@ -418,11 +418,13 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
 
             <Collapsible defaultOpen={false}>
               <CollapsibleTrigger className="flex w-full items-center gap-2 py-2 text-left">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground pointer-events-none">Style</Label>
+                <span className="flex items-center gap-1">
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground pointer-events-none">Style</Label>
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                </span>
                 {styles.length > 0 && (
-                  <span className="text-[10px] text-muted-foreground">{styles.length} selected</span>
+                  <span className="ml-auto text-[10px] text-muted-foreground">{styles.length} selected</span>
                 )}
-                <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -795,11 +797,13 @@ function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: 
         {!lockedFields && (
           <Collapsible defaultOpen={false}>
             <CollapsibleTrigger className="flex w-full items-center gap-2 py-2 text-left">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground pointer-events-none">Style</Label>
+              <span className="flex items-center gap-1">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground pointer-events-none">Style</Label>
+                <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+              </span>
               {styles.length > 0 && (
-                <span className="text-[10px] text-muted-foreground">{styles.length} selected</span>
+                <span className="ml-auto text-[10px] text-muted-foreground">{styles.length} selected</span>
               )}
-              <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="mt-2 flex flex-wrap gap-1.5">

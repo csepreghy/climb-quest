@@ -197,7 +197,10 @@ export interface State {
   activeBuffs?: import("./streak").ActiveBuff[];
   /** Streak-milestone day numbers (14/21/30/…) already awarded. */
   streakMilestonesAwarded?: number[];
+  /** Chalk earned via board sessions, keyed by local toDateString(). Counts toward the daily cap. */
+  boardChalkByDay?: Record<string, number>;
 }
+
 
 const STORAGE_KEY = "climbquest:v1";
 

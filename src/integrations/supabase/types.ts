@@ -738,6 +738,7 @@ export type Database = {
           level: number
           owned: Json
           strength_reps: number
+          strength_seconds: number
           total_chalk_earned: number
           total_logs: number
           user_id: string

@@ -24,6 +24,7 @@ interface Row {
   total_logs: number;
   bosses_sent: number;
   strength_reps: number;
+  strength_seconds: number;
   board_sessions: number;
   owned: string[];
   equipped: Equipped;
@@ -175,7 +176,9 @@ function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; look
           <span className="opacity-40">·</span>
           <span className="flex items-center gap-0.5"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
           <span className="opacity-40">·</span>
-          <span className="flex items-center gap-0.5"><Dumbbell className="h-3 w-3" />{row.strength_reps ?? 0}</span>
+          <span className="flex items-center gap-0.5" title="Strength reps"><Dumbbell className="h-3 w-3" />{row.strength_reps ?? 0}</span>
+          <span className="opacity-40">·</span>
+          <span className="flex items-center gap-0.5 tabular-nums" title="Total hold time">⏱ {formatDuration(row.strength_seconds ?? 0)}</span>
           <span className="opacity-40">·</span>
           <span className="flex items-center gap-0.5"><Mountain className="h-3 w-3" />{row.board_sessions ?? 0}</span>
         </div>
@@ -334,9 +337,9 @@ function ClimberDetailsDialog({
             <div className="grid gap-2 grid-cols-3 sm:grid-cols-6">
               <StrengthStatCard label="Logs" value={row.total_logs} />
               <StrengthStatCard label="Bosses" value={row.bosses_sent} />
-              <StrengthStatCard label="Strength" value={row.strength_reps ?? 0} />
+              <StrengthStatCard label="Reps" value={row.strength_reps ?? 0} />
+              <StrengthStatCard label="Hold time" value={formatDuration(row.strength_seconds ?? 0)} />
               <StrengthStatCard label="Board" value={chartsLoading ? "—" : (charts?.boardSessions ?? []).length} />
-              <StrengthStatCard label="Best board" value={(charts?.boardSessions && charts.boardSessions.length) ? charts.boardSessions.reduce((a: any, b: any) => ((b.grade_rank ?? 0) > (a.grade_rank ?? 0) ? b : a)).grade : "—"} />
               <StrengthStatCard label="Tier" value={(() => {
                 if (!charts?.strengthSessions) return "—";
                 const { tier } = tierFor(charts.strengthSessions);

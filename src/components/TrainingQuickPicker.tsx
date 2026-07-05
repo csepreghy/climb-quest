@@ -16,8 +16,8 @@ type Tile = {
 const TILES: Tile[] = [
   { key: "boulder",   label: "Boulder",   image: pickBoulderImg },
   { key: "strength",  label: "Strength",  image: pullup4 },
-  { key: "hangboard", label: "Hangboard", image: hangboardPickImg.url },
   { key: "board",     label: "Board",     image: boardMoonAsset.url },
+  { key: "hangboard", label: "Hangboard", image: hangboardPickImg.url },
 ];
 
 export function TrainingQuickPicker({

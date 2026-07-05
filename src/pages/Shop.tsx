@@ -21,7 +21,7 @@ type GroupKey = ItemGroup | "all";
 const GROUPS: { key: GroupKey; label: string; categories: string[] }[] = [
   { key: "all",    label: "All",       categories: [] },
   { key: "outfit", label: "Outfit",    categories: ["All", "Top", "Pants", "Shoes", "Hat", "Hand"] },
-  { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk", "Study"] },
+  { key: "gear",   label: "Gear",      categories: ["All", "Brushes", "Chalk", "Study", "Campus Board", "Quickdraw"] },
   { key: "power",  label: "Power-ups", categories: [] },
   { key: "board",  label: "Board",     categories: [] },
   { key: "buddy",  label: "Climbing Buddies", categories: [] },

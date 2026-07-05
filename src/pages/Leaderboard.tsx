@@ -23,7 +23,7 @@ interface Row {
   total_chalk_earned: number;
   total_logs: number;
   bosses_sent: number;
-  strength_sessions: number;
+  strength_reps: number;
   board_sessions: number;
   owned: string[];
   equipped: Equipped;

@@ -293,7 +293,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   );
   const preview = useMemo(
     () => (activity && attemptType)
-      ? computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat)
+      ? computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat, false, true)
       : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activity, attemptType, styles.join(","), diffMult],

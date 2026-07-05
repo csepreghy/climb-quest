@@ -31,6 +31,17 @@ function dayTotals(sessions: StrengthSession[], targetKey: string): { reps: numb
   let reps = 0, seconds = 0;
   for (const ss of sessions) {
     if (dayKey(ss.date) !== targetKey) continue;
+    // Hangboard sessions always count as hold seconds regardless of set shape.
+    const isHang = (ss as any).workout === "hangboard" || (ss as any).hangboard;
+    if (isHang) {
+      const meta = (ss as any).hangboard;
+      const metaSecs = meta && Array.isArray(meta.holds)
+        ? meta.holds.reduce((a: number, h: any) => a + (Number(h.seconds) || 0), 0)
+        : 0;
+      const setSecs = (ss.sets ?? []).reduce((a, st) => a + (Number(st.reps) || 0), 0);
+      seconds += Math.max(metaSecs, setSecs, Number((ss as any).totalReps) || 0);
+      continue;
+    }
     for (const st of ss.sets ?? []) {
       const v = Number(st.reps) || 0;
       if (st.mode === "hold") seconds += v;

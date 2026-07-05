@@ -474,7 +474,9 @@ export function computeChalk(
   dateISO?: string,
   repeat = false,
   skipCap = false,
+  skipCrit = false,
 ): ChalkBreakdown {
+
 
   const baseRaw = scaledActivityReward(activity);
   const base = Math.max(1, Math.round(baseRaw * difficultyMult));

@@ -474,7 +474,9 @@ export function computeChalk(
   dateISO?: string,
   repeat = false,
   skipCap = false,
+  skipCrit = false,
 ): ChalkBreakdown {
+
 
   const baseRaw = scaledActivityReward(activity);
   const base = Math.max(1, Math.round(baseRaw * difficultyMult));
@@ -598,10 +600,11 @@ export function computeChalk(
   if (stCrit > 0) {
     critProb = 1 - (1 - critProb) * (1 - Math.min(100, stCrit) / 100);
   }
-  if (critProb > 0 && Math.random() < critProb) {
+  if (!skipCrit && critProb > 0 && Math.random() < critProb) {
     bonuses.push({ source: `Crit! ×2 (${Math.round(critProb * 100)}%)`, amount: running });
     running *= 2;
   }
+
 
   // Daily cap — soft, with diminishing returns. Applied last. Active cap-buff scales the cap up.
   const dateForCap = dateISO ?? new Date().toISOString();

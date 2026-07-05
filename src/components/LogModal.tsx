@@ -293,7 +293,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
   );
   const preview = useMemo(
     () => (activity && attemptType)
-      ? computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat)
+      ? computeChalk(activity, styles, sent, flashed, diffMult, undefined, repeat, false, true)
       : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activity, attemptType, styles.join(","), diffMult],
@@ -705,7 +705,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: 
         </DialogHeader>
         <div className="grid sm:grid-cols-3 gap-3 mt-2">
           {ATTEMPT_TIERS.map(t => {
-            const preview = computeChalk("boss_attempt", styles);
+            const preview = computeChalk("boss_attempt", styles, false, false, 1, undefined, false, false, true);
             const total = Math.round(preview.total * t.mult);
             return (
               <button key={t.v} onClick={() => commit("attempt", t.v)}

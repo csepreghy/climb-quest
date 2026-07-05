@@ -176,7 +176,9 @@ function RankRow({ row, rank, lookup, onSelect }: { row: Row; rank: number; look
           <span className="opacity-40">·</span>
           <span className="flex items-center gap-0.5"><Swords className="h-3 w-3" />{row.bosses_sent}</span>
           <span className="opacity-40">·</span>
-          <span className="flex items-center gap-0.5"><Dumbbell className="h-3 w-3" />{row.strength_reps ?? 0}</span>
+          <span className="flex items-center gap-0.5" title="Strength reps"><Dumbbell className="h-3 w-3" />{row.strength_reps ?? 0}</span>
+          <span className="opacity-40">·</span>
+          <span className="flex items-center gap-0.5 tabular-nums" title="Total hold time">⏱ {formatDuration(row.strength_seconds ?? 0)}</span>
           <span className="opacity-40">·</span>
           <span className="flex items-center gap-0.5"><Mountain className="h-3 w-3" />{row.board_sessions ?? 0}</span>
         </div>

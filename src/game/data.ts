@@ -88,7 +88,7 @@ export interface ShopItem {
   id: string;
   name: string;
   group: ItemGroup;          // outfit | gear | power
-  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Study" | "Power-up" | "Accessories" | "Auras" | "Titles" | "Consumables" | "Buddy" | "Board";
+  category: "Top" | "Pants" | "Shoes" | "Hat" | "Hand" | "Brushes" | "Chalk" | "Study" | "Campus Board" | "Quickdraw" | "Power-up" | "Accessories" | "Auras" | "Titles" | "Consumables" | "Buddy" | "Board";
   slot: Slot;
   rarity: Rarity;
   price: number;

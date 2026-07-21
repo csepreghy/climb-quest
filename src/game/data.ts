@@ -155,8 +155,8 @@ export const BASE_CHALK: Record<ActivityType, number> = {
 };
 
 export const ACTIVITY_LABELS: Record<ActivityType, string> = {
-  warmup_boulder: "Warm-up Boulder",
-  boulder: "Regular Boulder",
+  warmup_boulder: "Easy Boulder",
+  boulder: "Medium Boulder",
   hard_boulder: "Hard Boulder",
   project_boulder: "Project Boulder",
   boulder_send: "Boulder Send",

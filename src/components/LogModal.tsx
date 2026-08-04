@@ -338,7 +338,7 @@ function BoulderForm({ onBack, onDone, onSwitchToBoss, editLog }: { onBack: () =
     }
     const res = logBoulder(input);
     setCelebrating({ total: res.log.chalkTotal, critPre: findCritPre(res.breakdown) });
-    toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{res.log.chalkTotal} Chalk earned</div>);
+    toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{res.log.chalkTotal} Chalk earned</div>, { closeButton: true });
     setTimeout(() => { setCelebrating(null); onDone(); }, 1600);
   }
 
@@ -673,7 +673,7 @@ function BossForm({ onBack, onDone, editLog, existingBoss, onSwitchToBoulder }: 
       total: res.log.chalkTotal,
     };
     setCelebrate({ total: res.log.chalkTotal, defeated: outcome === "defeat", breakdown: scaled });
-    toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{res.log.chalkTotal} Chalk earned</div>);
+    toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{res.log.chalkTotal} Chalk earned</div>, { closeButton: true });
     if (outcome !== "defeat") {
       setTimeout(() => { setCelebrate(null); onDone(); }, 1600);
     }
@@ -1440,7 +1440,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     if (action === "finish") {
       const dateISO = new Date(date).toISOString();
       const { chalk, breakdown } = logStrength({ workout, level, sets: newSets, date: dateISO });
-      toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{chalk} Chalk · {WORKOUT_META[workout].title} L{level}</div>);
+      toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{chalk} Chalk · {WORKOUT_META[workout].title} L{level}</div>, { closeButton: true });
       const critPre = findCritPre(breakdown);
       const finalEntry: SessionLogEntry = { workout, level, sets: newSets, chalk, mode: setMode, critPre };
       if (sessionLogs.length > 0) {
@@ -1453,7 +1453,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     } else if (action === "new-workout") {
       const dateISO = new Date(date).toISOString();
       const { chalk, breakdown } = logStrength({ workout, level, sets: newSets, date: dateISO });
-      toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{chalk} Chalk · {WORKOUT_META[workout].title} L{level} · pick next workout</div>);
+      toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{chalk} Chalk · {WORKOUT_META[workout].title} L{level} · pick next workout</div>, { closeButton: true });
       setSessionLogs(prev => [...prev, { workout, level, sets: newSets, chalk, mode: setMode, critPre: findCritPre(breakdown) }]);
       setSets([]);
       setReps(5);
@@ -1857,7 +1857,7 @@ function StrengthFlow({ onBack, onDone }: { onBack: () => void; onDone: () => vo
         onSave={(seconds) => {
           const dateISO = new Date(date).toISOString();
           const res = logStrengthHold({ workout, level, seconds, mode: "hold", date: dateISO });
-          toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{res.chalk} Chalk · {seconds}s hold</div>);
+          toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{res.chalk} Chalk · {seconds}s hold</div>, { closeButton: true });
           let subline: string | undefined;
           if (res.isFirstEver) subline = "🎉 First hold logged at this level!";
           else if (res.isNewRecord) subline = `🏆 New record! +${seconds - res.prevRecord}s over your best`;

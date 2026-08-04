@@ -156,7 +156,7 @@ export default function Admin() {
                   variant={day === 7 ? "secondary" : "default"}
                   onClick={() => {
                     const r = adminTriggerStreakReward(day);
-                    toast.success(<div className="flex items-center gap-1.5">{r.bannerLabel}{r.chalkCache > 0 ? <><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />(+{r.chalkCache} Chalk)</> : ""}</div>);
+                    toast.success(<div className="flex items-center gap-1.5">{r.bannerLabel}{r.chalkCache > 0 ? <><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />(+{r.chalkCache} Chalk)</> : ""}</div>, { closeButton: true });
                   }}
                 >
                   Day {day}
@@ -197,7 +197,7 @@ export default function Admin() {
             <div className="text-sm text-muted-foreground mb-3">Current balance: <span className="gradient-chalk-text font-bold tabular-nums">{s.chalk.toLocaleString()}</span></div>
             <div className="flex gap-2">
               <Input type="number" value={amount} min={1} onChange={e => setAmount(parseInt(e.target.value) || 0)} className="max-w-32" />
-              <Button variant="default" onClick={() => { adminAdjustChalk(amount); toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{amount} Chalk</div>); }}>
+              <Button variant="default" onClick={() => { adminAdjustChalk(amount); toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />+{amount} Chalk</div>, { closeButton: true }); }}>
                 <Plus className="h-4 w-4" /> Add
               </Button>
               <Button variant="secondary" onClick={() => { adminAdjustChalk(-amount); toast.info(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />-{amount} Chalk</div>); }}>

@@ -130,7 +130,7 @@ export default function Inventory() {
     if (!sellTarget) return;
     const r = sellItem(sellTarget.id);
     if (!r.ok) { toast.error(r.reason ?? "Cannot sell"); setSellTarget(null); return; }
-    toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />Sold {sellTarget.name} · +{r.refund} chalk</div>);
+    toast.success(<div className="flex items-center gap-1.5"><img src={chalkBagImg} alt="" className="h-4 w-4 object-contain" />Sold {sellTarget.name} · +{r.refund} chalk</div>, { closeButton: true });
     setCompareItem(c => (c?.id === sellTarget.id ? null : c));
     setSellTarget(null);
   }

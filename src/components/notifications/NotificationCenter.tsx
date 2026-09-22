@@ -12,6 +12,7 @@ import {
 import { GameButton } from "@/components/ui/game-button";
 import { cn } from "@/lib/utils";
 import { useNotifications, type NotificationView } from "@/hooks/useNotifications";
+import { openFeedbackModal } from "@/components/FeedbackButton";
 
 function typeLabel(t: string) {
   return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

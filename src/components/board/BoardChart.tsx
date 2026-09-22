@@ -4,24 +4,23 @@ import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, 
 import { TrendingUp } from "lucide-react";
 import { useBoardSessions } from "@/game/board/store";
 import { V_GRADES, rankToVLabel } from "@/game/board/grades";
+import type { BoardSessionRow } from "@/game/board/types";
+import { ChartMotion, ChartRangeControls, useChartRange } from "@/components/charts/ChartRangeControls";
 
 /** Weekly board climbs + top grade rank for the last 13 weeks. */
-export function BoardChart() {
-  const { sessions } = useBoardSessions();
+export function BoardChart({ sessions: providedSessions }: { sessions?: BoardSessionRow[] }) {
+  const local = useBoardSessions();
+  const sessions = providedSessions ?? local.sessions;
+  const range = useChartRange();
 
   const data = useMemo(() => {
-    const WEEKS = 13;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dow = (today.getDay() + 6) % 7;
-    const thisWeekStart = new Date(today);
-    thisWeekStart.setDate(today.getDate() - dow);
+    const start = new Date(range.start);
+    const dow = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - dow);
 
     type Wk = { ts: number; label: string; climbs: number; lastRank: number | null; lastTs: number };
     const weeks: Wk[] = [];
-    for (let i = WEEKS - 1; i >= 0; i--) {
-      const ws = new Date(thisWeekStart);
-      ws.setDate(thisWeekStart.getDate() - i * 7);
+    for (let ws = new Date(start); ws <= range.end; ws.setDate(ws.getDate() + 7)) {
       weeks.push({
         ts: ws.getTime(),
         label: ws.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
@@ -30,7 +29,7 @@ export function BoardChart() {
         lastTs: 0,
       });
     }
-    const earliest = weeks[0].ts;
+    const earliest = weeks[0]?.ts ?? range.start.getTime();
     const idxFor = (d: Date) => {
       const day = new Date(d); day.setHours(0,0,0,0);
       const t = day.getTime();
@@ -42,7 +41,7 @@ export function BoardChart() {
     for (const s of sessions) {
       const d = new Date(s.logged_at);
       const i = idxFor(d);
-      if (i < 0) continue;
+      if (i < 0 || d > range.end) continue;
       weeks[i].climbs += 1;
       const ts = d.getTime();
       if (ts >= weeks[i].lastTs) {
@@ -51,15 +50,15 @@ export function BoardChart() {
       }
     }
     return weeks;
-  }, [sessions]);
+  }, [sessions, range.start, range.end]);
 
   return (
     <GameCard className="p-5">
-      <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <TrendingUp className="h-3 w-3" /> Board · climbs &amp; last grade
-        <span className="ml-2 text-[10px] font-normal text-muted-foreground normal-case tracking-normal">({sessions.length} total)</span>
-      </h3>
-      <div className="h-56 -ml-2">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <h3 className="menu-label mb-0 flex items-center gap-1.5"><TrendingUp className="h-3 w-3" /> Board · climbs &amp; last grade</h3>
+        <ChartRangeControls start={range.start} end={range.end} months={range.months} monthOffset={range.monthOffset} onEarlier={range.moveEarlier} onLater={range.moveLater} onMonthsChange={range.changeMonths} />
+      </div>
+      <ChartMotion animationKey={range.animationKey} direction={range.direction} className="h-56 -ml-2">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>
@@ -94,7 +93,7 @@ export function BoardChart() {
             <Line yAxisId="grade" type="monotone" dataKey="lastRank" name="Last grade" stroke="hsl(var(--legendary))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--legendary))" }} connectNulls />
           </ComposedChart>
         </ResponsiveContainer>
-      </div>
+      </ChartMotion>
     </GameCard>
   );
 }

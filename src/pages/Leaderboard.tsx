@@ -12,6 +12,9 @@ import { Trophy, ScrollText, Swords, Dumbbell, Sparkles, Mountain } from "lucide
 import chalkBagImg from "@/assets/chalk-bag.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChalkOverTimeChart, StrengthRepsHoldChart } from "@/pages/Dashboard";
+import { BoardChart } from "@/components/board/BoardChart";
+import { HangboardChart } from "@/components/hangboard/HangboardChart";
+import type { BoardSessionRow } from "@/game/board/types";
 import { ShopPreviewTile } from "@/components/pixel/ShopPreviewTile";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { tierFor, TIER_LABEL, TIER_TEXT, tierChalkPct } from "@/game/strengthTier";
@@ -396,6 +399,8 @@ function ClimberDetailsDialog({
               <div className="space-y-3">
                 <ChalkOverTimeChart logs={charts.logs as any} gyms={gyms} strengthSessions={charts.strengthSessions} />
                 <StrengthRepsHoldChart sessions={charts.strengthSessions} />
+                {charts.boardSessions.length > 0 && <BoardChart sessions={charts.boardSessions as BoardSessionRow[]} />}
+                {charts.strengthSessions.some(session => (session.workout as string) === "hangboard") && <HangboardChart sessions={charts.strengthSessions} />}
               </div>
             )}
 

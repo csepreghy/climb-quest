@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,12 +23,24 @@ export const FEEDBACK_CATEGORIES = [
   "Other",
 ] as const;
 
+export const FEEDBACK_OPEN_EVENT = "climbquest:open-feedback";
+
+export function openFeedbackModal() {
+  window.dispatchEvent(new CustomEvent(FEEDBACK_OPEN_EVENT));
+}
+
 export function FeedbackButton() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<string>("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener(FEEDBACK_OPEN_EVENT, handler);
+    return () => window.removeEventListener(FEEDBACK_OPEN_EVENT, handler);
+  }, []);
 
   if (!user) return null;
 

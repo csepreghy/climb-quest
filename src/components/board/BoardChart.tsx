@@ -41,7 +41,7 @@ export function BoardChart({ sessions: providedSessions }: { sessions?: BoardSes
     for (const s of sessions) {
       const d = new Date(s.logged_at);
       const i = idxFor(d);
-      if (i < 0 || d > range.end) continue;
+      if (i < 0 || d < range.start || d > range.end) continue;
       weeks[i].climbs += 1;
       const ts = d.getTime();
       if (ts >= weeks[i].lastTs) {

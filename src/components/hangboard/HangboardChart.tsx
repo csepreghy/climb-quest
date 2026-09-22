@@ -39,7 +39,7 @@ export function HangboardChart({ sessions }: { sessions?: StrengthSession[] }) {
   return (
     <GameCard className="p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-2">
-        <h3 className="font-bold">Hangboard · last 14 days</h3>
+        <h3 className="font-bold">Hangboard · daily hold time</h3>
         <ChartRangeControls start={range.start} end={range.end} months={range.months} monthOffset={range.monthOffset} onEarlier={range.moveEarlier} onLater={range.moveLater} onMonthsChange={range.changeMonths} />
       </div>
       <div className="text-xs text-muted-foreground mb-2">{total}s total</div>

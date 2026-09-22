@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
 import { useAllGyms as useGyms } from "@/game/allGyms";
 import { useGame, currentLevel, nextLevel, levelUp, strengthLevelMult, type StrengthSession } from "@/game/store";
@@ -392,7 +391,8 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
 
     for (const l of logs) {
       const idx = weekIdxFor(new Date(l.date));
-      if (idx < 0 || new Date(l.date) > range.end) continue;
+      const logDate = new Date(l.date);
+      if (idx < 0 || logDate < range.start || logDate > range.end) continue;
       weeks[idx].chalk += l.chalkTotal;
       const gLabel = l.gradeMax || l.grade;
       const countsForGrade = !l.isBoss || l.attemptType === "send" || l.attemptType === "flash";
@@ -412,7 +412,8 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
     }
     for (const sess of strengthSessions) {
       const idx = weekIdxFor(new Date(sess.date));
-      if (idx < 0 || new Date(sess.date) > range.end) continue;
+      const sessionDate = new Date(sess.date);
+      if (idx < 0 || sessionDate < range.start || sessionDate > range.end) continue;
       weeks[idx].strength += sess.chalkTotal ?? 0;
     }
 

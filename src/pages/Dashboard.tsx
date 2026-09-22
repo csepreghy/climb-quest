@@ -33,6 +33,7 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/h
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from "recharts";
 import { gradeToVRank, V_SCALE, gradeLabels, resolveGymGradingSystems, type GradingSystem } from "@/game/gyms";
 import { usePublicGyms } from "@/game/publicGyms";
+import { ChartMotion, ChartRangeControls, useChartRange } from "@/components/charts/ChartRangeControls";
 
 export default function Dashboard() {
   const s = useGame();
@@ -323,6 +324,7 @@ function EquippedStrip({ equipped, vertical }: { equipped: Partial<Record<Slot, 
 }
 
 export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { date: string; chalkTotal: number; grade?: string; gradeMax?: string; gymId?: string; isBoss?: boolean; attemptType?: string }[]; gyms: { id: string; gradingSystemIds: string[]; gradingSystems?: GradingSystem[] }[]; strengthSessions: StrengthSession[] }) {
+  const range = useChartRange();
   // Fall back to all known public gyms when a log's gym isn't in the passed list
   // (e.g. when viewing another climber's chart on the leaderboard).
   const pub = usePublicGyms();
@@ -358,19 +360,13 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
   const axisTitle = dominantGs ? dominantGs.name : "V Scale";
 
   const data = useMemo(() => {
-    const WEEKS = 13;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    // Anchor weeks to Monday of the current week.
-    const dow = (today.getDay() + 6) % 7; // 0 = Monday
-    const thisWeekStart = new Date(today);
-    thisWeekStart.setDate(today.getDate() - dow);
+    const firstWeekStart = new Date(range.start);
+    const dow = (firstWeekStart.getDay() + 6) % 7;
+    firstWeekStart.setDate(firstWeekStart.getDate() - dow);
 
     type Wk = { ts: number; label: string; chalk: number; strength: number; gradeRank: number | null };
     const weeks: Wk[] = [];
-    for (let i = WEEKS - 1; i >= 0; i--) {
-      const ws = new Date(thisWeekStart);
-      ws.setDate(thisWeekStart.getDate() - i * 7);
+    for (let ws = new Date(firstWeekStart); ws <= range.end; ws.setDate(ws.getDate() + 7)) {
       weeks.push({
         ts: ws.getTime(),
         label: ws.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
@@ -379,7 +375,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
         gradeRank: null,
       });
     }
-    const earliest = weeks[0].ts;
+    const earliest = weeks[0]?.ts ?? range.start.getTime();
     const upperLabels = scaleLabels.map(l => l.toUpperCase());
 
     const weekIdxFor = (d: Date) => {
@@ -396,7 +392,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
 
     for (const l of logs) {
       const idx = weekIdxFor(new Date(l.date));
-      if (idx < 0) continue;
+      if (idx < 0 || new Date(l.date) > range.end) continue;
       weeks[idx].chalk += l.chalkTotal;
       const gLabel = l.gradeMax || l.grade;
       const countsForGrade = !l.isBoss || l.attemptType === "send" || l.attemptType === "flash";
@@ -416,25 +412,28 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
     }
     for (const sess of strengthSessions) {
       const idx = weekIdxFor(new Date(sess.date));
-      if (idx < 0) continue;
+      if (idx < 0 || new Date(sess.date) > range.end) continue;
       weeks[idx].strength += sess.chalkTotal ?? 0;
     }
 
     return weeks;
-  }, [logs, strengthSessions, scaleLabels, dominantGs]);
+  }, [logs, strengthSessions, scaleLabels, dominantGs, range.start, range.end]);
 
   return (
     <GameCard className="p-5">
-      <h3 className="menu-label mb-3 flex items-center gap-1.5">
-        <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade per Week
-        <span className="ml-2 text-[10px] font-normal text-muted-foreground normal-case tracking-normal">({axisTitle})</span>
-      </h3>
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <h3 className="menu-label mb-0 flex items-center gap-1.5">
+          <TrendingUp className="h-3 w-3" /> Chalk &amp; Top Grade per Week
+          <span className="ml-2 text-[10px] font-normal text-muted-foreground normal-case tracking-normal">({axisTitle})</span>
+        </h3>
+        <ChartRangeControls start={range.start} end={range.end} months={range.months} monthOffset={range.monthOffset} onEarlier={range.moveEarlier} onLater={range.moveLater} onMonthsChange={range.changeMonths} />
+      </div>
       {data.length === 0 ? (
         <div className="text-sm text-muted-foreground py-8 text-center">
           No data yet. Log a session to start tracking your progress.
         </div>
       ) : (
-        <div className="h-56 -ml-2">
+        <ChartMotion animationKey={range.animationKey} direction={range.direction} className="h-56 -ml-2">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>
@@ -480,7 +479,7 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
               <Line yAxisId="grade" type="monotone" dataKey="gradeRank" name="Top grade" stroke="hsl(270 80% 65%)" strokeWidth={2} dot={{ r: 3, fill: "hsl(270 80% 65%)" }} connectNulls />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ChartMotion>
       )}
     </GameCard>
   );
@@ -492,19 +491,17 @@ export function ChalkOverTimeChart({ logs, gyms, strengthSessions }: { logs: { d
  * Hold seconds: plank + handstand hold, summed per day.
  */
 export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[] }) {
-  const isMobile = useIsMobile();
+  const range = useChartRange();
   const data = useMemo(() => {
-    const DAYS = isMobile ? 14 : 30;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const start = new Date(range.start); start.setHours(0, 0, 0, 0);
+    const end = new Date(range.end); end.setHours(0, 0, 0, 0);
     type Row = { ts: number; key: string; label: string; core: number; pullup: number; pushup: number; squat: number; handstand_pushup: number; hold_sec: number; rollingAvg: number };
     const raw: Row[] = [];
     const byKey = new Map<string, Row>();
     
-    // Generate DAYS + 6 trailing days to calculate rolling average for all visible days
-    for (let i = DAYS - 1 + 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
+    const rollingStart = new Date(start);
+    rollingStart.setDate(rollingStart.getDate() - 6);
+    for (let d = new Date(rollingStart); d <= end; d.setDate(d.getDate() + 1)) {
       const key = d.toISOString().slice(0, 10);
       const row: Row = { ts: d.getTime(), key, label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }), core: 0, pullup: 0, pushup: 0, squat: 0, handstand_pushup: 0, hold_sec: 0, rollingAvg: 0 };
       raw.push(row);
@@ -542,15 +539,16 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
       });
     }
     return out;
-  }, [sessions, isMobile]);
+  }, [sessions, range.start, range.end]);
 
   const hasAny = data.some(d => d.core || d.pullup || d.pushup || d.squat || d.handstand_pushup || d.hold_sec || d.rollingAvg);
 
   return (
     <GameCard className="p-5">
-      <h3 className="menu-label mb-1 flex items-center gap-1.5">
-        <Dumbbell className="h-3 w-3" /> Strength Reps & Holds · Daily & 7-day Avg
-      </h3>
+      <div className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <h3 className="menu-label mb-0 flex items-center gap-1.5"><Dumbbell className="h-3 w-3" /> Strength Reps & Holds · Daily & 7-day Avg</h3>
+        <ChartRangeControls start={range.start} end={range.end} months={range.months} monthOffset={range.monthOffset} onEarlier={range.moveEarlier} onLater={range.moveLater} onMonthsChange={range.changeMonths} />
+      </div>
       <p className="text-[10px] text-muted-foreground mb-3 normal-case tracking-normal">
         Bars: total reps per category. Blue Line: 7-day rolling average of total reps. Pink Line: seconds held (plank + handstand hold).
       </p>
@@ -559,7 +557,7 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
           No strength sessions yet.
         </div>
       ) : (
-        <div className="h-48 -ml-2">
+        <ChartMotion animationKey={range.animationKey} direction={range.direction} className="h-48 -ml-2">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
@@ -584,7 +582,7 @@ export function StrengthRepsHoldChart({ sessions }: { sessions: StrengthSession[
               <Line yAxisId="sec" type="monotone" dataKey="hold_sec" name="Hold" stroke="hsl(var(--boss))" strokeWidth={2} dot={{ r: 2 }} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ChartMotion>
       )}
     </GameCard>
   );

@@ -175,7 +175,21 @@ export function NotificationCenter() {
                 </div>
               )}
 
-              <DialogFooter>
+              <DialogFooter className="gap-2 sm:gap-2">
+                {active.action_url === "#feedback" && (
+                  <GameButton
+                    variant="primary"
+                    size="sm"
+                    onClick={async () => {
+                      const id = active.id;
+                      setActive(null);
+                      openFeedbackModal();
+                      await dismiss(id);
+                    }}
+                  >
+                    {active.action_label || "Share feedback"}
+                  </GameButton>
+                )}
                 <GameButton
                   variant="primary"
                   size="sm"

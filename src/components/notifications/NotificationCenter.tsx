@@ -12,6 +12,7 @@ import {
 import { GameButton } from "@/components/ui/game-button";
 import { cn } from "@/lib/utils";
 import { useNotifications, type NotificationView } from "@/hooks/useNotifications";
+import { openFeedbackModal } from "@/components/FeedbackButton";
 
 function typeLabel(t: string) {
   return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -175,7 +176,21 @@ export function NotificationCenter() {
                 </div>
               )}
 
-              <DialogFooter>
+              <DialogFooter className="gap-2 sm:gap-2">
+                {active.action_url === "#feedback" && (
+                  <GameButton
+                    variant="primary"
+                    size="sm"
+                    onClick={async () => {
+                      const id = active.id;
+                      setActive(null);
+                      openFeedbackModal();
+                      await dismiss(id);
+                    }}
+                  >
+                    {active.action_label || "Share feedback"}
+                  </GameButton>
+                )}
                 <GameButton
                   variant="primary"
                   size="sm"
